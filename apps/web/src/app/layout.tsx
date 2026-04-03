@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
-import Header from "@/components/header";
+import Navbar from "@/components/navbar";
 import Providers from "@/components/providers";
 
 const geistSans = Geist({
@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "my-better-t-app",
-  description: "my-better-t-app",
+  title: "TestimonialWall — Collect & Display Customer Testimonials",
+  description:
+    "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
 };
 
 export default function RootLayout({
@@ -29,10 +30,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
+          <Navbar />
+          {children}
         </Providers>
       </body>
     </html>
