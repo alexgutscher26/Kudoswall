@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -337,9 +338,13 @@ function MobileDrawer({
 function TopBar({
   userName,
   onMenuOpen,
+  pageTitle = "Overview",
+  pageSubtitle,
 }: {
   userName: string;
   onMenuOpen: () => void;
+  pageTitle?: string;
+  pageSubtitle?: string;
 }) {
   return (
     <header
@@ -365,10 +370,10 @@ function TopBar({
 
         <div>
           <p className="text-[15px] font-bold text-neutral-900 leading-none">
-            Overview
+            {pageTitle}
           </p>
           <p className="hidden sm:block text-[12px] text-neutral-400 mt-0.5">
-            Welcome back, {userName} 👋
+            {pageSubtitle ?? `Welcome back, ${userName} 👋`}
           </p>
         </div>
       </div>
@@ -659,12 +664,21 @@ function FeatureSpotlight() {
 
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 
+// ─── Dashboard shell ──────────────────────────────────────────────────────────
+// When `children` is provided it renders instead of the default overview content.
+
 export default function DashboardShell({
   userName,
   userEmail,
+  children,
+  pageTitle,
+  pageSubtitle,
 }: {
   userName: string;
   userEmail: string;
+  children?: ReactNode;
+  pageTitle?: string;
+  pageSubtitle?: string;
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -716,78 +730,84 @@ export default function DashboardShell({
           <TopBar
             userName={userName}
             onMenuOpen={() => setMobileMenuOpen(true)}
+            pageTitle={pageTitle}
+            pageSubtitle={pageSubtitle}
           />
         </div>
 
         {/* Main content */}
-        <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
-            {/* Stats grid — 2 cols on mobile, 4 on xl */}
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-              {STATS.map((stat) => (
-                <StatCard key={stat.label} {...stat} />
-              ))}
-            </div>
+        {children ? (
+          <main className="relative z-10 flex-1">{children}</main>
+        ) : (
+          <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
+              {/* Stats grid — 2 cols on mobile, 4 on xl */}
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                {STATS.map((stat) => (
+                  <StatCard key={stat.label} {...stat} />
+                ))}
+              </div>
 
-            {/* Main split */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
-              {/* Testimonials panel */}
-              <div
-                className="xl:col-span-2 rounded-2xl border border-neutral-100 overflow-hidden"
-                style={{ backgroundColor: "#ffffff" }}
-              >
+              {/* Main split */}
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
+                {/* Testimonials panel */}
                 <div
-                  className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3"
-                  style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                  className="xl:col-span-2 rounded-2xl border border-neutral-100 overflow-hidden"
+                  style={{ backgroundColor: "#ffffff" }}
                 >
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-semibold text-neutral-900">
-                      Recent Testimonials
-                    </p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5 hidden sm:block">
-                      Latest submissions from your customers
-                    </p>
+                  <div
+                    className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3"
+                    style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-semibold text-neutral-900">
+                        Recent Testimonials
+                      </p>
+                      <p className="text-[11px] text-neutral-400 mt-0.5 hidden sm:block">
+                        Latest submissions from your customers
+                      </p>
+                    </div>
+                    {/* Filter chips */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                      {["All", "Video", "Text"].map((f, i) => (
+                        <button
+                          key={f}
+                          type="button"
+                          className="text-[11px] font-medium rounded-full px-2.5 sm:px-3 py-1 transition-all border"
+                          style={
+                            i === 0
+                              ? {
+                                  backgroundColor: "#fff5f7",
+                                  color: "#e8527a",
+                                  borderColor: "#fecdd3",
+                                }
+                              : {
+                                  backgroundColor: "transparent",
+                                  color: "#a3a3a3",
+                                  borderColor: "rgba(0,0,0,0.08)",
+                                }
+                          }
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  {/* Filter chips */}
-                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-                    {["All", "Video", "Text"].map((f, i) => (
-                      <button
-                        key={f}
-                        type="button"
-                        className="text-[11px] font-medium rounded-full px-2.5 sm:px-3 py-1 transition-all border"
-                        style={
-                          i === 0
-                            ? {
-                                backgroundColor: "#fff5f7",
-                                color: "#e8527a",
-                                borderColor: "#fecdd3",
-                              }
-                            : {
-                                backgroundColor: "transparent",
-                                color: "#a3a3a3",
-                                borderColor: "rgba(0,0,0,0.08)",
-                              }
-                        }
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
+                  <EmptyTestimonials />
                 </div>
-                <EmptyTestimonials />
+
+                {/* Right column */}
+                <div className="xl:col-span-1 space-y-4 sm:space-y-5">
+                  <GettingStarted />
+                  <QuickActions />
+                </div>
               </div>
 
-              {/* Right column */}
-              <div className="xl:col-span-1 space-y-4 sm:space-y-5">
-                <GettingStarted />
-                <QuickActions />
-              </div>
+              {/* Bento feature cards */}
+              <FeatureSpotlight />
             </div>
-
-            {/* Bento feature cards */}
-            <FeatureSpotlight />
-          </div>
-        </main>
+          </main>
+        )}
       </div>
     </div>
   );
