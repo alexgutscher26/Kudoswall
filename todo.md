@@ -41,9 +41,9 @@
     - [ ] KV-store for fast metadata lookups on widgets
 
 ## 2. Auth & Multi-tenancy
-- [/] Implement Better Auth (Email/Password, Google OAuth)
-- [ ] **Advanced Authentication**:
-    - [ ] Add GitHub, LinkedIn, and Magic Link auth providers
+- [x] Implement Better Auth (Email/Password, Google OAuth)
+- [x] **Advanced Authentication**:
+    - [x] Add GitHub, LinkedIn, and Magic Link auth providers
     - [ ] Two-Factor Authentication (2FA) for paid tiers
     - [ ] SAML/SSO for Enterprise accounts (Agency/Enterprise)
 - [ ] **Multi-tenancy Deep-Dive**:
@@ -55,10 +55,10 @@
     - [ ] Audit logs for team actions (Who approved which testimonial?)
 
 ## 3. The "Sender" Experience (Collection)
-- [ ] **Dynamic Collection Engine**:
-    - [ ] Multi-step submission wizard (Star rating -> Text -> Photo -> Video)
-    - [ ] Support for custom fields (Company name, LinkedIn URL, Tagline)
-    - [ ] In-browser photo cropping for profile pictures
+- [x] **Dynamic Collection Engine**:
+    - [x] Multi-step submission wizard (Star rating -> Text -> Photo -> Video)
+    - [x] Support for custom fields (Company name, LinkedIn URL, Tagline)
+    - [x] In-browser photo cropping for profile pictures
 - [ ] **Video Interaction**:
     - [ ] Teleprompter tool (Customer sees their script while recording)
     - [ ] Video prompts (Owner records a question, customer records a reply)

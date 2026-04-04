@@ -32,6 +32,10 @@ export async function submitTestimonial(
     content: string;
     authorName: string;
     authorEmail: string;
+    authorImage?: string;
+    authorCompany?: string;
+    authorLinkedin?: string;
+    authorTagline?: string;
   }
 ) {
   const id = `tst_${nanoid()}`;
@@ -43,8 +47,12 @@ export async function submitTestimonial(
     content: data.content,
     authorName: data.authorName,
     authorEmail: data.authorEmail,
+    authorImage: data.authorImage,
+    authorCompany: data.authorCompany,
+    authorLinkedin: data.authorLinkedin,
+    authorTagline: data.authorTagline,
     status: "pending",
-    type: "text",
+    type: "text", // Could be "video" if videoUrl is present
   });
 
   return { success: true };

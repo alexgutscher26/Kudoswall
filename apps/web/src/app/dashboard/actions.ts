@@ -3,7 +3,7 @@
 import { db } from "@/lib/server-db";
 import { auth } from "@/lib/auth";
 import { workspace, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -93,9 +93,24 @@ export async function getDashboardData() {
       )
     );
 
+  const recentTestimonials = projects.length > 0
+    ? await db.query.testimonial.findMany({
+        where: inArray(
+          testimonial.projectId,
+          projects.map((p) => p.id)
+        ),
+        orderBy: desc(testimonial.createdAt),
+        limit: 5,
+        with: {
+          project: true,
+        },
+      })
+    : [];
+
   return {
     workspace: ws,
     projects,
+    recentTestimonials,
     stats: {
       testimonials: testimonialCount?.value || 0,
       pending: pendingCount?.value || 0,

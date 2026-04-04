@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Menu,
   X,
+  User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { createProject, type getDashboardData } from "./actions";
@@ -820,6 +821,62 @@ function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) 
 }
 
 
+function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
+  if (!testimonials || testimonials.length === 0) return null;
+
+  return (
+    <div className="divide-y divide-neutral-50 overflow-y-auto max-h-[400px]">
+      {testimonials.map((t: any) => (
+        <div key={t.id} className="px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-neutral-50/50 transition-all group">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="size-10 rounded-xl bg-neutral-50 flex items-center justify-center shrink-0 overflow-hidden border border-neutral-100">
+              {t.authorImage ? (
+                <img src={t.authorImage} alt={t.authorName || "User"} className="size-full object-cover" />
+              ) : (
+                <User className="size-5 text-neutral-300" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-[14px] font-bold text-neutral-900 truncate tracking-tight">
+                  {t.authorName || "Anonymous"}
+                </h4>
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`size-2.5 ${i < (t.rating || 5) ? "fill-yellow-400 text-yellow-400" : "fill-neutral-100 text-neutral-100"}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <p className="text-[12px] text-neutral-500 line-clamp-1 mt-0.5 italic">
+                "{t.content || (t.type === 'video' ? 'Video testimonial' : 'No content')}"
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-50 text-neutral-400 border border-neutral-100/50">
+                  {t.project?.name}
+                </span>
+                <span className="text-[10px] text-neutral-300">
+                  {new Date(t.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            <Link
+              href={`/dashboard/testimonials?id=${t.id}`}
+              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+            >
+              <ChevronRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ProjectsList({ projects, workspaceSlug }: { projects: any[], workspaceSlug: string }) {
   if (!projects || projects.length === 0) return null;
 
@@ -1048,10 +1105,9 @@ export default function DashboardShell({
                       ))}
                     </div>
                   </div>
-                  {initialData.projects.length > 0 ? (
-                    <ProjectsList 
-                      projects={initialData.projects} 
-                      workspaceSlug={initialData.workspace.slug} 
+                  {initialData.recentTestimonials && initialData.recentTestimonials.length > 0 ? (
+                    <RecentTestimonialsList 
+                      testimonials={initialData.recentTestimonials} 
                     />
                   ) : (
                     <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
