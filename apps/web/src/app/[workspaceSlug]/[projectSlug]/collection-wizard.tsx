@@ -106,7 +106,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
     setLoading(true);
     try {
-      // In a real app, we'd upload the videoBlob and photo to storage here
+      // TODO: In a real app, we'd upload the videoBlob and photo to storage here
       // and get the URL. For now, we'll simulate the text submission.
       await submitTestimonial(project.id, {
         rating,

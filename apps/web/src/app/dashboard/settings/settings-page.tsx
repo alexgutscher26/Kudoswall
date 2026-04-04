@@ -1,22 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Settings,
-  Globe,
-  Bell,
-  CreditCard,
-  Users,
-  ShieldAlert,
-  Save,
-  Upload,
-  Link,
-  ChevronRight,
-  ExternalLink,
-  Mail,
-  Zap,
-  Trash2,
-} from "lucide-react";
+import { Settings, Globe, CreditCard, Users, Save, Upload, Link, Zap, Trash2 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

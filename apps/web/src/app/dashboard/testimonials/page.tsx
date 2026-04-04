@@ -80,7 +80,7 @@ export default async function TestimonialsPage({
     >
       <TestimonialInbox
         key={activeProjectId}
-        initialTestimonials={data.testimonials as any}
+        initialTestimonials={data.testimonials}
         project={data.project}
         projects={dashData.projects.map((p) => ({ id: p.id, name: p.name }))}
       />

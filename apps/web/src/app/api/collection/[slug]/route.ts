@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
+// TODO: Implement resend
+
 // Simple in-memory rate limiting (Note: In production with multiple instances, use Redis/KV)
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
 

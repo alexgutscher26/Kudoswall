@@ -40,6 +40,9 @@ interface Testimonial {
   authorName: string | null;
   authorEmail: string | null;
   authorImage: string | null;
+  authorCompany?: string | null;
+  authorLinkedin?: string | null;
+  authorTagline?: string | null;
   rating: number | null;
   status: "pending" | "approved" | "archived";
   type: "text" | "video";
@@ -407,7 +410,7 @@ function TestimonialCard({
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`size-4 ${i < t.rating ? "fill-amber-400 text-amber-400" : "fill-neutral-100 text-neutral-100"}`}
+                  className={`size-4 ${(t.rating ?? 0) > i ? "fill-amber-400 text-amber-400" : "fill-neutral-100 text-neutral-100"}`}
                 />
               ))}
             </div>
@@ -426,7 +429,11 @@ function TestimonialCard({
           <footer className="flex items-center gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
-                <img src={t.authorImage} alt={t.authorName} className="size-full object-cover" />
+                <img
+                  src={t.authorImage}
+                  alt={t.authorName ?? "Author"}
+                  className="size-full object-cover"
+                />
               ) : (
                 <User className="size-6 text-neutral-200" />
               )}

@@ -1,17 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  Camera,
-  Video,
-  RotateCcw,
-  Trash2,
-  Play,
-  Square,
-  Lock,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
+import { RotateCcw, Lock, Sparkles } from "lucide-react";
 
 interface VideoRecorderProps {
   isPro: boolean;

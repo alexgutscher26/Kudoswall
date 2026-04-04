@@ -72,6 +72,10 @@ export const testimonial = pgTable(
     type: testimonialTypeEnum("type").default("text").notNull(),
     videoUrl: text("video_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull()
+      .defaultNow(),
   },
   (table) => [index("testimonial_project_id_idx").on(table.projectId)],
 );
