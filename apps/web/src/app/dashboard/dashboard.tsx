@@ -26,6 +26,8 @@ import {
   X,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { createProject, type getDashboardData } from "./actions";
+import { toast } from "sonner";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -613,6 +615,25 @@ function NewCollectionModal({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      const result = await createProject(formData);
+      if (result.success) {
+        toast.success("Collection link created!");
+        onClose();
+      }
+    } catch (error) {
+      toast.error("Failed to create collection link");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -654,14 +675,7 @@ function NewCollectionModal({
           </p>
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setLoading(true);
-              setTimeout(() => {
-                setLoading(false);
-                onClose();
-              }, 1000);
-            }}
+            onSubmit={handleSubmit}
             className="space-y-6"
           >
             <div className="space-y-2">
@@ -670,6 +684,7 @@ function NewCollectionModal({
               </label>
               <input
                 autoFocus
+                name="name"
                 type="text"
                 required
                 placeholder="e.g. April 2024 Product Launch"
@@ -799,7 +814,55 @@ function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) 
   );
 }
 
-// ─── Dashboard shell ──────────────────────────────────────────────────────────
+
+function ProjectsList({ projects, workspaceSlug }: { projects: any[], workspaceSlug: string }) {
+  if (!projects || projects.length === 0) return null;
+
+  return (
+    <div className="divide-y divide-neutral-50 overflow-y-auto max-h-[400px]">
+      {projects.map((p: any) => (
+        <div key={p.id} className="px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-neutral-50/50 transition-all group">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="size-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0">
+              <LinkIcon className="size-5 text-pink-500" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-[14px] font-bold text-neutral-900 truncate tracking-tight">{p.name}</h4>
+              <p className="text-[11px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
+                <Globe className="size-3" />
+                wall.me/{workspaceSlug}/{p.slug}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`https://wall.me/${workspaceSlug}/${p.slug}`);
+                toast.success("Link copied!");
+              }}
+              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+              title="Copy link"
+            >
+              <Copy className="size-4" />
+            </button>
+            <Link
+              href={`/dashboard/testimonials?project=${p.id}`}
+              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+            >
+              <ChevronRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LinkIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  );
+}
 
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 // When `children` is provided it renders instead of the default overview content.
@@ -810,16 +873,54 @@ export default function DashboardShell({
   children,
   pageTitle,
   pageSubtitle,
+  initialData,
 }: {
   userName: string;
   userEmail: string;
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
+  initialData: NonNullable<Awaited<ReturnType<typeof getDashboardData>>>;
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+
+  // Derived stats from initialData
+  const stats = [
+    {
+      label: "Testimonials",
+      value: initialData.stats.testimonials.toString(),
+      sub: initialData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
+      icon: MessageSquareQuote,
+      accent: "#e8527a",
+      bg: "#fff5f7",
+    },
+    {
+      label: "Pending Approval",
+      value: initialData.stats.pending.toString(),
+      sub: initialData.stats.pending > 0 ? "New submissions!" : "All clear",
+      icon: Clock,
+      accent: "#7c3aed",
+      bg: "#f5f3ff",
+    },
+    {
+      label: "Widget Views",
+      value: initialData.stats.views.toString(),
+      sub: "Embed to start tracking",
+      icon: Globe,
+      accent: "#0ea5e9",
+      bg: "#f0f9ff",
+    },
+    {
+      label: "Conversion Rate",
+      value: initialData.stats.conversion,
+      sub: "Needs more data",
+      icon: BarChart2,
+      accent: "#16a34a",
+      bg: "#f0fdf4",
+    },
+  ];
 
   function handleSignOut() {
     authClient.signOut({
@@ -889,7 +990,7 @@ export default function DashboardShell({
             <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
               {/* Stats grid — 2 cols on mobile, 4 on xl */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-                {STATS.map((stat) => (
+                {stats.map((stat) => (
                   <StatCard key={stat.label} {...stat} />
                 ))}
               </div>
@@ -939,7 +1040,14 @@ export default function DashboardShell({
                       ))}
                     </div>
                   </div>
-                  <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
+                  {initialData.projects.length > 0 ? (
+                    <ProjectsList 
+                      projects={initialData.projects} 
+                      workspaceSlug={initialData.workspace.slug} 
+                    />
+                  ) : (
+                    <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
+                  )}
                 </div>
 
                 {/* Right column */}

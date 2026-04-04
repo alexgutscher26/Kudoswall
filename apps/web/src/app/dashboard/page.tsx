@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import DashboardShell from "./dashboard";
+import { getDashboardData } from "./actions";
 
 export const metadata = {
   title: "Dashboard — TestimonialWall",
@@ -18,10 +19,17 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const data = await getDashboardData();
+
+  if (!data) {
+    redirect("/login");
+  }
+
   return (
     <DashboardShell
       userName={session.user.name ?? "User"}
       userEmail={session.user.email ?? ""}
+      initialData={data}
     />
   );
 }
