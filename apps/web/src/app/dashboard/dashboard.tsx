@@ -140,12 +140,14 @@ function NavContent({
   userName,
   userEmail,
   onSignOut,
+  onNewCollection,
 }: {
   pathname: string;
   onNavClick?: () => void;
   userName: string;
   userEmail: string;
   onSignOut: () => void;
+  onNewCollection: () => void;
 }) {
   return (
     <>
@@ -206,10 +208,14 @@ function NavContent({
       <div className="px-3 pb-3 shrink-0">
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] shadow-sm"
+          onClick={() => {
+            if (onNavClick) onNavClick();
+            onNewCollection();
+          }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] shadow-sm group"
           style={{ backgroundColor: "#171717" }}
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-3.5 group-hover:rotate-90 transition-transform duration-300" />
           New Collection Link
         </button>
       </div>
@@ -253,10 +259,12 @@ function DesktopSidebar({
   userName,
   userEmail,
   onSignOut,
+  onNewCollection,
 }: {
   userName: string;
   userEmail: string;
   onSignOut: () => void;
+  onNewCollection: () => void;
 }) {
   const pathname = usePathname();
   return (
@@ -272,6 +280,7 @@ function DesktopSidebar({
         userName={userName}
         userEmail={userEmail}
         onSignOut={onSignOut}
+        onNewCollection={onNewCollection}
       />
     </aside>
   );
@@ -285,12 +294,14 @@ function MobileDrawer({
   userName,
   userEmail,
   onSignOut,
+  onNewCollection,
 }: {
   open: boolean;
   onClose: () => void;
   userName: string;
   userEmail: string;
   onSignOut: () => void;
+  onNewCollection: () => void;
 }) {
   const pathname = usePathname();
 
@@ -327,6 +338,7 @@ function MobileDrawer({
           userName={userName}
           userEmail={userEmail}
           onSignOut={onSignOut}
+          onNewCollection={onNewCollection}
         />
       </div>
     </>
@@ -447,7 +459,7 @@ function StatCard({
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
-function EmptyTestimonials() {
+function EmptyTestimonials({ onNewCollection }: { onNewCollection: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 sm:py-14 px-6 text-center">
       <div
@@ -464,11 +476,12 @@ function EmptyTestimonials() {
       </p>
       <button
         type="button"
+        onClick={onNewCollection}
         className="flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
         style={{ backgroundColor: "#171717" }}
       >
-        <Copy className="size-3.5" />
-        Copy Collection Link
+        <Plus className="size-3.5" />
+        New Collection Link
       </button>
     </div>
   );
@@ -543,7 +556,7 @@ function GettingStarted() {
 
 // ─── Quick actions ────────────────────────────────────────────────────────────
 
-function QuickActions() {
+function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
   return (
     <div
       className="rounded-2xl border border-neutral-100 overflow-hidden"
@@ -562,6 +575,7 @@ function QuickActions() {
           <li key={label}>
             <button
               type="button"
+              onClick={label === "Copy Collection Link" ? onNewCollection : undefined}
               className="w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-neutral-50 group"
             >
               <div
@@ -570,12 +584,12 @@ function QuickActions() {
               >
                 <Icon className="size-3.5" style={{ color: accent }} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0" >
                 <p className="text-[13px] font-medium text-neutral-800 leading-tight">
-                  {label}
+                  {label === "Copy Collection Link" ? "New Collection Link" : label}
                 </p>
                 <p className="text-[11px] text-neutral-400 leading-tight mt-0.5">
-                  {desc}
+                  {label === "Copy Collection Link" ? "Create a dedicated wall page" : desc}
                 </p>
               </div>
               <ChevronRight className="size-3.5 text-neutral-200 group-hover:text-neutral-400 transition-colors" />
@@ -587,9 +601,131 @@ function QuickActions() {
   );
 }
 
+// ─── Modal ──────────────────────────────────────────────────────────────────
+
+function NewCollectionModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Content */}
+      <div
+        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+      >
+        <DotGrid opacity={0.04} />
+
+        <div className="relative p-6 sm:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3
+              className="text-xl font-bold text-neutral-900 tracking-tight"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              New Collection Link
+            </h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="size-8 flex items-center justify-center rounded-full hover:bg-neutral-50 transition-colors"
+            >
+              <X className="size-4 text-neutral-400" />
+            </button>
+          </div>
+
+          <p className="text-[13px] text-neutral-500 leading-relaxed mb-8">
+            Create a dedicated page where your customers can record or write
+            their testimonials.
+          </p>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setLoading(true);
+              setTimeout(() => {
+                setLoading(false);
+                onClose();
+              }, 1000);
+            }}
+            className="space-y-6"
+          >
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest px-1">
+                Project / Campaign Name
+              </label>
+              <input
+                autoFocus
+                type="text"
+                required
+                placeholder="e.g. April 2024 Product Launch"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border border-neutral-100 bg-neutral-50 font-medium text-[14px] outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all placeholder:text-neutral-300"
+              />
+            </div>
+
+            <div className="bg-neutral-50 rounded-2xl p-4 space-y-2 border border-neutral-100">
+              <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+                Preview URL
+              </p>
+              <code className="text-[12px] font-mono font-bold text-neutral-400 flex items-center gap-1.5">
+                <Globe className="size-3" />
+                wall.me/my-workspace/
+                <span className={name ? "text-pink-500" : "text-neutral-300"}>
+                  {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
+                </span>
+              </code>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 rounded-full text-[14px] font-bold text-neutral-500 hover:bg-neutral-50 transition-all active:scale-[0.98]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[14px] font-bold text-white shadow-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+                style={{ backgroundColor: "#171717" }}
+              >
+                {loading ? (
+                  <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Create Link
+                    <ChevronRight className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Bento spotlight ──────────────────────────────────────────────────────────
 
-function FeatureSpotlight() {
+function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Collect — 1 col */}
@@ -611,10 +747,11 @@ function FeatureSpotlight() {
         </p>
         <button
           type="button"
+          onClick={onNewCollection}
           className="text-[12px] font-semibold flex items-center gap-1 hover:opacity-70 transition-opacity"
           style={{ color: "#e8527a" }}
         >
-          Copy your link <ChevronRight className="size-3" />
+          Create your link <ChevronRight className="size-3" />
         </button>
       </div>
 
@@ -647,7 +784,7 @@ function FeatureSpotlight() {
           }}
         >
           <code className="flex-1 text-[11px] font-mono text-neutral-500 truncate">
-            {'<script src="https://cdn.testimonialwall.com/widget.js" />'}
+            &lt;script src="https://cdn.testimonialwall.com/widget.js" /&gt;
           </code>
           <button
             type="button"
@@ -682,6 +819,7 @@ export default function DashboardShell({
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [newCollectionOpen, setNewCollectionOpen] = useState(false);
 
   function handleSignOut() {
     authClient.signOut({
@@ -698,6 +836,7 @@ export default function DashboardShell({
         userName={userName}
         userEmail={userEmail}
         onSignOut={handleSignOut}
+        onNewCollection={() => setNewCollectionOpen(true)}
       />
 
       {/* Mobile drawer */}
@@ -707,6 +846,13 @@ export default function DashboardShell({
         userName={userName}
         userEmail={userEmail}
         onSignOut={handleSignOut}
+        onNewCollection={() => setNewCollectionOpen(true)}
+      />
+
+      {/* Modal */}
+      <NewCollectionModal
+        open={newCollectionOpen}
+        onClose={() => setNewCollectionOpen(false)}
       />
 
       {/* Main content — offset only on lg+ */}
@@ -793,18 +939,18 @@ export default function DashboardShell({
                       ))}
                     </div>
                   </div>
-                  <EmptyTestimonials />
+                  <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
                 </div>
 
                 {/* Right column */}
                 <div className="xl:col-span-1 space-y-4 sm:space-y-5">
                   <GettingStarted />
-                  <QuickActions />
+                  <QuickActions onNewCollection={() => setNewCollectionOpen(true)} />
                 </div>
               </div>
 
               {/* Bento feature cards */}
-              <FeatureSpotlight />
+              <FeatureSpotlight onNewCollection={() => setNewCollectionOpen(true)} />
             </div>
           </main>
         )}
