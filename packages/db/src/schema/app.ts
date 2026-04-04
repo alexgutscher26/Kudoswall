@@ -13,6 +13,8 @@ export const workspace = pgTable("workspace", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   logoUrl: text("logo_url"),
+  isPro: boolean("is_pro").default(false).notNull(),
+  brandingJson: text("branding_json"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .$onUpdate(() => new Date())
@@ -28,7 +30,9 @@ export const project = pgTable("project", {
     .references(() => workspace.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
+  collectionSlug: text("collection_slug").unique(),
   description: text("description"),
+  thankYouMessage: text("thank_you_message"),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -36,6 +40,7 @@ export const project = pgTable("project", {
     .notNull(),
 }, (table) => [
   index("project_workspace_slug_idx").on(table.workspaceId, table.slug),
+  index("project_collection_slug_idx").on(table.collectionSlug),
 ]);
 
 export const testimonial = pgTable("testimonial", {

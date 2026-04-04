@@ -1,6 +1,8 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
+import { dashboardRouter } from "./dashboard";
 
 export const appRouter = router({
+  dashboard: dashboardRouter,
   healthCheck: publicProcedure.query(() => {
     return "OK";
   }),

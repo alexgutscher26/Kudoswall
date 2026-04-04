@@ -23,7 +23,8 @@
       "@types/react": "^19.2.10",
       "@types/react-dom": "^19.2.3",
       "tailwindcss": "^4.1.18",
-      "alchemy": "^0.90.0"
+      "alchemy": "^0.90.0",
+      "drizzle-orm": "^0.45.1"
     }
   },
   "type": "module",
@@ -43,7 +44,10 @@
   },
   "dependencies": {
     "@my-better-t-app/env": "workspace:*",
+    "@trpc/server": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "catalog:",
+    "next": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -22,7 +22,19 @@ export async function getProjectBySlug(workspaceSlug: string, projectSlug: strin
     },
   });
 
-  return result;
+  if (!result) return null;
+  
+  return {
+    ...result,
+    workspace: {
+      ...result.workspace,
+      branding: result.workspace.brandingJson ? JSON.parse(result.workspace.brandingJson) : {
+        accentColor: "#e8527a",
+        font: "sans",
+        logoUrl: result.workspace.logoUrl
+      }
+    }
+  };
 }
 
 export async function submitTestimonial(

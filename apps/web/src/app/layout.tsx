@@ -22,15 +22,25 @@ export const metadata: Metadata = {
     "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
 };
 
-export default function RootLayout({
+import { cookies } from "next/headers";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value || "system";
+  
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <html lang="en" className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme={theme}
+          enableSystem={true}
+          disableTransitionOnChange
+        >
           <Providers>{children}</Providers>
         </ThemeProvider>
       </body>

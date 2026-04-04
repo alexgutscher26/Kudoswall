@@ -27,8 +27,10 @@ import {
   User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { createProject, type getDashboardData } from "./actions";
+import { createProject } from "./actions";
 import { toast } from "sonner";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -355,11 +357,13 @@ function TopBar({
   onMenuOpen,
   pageTitle = "Overview",
   pageSubtitle,
+  isLive,
 }: {
   userName: string;
   onMenuOpen: () => void;
   pageTitle?: string;
   pageSubtitle?: string;
+  isLive?: boolean;
 }) {
   return (
     <header
@@ -383,13 +387,21 @@ function TopBar({
           <Menu className="size-4 text-neutral-600" />
         </button>
 
-        <div>
-          <p className="text-[15px] font-bold text-neutral-900 leading-none">
-            {pageTitle}
-          </p>
-          <p className="hidden sm:block text-[12px] text-neutral-400 mt-0.5">
-            {pageSubtitle ?? `Welcome back, ${userName} 👋`}
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-[15px] font-bold text-neutral-900 leading-none flex items-center gap-2">
+              {pageTitle}
+              {isLive && (
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+              )}
+            </p>
+            <p className="hidden sm:block text-[12px] text-neutral-400 mt-0.5">
+              {pageSubtitle ?? `Welcome back, ${userName} 👋`}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -945,33 +957,42 @@ export default function DashboardShell({
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
-  initialData?: NonNullable<Awaited<ReturnType<typeof getDashboardData>>>;
+  initialData?: any;
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
 
+  // Live polling for dashboard data
+  const { data: liveData } = useQuery({
+    ...trpc.dashboard.getData.queryOptions(),
+    initialData,
+    refetchInterval: 5000,
+  });
+
+  const activeData = liveData || initialData;
+
   // Derived stats from initialData
-  const stats = initialData ? [
+  const stats = activeData ? [
     {
       label: "Testimonials",
-      value: initialData.stats.testimonials.toString(),
-      sub: initialData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
+      value: activeData.stats.testimonials.toString(),
+      sub: activeData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
       icon: MessageSquareQuote,
       accent: "#e8527a",
       bg: "#fff5f7",
     },
     {
       label: "Pending Approval",
-      value: initialData.stats.pending.toString(),
-      sub: initialData.stats.pending > 0 ? "New submissions!" : "All clear",
+      value: activeData.stats.pending.toString(),
+      sub: activeData.stats.pending > 0 ? "New submissions!" : "All clear",
       icon: Clock,
       accent: "#7c3aed",
       bg: "#f5f3ff",
     },
     {
       label: "Widget Views",
-      value: initialData.stats.views.toString(),
+      value: activeData.stats.views.toString(),
       sub: "Embed to start tracking",
       icon: Globe,
       accent: "#0ea5e9",
@@ -979,7 +1000,7 @@ export default function DashboardShell({
     },
     {
       label: "Conversion Rate",
-      value: initialData.stats.conversion,
+      value: activeData.stats.conversion,
       sub: "Needs more data",
       icon: BarChart2,
       accent: "#16a34a",
@@ -1044,6 +1065,7 @@ export default function DashboardShell({
             onMenuOpen={() => setMobileMenuOpen(true)}
             pageTitle={pageTitle}
             pageSubtitle={pageSubtitle}
+            isLive
           />
         </div>
 
@@ -1105,9 +1127,9 @@ export default function DashboardShell({
                       ))}
                     </div>
                   </div>
-                  {initialData.recentTestimonials && initialData.recentTestimonials.length > 0 ? (
+                  {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
                     <RecentTestimonialsList 
-                      testimonials={initialData.recentTestimonials} 
+                      testimonials={activeData.recentTestimonials} 
                     />
                   ) : (
                     <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
