@@ -29,7 +29,7 @@ export default function CtaSection() {
       </div>
 
       <div className="relative max-w-3xl mx-auto text-center flex flex-col items-center gap-6">
-        <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
           Start collecting testimonials{" "}
           <span style={{ color: "#e8527a" }}>today</span>
         </h2>

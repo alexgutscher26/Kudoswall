@@ -75,9 +75,8 @@ export default function FeaturesSection() {
           >
             Features
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
-            Everything you need to collect
-            <br />
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
+            Everything you need to collect{" "}
             <span style={{ color: "#e8527a" }}>social proof that converts</span>
           </h2>
           <p className="mt-4 text-neutral-500 text-lg max-w-xl mx-auto">
@@ -90,7 +89,7 @@ export default function FeaturesSection() {
           {FEATURES.map(({ icon: Icon, title, description, span, accent, bg }) => (
             <div
               key={title}
-              className={`${span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"} rounded-2xl p-6 border border-neutral-100 transition-shadow hover:shadow-md`}
+              className={`${span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"} rounded-2xl p-5 sm:p-6 border border-neutral-100 transition-shadow hover:shadow-md`}
               style={{ backgroundColor: bg }}
             >
               <div

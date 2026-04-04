@@ -57,7 +57,7 @@ export default function HowItWorksSection() {
           >
             How it works
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
             Up and running in{" "}
             <span style={{ color: "#e8527a" }}>under 5 minutes</span>
           </h2>
@@ -78,7 +78,7 @@ export default function HowItWorksSection() {
           {STEPS.map(({ number, icon: Icon, title, description, color, bg }) => (
             <div
               key={number}
-              className="relative flex flex-col items-center text-center p-8 rounded-2xl border border-white/70 shadow-sm"
+              className="relative flex flex-col items-center text-center p-6 sm:p-8 rounded-2xl border border-white/70 shadow-sm"
               style={{ backgroundColor: "#ffffff" }}
             >
               {/* Step number badge */}

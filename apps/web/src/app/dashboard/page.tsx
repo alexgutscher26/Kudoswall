@@ -2,7 +2,12 @@ import { createAuth } from "@my-better-t-app/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import Dashboard from "./dashboard";
+import DashboardShell from "./dashboard";
+
+export const metadata = {
+  title: "Dashboard — TestimonialWall",
+  description: "Manage your testimonials, embed widget, and analytics.",
+};
 
 export default async function DashboardPage() {
   const session = await createAuth().api.getSession({
@@ -14,10 +19,9 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome {session.user.name}</p>
-      <Dashboard session={session} />
-    </div>
+    <DashboardShell
+      userName={session.user.name ?? "User"}
+      userEmail={session.user.email ?? ""}
+    />
   );
 }

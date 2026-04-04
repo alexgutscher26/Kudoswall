@@ -18,7 +18,7 @@ const CATEGORY_CHIPS = [
 export default function Hero() {
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden"
       style={{ backgroundColor: "#ffffff" }}
     >
       {/* Dot-grid texture overlay — always dark dots on the light bg */}
@@ -38,12 +38,12 @@ export default function Hero() {
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
       >
         <div
-          className="w-[700px] h-[500px] rounded-full blur-3xl"
+          className="w-[min(700px,90vw)] h-[min(500px,60vw)] rounded-full blur-3xl"
           style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
         />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center gap-8 px-4 text-center max-w-4xl mx-auto pt-24">
+      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 px-4 sm:px-6 text-center max-w-4xl mx-auto pt-24">
         {/* Watch intro badge */}
         <button
           type="button"
@@ -60,11 +60,11 @@ export default function Hero() {
 
         {/* Main headline */}
         <div className="flex flex-col gap-1 -mt-2">
-          <h1 className="text-5xl md:text-6xl font-bold leading-[1.1] text-neutral-900 whitespace-nowrap">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] text-neutral-900">
             The easiest way to collect
           </h1>
           <span
-            className="text-5xl md:text-6xl font-bold leading-[1.1]"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1]"
             style={{ color: "#e8527a" }}
           >
             glowing testimonials
@@ -72,7 +72,7 @@ export default function Hero() {
         </div>
 
         {/* Sub-headline */}
-        <p className="text-lg md:text-xl text-neutral-500 max-w-2xl -mt-2">
+        <p className="text-base sm:text-lg md:text-xl text-neutral-500 max-w-2xl -mt-2 px-2">
           Collect, organize, and display beautiful customer testimonials on your website in minutes — no code required.
         </p>
 
@@ -83,7 +83,7 @@ export default function Hero() {
               🚀 Paste a customer's email and collect a testimonial instantly…
             </p>
           </div>
-          <div className="flex items-center gap-3 px-5 py-3 border-t border-neutral-100">
+          <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-t border-neutral-100">
             <span className="flex items-center gap-1.5 bg-neutral-100 text-neutral-700 text-xs font-medium rounded-full px-3 py-1.5">
               <Star className="size-3 fill-pink-500 text-pink-500" />
               Smart mode

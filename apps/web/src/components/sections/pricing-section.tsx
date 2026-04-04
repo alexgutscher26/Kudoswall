@@ -94,10 +94,10 @@ function LTDSection() {
     <div className="mb-14 relative group max-w-5xl mx-auto w-full">
       {/* Multi-layered Aura Glow */}
       <div 
-        className="absolute -inset-1.5 bg-gradient-to-r from-[#e8527a] via-[#bf3fbe] to-[#e8527a] rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000" 
+        className="absolute -inset-1.5 bg-linear-to-r from-[#e8527a] via-[#bf3fbe] to-[#e8527a] rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000" 
       />
       
-      <div className="relative bg-neutral-900 rounded-[2.2rem] p-8 md:p-12 flex flex-col lg:flex-row items-center gap-12 border border-white/10 shadow-2xl overflow-hidden">
+      <div className="relative bg-neutral-900 rounded-[2.2rem] p-6 sm:p-8 md:p-12 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 border border-white/10 shadow-2xl overflow-hidden">
         {/* Background Sparkles */}
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <Sparkles className="size-32 text-pink-500 blur-lg" />
@@ -118,9 +118,9 @@ function LTDSection() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
               Stop paying monthly. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e8527a] via-[#ff94b4] to-[#e8527a] animate-gradient-x">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-[#e8527a] via-[#ff94b4] to-[#e8527a] animate-gradient-x">
                 Own your brand asset.
               </span>
             </h3>
@@ -148,7 +148,7 @@ function LTDSection() {
           </div>
         </div>
 
-        <div className="w-full lg:w-[360px] flex flex-col gap-8 p-10 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] items-center text-center relative z-20">
+        <div className="w-full lg:w-[360px] flex flex-col gap-6 sm:gap-8 p-6 sm:p-10 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] items-center text-center relative z-20">
           <div className="space-y-2">
              <div className="flex items-center justify-center gap-2 mb-1">
                <span className="text-[10px] font-black text-[#e8527a] uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-full">
@@ -156,7 +156,7 @@ function LTDSection() {
                </span>
              </div>
             <div className="flex items-baseline justify-center gap-3">
-              <span className="text-6xl font-black text-neutral-900 tracking-tighter">$199</span>
+              <span className="text-5xl sm:text-6xl font-black text-neutral-900 tracking-tighter">$199</span>
               <span className="text-neutral-400 line-through text-xl font-bold">$499</span>
             </div>
             <p className="text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em]">
@@ -174,7 +174,7 @@ function LTDSection() {
             </div>
             <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden border border-neutral-200 shadow-inner">
               <div 
-                className="h-full bg-gradient-to-r from-[#e8527a] to-[#bf3fbe] transition-all duration-1000 shadow-[0_0_10px_rgba(232,82,122,0.3)]"
+                className="h-full bg-linear-to-r from-[#e8527a] to-[#bf3fbe] transition-all duration-1000 shadow-[0_0_10px_rgba(232,82,122,0.3)]"
                 style={{ width: `${(seatsRemaining / 500) * 100}%` }}
               />
             </div>
@@ -221,7 +221,7 @@ export default function PricingSection() {
           >
             Simple Pricing
           </span>
-          <h2 className="text-5xl md:text-6xl font-black text-neutral-900 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-neutral-900 leading-tight tracking-tight">
             Plans that scale with you.
           </h2>
           <p className="mt-5 text-neutral-500 text-lg max-w-xl mx-auto font-medium">
@@ -266,7 +266,7 @@ export default function PricingSection() {
           {PLANS.map(({ name, monthlyPrice, yearlyPrice, period, description, cta, ctaHref, highlight, features, badge }) => (
             <div
               key={name}
-              className="rounded-[2.5rem] p-9 border-2 flex flex-col gap-8 relative group transition-all duration-500 hover:scale-[1.01]"
+              className="rounded-[2.5rem] p-6 sm:p-9 border-2 flex flex-col gap-6 sm:gap-8 relative group transition-all duration-500 hover:scale-[1.01]"
               style={{
                 backgroundColor: highlight ? "#171717" : "#fafafa",
                 borderColor: highlight ? "#171717" : "#f1f1f1",
@@ -294,7 +294,7 @@ export default function PricingSection() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span
-                    className="text-5xl font-black tracking-tighter"
+                    className="text-4xl sm:text-5xl font-black tracking-tighter"
                     style={{ color: highlight ? "#ffffff" : "#111827" }}
                   >
                     {billingCycle === "monthly" ? monthlyPrice : yearlyPrice}

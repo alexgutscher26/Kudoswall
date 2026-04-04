@@ -72,7 +72,7 @@ export default function SocialProofSection() {
           >
             Social proof
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900">
             Businesses that trust{" "}
             <span style={{ color: "#e8527a" }}>TestimonialWall</span>
           </h2>
@@ -92,7 +92,7 @@ export default function SocialProofSection() {
         </div>
 
         {/* Testimonial cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {TESTIMONIALS.map(({ name, role, avatar, avatarColor, rating, quote }) => (
             <div
               key={name}

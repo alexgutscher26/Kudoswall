@@ -67,7 +67,7 @@ export default function WidgetPreviewSection() {
           >
             Live preview
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
             A widget your visitors will{" "}
             <span style={{ color: "#e8527a" }}>actually trust</span>
           </h2>
@@ -98,9 +98,9 @@ export default function WidgetPreviewSection() {
           </div>
 
           {/* Widget content */}
-          <div className="p-6" style={{ backgroundColor: "#ffffff" }}>
+          <div className="p-4 sm:p-6" style={{ backgroundColor: "#ffffff" }}>
             {/* Widget header */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
               <div>
                 <h3 className="font-bold text-neutral-900 text-lg">What our customers say</h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -114,7 +114,7 @@ export default function WidgetPreviewSection() {
                 </div>
               </div>
               <span
-                className="text-[10px] font-semibold px-2 py-1 rounded-full"
+                className="hidden sm:inline text-[10px] font-semibold px-2 py-1 rounded-full shrink-0"
                 style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
               >
                 Powered by TestimonialWall
@@ -122,7 +122,7 @@ export default function WidgetPreviewSection() {
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {WIDGET_TESTIMONIALS.map(({ name, role, avatar, avatarColor, rating, text, type }) => (
                 <div
                   key={name}

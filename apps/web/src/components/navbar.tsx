@@ -123,29 +123,46 @@ export default function Navbar() {
               {label}
             </a>
           ))}
-          <Link
-            href="/dashboard"
-            onClick={() => setMenuOpen(false)}
-            className="py-2 px-3 text-sm font-bold text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors"
-          >
-            Dashboard
-          </Link>
-          <hr className="my-2 border-neutral-200" />
-          <a
-            href="/login"
-            onClick={() => setMenuOpen(false)}
-            className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl"
-          >
-            Log in
-          </a>
-          <a href="/login" onClick={() => setMenuOpen(false)}>
-            <Button
-              className="w-full rounded-xl text-sm mt-1 text-white"
-              style={{ backgroundColor: "#171717" }}
-            >
-              Get started →
-            </Button>
-          </a>
+          {!isPending && session ? (
+            <>
+              <Link
+                href="/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="py-2 px-3 text-sm font-bold text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await authClient.signOut();
+                  setMenuOpen(false);
+                }}
+                className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl text-left"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <hr className="my-2 border-neutral-200" />
+              <a
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl"
+              >
+                Log in
+              </a>
+              <a href="/login" onClick={() => setMenuOpen(false)}>
+                <Button
+                  className="w-full rounded-xl text-sm mt-1 text-white"
+                  style={{ backgroundColor: "#171717" }}
+                >
+                  Get started →
+                </Button>
+              </a>
+            </>
+          )}
         </div>
       )}
     </header>
