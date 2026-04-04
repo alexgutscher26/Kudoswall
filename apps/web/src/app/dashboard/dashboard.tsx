@@ -698,12 +698,17 @@ function NewCollectionModal({
               <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
                 Preview URL
               </p>
-              <code className="text-[12px] font-mono font-bold text-neutral-400 flex items-center gap-1.5">
-                <Globe className="size-3" />
-                wall.me/my-workspace/
-                <span className={name ? "text-pink-500" : "text-neutral-300"}>
-                  {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
-                </span>
+              <code className="text-[12px] font-mono font-bold text-neutral-400 flex flex-col gap-1">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="size-3" />
+                  wall.me/my-workspace/
+                  <span className={name ? "text-pink-500" : "text-neutral-300"}>
+                    {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
+                  </span>
+                </div>
+                <div className="text-[10px] text-neutral-300 font-medium">
+                  Local: localhost:3001/my-workspace/...
+                </div>
               </code>
             </div>
 
@@ -830,14 +835,17 @@ function ProjectsList({ projects, workspaceSlug }: { projects: any[], workspaceS
               <h4 className="text-[14px] font-bold text-neutral-900 truncate tracking-tight">{p.name}</h4>
               <p className="text-[11px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
                 <Globe className="size-3" />
-                wall.me/{workspaceSlug}/{p.slug}
+                /{workspaceSlug}/{p.slug}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`https://wall.me/${workspaceSlug}/${p.slug}`);
+                const url = window.location.origin === "http://localhost:3001" 
+                  ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
+                  : `https://wall.me/${workspaceSlug}/${p.slug}`;
+                navigator.clipboard.writeText(url);
                 toast.success("Link copied!");
               }}
               className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
@@ -880,14 +888,14 @@ export default function DashboardShell({
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
-  initialData: NonNullable<Awaited<ReturnType<typeof getDashboardData>>>;
+  initialData?: NonNullable<Awaited<ReturnType<typeof getDashboardData>>>;
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
 
   // Derived stats from initialData
-  const stats = [
+  const stats = initialData ? [
     {
       label: "Testimonials",
       value: initialData.stats.testimonials.toString(),
@@ -920,7 +928,7 @@ export default function DashboardShell({
       accent: "#16a34a",
       bg: "#f0fdf4",
     },
-  ];
+  ] : [];
 
   function handleSignOut() {
     authClient.signOut({

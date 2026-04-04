@@ -104,3 +104,104 @@ export async function getDashboardData() {
     },
   };
 }
+
+export async function getProjectTestimonials(projectId: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify ownership via the project's workspace
+  const p = await db.query.project.findFirst({
+    where: eq(project.id, projectId),
+    with: {
+      workspace: true,
+    },
+  });
+
+  if (!p || p.workspace.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  const testimonials = await db.query.testimonial.findMany({
+    where: eq(testimonial.projectId, projectId),
+    orderBy: desc(testimonial.createdAt),
+  });
+
+  return {
+    project: p,
+    testimonials,
+  };
+}
+
+export async function updateTestimonialStatus(
+  id: string,
+  status: "approved" | "archived" | "pending"
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  // Check ownership
+  const t = await db.query.testimonial.findFirst({
+    where: eq(testimonial.id, id),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  if (!t || t.project.workspace.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  await db
+    .update(testimonial)
+    .set({ status })
+    .where(eq(testimonial.id, id));
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  return { success: true };
+}
+
+export async function deleteTestimonial(id: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const t = await db.query.testimonial.findFirst({
+    where: eq(testimonial.id, id),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  if (!t || t.project.workspace.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  await db.delete(testimonial).where(eq(testimonial.id, id));
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  return { success: true };
+}
