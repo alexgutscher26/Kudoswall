@@ -1070,10 +1070,8 @@ export default function DashboardShell({
         </div>
 
         {/* Main content */}
-        {children ? (
-          <main className="relative z-10 flex-1">{children}</main>
-        ) : (
-          <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {children || (
             <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
               {/* Stats grid — 2 cols on mobile, 4 on xl */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -1146,8 +1144,8 @@ export default function DashboardShell({
               {/* Bento feature cards */}
               <FeatureSpotlight onNewCollection={() => setNewCollectionOpen(true)} />
             </div>
-          </main>
-        )}
+          )}
+        </main>
       </div>
     </div>
   );

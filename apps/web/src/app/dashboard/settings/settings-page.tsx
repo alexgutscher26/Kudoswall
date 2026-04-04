@@ -30,8 +30,7 @@ export default function SettingsPage() {
   const [slug, setSlug] = useState("acme-marketing");
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+    <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
         
         {/* ── Left Navigation ────────────────────────────────────────────── */}
         <div className="w-full md:w-64 space-y-1">
@@ -293,7 +292,6 @@ export default function SettingsPage() {
           )}
 
         </div>
-      </div>
     </div>
   );
 }

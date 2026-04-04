@@ -163,8 +163,7 @@ export default function EmbedPage() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-6">
+    <div className="max-w-7xl mx-auto flex flex-col xl:flex-row gap-6">
         
         {/* ── Left: Settings Panel ────────────────────────────────────────── */}
         <div className="w-full xl:w-[350px] space-y-5 shrink-0">
@@ -378,6 +377,5 @@ export default function EmbedPage() {
         </div>
 
       </div>
-    </div>
   );
 }

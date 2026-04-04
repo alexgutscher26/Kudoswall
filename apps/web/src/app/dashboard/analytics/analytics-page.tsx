@@ -233,8 +233,7 @@ export default function AnalyticsPage() {
   const [timeframe, setTimeframe] = useState("Last 7 Days");
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
+    <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
 
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -383,8 +382,6 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </div>
-
       </div>
-    </div>
-  );
+
 }
