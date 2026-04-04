@@ -4,7 +4,14 @@
 pre-commit:
   parallel: true
   jobs:
-    # Add your pre-commit commands here
-    # Example:
-    # - name: lint
-    #   run:  lint
+    - name: prettier
+      glob: "*.{js,ts,jsx,tsx,json,css,md}"
+      run: bun x prettier --write {staged_files} && git add {staged_files}
+
+    - name: type-check
+      run: bun run check-types
+
+pre-push:
+  jobs:
+    - name: build-check
+      run: bun run build
