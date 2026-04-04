@@ -157,20 +157,17 @@ function NavContent({
   return (
     <>
       {/* Logo */}
-      <div
-        className="px-5 py-5 shrink-0"
-        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
-      >
+      <div className="shrink-0 px-5 py-5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
         <Link
           href="/"
           onClick={onNavClick}
-          className="block text-lg font-bold tracking-tight text-neutral-900 select-none leading-none"
+          className="block text-lg leading-none font-bold tracking-tight text-neutral-900 select-none"
           style={{ fontFamily: "'Georgia', serif" }}
         >
           TestimonialWall
         </Link>
         <span
-          className="inline-block mt-2 text-[10px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full"
+          className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase"
           style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
         >
           Dashboard
@@ -178,7 +175,7 @@ function NavContent({
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href;
           return (
@@ -186,17 +183,14 @@ function NavContent({
               key={href}
               href={href as Route}
               onClick={onNavClick}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
                 isActive
                   ? "text-neutral-900"
-                  : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+                  : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
               }`}
               style={isActive ? { backgroundColor: "#fff5f7", color: "#c2395d" } : {}}
             >
-              <Icon
-                className="size-4 shrink-0"
-                style={isActive ? { color: "#e8527a" } : {}}
-              />
+              <Icon className="size-4 shrink-0" style={isActive ? { color: "#e8527a" } : {}} />
               {label}
               {isActive && (
                 <div
@@ -210,44 +204,42 @@ function NavContent({
       </nav>
 
       {/* CTA */}
-      <div className="px-3 pb-3 shrink-0">
+      <div className="shrink-0 px-3 pb-3">
         <button
           type="button"
           onClick={() => {
             if (onNavClick) onNavClick();
             onNewCollection();
           }}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] shadow-sm group"
+          className="group flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
           style={{ backgroundColor: "#171717" }}
         >
-          <Plus className="size-3.5 group-hover:rotate-90 transition-transform duration-300" />
+          <Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" />
           New Collection Link
         </button>
       </div>
 
       {/* User */}
       <div
-        className="px-4 py-4 flex items-center gap-3 shrink-0"
+        className="flex shrink-0 items-center gap-3 px-4 py-4"
         style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
         <div
-          className="size-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+          className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
           style={{ backgroundColor: "#e8527a" }}
         >
           {userName.charAt(0).toUpperCase()}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-neutral-900 truncate leading-tight">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[13px] leading-tight font-semibold text-neutral-900">
             {userName}
           </p>
-          <p className="text-[11px] text-neutral-400 truncate leading-tight mt-0.5">
-            {userEmail}
-          </p>
+          <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">{userEmail}</p>
         </div>
         <button
           type="button"
           onClick={onSignOut}
-          className="text-neutral-300 hover:text-neutral-600 transition-colors p-1"
+          className="p-1 text-neutral-300 transition-colors hover:text-neutral-600"
           title="Sign out"
           aria-label="Sign out"
         >
@@ -274,7 +266,7 @@ function DesktopSidebar({
   const pathname = usePathname();
   return (
     <aside
-      className="hidden lg:flex fixed left-0 top-0 h-screen w-60 flex-col z-40"
+      className="fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col lg:flex"
       style={{
         backgroundColor: "#ffffff",
         borderRight: "1px solid rgba(0,0,0,0.07)",
@@ -322,7 +314,7 @@ function MobileDrawer({
       />
       {/* Drawer */}
       <div
-        className="fixed left-0 top-0 h-screen w-72 flex flex-col z-50 lg:hidden animate-in slide-in-from-left duration-200"
+        className="animate-in slide-in-from-left fixed top-0 left-0 z-50 flex h-screen w-72 flex-col duration-200 lg:hidden"
         style={{
           backgroundColor: "#ffffff",
           borderRight: "1px solid rgba(0,0,0,0.07)",
@@ -333,7 +325,7 @@ function MobileDrawer({
           type="button"
           onClick={onClose}
           aria-label="Close menu"
-          className="absolute top-4 right-4 size-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
+          className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
         >
           <X className="size-4 text-neutral-500" />
         </button>
@@ -367,7 +359,7 @@ function TopBar({
 }) {
   return (
     <header
-      className="h-14 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30"
+      className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8"
       style={{
         backgroundColor: "rgba(255,255,255,0.9)",
         backdropFilter: "blur(12px)",
@@ -381,7 +373,7 @@ function TopBar({
           type="button"
           onClick={onMenuOpen}
           aria-label="Open navigation"
-          className="lg:hidden size-8 flex items-center justify-center rounded-full border hover:bg-neutral-50 transition-colors"
+          className="flex size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50 lg:hidden"
           style={{ borderColor: "rgba(0,0,0,0.1)" }}
         >
           <Menu className="size-4 text-neutral-600" />
@@ -389,16 +381,16 @@ function TopBar({
 
         <div className="flex items-center gap-3">
           <div>
-            <p className="text-[15px] font-bold text-neutral-900 leading-none flex items-center gap-2">
+            <p className="flex items-center gap-2 text-[15px] leading-none font-bold text-neutral-900">
               {pageTitle}
               {isLive && (
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
               )}
             </p>
-            <p className="hidden sm:block text-[12px] text-neutral-400 mt-0.5">
+            <p className="mt-0.5 hidden text-[12px] text-neutral-400 sm:block">
               {pageSubtitle ?? `Welcome back, ${userName} 👋`}
             </p>
           </div>
@@ -410,7 +402,7 @@ function TopBar({
         <button
           type="button"
           aria-label="Notifications"
-          className="relative size-8 flex items-center justify-center rounded-full border transition-colors hover:bg-neutral-50"
+          className="relative flex size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50"
           style={{ borderColor: "rgba(0,0,0,0.1)" }}
         >
           <Bell className="size-[15px] text-neutral-500" />
@@ -423,7 +415,7 @@ function TopBar({
         {/* Upgrade pill */}
         <button
           type="button"
-          className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] sm:px-4 sm:text-[13px]"
           style={{ backgroundColor: "#171717" }}
         >
           <span className="hidden sm:inline">Upgrade Plan</span>
@@ -454,20 +446,20 @@ function StatCard({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 sm:p-5 border border-neutral-100 hover:shadow-md transition-shadow"
+      className="rounded-2xl border border-neutral-100 p-4 transition-shadow hover:shadow-md sm:p-5"
       style={{ backgroundColor: bg }}
     >
       <div
-        className="inline-flex items-center justify-center size-9 rounded-xl mb-3"
+        className="mb-3 inline-flex size-9 items-center justify-center rounded-xl"
         style={{ backgroundColor: `${accent}20` }}
       >
         <Icon className="size-4" style={{ color: accent }} />
       </div>
-      <p className="text-2xl sm:text-3xl font-bold text-neutral-900 leading-none mb-1 tracking-tight">
+      <p className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900 sm:text-3xl">
         {value}
       </p>
       <p className="text-[13px] font-medium text-neutral-700">{label}</p>
-      <p className="text-[11px] text-neutral-400 mt-0.5 hidden sm:block">{sub}</p>
+      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">{sub}</p>
     </div>
   );
 }
@@ -476,23 +468,22 @@ function StatCard({
 
 function EmptyTestimonials({ onNewCollection }: { onNewCollection: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-10 sm:py-14 px-6 text-center">
+    <div className="flex flex-col items-center justify-center px-6 py-10 text-center sm:py-14">
       <div
-        className="size-14 rounded-2xl flex items-center justify-center mb-4"
+        className="mb-4 flex size-14 items-center justify-center rounded-2xl"
         style={{ backgroundColor: "#fff5f7" }}
       >
         <MessageSquareQuote className="size-6" style={{ color: "#e8527a" }} />
       </div>
-      <h3 className="text-[15px] font-semibold text-neutral-900 mb-1.5">
-        No testimonials yet
-      </h3>
-      <p className="text-[13px] text-neutral-400 max-w-xs leading-relaxed mb-6">
-        Share your collection link with customers and your first testimonials will appear here — ready to review and approve.
+      <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">No testimonials yet</h3>
+      <p className="mb-6 max-w-xs text-[13px] leading-relaxed text-neutral-400">
+        Share your collection link with customers and your first testimonials will appear here —
+        ready to review and approve.
       </p>
       <button
         type="button"
         onClick={onNewCollection}
-        className="flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+        className="flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
         style={{ backgroundColor: "#171717" }}
       >
         <Plus className="size-3.5" />
@@ -511,23 +502,21 @@ function GettingStarted() {
 
   return (
     <div
-      className="rounded-2xl border border-neutral-100 overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-neutral-100"
       style={{ backgroundColor: "#ffffff" }}
     >
       <div
-        className="px-5 py-4 flex items-center justify-between"
+        className="flex items-center justify-between px-5 py-4"
         style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
       >
         <div>
-          <p className="text-[13px] font-semibold text-neutral-900">
-            Getting Started
-          </p>
-          <p className="text-[11px] text-neutral-400 mt-0.5">
+          <p className="text-[13px] font-semibold text-neutral-900">Getting Started</p>
+          <p className="mt-0.5 text-[11px] text-neutral-400">
             {done} / {total} complete
           </p>
         </div>
         <span
-          className="text-[11px] font-bold px-2.5 py-1 rounded-full"
+          className="rounded-full px-2.5 py-1 text-[11px] font-bold"
           style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
         >
           {pct}%
@@ -541,23 +530,20 @@ function GettingStarted() {
         />
       </div>
 
-      <ul className="px-5 py-4 space-y-3">
+      <ul className="space-y-3 px-5 py-4">
         {CHECKLIST.map(({ label, done: isDone }) => (
           <li key={label} className="flex items-center gap-3">
             {isDone ? (
-              <CheckCircle2
-                className="size-4 shrink-0"
-                style={{ color: "#16a34a" }}
-              />
+              <CheckCircle2 className="size-4 shrink-0" style={{ color: "#16a34a" }} />
             ) : (
               <div
-                className="size-4 rounded-full border-2 shrink-0"
+                className="size-4 shrink-0 rounded-full border-2"
                 style={{ borderColor: "rgba(0,0,0,0.15)" }}
               />
             )}
             <span
               className={`text-[13px] leading-snug ${
-                isDone ? "line-through text-neutral-300" : "text-neutral-700"
+                isDone ? "text-neutral-300 line-through" : "text-neutral-700"
               }`}
             >
               {label}
@@ -574,16 +560,11 @@ function GettingStarted() {
 function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
   return (
     <div
-      className="rounded-2xl border border-neutral-100 overflow-hidden"
+      className="overflow-hidden rounded-2xl border border-neutral-100"
       style={{ backgroundColor: "#ffffff" }}
     >
-      <div
-        className="px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-      >
-        <p className="text-[13px] font-semibold text-neutral-900">
-          Quick Actions
-        </p>
+      <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <p className="text-[13px] font-semibold text-neutral-900">Quick Actions</p>
       </div>
       <ul className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
         {QUICK_ACTIONS.map(({ icon: Icon, label, desc, accent, bg }) => (
@@ -591,23 +572,23 @@ function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
             <button
               type="button"
               onClick={label === "Copy Collection Link" ? onNewCollection : undefined}
-              className="w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-neutral-50 group"
+              className="group flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-neutral-50"
             >
               <div
-                className="size-8 rounded-xl flex items-center justify-center shrink-0"
+                className="flex size-8 shrink-0 items-center justify-center rounded-xl"
                 style={{ backgroundColor: bg }}
               >
                 <Icon className="size-3.5" style={{ color: accent }} />
               </div>
-              <div className="flex-1 min-w-0" >
-                <p className="text-[13px] font-medium text-neutral-800 leading-tight">
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] leading-tight font-medium text-neutral-800">
                   {label === "Copy Collection Link" ? "New Collection Link" : label}
                 </p>
-                <p className="text-[11px] text-neutral-400 leading-tight mt-0.5">
+                <p className="mt-0.5 text-[11px] leading-tight text-neutral-400">
                   {label === "Copy Collection Link" ? "Create a dedicated wall page" : desc}
                 </p>
               </div>
-              <ChevronRight className="size-3.5 text-neutral-200 group-hover:text-neutral-400 transition-colors" />
+              <ChevronRight className="size-3.5 text-neutral-200 transition-colors group-hover:text-neutral-400" />
             </button>
           </li>
         ))}
@@ -618,13 +599,7 @@ function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
-function NewCollectionModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -632,7 +607,7 @@ function NewCollectionModal({
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    
+
     try {
       const result = await createProject(formData);
       if (result.success) {
@@ -653,22 +628,22 @@ function NewCollectionModal({
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+        className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Content */}
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+        className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl duration-300"
         style={{ border: "1px solid rgba(0,0,0,0.08)" }}
       >
         <DotGrid opacity={0.04} />
 
         <div className="relative p-6 sm:p-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h3
-              className="text-xl font-bold text-neutral-900 tracking-tight"
+              className="text-xl font-bold tracking-tight text-neutral-900"
               style={{ fontFamily: "'Georgia', serif" }}
             >
               New Collection Link
@@ -676,23 +651,19 @@ function NewCollectionModal({
             <button
               type="button"
               onClick={onClose}
-              className="size-8 flex items-center justify-center rounded-full hover:bg-neutral-50 transition-colors"
+              className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
             >
               <X className="size-4 text-neutral-400" />
             </button>
           </div>
 
-          <p className="text-[13px] text-neutral-500 leading-relaxed mb-8">
-            Create a dedicated page where your customers can record or write
-            their testimonials.
+          <p className="mb-8 text-[13px] leading-relaxed text-neutral-500">
+            Create a dedicated page where your customers can record or write their testimonials.
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest px-1">
+              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                 Project / Campaign Name
               </label>
               <input
@@ -703,15 +674,15 @@ function NewCollectionModal({
                 placeholder="e.g. April 2024 Product Launch"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-neutral-100 bg-neutral-50 font-medium text-[14px] outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all placeholder:text-neutral-300"
+                className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
               />
             </div>
 
-            <div className="bg-neutral-50 rounded-2xl p-4 space-y-2 border border-neutral-100">
-              <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+            <div className="space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
+              <p className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                 Preview URL
               </p>
-              <code className="text-[12px] font-mono font-bold text-neutral-400 flex flex-col gap-1">
+              <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <Globe className="size-3" />
                   wall.me/my-workspace/
@@ -719,7 +690,7 @@ function NewCollectionModal({
                     {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
                   </span>
                 </div>
-                <div className="text-[10px] text-neutral-300 font-medium">
+                <div className="text-[10px] font-medium text-neutral-300">
                   Local: localhost:3001/my-workspace/...
                 </div>
               </code>
@@ -729,18 +700,18 @@ function NewCollectionModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2.5 rounded-full text-[14px] font-bold text-neutral-500 hover:bg-neutral-50 transition-all active:scale-[0.98]"
+                className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[14px] font-bold text-white shadow-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                 style={{ backgroundColor: "#171717" }}
               >
                 {loading ? (
-                  <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 ) : (
                   <>
                     Create Link
@@ -760,28 +731,26 @@ function NewCollectionModal({
 
 function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {/* Collect — 1 col */}
       <div
-        className="rounded-2xl p-5 sm:p-6 border border-neutral-100 hover:shadow-md transition-shadow"
+        className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6"
         style={{ backgroundColor: "#fff5f7" }}
       >
         <div
-          className="inline-flex items-center justify-center size-10 rounded-xl mb-4"
+          className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
           style={{ backgroundColor: "#e8527a20" }}
         >
           <Star className="size-5" style={{ color: "#e8527a" }} />
         </div>
-        <h3 className="font-semibold text-neutral-900 text-[15px] mb-1.5">
-          Collect reviews
-        </h3>
-        <p className="text-neutral-500 text-[13px] leading-relaxed mb-4">
+        <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">Collect reviews</h3>
+        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
           Share a single link — customers send video or text with no login required.
         </p>
         <button
           type="button"
           onClick={onNewCollection}
-          className="text-[12px] font-semibold flex items-center gap-1 hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1 text-[12px] font-semibold transition-opacity hover:opacity-70"
           style={{ color: "#e8527a" }}
         >
           Create your link <ChevronRight className="size-3" />
@@ -790,38 +759,37 @@ function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) 
 
       {/* Embed — 2 col */}
       <div
-        className="rounded-2xl p-5 sm:p-6 border border-neutral-100 hover:shadow-md transition-shadow md:col-span-2"
+        className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6 md:col-span-2"
         style={{ backgroundColor: "#f0f9ff" }}
       >
         <div
-          className="inline-flex items-center justify-center size-10 rounded-xl mb-4"
+          className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
           style={{ backgroundColor: "#0ea5e920" }}
         >
           <Code2 className="size-5" style={{ color: "#0ea5e9" }} />
         </div>
-        <h3 className="font-semibold text-neutral-900 text-[15px] mb-1.5">
-          Embed on your website
-        </h3>
-        <p className="text-neutral-500 text-[13px] leading-relaxed mb-4">
+        <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">Embed on your website</h3>
+        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
           Copy one{" "}
-          <code className="font-mono bg-white/70 px-1.5 py-0.5 rounded-md text-[11px] border border-white/80">
+          <code className="rounded-md border border-white/80 bg-white/70 px-1.5 py-0.5 font-mono text-[11px]">
             &lt;script&gt;
           </code>{" "}
-          tag and drop it into Webflow, WordPress, or any HTML page — testimonials show up instantly.
+          tag and drop it into Webflow, WordPress, or any HTML page — testimonials show up
+          instantly.
         </p>
         <div
-          className="flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl border"
+          className="flex items-center gap-3 rounded-xl border px-3 py-3 sm:px-4"
           style={{
             backgroundColor: "rgba(255,255,255,0.7)",
             borderColor: "rgba(0,0,0,0.08)",
           }}
         >
-          <code className="flex-1 text-[11px] font-mono text-neutral-500 truncate">
+          <code className="flex-1 truncate font-mono text-[11px] text-neutral-500">
             &lt;script src="https://cdn.testimonialwall.com/widget.js" /&gt;
           </code>
           <button
             type="button"
-            className="shrink-0 text-neutral-300 hover:text-neutral-600 transition-colors"
+            className="shrink-0 text-neutral-300 transition-colors hover:text-neutral-600"
             aria-label="Copy embed code"
           >
             <Copy className="size-3.5" />
@@ -832,25 +800,31 @@ function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) 
   );
 }
 
-
 function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
   if (!testimonials || testimonials.length === 0) return null;
 
   return (
-    <div className="divide-y divide-neutral-50 overflow-y-auto max-h-[400px]">
+    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
       {testimonials.map((t: any) => (
-        <div key={t.id} className="px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-neutral-50/50 transition-all group">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="size-10 rounded-xl bg-neutral-50 flex items-center justify-center shrink-0 overflow-hidden border border-neutral-100">
+        <div
+          key={t.id}
+          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
-                <img src={t.authorImage} alt={t.authorName || "User"} className="size-full object-cover" />
+                <img
+                  src={t.authorImage}
+                  alt={t.authorName || "User"}
+                  className="size-full object-cover"
+                />
               ) : (
                 <User className="size-5 text-neutral-300" />
               )}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="text-[14px] font-bold text-neutral-900 truncate tracking-tight">
+                <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
                   {t.authorName || "Anonymous"}
                 </h4>
                 <div className="flex items-center gap-0.5">
@@ -862,11 +836,11 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
                   ))}
                 </div>
               </div>
-              <p className="text-[12px] text-neutral-500 line-clamp-1 mt-0.5 italic">
-                "{t.content || (t.type === 'video' ? 'Video testimonial' : 'No content')}"
+              <p className="mt-0.5 line-clamp-1 text-[12px] text-neutral-500 italic">
+                "{t.content || (t.type === "video" ? "Video testimonial" : "No content")}"
               </p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-50 text-neutral-400 border border-neutral-100/50">
+              <div className="mt-1 flex items-center gap-2">
+                <span className="rounded-md border border-neutral-100/50 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-medium text-neutral-400">
                   {t.project?.name}
                 </span>
                 <span className="text-[10px] text-neutral-300">
@@ -875,10 +849,10 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 ml-4">
+          <div className="ml-4 flex items-center gap-2">
             <Link
               href={`/dashboard/testimonials?id=${t.id}`}
-              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
             >
               <ChevronRight className="size-4" />
             </Link>
@@ -889,42 +863,47 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
   );
 }
 
-function ProjectsList({ projects, workspaceSlug }: { projects: any[], workspaceSlug: string }) {
+function ProjectsList({ projects, workspaceSlug }: { projects: any[]; workspaceSlug: string }) {
   if (!projects || projects.length === 0) return null;
 
   return (
-    <div className="divide-y divide-neutral-50 overflow-y-auto max-h-[400px]">
+    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
       {projects.map((p: any) => (
-        <div key={p.id} className="px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-neutral-50/50 transition-all group">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="size-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0">
+        <div
+          key={p.id}
+          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
+        >
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-pink-50">
               <LinkIcon className="size-5 text-pink-500" />
             </div>
             <div className="min-w-0">
-              <h4 className="text-[14px] font-bold text-neutral-900 truncate tracking-tight">{p.name}</h4>
-              <p className="text-[11px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
-                <Globe className="size-3" />
-                /{workspaceSlug}/{p.slug}
+              <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
+                {p.name}
+              </h4>
+              <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
+                <Globe className="size-3" />/{workspaceSlug}/{p.slug}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
-                const url = window.location.origin === "http://localhost:3001" 
-                  ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
-                  : `https://wall.me/${workspaceSlug}/${p.slug}`;
+                const url =
+                  window.location.origin === "http://localhost:3001"
+                    ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
+                    : `https://wall.me/${workspaceSlug}/${p.slug}`;
                 navigator.clipboard.writeText(url);
                 toast.success("Link copied!");
               }}
-              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
               title="Copy link"
             >
               <Copy className="size-4" />
             </button>
             <Link
               href={`/dashboard/testimonials?project=${p.id}`}
-              className="p-2 rounded-full hover:bg-white hover:shadow-sm text-neutral-300 hover:text-neutral-600 transition-all"
+              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
             >
               <ChevronRight className="size-4" />
             </Link>
@@ -937,7 +916,21 @@ function ProjectsList({ projects, workspaceSlug }: { projects: any[], workspaceS
 
 function LinkIcon({ className }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
   );
 }
 
@@ -973,40 +966,42 @@ export default function DashboardShell({
   const activeData = liveData || initialData;
 
   // Derived stats from initialData
-  const stats = activeData ? [
-    {
-      label: "Testimonials",
-      value: activeData.stats.testimonials.toString(),
-      sub: activeData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
-      icon: MessageSquareQuote,
-      accent: "#e8527a",
-      bg: "#fff5f7",
-    },
-    {
-      label: "Pending Approval",
-      value: activeData.stats.pending.toString(),
-      sub: activeData.stats.pending > 0 ? "New submissions!" : "All clear",
-      icon: Clock,
-      accent: "#7c3aed",
-      bg: "#f5f3ff",
-    },
-    {
-      label: "Widget Views",
-      value: activeData.stats.views.toString(),
-      sub: "Embed to start tracking",
-      icon: Globe,
-      accent: "#0ea5e9",
-      bg: "#f0f9ff",
-    },
-    {
-      label: "Conversion Rate",
-      value: activeData.stats.conversion,
-      sub: "Needs more data",
-      icon: BarChart2,
-      accent: "#16a34a",
-      bg: "#f0fdf4",
-    },
-  ] : [];
+  const stats = activeData
+    ? [
+        {
+          label: "Testimonials",
+          value: activeData.stats.testimonials.toString(),
+          sub: activeData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
+          icon: MessageSquareQuote,
+          accent: "#e8527a",
+          bg: "#fff5f7",
+        },
+        {
+          label: "Pending Approval",
+          value: activeData.stats.pending.toString(),
+          sub: activeData.stats.pending > 0 ? "New submissions!" : "All clear",
+          icon: Clock,
+          accent: "#7c3aed",
+          bg: "#f5f3ff",
+        },
+        {
+          label: "Widget Views",
+          value: activeData.stats.views.toString(),
+          sub: "Embed to start tracking",
+          icon: Globe,
+          accent: "#0ea5e9",
+          bg: "#f0f9ff",
+        },
+        {
+          label: "Conversion Rate",
+          value: activeData.stats.conversion,
+          sub: "Needs more data",
+          icon: BarChart2,
+          accent: "#16a34a",
+          bg: "#f0fdf4",
+        },
+      ]
+    : [];
 
   function handleSignOut() {
     authClient.signOut({
@@ -1017,7 +1012,7 @@ export default function DashboardShell({
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#ffffff" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
       {/* Desktop sidebar */}
       <DesktopSidebar
         userName={userName}
@@ -1037,13 +1032,10 @@ export default function DashboardShell({
       />
 
       {/* Modal */}
-      <NewCollectionModal
-        open={newCollectionOpen}
-        onClose={() => setNewCollectionOpen(false)}
-      />
+      <NewCollectionModal open={newCollectionOpen} onClose={() => setNewCollectionOpen(false)} />
 
       {/* Main content — offset only on lg+ */}
-      <div className="flex-1 flex flex-col min-h-screen relative lg:ml-60">
+      <div className="relative flex min-h-screen flex-1 flex-col lg:ml-60">
         <DotGrid opacity={0.08} />
 
         {/* Soft central glow */}
@@ -1053,7 +1045,7 @@ export default function DashboardShell({
           style={{ zIndex: 0 }}
         >
           <div
-            className="w-[600px] lg:w-[900px] h-[500px] rounded-full blur-3xl"
+            className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
             style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
           />
         </div>
@@ -1070,42 +1062,42 @@ export default function DashboardShell({
         </div>
 
         {/* Main content */}
-        <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {children || (
-            <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6">
+            <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
               {/* Stats grid — 2 cols on mobile, 4 on xl */}
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                 {stats.map((stat) => (
                   <StatCard key={stat.label} {...stat} />
                 ))}
               </div>
 
               {/* Main split */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
                 {/* Testimonials panel */}
                 <div
-                  className="xl:col-span-2 rounded-2xl border border-neutral-100 overflow-hidden"
+                  className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
                   style={{ backgroundColor: "#ffffff" }}
                 >
                   <div
-                    className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3"
+                    className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
                     style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
                   >
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-neutral-900">
                         Recent Testimonials
                       </p>
-                      <p className="text-[11px] text-neutral-400 mt-0.5 hidden sm:block">
+                      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
                         Latest submissions from your customers
                       </p>
                     </div>
                     {/* Filter chips */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
                       {["All", "Video", "Text"].map((f, i) => (
                         <button
                           key={f}
                           type="button"
-                          className="text-[11px] font-medium rounded-full px-2.5 sm:px-3 py-1 transition-all border"
+                          className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
                           style={
                             i === 0
                               ? {
@@ -1126,16 +1118,14 @@ export default function DashboardShell({
                     </div>
                   </div>
                   {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
-                    <RecentTestimonialsList 
-                      testimonials={activeData.recentTestimonials} 
-                    />
+                    <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
                   ) : (
                     <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
                   )}
                 </div>
 
                 {/* Right column */}
-                <div className="xl:col-span-1 space-y-4 sm:space-y-5">
+                <div className="space-y-4 sm:space-y-5 xl:col-span-1">
                   <GettingStarted />
                   <QuickActions onNewCollection={() => setNewCollectionOpen(true)} />
                 </div>

@@ -1,6 +1,7 @@
 import { protectedProcedure, router } from "../index";
 import { workspace, project, testimonial } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray } from "drizzle-orm";
+import { z } from "zod";
 
 /**
  * Helper to ensure the user has a workspace.
@@ -12,7 +13,7 @@ async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
 
   if (existing) return existing;
 
-  const generateSlug = (name: string) => 
+  const generateSlug = (name: string) =>
     name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
 
   const newWorkspace = {
@@ -46,26 +47,22 @@ export const dashboardRouter = router({
       .select({ value: count() })
       .from(testimonial)
       .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(
-        and(
-          eq(project.workspaceId, ws.id),
-          eq(testimonial.status, "pending")
-        )
-      );
+      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending")));
 
-    const recentTestimonials = projects.length > 0
-      ? await db.query.testimonial.findMany({
-          where: inArray(
-            testimonial.projectId,
-            projects.map((p: any) => p.id)
-          ),
-          orderBy: desc(testimonial.createdAt),
-          limit: 5,
-          with: {
-            project: true,
-          },
-        })
-      : [];
+    const recentTestimonials =
+      projects.length > 0
+        ? await db.query.testimonial.findMany({
+            where: inArray(
+              testimonial.projectId,
+              projects.map((p: any) => p.id),
+            ),
+            orderBy: desc(testimonial.createdAt),
+            limit: 5,
+            with: {
+              project: true,
+            },
+          })
+        : [];
 
     return {
       workspace: ws,
@@ -79,4 +76,33 @@ export const dashboardRouter = router({
       },
     };
   }),
+
+  getProjectTestimonials: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { projectId } = input;
+
+      // Verify ownership via the project's workspace
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, projectId),
+        with: {
+          workspace: true,
+        },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      const testimonials = await db.query.testimonial.findMany({
+        where: eq(testimonial.projectId, projectId),
+        orderBy: desc(testimonial.createdAt),
+      });
+
+      return {
+        project: p,
+        testimonials,
+      };
+    }),
 });

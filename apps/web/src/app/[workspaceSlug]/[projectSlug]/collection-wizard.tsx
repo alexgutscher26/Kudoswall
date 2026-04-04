@@ -154,11 +154,9 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 lg:px-0">
-      <div 
-        className="relative flex min-h-[550px] flex-col overflow-hidden rounded-[48px] border border-neutral-100 bg-white text-card-foreground shadow-2xl shadow-neutral-200/50"
-      >
+      <div className="text-card-foreground relative flex min-h-[550px] flex-col overflow-hidden rounded-[48px] border border-neutral-100 bg-white shadow-2xl shadow-neutral-200/50">
         {/* Progress Bar */}
-        <div className="absolute top-0 right-0 left-0 h-1.5 bg-neutral-50 overflow-hidden">
+        <div className="absolute top-0 right-0 left-0 h-1.5 overflow-hidden bg-neutral-50">
           <motion.div
             animate={{
               width: `${(steps[step] / 5) * 100}%`,
@@ -180,17 +178,17 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
             >
               {step === "rating" && (
                 <div className="flex flex-1 flex-col items-center justify-center space-y-10 py-4 text-center">
-                  <div 
-                    className="flex size-20 items-center justify-center rounded-3xl shadow-lg animate-in zoom-in duration-500"
+                  <div
+                    className="animate-in zoom-in flex size-20 items-center justify-center rounded-3xl shadow-lg duration-500"
                     style={{ backgroundColor: `${accentColor}10` }}
                   >
                     <Sparkles className="size-10" style={{ color: accentColor }} />
                   </div>
                   <div className="space-y-4">
-                    <h2 className="font-black text-3xl sm:text-4xl text-neutral-900 tracking-tight leading-tight">
+                    <h2 className="text-3xl leading-tight font-black tracking-tight text-neutral-900 sm:text-4xl">
                       How was your experience?
                     </h2>
-                    <p className="mx-auto max-w-xs text-neutral-500 font-medium text-[15px]">
+                    <p className="mx-auto max-w-xs text-[15px] font-medium text-neutral-500">
                       We value your feedback and want to know how we did.
                     </p>
                   </div>
@@ -208,14 +206,17 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                         type="button"
                       >
                         <Star
-                          className={`size-12 sm:size-14 transition-all duration-300 ${
+                          className={`size-12 transition-all duration-300 sm:size-14 ${
                             s <= (hoveredRating || rating)
                               ? "fill-current"
                               : "fill-neutral-100 text-neutral-100"
                           }`}
-                          style={{ 
+                          style={{
                             color: s <= (hoveredRating || rating) ? accentColor : undefined,
-                            filter: s <= (hoveredRating || rating) ? `drop-shadow(0 0 12px ${accentColor}40)` : undefined
+                            filter:
+                              s <= (hoveredRating || rating)
+                                ? `drop-shadow(0 0 12px ${accentColor}40)`
+                                : undefined,
                           }}
                         />
                       </button>
@@ -226,38 +227,40 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
               {step === "text" && (
                 <div className="flex flex-1 flex-col space-y-6">
-                  <div className="flex items-center gap-4 mt-2">
+                  <div className="mt-2 flex items-center gap-4">
                     <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-900 shadow-xl">
                       <Quote className="size-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-neutral-900 text-2xl tracking-tight leading-none mb-1">
+                      <h2 className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900">
                         Share your story
                       </h2>
-                      <p className="font-medium text-[12px] text-neutral-400 uppercase tracking-widest">
+                      <p className="text-[12px] font-medium tracking-widest text-neutral-400 uppercase">
                         What result did you achieve?
                       </p>
                     </div>
                   </div>
-                  
-                  <div className="relative flex-1 flex flex-col group">
+
+                  <div className="group relative flex flex-1 flex-col">
                     <textarea
                       autoFocus
-                      className="w-full flex-1 resize-none rounded-[32px] border border-neutral-100 bg-neutral-50/50 p-8 pt-10 font-medium text-[17px] leading-relaxed text-neutral-900 outline-none transition-all placeholder:text-neutral-300 focus:border-neutral-200 focus:bg-white focus:ring-4"
-                      style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                      className="w-full flex-1 resize-none rounded-[32px] border border-neutral-100 bg-neutral-50/50 p-8 pt-10 text-[17px] leading-relaxed font-medium text-neutral-900 transition-all outline-none placeholder:text-neutral-300 focus:border-neutral-200 focus:bg-white focus:ring-4"
+                      style={{ "--tw-ring-color": `${accentColor}10` } as any}
                       onChange={(e) => setContent(e.target.value)}
                       placeholder="I chose TestimonialWall because..."
                       value={content}
                     />
-                    
+
                     {/* Character Count Badge */}
-                    <div className="absolute bottom-6 right-8 flex items-center gap-3">
-                       <span className={`text-[11px] font-black tracking-widest uppercase transition-colors ${isContentValid ? "text-emerald-500" : "text-neutral-400"}`}>
+                    <div className="absolute right-8 bottom-6 flex items-center gap-3">
+                      <span
+                        className={`text-[11px] font-black tracking-widest uppercase transition-colors ${isContentValid ? "text-emerald-500" : "text-neutral-400"}`}
+                      >
                         {charCount} / 50 MIN
                       </span>
                       <div className="h-6 w-[1px] bg-neutral-100" />
                       <button
-                        className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-[14px] text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-20 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 rounded-xl px-6 py-3 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-20"
                         style={{ backgroundColor: accentColor }}
                         disabled={!isContentValid}
                         onClick={nextStep}
@@ -272,15 +275,11 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
               {step === "photo" && (
                 <div className="flex flex-1 flex-col items-center justify-center space-y-10 py-4 text-center">
-                  <div className="group relative flex size-32 cursor-pointer items-center justify-center overflow-hidden rounded-[40px] border-2 border-neutral-200 border-dashed bg-neutral-50/50 transition-all hover:border-pink-300 hover:bg-white shadow-inner">
+                  <div className="group relative flex size-32 cursor-pointer items-center justify-center overflow-hidden rounded-[40px] border-2 border-dashed border-neutral-200 bg-neutral-50/50 shadow-inner transition-all hover:border-pink-300 hover:bg-white">
                     {photo ? (
-                      <img
-                        alt="Preview"
-                        className="size-full object-cover"
-                        src={photo}
-                      />
+                      <img alt="Preview" className="size-full object-cover" src={photo} />
                     ) : (
-                      <Camera className="size-10 text-neutral-300 group-hover:text-pink-400 transition-colors" />
+                      <Camera className="size-10 text-neutral-300 transition-colors group-hover:text-pink-400" />
                     )}
                     <input
                       accept="image/*"
@@ -290,23 +289,23 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                     />
                   </div>
                   <div className="space-y-4">
-                    <h2 className="font-bold text-3xl text-neutral-900 tracking-tight">
+                    <h2 className="text-3xl font-bold tracking-tight text-neutral-900">
                       Add a face to your words
                     </h2>
-                    <p className="mx-auto max-w-xs text-neutral-500 font-medium">
+                    <p className="mx-auto max-w-xs font-medium text-neutral-500">
                       This helps build trust and makes your testimonial look amazing.
                     </p>
                   </div>
                   <div className="flex w-full gap-4 pt-4">
                     <button
-                      className="flex-1 rounded-2xl border border-neutral-100 py-4 font-bold text-[15px] text-neutral-400 transition-all hover:bg-neutral-50 hover:text-neutral-600"
+                      className="flex-1 rounded-2xl border border-neutral-100 py-4 text-[15px] font-bold text-neutral-400 transition-all hover:bg-neutral-50 hover:text-neutral-600"
                       onClick={nextStep}
                     >
                       Maybe later
                     </button>
                     <button
-                      className="flex-1 items-center justify-center rounded-2xl py-4 font-bold text-[15px] text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-20 disabled:cursor-not-allowed"
-                      style={{ backgroundColor: photo ? accentColor : '#171717' }}
+                      className="flex-1 items-center justify-center rounded-2xl py-4 text-[15px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-20"
+                      style={{ backgroundColor: photo ? accentColor : "#171717" }}
                       onClick={() => nextStep()}
                     >
                       {photo ? "Looking good!" : "Click to upload"}
@@ -317,17 +316,17 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
               {step === "video" && (
                 <div className="flex flex-1 flex-col space-y-8 py-4">
-                  <div className="text-center space-y-2">
-                    <h2 className="font-bold text-2xl text-neutral-900 tracking-tight">
+                  <div className="space-y-2 text-center">
+                    <h2 className="text-2xl font-bold tracking-tight text-neutral-900">
                       One last thing...
                     </h2>
-                    <p className="text-neutral-500 font-medium text-sm">
+                    <p className="text-sm font-medium text-neutral-500">
                       Video testimonials convert 4x better. It only takes 30 seconds!
                     </p>
                   </div>
-                  
-                  <VideoRecorder 
-                    isPro={isPro} 
+
+                  <VideoRecorder
+                    isPro={isPro}
                     accentColor={accentColor}
                     onConfirm={(blob) => {
                       setVideoBlob(blob);
@@ -336,9 +335,9 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   />
 
                   {!videoBlob && (
-                    <button 
+                    <button
                       onClick={nextStep}
-                      className="text-[12px] font-bold text-neutral-400 hover:text-neutral-600 transition-colors text-center underline underline-offset-4"
+                      className="text-center text-[12px] font-bold text-neutral-400 underline underline-offset-4 transition-colors hover:text-neutral-600"
                     >
                       Skip video recording
                     </button>
@@ -348,15 +347,15 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
               {step === "details" && (
                 <div className="flex flex-1 flex-col space-y-8">
-                  <div className="flex items-center gap-4 mt-2">
+                  <div className="mt-2 flex items-center gap-4">
                     <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-900 shadow-xl">
                       <Layout className="size-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-neutral-900 text-2xl tracking-tight leading-none mb-1">
+                      <h2 className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900">
                         Nearly there!
                       </h2>
-                      <p className="font-medium text-[12px] text-neutral-400 uppercase tracking-widest">
+                      <p className="text-[12px] font-medium tracking-widest text-neutral-400 uppercase">
                         Who are we reviewing today?
                       </p>
                     </div>
@@ -365,12 +364,12 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <label className="pl-1 font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+                        <label className="pl-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                           Full Name *
                         </label>
                         <input
-                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 outline-none transition-all focus:border-neutral-200 focus:bg-white focus:ring-4"
-                          style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-4"
+                          style={{ "--tw-ring-color": `${accentColor}10` } as any}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Jane Doe"
                           required
@@ -378,12 +377,12 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="pl-1 font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+                        <label className="pl-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                           Email (Internal only)
                         </label>
                         <input
-                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 outline-none transition-all focus:border-neutral-200 focus:bg-white focus:ring-4"
-                          style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-4"
+                          style={{ "--tw-ring-color": `${accentColor}10` } as any}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="jane@example.com"
                           type="email"
@@ -392,41 +391,41 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                       </div>
                     </div>
 
-                    <div className="space-y-5 border-neutral-50 border-t pt-6">
+                    <div className="space-y-5 border-t border-neutral-50 pt-6">
                       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                         <div className="space-y-2">
-                          <label className="flex items-center gap-2 pl-1 font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2 pl-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                             <Building2 className="size-3" /> Company
                           </label>
                           <input
-                            className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 outline-none transition-all focus:border-neutral-200 focus:bg-white focus:ring-4"
-                            style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                            className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-4"
+                            style={{ "--tw-ring-color": `${accentColor}10` } as any}
                             onChange={(e) => setCompany(e.target.value)}
                             placeholder="Acme Inc."
                             value={company}
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="pl-1 font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+                          <label className="pl-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                             Job Title / Role
                           </label>
                           <input
-                            className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 outline-none transition-all focus:border-neutral-200 focus:bg-white focus:ring-4"
-                            style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                            className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-4"
+                            style={{ "--tw-ring-color": `${accentColor}10` } as any}
                             onChange={(e) => setTagline(e.target.value)}
                             placeholder="CEO"
                             value={tagline}
                           />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <label className="flex items-center gap-2 pl-1 font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+                        <label className="flex items-center gap-2 pl-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                           <Linkedin className="size-3" /> LinkedIn Profile
                         </label>
                         <input
-                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 outline-none transition-all focus:border-neutral-200 focus:bg-white focus:ring-4"
-                          style={{ '--tw-ring-color': `${accentColor}10` } as any}
+                          className="w-full rounded-2xl border border-neutral-100 bg-neutral-50/50 px-5 py-4 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-4"
+                          style={{ "--tw-ring-color": `${accentColor}10` } as any}
                           onChange={(e) => setLinkedin(e.target.value)}
                           placeholder="linkedin.com/in/jane"
                           value={linkedin}
@@ -436,8 +435,8 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   </div>
 
                   <button
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-[24px] py-5 font-bold text-[16px] text-white shadow-2xl transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-30"
-                    style={{ backgroundColor: name ? accentColor : '#171717' }}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-[24px] py-5 text-[16px] font-bold text-white shadow-2xl transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-30"
+                    style={{ backgroundColor: name ? accentColor : "#171717" }}
                     disabled={loading || !name}
                     onClick={handleSubmit}
                   >
@@ -455,19 +454,20 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
               {step === "success" && (
                 <div className="flex flex-1 flex-col items-center justify-center space-y-10 px-4 py-8 text-center">
-                  <div className="flex size-24 items-center justify-center rounded-[40px] bg-emerald-50 shadow-emerald-500/10 shadow-lg">
+                  <div className="flex size-24 items-center justify-center rounded-[40px] bg-emerald-50 shadow-lg shadow-emerald-500/10">
                     <CheckCircle2 className="size-12 text-emerald-500" />
                   </div>
                   <div className="space-y-6">
-                    <h2 className="font-black text-4xl text-neutral-900 tracking-tight leading-tight">
+                    <h2 className="text-4xl leading-tight font-black tracking-tight text-neutral-900">
                       You're awesome!
                     </h2>
-                    <p className="text-neutral-500 font-medium text-lg leading-relaxed max-w-sm mx-auto">
-                      {project.thankYouMessage || `Your feedback has been sent to ${project.name}. It helps us more than you know.`}
+                    <p className="mx-auto max-w-sm text-lg leading-relaxed font-medium text-neutral-500">
+                      {project.thankYouMessage ||
+                        `Your feedback has been sent to ${project.name}. It helps us more than you know.`}
                     </p>
                   </div>
                   <button
-                    className="rounded-2xl border border-neutral-100 bg-neutral-50 px-10 py-4 font-bold text-[14px] text-neutral-600 shadow-sm transition-all hover:bg-white hover:text-neutral-900"
+                    className="rounded-2xl border border-neutral-100 bg-neutral-50 px-10 py-4 text-[14px] font-bold text-neutral-600 shadow-sm transition-all hover:bg-white hover:text-neutral-900"
                     onClick={() => window.location.reload()}
                   >
                     Post another one
@@ -481,7 +481,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
         {/* Back Button */}
         {step !== "rating" && step !== "success" && (
           <button
-            className="absolute top-8 left-8 p-2 text-neutral-300 transition-colors hover:text-neutral-900 z-20"
+            className="absolute top-8 left-8 z-20 p-2 text-neutral-300 transition-colors hover:text-neutral-900"
             onClick={prevStep}
           >
             <ChevronLeft className="size-8" />
@@ -493,14 +493,14 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
       {!project.workspace.isPro && (
         <div className="mt-12 flex flex-col items-center justify-center gap-3">
           <div className="flex items-center gap-2 text-neutral-300">
-            <div className="flex size-6 items-center justify-center rounded-lg bg-neutral-100 font-bold text-[11px]">
+            <div className="flex size-6 items-center justify-center rounded-lg bg-neutral-100 text-[11px] font-bold">
               T
             </div>
-            <p className="font-bold text-[12px] uppercase tracking-[0.25em]">
+            <p className="text-[12px] font-bold tracking-[0.25em] uppercase">
               Powered by TestimonialWall
             </p>
           </div>
-          <p className="text-[10px] text-neutral-200 font-black uppercase tracking-widest">
+          <p className="text-[10px] font-black tracking-widest text-neutral-200 uppercase">
             The simplest way to collect social proof
           </p>
         </div>

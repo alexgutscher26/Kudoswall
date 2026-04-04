@@ -1,102 +1,97 @@
-# my-better-t-app
+# TestimonialWall
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Self, TRPC, and more.
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-2.0-red?logo=turborepo)](https://turbo.build/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.1-fb7da4?logo=bun)](https://bun.sh/)
 
-## Features
+TestimonialWall is a modern, high-performance monorepo application designed for managing and embedding customer testimonials. Built on the Better-T-Stack, it leverages a fully type-safe architecture from the database to the edge.
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **tRPC** - End-to-end type-safe APIs
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Turborepo** - Optimized monorepo build system
+## Core Technology Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Monorepo Management**: Turborepo
+- **API Layer**: tRPC (End-to-end type safety)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Better-Auth
+- **Styling**: Tailwind CSS
+- **Component Library**: Shared shadcn/ui primitives in `packages/ui`
+- **Runtime**: Bun
+
+## Project Architecture
+
+The codebase is organized into a modular monorepo structure to ensure scalability and separation of concerns:
+
+- `apps/web`: The primary Next.js application including the user dashboard and marketing pages.
+- `packages/ui`: A centralized design system and shared component library.
+- `packages/api`: The core business logic and tRPC router definitions.
+- `packages/auth`: Centralized authentication configuration.
+- `packages/db`: Database schema definitions, migrations, and client configuration.
+- `packages/env`: Type-safe environment variable management.
 
 ## Getting Started
 
-First, install the dependencies:
+### Prerequisites
+
+Ensure you have [Bun](https://bun.sh/) installed on your system.
+
+### Installation
+
+Clone the repository and install dependencies:
 
 ```bash
 bun install
 ```
 
-## Database Setup
+### Database Configuration
 
-This project uses PostgreSQL with Drizzle ORM.
-
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/web/.env` file with your PostgreSQL connection details.
-
-3. Apply the schema to your database:
+1. Provision a PostgreSQL instance.
+2. Configure the connection string in `apps/web/.env`.
+3. Synchronize the database schema:
 
 ```bash
 bun run db:push
 ```
 
-Then, run the development server:
+### Development
+
+Start the development server for all applications:
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the fullstack application.
+The application will be accessible at `http://localhost:3001`.
 
-## UI Customization
+## Development Workflows
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+### UI Development
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
+Shared components are managed within `packages/ui`. To add new shadcn/ui primitives to the shared package:
 
 ```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
+npx shadcn@latest add [component-name] -c packages/ui
 ```
 
-Import shared components like this:
+### Available Scripts
 
-```tsx
-import { Button } from "@my-better-t-app/ui/components/button";
-```
+- `bun run dev`: Launches all applications in development mode.
+- `bun run build`: Generates production builds for all packages.
+- `bun run check-types`: Executes TypeScript validation across the workspace.
+- `bun run format`: Formats the codebase using Prettier.
+- `bun run db:push`: Synchronizes schema changes with the database.
+- `bun run db:studio`: Launches the Drizzle Studio database explorer.
 
-### Add app-specific blocks
+## Deployment
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
+The application is configured for deployment on Cloudflare via Alchemy:
 
-## Deployment (Cloudflare via Alchemy)
+- **Deployment**: `cd apps/web && bun run deploy`
+- **Cleanup**: `cd apps/web && bun run destroy`
 
-- Dev: cd apps/web && bun run alchemy dev
-- Deploy: cd apps/web && bun run deploy
-- Destroy: cd apps/web && bun run destroy
+For detailed deployment instructions, refer to the [Better-T-Stack documentation](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
 
-For more details, see the guide on [Deploying to Cloudflare with Alchemy](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
+## License
 
-## Project Structure
-
-```
-my-better-t-app/
-├── apps/
-│   └── web/         # Fullstack application (Next.js)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
-
-## Available Scripts
-
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:generate`: Generate database client/types
-- `bun run db:migrate`: Run database migrations
-- `bun run db:studio`: Open database studio UI
+This project is licensed under the MIT License.

@@ -44,17 +44,17 @@ export default async function TestimonialsPage({
         pageSubtitle="Manage your testimonials and approve them for your wall."
         initialData={dashData}
       >
-        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-          <div className="size-16 bg-pink-50 rounded-2xl flex items-center justify-center mb-6">
+        <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
+          <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-pink-50">
             <MessageSquareQuote className="size-8 text-pink-500" />
           </div>
-          <h2 className="text-xl font-bold text-neutral-900 mb-2">No projects yet</h2>
-          <p className="text-neutral-500 max-w-sm mb-8">
+          <h2 className="mb-2 text-xl font-bold text-neutral-900">No projects yet</h2>
+          <p className="mb-8 max-w-sm text-neutral-500">
             Create your first project to start collecting and managing testimonials.
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#171717] text-white font-bold text-[14px] shadow-lg shadow-black/5 hover:opacity-90 active:scale-[0.98] transition-all"
+            className="inline-flex items-center gap-2 rounded-full bg-[#171717] px-6 py-3 text-[14px] font-bold text-white shadow-lg shadow-black/5 transition-all hover:opacity-90 active:scale-[0.98]"
           >
             <Plus className="size-4" />
             Create Project
@@ -78,10 +78,11 @@ export default async function TestimonialsPage({
       pageSubtitle="Manage your testimonials and approve them for your wall."
       initialData={dashData}
     >
-      <TestimonialInbox 
-        initialTestimonials={data.testimonials as any} 
-        project={data.project} 
-        projects={dashData.projects.map(p => ({ id: p.id, name: p.name }))}
+      <TestimonialInbox
+        key={activeProjectId}
+        initialTestimonials={data.testimonials as any}
+        project={data.project}
+        projects={dashData.projects.map((p) => ({ id: p.id, name: p.name }))}
       />
     </DashboardShell>
   );

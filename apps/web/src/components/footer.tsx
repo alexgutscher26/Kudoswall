@@ -1,6 +1,3 @@
-
-
-
 const PRODUCT_LINKS = [
   { label: "Features", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
@@ -26,15 +23,14 @@ export default function Footer() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "20px 20px",
         }}
       />
-      <div className="relative max-w-5xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+      <div className="relative mx-auto max-w-5xl">
+        <div className="mb-12 grid grid-cols-2 gap-10 md:grid-cols-4">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
+          <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
             <a
               href="/"
               className="text-xl font-bold text-neutral-900"
@@ -42,14 +38,14 @@ export default function Footer() {
             >
               TestimonialWall
             </a>
-            <p className="text-sm text-neutral-500 leading-relaxed max-w-xs">
+            <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
               The easiest way for small businesses to collect and display customer testimonials.
             </p>
           </div>
 
           {/* Product */}
           <div>
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-4">
+            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
               Product
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -57,7 +53,7 @@ export default function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                    className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                   >
                     {label}
                   </a>
@@ -68,7 +64,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-4">
+            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
               Company
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -76,7 +72,7 @@ export default function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                    className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                   >
                     {label}
                   </a>
@@ -87,14 +83,14 @@ export default function Footer() {
 
           {/* Legal — uses real routes so <Link> is correct here */}
           <div>
-            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-4">
+            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
               Legal
             </p>
             <ul className="flex flex-col gap-2.5">
               <li>
                 <a
                   href="/privacy"
-                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                 >
                   Privacy policy
                 </a>
@@ -102,7 +98,7 @@ export default function Footer() {
               <li>
                 <a
                   href="/terms"
-                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                 >
                   Terms of service
                 </a>
@@ -110,7 +106,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                 >
                   Cookie policy
                 </a>
@@ -120,7 +116,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-neutral-100">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-neutral-100 pt-8 sm:flex-row">
           <p className="text-xs text-neutral-400">
             © {new Date().getFullYear()} TestimonialWall. All rights reserved.
           </p>

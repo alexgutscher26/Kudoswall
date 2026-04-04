@@ -7,7 +7,7 @@ import { eq, and, desc, count, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-const generateSlug = (name: string) => 
+const generateSlug = (name: string) =>
   name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
 
 /**
@@ -86,26 +86,22 @@ export async function getDashboardData() {
     .select({ value: count() })
     .from(testimonial)
     .innerJoin(project, eq(testimonial.projectId, project.id))
-    .where(
-      and(
-        eq(project.workspaceId, ws.id),
-        eq(testimonial.status, "pending")
-      )
-    );
+    .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending")));
 
-  const recentTestimonials = projects.length > 0
-    ? await db.query.testimonial.findMany({
-        where: inArray(
-          testimonial.projectId,
-          projects.map((p) => p.id)
-        ),
-        orderBy: desc(testimonial.createdAt),
-        limit: 5,
-        with: {
-          project: true,
-        },
-      })
-    : [];
+  const recentTestimonials =
+    projects.length > 0
+      ? await db.query.testimonial.findMany({
+          where: inArray(
+            testimonial.projectId,
+            projects.map((p) => p.id),
+          ),
+          orderBy: desc(testimonial.createdAt),
+          limit: 5,
+          with: {
+            project: true,
+          },
+        })
+      : [];
 
   return {
     workspace: ws,
@@ -154,7 +150,7 @@ export async function getProjectTestimonials(projectId: string) {
 
 export async function updateTestimonialStatus(
   id: string,
-  status: "approved" | "archived" | "pending"
+  status: "approved" | "archived" | "pending",
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -180,10 +176,7 @@ export async function updateTestimonialStatus(
     throw new Error("Forbidden");
   }
 
-  await db
-    .update(testimonial)
-    .set({ status })
-    .where(eq(testimonial.id, id));
+  await db.update(testimonial).set({ status }).where(eq(testimonial.id, id));
 
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/testimonials/${t.projectId}`);

@@ -43,44 +43,40 @@ function StarRow({ count }: { count: number }) {
 
 export default function WidgetPreviewSection() {
   return (
-    <section
-      className="py-24 px-4 relative overflow-hidden"
-      style={{ backgroundColor: "#ffffff" }}
-    >
+    <section className="relative overflow-hidden px-4 py-24" style={{ backgroundColor: "#ffffff" }}>
       {/* Dot grid */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "20px 20px",
         }}
       />
 
-      <div className="relative max-w-5xl mx-auto">
+      <div className="relative mx-auto max-w-5xl">
         {/* Header */}
-        <div className="text-center mb-14">
+        <div className="mb-14 text-center">
           <span
-            className="inline-block text-xs font-semibold tracking-widest uppercase mb-3 px-3 py-1 rounded-full"
+            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
             style={{ color: "#0ea5e9", backgroundColor: "#f0f9ff" }}
           >
             Live preview
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
-            A widget your visitors will{" "}
-            <span style={{ color: "#e8527a" }}>actually trust</span>
+          <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
+            A widget your visitors will <span style={{ color: "#e8527a" }}>actually trust</span>
           </h2>
-          <p className="mt-4 text-neutral-500 text-lg max-w-xl mx-auto">
-            Here's what the embeddable widget looks like on your site — fully customizable to match your brand.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
+            Here's what the embeddable widget looks like on your site — fully customizable to match
+            your brand.
           </p>
         </div>
 
         {/* Browser chrome mock */}
-        <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-neutral-200">
+        <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-neutral-200 shadow-2xl">
           {/* Browser bar */}
           <div
-            className="flex items-center gap-2 px-4 py-3 border-b border-neutral-200"
+            className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3"
             style={{ backgroundColor: "#f0efeb" }}
           >
             <div className="flex gap-1.5">
@@ -89,7 +85,7 @@ export default function WidgetPreviewSection() {
               <span className="size-3 rounded-full bg-green-400" />
             </div>
             <div
-              className="flex-1 mx-4 rounded-full px-3 py-1 text-xs text-neutral-400"
+              className="mx-4 flex-1 rounded-full px-3 py-1 text-xs text-neutral-400"
               style={{ backgroundColor: "#e8e7e3" }}
             >
               yourwebsite.com
@@ -100,10 +96,10 @@ export default function WidgetPreviewSection() {
           {/* Widget content */}
           <div className="p-4 sm:p-6" style={{ backgroundColor: "#ffffff" }}>
             {/* Widget header */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="font-bold text-neutral-900 text-lg">What our customers say</h3>
-                <div className="flex items-center gap-2 mt-1">
+                <h3 className="text-lg font-bold text-neutral-900">What our customers say</h3>
+                <div className="mt-1 flex items-center gap-2">
                   <div className="flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       // biome-ignore lint/suspicious/noArrayIndexKey: static stars
@@ -114,7 +110,7 @@ export default function WidgetPreviewSection() {
                 </div>
               </div>
               <span
-                className="hidden sm:inline text-[10px] font-semibold px-2 py-1 rounded-full shrink-0"
+                className="hidden shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold sm:inline"
                 style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
               >
                 Powered by TestimonialWall
@@ -122,48 +118,48 @@ export default function WidgetPreviewSection() {
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {WIDGET_TESTIMONIALS.map(({ name, role, avatar, avatarColor, rating, text, type }) => (
-                <div
-                  key={name}
-                  className="rounded-xl p-4 border border-neutral-100 relative"
-                  style={{ backgroundColor: "#fafafa" }}
-                >
-                  {type === "video" && (
-                    <div
-                      className="h-24 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
-                      style={{ backgroundColor: "#e8527a22" }}
-                    >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {WIDGET_TESTIMONIALS.map(
+                ({ name, role, avatar, avatarColor, rating, text, type }) => (
+                  <div
+                    key={name}
+                    className="relative rounded-xl border border-neutral-100 p-4"
+                    style={{ backgroundColor: "#fafafa" }}
+                  >
+                    {type === "video" && (
                       <div
-                        className="size-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: "#e8527a" }}
+                        className="relative mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg"
+                        style={{ backgroundColor: "#e8527a22" }}
                       >
-                        <Play className="size-3.5 text-white fill-white" />
+                        <div
+                          className="flex size-8 items-center justify-center rounded-full"
+                          style={{ backgroundColor: "#e8527a" }}
+                        >
+                          <Play className="size-3.5 fill-white text-white" />
+                        </div>
+                        <span className="absolute right-2 bottom-2 rounded bg-white px-1 text-[10px] text-neutral-500">
+                          0:32
+                        </span>
                       </div>
-                      <span className="absolute bottom-2 right-2 text-[10px] text-neutral-500 bg-white rounded px-1">
-                        0:32
-                      </span>
-                    </div>
-                  )}
-                  {type === "text" && (
-                    <Quote className="size-5 text-neutral-200 mb-2" />
-                  )}
-                  <StarRow count={rating} />
-                  <p className="text-xs text-neutral-600 leading-relaxed mt-2 mb-3">"{text}"</p>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="size-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                      style={{ backgroundColor: avatarColor }}
-                    >
-                      {avatar}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800">{name}</p>
-                      <p className="text-[10px] text-neutral-400">{role}</p>
+                    )}
+                    {type === "text" && <Quote className="mb-2 size-5 text-neutral-200" />}
+                    <StarRow count={rating} />
+                    <p className="mt-2 mb-3 text-xs leading-relaxed text-neutral-600">"{text}"</p>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="flex size-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                        style={{ backgroundColor: avatarColor }}
+                      >
+                        {avatar}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-neutral-800">{name}</p>
+                        <p className="text-[10px] text-neutral-400">{role}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </div>
         </div>

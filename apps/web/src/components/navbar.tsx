@@ -19,21 +19,21 @@ export default function Navbar() {
   const { data: session, isPending } = authClient.useSession();
 
   return (
-    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl">
+    <header className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
       <nav
-        className="flex items-center justify-between backdrop-blur-md rounded-full px-4 py-2 shadow-sm"
+        className="flex items-center justify-between rounded-full px-4 py-2 shadow-sm backdrop-blur-md"
         style={{
           backgroundColor: "rgba(255,255,255,0.92)",
           border: "1px solid rgba(0,0,0,0.09)",
         }}
       >
         {/* Left: Nav links */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <a
               key={href}
               href={href}
-              className="px-3 py-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors rounded-full hover:bg-neutral-100"
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
             >
               {label}
             </a>
@@ -50,12 +50,12 @@ export default function Navbar() {
         </Link>
 
         {/* Right: Auth actions */}
-        <div className="hidden md:flex items-center gap-2 ml-auto">
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           {!isPending && session ? (
             <div className="flex items-center gap-4">
-              <Link 
-                href="/dashboard" 
-                className="text-sm font-bold text-neutral-700 hover:text-neutral-900 transition-colors"
+              <Link
+                href="/dashboard"
+                className="text-sm font-bold text-neutral-700 transition-colors hover:text-neutral-900"
                 style={{ fontFamily: "inherit" }}
               >
                 Dashboard
@@ -63,23 +63,23 @@ export default function Navbar() {
             </div>
           ) : (
             <>
-              <Link 
-                href="/dashboard" 
-                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors px-3 py-1.5 mr-2"
+              <Link
+                href="/dashboard"
+                className="mr-2 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
               >
                 Dashboard
               </Link>
               <a href="/login">
                 <Button
                   variant="outline"
-                  className="rounded-full text-sm px-4 h-8 border-neutral-300 text-neutral-700 hover:bg-neutral-100"
+                  className="h-8 rounded-full border-neutral-300 px-4 text-sm text-neutral-700 hover:bg-neutral-100"
                 >
                   Log in
                 </Button>
               </a>
               <a href="/login">
                 <Button
-                  className="rounded-full text-sm px-4 h-8 text-white hover:bg-neutral-700 transition-all active:scale-95"
+                  className="h-8 rounded-full px-4 text-sm text-white transition-all hover:bg-neutral-700 active:scale-95"
                   style={{ backgroundColor: "#171717" }}
                 >
                   Get started →
@@ -92,7 +92,7 @@ export default function Navbar() {
         {/* Mobile: Hamburger */}
         <button
           type="button"
-          className="md:hidden ml-auto p-2 rounded-full hover:bg-neutral-100 transition-colors"
+          className="ml-auto rounded-full p-2 transition-colors hover:bg-neutral-100 md:hidden"
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
         >
@@ -107,7 +107,7 @@ export default function Navbar() {
       {/* Mobile menu dropdown */}
       {menuOpen && (
         <div
-          className="md:hidden mt-2 rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-1 animate-in fade-in slide-in-from-top-2"
+          className="animate-in fade-in slide-in-from-top-2 mt-2 flex flex-col gap-1 rounded-2xl px-4 py-3 shadow-lg md:hidden"
           style={{
             backgroundColor: "#ffffff",
             border: "1px solid rgba(0,0,0,0.09)",
@@ -118,7 +118,7 @@ export default function Navbar() {
               key={href}
               href={href}
               onClick={() => setMenuOpen(false)}
-              className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl transition-colors"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
             >
               {label}
             </a>
@@ -128,7 +128,7 @@ export default function Navbar() {
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}
-                className="py-2 px-3 text-sm font-bold text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors"
+                className="rounded-xl px-3 py-2 text-sm font-bold text-neutral-900 transition-colors hover:bg-neutral-100"
               >
                 Dashboard
               </Link>
@@ -138,7 +138,7 @@ export default function Navbar() {
                   await authClient.signOut();
                   setMenuOpen(false);
                 }}
-                className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl text-left"
+                className="rounded-xl px-3 py-2 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-100"
               >
                 Sign out
               </button>
@@ -149,13 +149,13 @@ export default function Navbar() {
               <a
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="py-2 px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-xl"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
               >
                 Log in
               </a>
               <a href="/login" onClick={() => setMenuOpen(false)}>
                 <Button
-                  className="w-full rounded-xl text-sm mt-1 text-white"
+                  className="mt-1 w-full rounded-xl text-sm text-white"
                   style={{ backgroundColor: "#171717" }}
                 >
                   Get started →

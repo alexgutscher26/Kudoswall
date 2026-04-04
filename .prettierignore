@@ -1,0 +1,10 @@
+node_modules
+.next
+.turbo
+dist
+build
+.gemini
+*.log
+bun.lock
+.env*
+public/

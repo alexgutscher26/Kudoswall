@@ -52,38 +52,36 @@ function StarRow({ count }: { count: number }) {
 
 export default function SocialProofSection() {
   return (
-    <section style={{ backgroundColor: "#ffffff" }} className="relative overflow-hidden py-24 px-4">
+    <section style={{ backgroundColor: "#ffffff" }} className="relative overflow-hidden px-4 py-24">
       {/* Dot-grid texture */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "20px 20px",
         }}
       />
-      <div className="relative max-w-5xl mx-auto">
+      <div className="relative mx-auto max-w-5xl">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="mb-12 text-center">
           <span
-            className="inline-block text-xs font-semibold tracking-widest uppercase mb-3 px-3 py-1 rounded-full"
+            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
             style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
           >
             Social proof
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900">
-            Businesses that trust{" "}
-            <span style={{ color: "#e8527a" }}>TestimonialWall</span>
+          <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl md:text-5xl">
+            Businesses that trust <span style={{ color: "#e8527a" }}>TestimonialWall</span>
           </h2>
         </div>
 
         {/* Logo strip */}
-        <div className="flex flex-wrap justify-center gap-4 mb-16">
+        <div className="mb-16 flex flex-wrap justify-center gap-4">
           {LOGO_COMPANIES.map((name) => (
             <div
               key={name}
-              className="px-5 py-2.5 rounded-full border border-neutral-200 text-sm font-semibold text-neutral-500"
+              className="rounded-full border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-500"
               style={{ backgroundColor: "#fafafa" }}
             >
               {name}
@@ -92,11 +90,11 @@ export default function SocialProofSection() {
         </div>
 
         {/* Testimonial cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {TESTIMONIALS.map(({ name, role, avatar, avatarColor, rating, quote }) => (
             <div
               key={name}
-              className="rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col gap-4"
+              className="flex flex-col gap-4 rounded-2xl border border-neutral-100 p-6 shadow-sm"
               style={{ backgroundColor: "#fafafa" }}
             >
               {/* Quote icon */}
@@ -106,12 +104,12 @@ export default function SocialProofSection() {
               <StarRow count={rating} />
 
               {/* Quote text */}
-              <p className="text-neutral-700 text-sm leading-relaxed flex-1">"{quote}"</p>
+              <p className="flex-1 text-sm leading-relaxed text-neutral-700">"{quote}"</p>
 
               {/* Author */}
-              <div className="flex items-center gap-3 pt-2 border-t border-neutral-100">
+              <div className="flex items-center gap-3 border-t border-neutral-100 pt-2">
                 <div
-                  className="size-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
                   style={{ backgroundColor: avatarColor }}
                 >
                   {avatar}

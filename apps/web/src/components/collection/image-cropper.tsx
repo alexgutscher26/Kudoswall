@@ -17,11 +17,7 @@ interface CropArea {
   height: number;
 }
 
-export function ImageCropper({
-  image,
-  onCropComplete,
-  onCancel,
-}: ImageCropperProps) {
+export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null);
@@ -38,7 +34,7 @@ export function ImageCropper({
     (_croppedArea: CropArea, croppedAreaPixels: CropArea) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
-    []
+    [],
   );
 
   const createCroppedImage = async () => {
@@ -67,12 +63,10 @@ export function ImageCropper({
       <div className="space-y-6 bg-white p-6">
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="font-bold text-[11px] text-neutral-400 uppercase tracking-widest">
+            <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
               Zoom
             </span>
-            <span className="font-bold text-[11px] text-pink-500">
-              {Math.round(zoom * 100)}%
-            </span>
+            <span className="text-[11px] font-bold text-pink-500">{Math.round(zoom * 100)}%</span>
           </div>
           <input
             aria-labelledby="Zoom"
@@ -88,7 +82,7 @@ export function ImageCropper({
 
         <div className="flex gap-3">
           <button
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-100 py-3 font-bold text-[14px] text-neutral-500 transition-all hover:bg-neutral-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-100 py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
             onClick={onCancel}
             type="button"
           >
@@ -96,7 +90,7 @@ export function ImageCropper({
             Cancel
           </button>
           <button
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-pink-500 py-3 font-bold text-[14px] text-white shadow-lg shadow-pink-500/20 transition-all hover:bg-pink-600"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-pink-500 py-3 text-[14px] font-bold text-white shadow-lg shadow-pink-500/20 transition-all hover:bg-pink-600"
             onClick={createCroppedImage}
             type="button"
           >
@@ -111,10 +105,7 @@ export function ImageCropper({
 
 // ─── Helper Functions ─────────────────────────────────────────────────────────
 
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: CropArea | null
-): Promise<string> {
+async function getCroppedImg(imageSrc: string, pixelCrop: CropArea | null): Promise<string> {
   if (!pixelCrop) {
     throw new Error("No pixelCrop provided");
   }
@@ -138,7 +129,7 @@ async function getCroppedImg(
     0,
     0,
     pixelCrop.width,
-    pixelCrop.height
+    pixelCrop.height,
   );
 
   return new Promise((resolve) => {

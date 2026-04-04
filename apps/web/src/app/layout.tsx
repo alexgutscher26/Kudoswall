@@ -31,7 +31,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme")?.value || "system";
-  
+
   return (
     <html lang="en" className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

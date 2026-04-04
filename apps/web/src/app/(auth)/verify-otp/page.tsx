@@ -26,10 +26,10 @@ export default function VerifyOTPPage() {
     if (otp.length < 6) return toast.error("Enter the 6-digit code");
     setLoading(true);
     try {
-      await authClient.signIn.emailOtp({ 
-        email, 
+      await authClient.signIn.emailOtp({
+        email,
         otp,
-        callbackURL: "/" 
+        callbackURL: "/",
       });
       toast.success("Identity verified! Welcome.");
       router.push("/");
@@ -54,44 +54,49 @@ export default function VerifyOTPPage() {
   };
 
   return (
-    <Card className="p-8 border-2 border-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.06)] rounded-[2.5rem] bg-white relative overflow-hidden">
+    <Card className="relative overflow-hidden rounded-[2.5rem] border-2 border-neutral-100 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
       {/* Decorative Glow */}
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-pink-500/5 to-transparent pointer-events-none" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-pink-500/5 to-transparent" />
 
       <div className="space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2 mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-50 text-[#e8527a] text-[10px] font-black uppercase tracking-widest border border-pink-100 mb-4">
+        <div className="mb-10 space-y-2 text-center">
+          <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-[10px] font-black tracking-widest text-[#e8527a] uppercase">
             <Timer className="size-3" />
             Temporary Access Code
           </div>
-          <h1 className="text-3xl font-black text-neutral-900 tracking-tight leading-tight">
+          <h1 className="text-3xl leading-tight font-black tracking-tight text-neutral-900">
             Verify Identity.
           </h1>
-          <p className="text-sm text-neutral-500 font-medium px-4">
+          <p className="px-4 text-sm font-medium text-neutral-500">
             We've sent a unique 6-digit secure code to: <br />
-            <span className="text-neutral-900 font-bold block mt-1">{email || "your inbox"}</span>
+            <span className="mt-1 block font-bold text-neutral-900">{email || "your inbox"}</span>
           </p>
         </div>
 
         {/* OTP Input UI */}
         <div className="space-y-6">
-            <div className="flex flex-col items-center gap-4">
-               <div className="w-full">
-                <Label htmlFor="otp" className="text-[10px] font-black uppercase text-neutral-400 tracking-widest ml-1 block mb-2 text-center">Secure 6-Digit Code</Label>
-                <Input 
-                    id="otp" 
-                    placeholder="0 0 0 0 0 0" 
-                    className="h-20 rounded-2xl border-2 px-6 font-black text-3xl tracking-[1em] text-center focus:border-pink-500/50" 
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
-                />
-               </div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-full">
+              <Label
+                htmlFor="otp"
+                className="mb-2 ml-1 block text-center text-[10px] font-black tracking-widest text-neutral-400 uppercase"
+              >
+                Secure 6-Digit Code
+              </Label>
+              <Input
+                id="otp"
+                placeholder="0 0 0 0 0 0"
+                className="h-20 rounded-2xl border-2 px-6 text-center text-3xl font-black tracking-[1em] focus:border-pink-500/50"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+              />
             </div>
+          </div>
 
-          <Button 
-            className="w-full h-14 rounded-2xl bg-[#171717] hover:bg-neutral-800 text-white font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98] shadow-xl"
+          <Button
+            className="h-14 w-full rounded-2xl bg-[#171717] text-sm font-black tracking-widest text-white uppercase shadow-xl transition-all hover:bg-neutral-800 active:scale-[0.98]"
             onClick={handleVerify}
             disabled={loading}
           >
@@ -99,9 +104,9 @@ export default function VerifyOTPPage() {
             <BadgeCheck className="ml-2 size-4" />
           </Button>
 
-          <Button 
-            variant="outline" 
-            className="w-full h-12 rounded-xl border-2 hover:bg-neutral-50 font-bold text-xs uppercase tracking-widest text-neutral-400"
+          <Button
+            variant="outline"
+            className="h-12 w-full rounded-xl border-2 text-xs font-bold tracking-widest text-neutral-400 uppercase hover:bg-neutral-50"
             onClick={handleResend}
             disabled={loading}
           >
@@ -111,17 +116,17 @@ export default function VerifyOTPPage() {
         </div>
 
         {/* Dynamic Context Footer */}
-        <div className="pt-8 border-t border-neutral-100 flex flex-col items-center gap-4">
-            <div className="flex items-center gap-2 text-neutral-400 grayscale opacity-50 font-bold uppercase tracking-widest text-[9px]">
-                <ShieldCheck className="size-4" />
-                <span>Protected by bank-level encryption</span>
-            </div>
-            <p className="text-xs text-neutral-400 font-medium">
-                Wrong email?{" "}
-                <a href="/login" className="text-pink-500 font-bold hover:underline">
-                    Back to login
-                </a>
-            </p>
+        <div className="flex flex-col items-center gap-4 border-t border-neutral-100 pt-8">
+          <div className="flex items-center gap-2 text-[9px] font-bold tracking-widest text-neutral-400 uppercase opacity-50 grayscale">
+            <ShieldCheck className="size-4" />
+            <span>Protected by bank-level encryption</span>
+          </div>
+          <p className="text-xs font-medium text-neutral-400">
+            Wrong email?{" "}
+            <a href="/login" className="font-bold text-pink-500 hover:underline">
+              Back to login
+            </a>
+          </p>
         </div>
       </div>
     </Card>

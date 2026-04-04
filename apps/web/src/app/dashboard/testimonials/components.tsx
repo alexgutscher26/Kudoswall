@@ -2,31 +2,33 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { 
-  Star, 
-  User, 
-  Check, 
-  Archive, 
-  Trash2, 
-  Clock, 
+import {
+  Star,
+  User,
+  Check,
+  Archive,
+  Trash2,
+  Clock,
   MessageSquareQuote,
   Search,
   Filter,
   ExternalLink,
   Plus,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
+import { useQuery } from "@tanstack/react-query";
+import { trpc, queryClient } from "@/utils/trpc";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem, 
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
-  DropdownMenuRadioItem
+  DropdownMenuRadioItem,
 } from "@my-better-t-app/ui/components/dropdown-menu";
 import { updateTestimonialStatus, deleteTestimonial } from "../actions";
 import { formatDistanceToNow } from "date-fns";
@@ -34,11 +36,11 @@ import { formatDistanceToNow } from "date-fns";
 interface Testimonial {
   id: string;
   projectId: string;
-  content: string;
-  authorName: string;
-  authorEmail: string;
+  content: string | null;
+  authorName: string | null;
+  authorEmail: string | null;
   authorImage: string | null;
-  rating: number;
+  rating: number | null;
   status: "pending" | "approved" | "archived";
   type: "text" | "video";
   videoUrl?: string | null;
@@ -62,12 +64,22 @@ interface InboxProps {
 export function TestimonialInbox({ initialTestimonials, project, projects }: InboxProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials);
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">("pending");
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">(
+    "pending",
+  );
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Fetch testimonials with real-time polling
+  const { data: qData } = useQuery({
+    ...trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+    initialData: { project, testimonials: initialTestimonials } as any,
+    refetchInterval: 5000,
+  });
+
+  const testimonials = qData.testimonials;
 
   const handleProjectSwitch = (projectId: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -78,11 +90,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const filteredTestimonials = testimonials.filter((t) => {
     const matchesTab = activeTab === "all" || t.status === activeTab;
     const matchesType = typeFilter === "all" || t.type === typeFilter;
-    const matchesSearch = 
-      t.authorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.authorEmail.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRating = minRating === null || t.rating >= minRating;
+      t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
     return matchesTab && matchesType && matchesSearch && matchesRating;
   });
 
@@ -90,8 +102,8 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     startTransition(async () => {
       try {
         await updateTestimonialStatus(id, status);
-        setTestimonials((prev) => 
-          prev.map((t) => (t.id === id ? { ...t, status } : t))
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
         );
         toast.success(`Testimonial ${status}`);
       } catch (error) {
@@ -102,11 +114,13 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this testimonial?")) return;
-    
+
     startTransition(async () => {
       try {
         await deleteTestimonial(id);
-        setTestimonials((prev) => prev.filter((t) => t.id !== id));
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
         toast.success("Testimonial deleted");
       } catch (error) {
         toast.error("Failed to delete testimonial");
@@ -124,39 +138,40 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   return (
     <div className="flex flex-col gap-6">
       {/* Search & Rating Filter Bar */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+      <div className="flex flex-col items-stretch justify-between gap-4 lg:flex-row lg:items-center">
         {/* Project Switcher */}
         <div className="flex items-center gap-3">
           <DropdownMenu>
-            <DropdownMenuTrigger
-              className="group flex items-center gap-3 px-4 py-2 bg-white border border-neutral-100 rounded-2xl shadow-sm hover:shadow-md hover:border-neutral-200 transition-all outline-none"
-            >
-              <div className="size-8 rounded-xl bg-pink-50 flex items-center justify-center shrink-0">
+            <DropdownMenuTrigger className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-4 py-2 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-50">
                 <MessageSquareQuote className="size-4 text-pink-500" />
               </div>
-              <div className="text-left min-w-[120px]">
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest leading-none mb-1">
+              <div className="min-w-[120px] text-left">
+                <p className="mb-1 text-[10px] leading-none font-bold tracking-widest text-neutral-400 uppercase">
                   Collection Link
                 </p>
-                <p className="text-[14px] font-bold text-neutral-900 leading-none truncate">
+                <p className="truncate text-[14px] leading-none font-bold text-neutral-900">
                   {project.name}
                 </p>
               </div>
-              <ChevronDown className="size-4 text-neutral-300 group-hover:text-neutral-500 transition-colors ml-2" />
+              <ChevronDown className="ml-2 size-4 text-neutral-300 transition-colors group-hover:text-neutral-500" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64 p-2 rounded-2xl border-neutral-100 shadow-2xl bg-white animate-in zoom-in-95 duration-200">
+            <DropdownMenuContent
+              align="start"
+              className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 shadow-2xl duration-200"
+            >
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3 py-2">
+                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
                   Switch Collection Link
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
                 <div className="max-h-60 overflow-y-auto">
                   <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
                     {projects.map((p) => (
-                      <DropdownMenuRadioItem 
-                        key={p.id} 
+                      <DropdownMenuRadioItem
+                        key={p.id}
                         value={p.id}
-                        className="rounded-xl text-[14px] font-medium py-2.5 px-3 focus:bg-pink-50 focus:text-pink-600 transition-colors"
+                        className="rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
                       >
                         {p.name}
                       </DropdownMenuRadioItem>
@@ -165,9 +180,9 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
                 </div>
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => router.push("/dashboard")}
-                className="rounded-xl text-[13px] font-bold text-neutral-900 hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white px-3 py-2.5 transition-all flex items-center gap-2 cursor-pointer mt-1"
+                className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
               >
                 <Plus className="size-3.5" />
                 New Collection Link
@@ -175,85 +190,102 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="h-8 w-px bg-neutral-100 hidden sm:block" />
+          <div className="hidden h-8 w-px bg-neutral-100 sm:block" />
 
           {/* Stats quick view (optional, but looks premium) */}
-          <div className="hidden sm:flex items-center gap-4">
+          <div className="hidden items-center gap-4 sm:flex">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Total</span>
+              <span className="text-[10px] font-bold tracking-widest text-neutral-300 uppercase">
+                Total
+              </span>
               <span className="text-[14px] font-bold text-neutral-900">{testimonials.length}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Pending</span>
+              <span className="text-[10px] font-bold tracking-widest text-neutral-300 uppercase">
+                Pending
+              </span>
               <span className="text-[14px] font-bold text-neutral-900">
-                {testimonials.filter(t => t.status === 'pending').length}
+                {testimonials.filter((t) => t.status === "pending").length}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               placeholder="Search testimonials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-neutral-100 rounded-2xl py-2.5 pl-10 pr-4 text-[14px] shadow-sm focus:outline-hidden focus:ring-2 focus:ring-pink-100 focus:border-pink-200 transition-all outline-none"
+              className="w-full rounded-2xl border border-neutral-100 bg-white py-2.5 pr-4 pl-10 text-[14px] shadow-sm transition-all outline-none focus:border-pink-200 focus:ring-2 focus:ring-pink-100 focus:outline-hidden"
             />
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger
-              className={`
-                h-[46px] relative flex items-center gap-2 text-[13px] font-bold px-4 py-2 rounded-2xl border transition-all shadow-sm outline-none
-                ${minRating !== null 
-                  ? "bg-pink-50 border-pink-200 text-pink-600" 
-                  : "bg-white border-neutral-100 text-neutral-600 hover:bg-neutral-50"
-                }
-              `}
+              className={`relative flex h-[46px] items-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-bold shadow-sm transition-all outline-none ${
+                minRating !== null
+                  ? "border-pink-200 bg-pink-50 text-pink-600"
+                  : "border-neutral-100 bg-white text-neutral-600 hover:bg-neutral-50"
+              } `}
             >
               <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
               Rating
               {minRating !== null && (
-                <span className="absolute -top-1 -right-1 size-2.5 bg-pink-500 rounded-full border-2 border-white shadow-sm" />
+                <span className="absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white bg-pink-500 shadow-sm" />
               )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-neutral-100 shadow-2xl bg-white">
+            <DropdownMenuContent
+              align="end"
+              className="w-56 rounded-2xl border-neutral-100 bg-white p-2 shadow-2xl"
+            >
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3 py-2">
+                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
                   Minimum Rating
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                <DropdownMenuRadioGroup 
-                  value={minRating?.toString() || "all"} 
+                <DropdownMenuRadioGroup
+                  value={minRating?.toString() || "all"}
                   onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
                 >
-                  <DropdownMenuRadioItem value="all" className="rounded-xl text-[14px] py-2 px-3 focus:bg-neutral-50 transition-colors">
+                  <DropdownMenuRadioItem
+                    value="all"
+                    className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                  >
                     All Ratings
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="5" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
-                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
-                      <span>5 Stars only</span>
+                  <DropdownMenuRadioItem
+                    value="5"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                  >
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <span>5 Stars only</span>
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="4" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
-                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
-                      <span>4+ Stars</span>
+                  <DropdownMenuRadioItem
+                    value="4"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                  >
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <span>4+ Stars</span>
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="3" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
-                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
-                      <span>3+ Stars</span>
+                  <DropdownMenuRadioItem
+                    value="3"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                  >
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <span>3+ Stars</span>
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuGroup>
-              
+
               {minRating !== null && (
                 <>
                   <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => setMinRating(null)}
-                    className="rounded-xl text-[13px] text-pink-600 font-bold px-3 py-2 hover:bg-pink-50 focus:bg-pink-50 cursor-pointer text-center justify-center transition-colors"
+                    className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
                   >
                     Clear Filter
                   </DropdownMenuItem>
@@ -272,13 +304,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             <button
               key={type}
               onClick={() => setTypeFilter(type)}
-              className={`
-                px-5 py-2 rounded-full text-[13px] font-bold transition-all duration-200 capitalize border
-                ${typeFilter === type
-                  ? "bg-pink-50 text-pink-600 border-pink-200 shadow-sm"
-                  : "bg-white text-neutral-400 border-neutral-100 hover:text-neutral-500 hover:border-neutral-200"
-                }
-              `}
+              className={`rounded-full border px-5 py-2 text-[13px] font-bold capitalize transition-all duration-200 ${
+                typeFilter === type
+                  ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm"
+                  : "border-neutral-100 bg-white text-neutral-400 hover:border-neutral-200 hover:text-neutral-500"
+              } `}
             >
               {type}
             </button>
@@ -286,30 +316,29 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
         </div>
 
         {/* Status Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-neutral-100/50 rounded-xl w-fit">
+        <div className="flex w-fit items-center gap-1 rounded-xl bg-neutral-100/50 p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const count = testimonials.filter((t) => tab.id === "all" || t.status === tab.id).length;
-            
+            const count = testimonials.filter(
+              (t) => tab.id === "all" || t.status === tab.id,
+            ).length;
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`
-                  flex items-center gap-2 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all
-                  ${isActive 
-                    ? "bg-white text-neutral-900 shadow-sm border border-black/5" 
-                    : "text-neutral-500 hover:text-neutral-700 hover:bg-white/50"
-                  }
-                `}
+                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
+                  isActive
+                    ? "border border-black/5 bg-white text-neutral-900 shadow-sm"
+                    : "text-neutral-500 hover:bg-white/50 hover:text-neutral-700"
+                } `}
               >
                 <Icon className={`size-3.5 ${isActive ? "text-pink-500" : "text-neutral-400"}`} />
                 {tab.label}
-                <span className={`
-                  ml-1 text-[11px] px-1.5 py-0.5 rounded-full border
-                  ${isActive ? "bg-neutral-50 border-neutral-100 text-neutral-600" : "bg-neutral-50/50 border-transparent text-neutral-400"}
-                `}>
+                <span
+                  className={`ml-1 rounded-full border px-1.5 py-0.5 text-[11px] ${isActive ? "border-neutral-100 bg-neutral-50 text-neutral-600" : "border-transparent bg-neutral-50/50 text-neutral-400"} `}
+                >
                   {count}
                 </span>
               </button>
@@ -322,22 +351,22 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
       <div className="grid grid-cols-1 gap-4">
         {filteredTestimonials.length > 0 ? (
           filteredTestimonials.map((t) => (
-            <TestimonialCard 
-              key={t.id} 
-              testimonial={t} 
+            <TestimonialCard
+              key={t.id}
+              testimonial={t}
               onUpdateStatus={handleStatusUpdate}
               onDelete={handleDelete}
             />
           ))
         ) : (
-          <div className="text-center py-24 bg-white rounded-[32px] border border-dashed border-neutral-200">
-            <div className="bg-neutral-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-neutral-100">
+          <div className="rounded-[32px] border border-dashed border-neutral-200 bg-white py-24 text-center">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full border border-neutral-100 bg-neutral-50">
               <MessageSquareQuote className="size-8 text-neutral-300" />
             </div>
             <h3 className="text-[16px] font-bold text-neutral-900">No testimonials found</h3>
-            <p className="text-[14px] text-neutral-500 mt-1 max-w-xs mx-auto leading-relaxed">
-              {searchQuery || typeFilter !== "all" || minRating !== null 
-                ? "Try adjusting your filters to find what you're looking for." 
+            <p className="mx-auto mt-1 max-w-xs text-[14px] leading-relaxed text-neutral-500">
+              {searchQuery || typeFilter !== "all" || minRating !== null
+                ? "Try adjusting your filters to find what you're looking for."
                 : "You haven't received any testimonials for this project yet."}
             </p>
           </div>
@@ -347,51 +376,55 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   );
 }
 
-function TestimonialCard({ 
-  testimonial, 
-  onUpdateStatus, 
-  onDelete 
-}: { 
-  testimonial: Testimonial; 
+function TestimonialCard({
+  testimonial,
+  onUpdateStatus,
+  onDelete,
+}: {
+  testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
 }) {
   const t = testimonial;
   return (
-    <div className="bg-white rounded-[24px] border border-neutral-100 p-6 sm:p-7 hover:shadow-xl hover:shadow-black/5 transition-all group relative overflow-hidden">
+    <div className="group relative overflow-hidden rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7">
       {/* Status Accent Line */}
-      <div 
-        className={`absolute top-0 left-0 bottom-0 w-1 ${
-          t.status === "approved" ? "bg-green-500" : t.status === "pending" ? "bg-amber-500" : "bg-neutral-300"
-        }`} 
+      <div
+        className={`absolute top-0 bottom-0 left-0 w-1 ${
+          t.status === "approved"
+            ? "bg-green-500"
+            : t.status === "pending"
+              ? "bg-amber-500"
+              : "bg-neutral-300"
+        }`}
       />
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col gap-8 lg:flex-row">
         {/* Content Section */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-5">
+        <div className="min-w-0 flex-1">
+          <div className="mb-5 flex items-center gap-3">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`size-4 ${i < t.rating ? "text-amber-400 fill-amber-400" : "text-neutral-100 fill-neutral-100"}`} 
+                <Star
+                  key={i}
+                  className={`size-4 ${i < t.rating ? "fill-amber-400 text-amber-400" : "fill-neutral-100 text-neutral-100"}`}
                 />
               ))}
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-300">
+            <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
               · {t.type} Testimonial
             </span>
           </div>
 
-          <p 
-            className="text-[17px] sm:text-[18px] leading-relaxed text-neutral-800 font-medium italic mb-8"
+          <p
+            className="mb-8 text-[17px] leading-relaxed font-medium text-neutral-800 italic sm:text-[18px]"
             style={{ fontFamily: "'Georgia', serif" }}
           >
             "{t.content}"
           </p>
 
           <footer className="flex items-center gap-4">
-            <div className="size-11 rounded-2xl bg-neutral-50 border border-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
                 <img src={t.authorImage} alt={t.authorName} className="size-full object-cover" />
               ) : (
@@ -399,10 +432,8 @@ function TestimonialCard({
               )}
             </div>
             <div className="min-w-0">
-              <h4 className="text-[15px] font-bold text-neutral-900 truncate">
-                {t.authorName}
-              </h4>
-              <p className="text-[13px] text-neutral-400 flex items-center gap-2">
+              <h4 className="truncate text-[15px] font-bold text-neutral-900">{t.authorName}</h4>
+              <p className="flex items-center gap-2 text-[13px] text-neutral-400">
                 {t.authorEmail}
                 <span className="size-1 rounded-full bg-neutral-200" />
                 {formatDistanceToNow(new Date(t.createdAt), { addSuffix: true })}
@@ -412,41 +443,41 @@ function TestimonialCard({
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between border-t lg:border-t-0 lg:border-l border-neutral-100 pt-6 lg:pt-0 lg:pl-10 shrink-0 gap-6">
-          <div className="flex lg:flex-col items-center gap-2.5">
+        <div className="flex shrink-0 flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-6 lg:flex-col lg:items-end lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
+          <div className="flex items-center gap-2.5 lg:flex-col">
             {t.status !== "approved" && (
-              <button 
+              <button
                 onClick={() => onUpdateStatus(t.id, "approved")}
-                className="flex items-center justify-center gap-2 px-4 h-10 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-all border border-green-200/50 font-bold text-[13px]"
+                className="flex h-10 items-center justify-center gap-2 rounded-xl border border-green-200/50 bg-green-50 px-4 text-[13px] font-bold text-green-600 transition-all hover:bg-green-100"
               >
                 <Check className="size-4" />
                 Approve
               </button>
             )}
             {t.status === "approved" && (
-              <button 
+              <button
                 onClick={() => onUpdateStatus(t.id, "pending")}
-                className="flex items-center justify-center gap-2 px-4 h-10 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all border border-amber-200/50 font-bold text-[13px]"
+                className="flex h-10 items-center justify-center gap-2 rounded-xl border border-amber-200/50 bg-amber-50 px-4 text-[13px] font-bold text-amber-600 transition-all hover:bg-amber-100"
               >
                 <Clock className="size-4" />
                 Waitlist
               </button>
             )}
             <div className="flex items-center gap-2.5">
-              <button 
+              <button
                 onClick={() => onUpdateStatus(t.id, "archived")}
-                className={`flex items-center justify-center size-10 rounded-xl transition-all border ${
-                  t.status === "archived" 
-                    ? "bg-neutral-900 text-white border-neutral-900" 
-                    : "bg-white text-neutral-400 hover:text-neutral-900 hover:border-neutral-200 border-neutral-100 shadow-sm"
+                className={`flex size-10 items-center justify-center rounded-xl border transition-all ${
+                  t.status === "archived"
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-neutral-100 bg-white text-neutral-400 shadow-sm hover:border-neutral-200 hover:text-neutral-900"
                 }`}
                 title="Archive"
               >
                 <Archive className="size-4.5" />
               </button>
-              <button 
+              <button
                 onClick={() => onDelete(t.id)}
-                className="flex items-center justify-center size-10 rounded-xl bg-neutral-50 text-neutral-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all border border-neutral-100"
+                className="flex size-10 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-400 transition-all hover:border-red-100 hover:bg-red-50 hover:text-red-500"
                 title="Delete"
               >
                 <Trash2 className="size-4.5" />
@@ -455,10 +486,10 @@ function TestimonialCard({
           </div>
 
           <div className="flex items-center gap-2">
-             <button className="flex items-center gap-2 text-[12px] font-bold text-neutral-300 hover:text-neutral-600 transition-colors uppercase tracking-widest">
-               <ExternalLink className="size-3.5" />
-               Raw Data
-             </button>
+            <button className="flex items-center gap-2 text-[12px] font-bold tracking-widest text-neutral-300 uppercase transition-colors hover:text-neutral-600">
+              <ExternalLink className="size-3.5" />
+              Raw Data
+            </button>
           </div>
         </div>
       </div>

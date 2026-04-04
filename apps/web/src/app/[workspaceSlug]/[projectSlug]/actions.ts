@@ -13,27 +13,26 @@ export async function getProjectBySlug(workspaceSlug: string, projectSlug: strin
   if (!ws) return null;
 
   const result = await db.query.project.findFirst({
-    where: and(
-      eq(project.workspaceId, ws.id),
-      eq(project.slug, projectSlug)
-    ),
+    where: and(eq(project.workspaceId, ws.id), eq(project.slug, projectSlug)),
     with: {
       workspace: true,
     },
   });
 
   if (!result) return null;
-  
+
   return {
     ...result,
     workspace: {
       ...result.workspace,
-      branding: result.workspace.brandingJson ? JSON.parse(result.workspace.brandingJson) : {
-        accentColor: "#e8527a",
-        font: "sans",
-        logoUrl: result.workspace.logoUrl
-      }
-    }
+      branding: result.workspace.brandingJson
+        ? JSON.parse(result.workspace.brandingJson)
+        : {
+            accentColor: "#e8527a",
+            font: "sans",
+            logoUrl: result.workspace.logoUrl,
+          },
+    },
   };
 }
 
@@ -48,10 +47,10 @@ export async function submitTestimonial(
     authorCompany?: string;
     authorLinkedin?: string;
     authorTagline?: string;
-  }
+  },
 ) {
   const id = `tst_${nanoid()}`;
-  
+
   await db.insert(testimonial).values({
     id,
     projectId,

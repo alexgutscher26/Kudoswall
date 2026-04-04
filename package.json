@@ -40,7 +40,8 @@
     "deploy": "turbo -F @my-better-t-app/infra deploy",
     "destroy": "turbo -F @my-better-t-app/infra destroy",
     "check": "ultracite check",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@my-better-t-app/env": "workspace:*",
@@ -56,6 +57,8 @@
     "@my-better-t-app/config": "workspace:*",
     "@types/node": "^22.13.14",
     "lefthook": "latest",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.12",
     "typescript": "^5",
     "ultracite": "7.4.3"

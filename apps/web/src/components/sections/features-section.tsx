@@ -55,51 +55,55 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" style={{ backgroundColor: "#ffffff" }} className="relative overflow-hidden py-24 px-4">
+    <section
+      id="features"
+      style={{ backgroundColor: "#ffffff" }}
+      className="relative overflow-hidden px-4 py-24"
+    >
       {/* Dot-grid texture */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "20px 20px",
         }}
       />
-      <div className="relative max-w-5xl mx-auto">
+      <div className="relative mx-auto max-w-5xl">
         {/* Header */}
-        <div className="text-center mb-14">
+        <div className="mb-14 text-center">
           <span
-            className="inline-block text-xs font-semibold tracking-widest uppercase mb-3 px-3 py-1 rounded-full"
+            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
             style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
           >
             Features
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight">
+          <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
             Everything you need to collect{" "}
             <span style={{ color: "#e8527a" }}>social proof that converts</span>
           </h2>
-          <p className="mt-4 text-neutral-500 text-lg max-w-xl mx-auto">
-            Built specifically for small businesses who don't have time to wrestle with clunky tools.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
+            Built specifically for small businesses who don't have time to wrestle with clunky
+            tools.
           </p>
         </div>
 
         {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {FEATURES.map(({ icon: Icon, title, description, span, accent, bg }) => (
             <div
               key={title}
-              className={`${span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"} rounded-2xl p-5 sm:p-6 border border-neutral-100 transition-shadow hover:shadow-md`}
+              className={`${span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"} rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6`}
               style={{ backgroundColor: bg }}
             >
               <div
-                className="inline-flex items-center justify-center size-10 rounded-xl mb-4"
+                className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
                 style={{ backgroundColor: `${accent}18` }}
               >
                 <Icon className="size-5" style={{ color: accent }} />
               </div>
-              <h3 className="font-semibold text-neutral-900 text-lg mb-2">{title}</h3>
-              <p className="text-neutral-500 text-sm leading-relaxed">{description}</p>
+              <h3 className="mb-2 text-lg font-semibold text-neutral-900">{title}</h3>
+              <p className="text-sm leading-relaxed text-neutral-500">{description}</p>
             </div>
           ))}
         </div>

@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Play, MessageSquareQuote, Image, BarChart2, Zap, Globe, Palette } from "lucide-react";
+import {
+  Star,
+  Play,
+  MessageSquareQuote,
+  Image,
+  BarChart2,
+  Zap,
+  Globe,
+  Palette,
+} from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
 
 const CATEGORY_CHIPS = [
@@ -18,7 +27,7 @@ const CATEGORY_CHIPS = [
 export default function Hero() {
   return (
     <section
-      className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden"
+      className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden"
       style={{ backgroundColor: "#ffffff" }}
     >
       {/* Dot-grid texture overlay — always dark dots on the light bg */}
@@ -26,8 +35,7 @@ export default function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.16) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.16) 1.5px, transparent 1.5px)",
           backgroundSize: "20px 20px",
         }}
       />
@@ -38,33 +46,31 @@ export default function Hero() {
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
       >
         <div
-          className="w-[min(700px,90vw)] h-[min(500px,60vw)] rounded-full blur-3xl"
+          className="h-[min(500px,60vw)] w-[min(700px,90vw)] rounded-full blur-3xl"
           style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
         />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 px-4 sm:px-6 text-center max-w-4xl mx-auto pt-24">
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 pt-24 text-center sm:gap-8 sm:px-6">
         {/* Watch intro badge */}
         <button
           type="button"
-          className="flex items-center gap-3 bg-white border border-neutral-200 rounded-full px-3 py-1.5 shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center gap-3 rounded-full border border-neutral-200 bg-white px-3 py-1.5 shadow-sm transition-shadow hover:shadow-md"
         >
-          <span className="relative flex items-center justify-center size-8 rounded-full overflow-hidden bg-neutral-100 shrink-0">
+          <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100">
             <span className="absolute inset-0 bg-linear-to-br from-pink-400 to-orange-300 opacity-80" />
-            <Play className="relative size-3 text-white fill-white" />
+            <Play className="relative size-3 fill-white text-white" />
           </span>
-          <span className="text-sm font-medium text-neutral-700 pr-1">
-            Watch Introduction
-          </span>
+          <span className="pr-1 text-sm font-medium text-neutral-700">Watch Introduction</span>
         </button>
 
         {/* Main headline */}
-        <div className="flex flex-col gap-1 -mt-2">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] text-neutral-900">
+        <div className="-mt-2 flex flex-col gap-1">
+          <h1 className="text-4xl leading-[1.1] font-bold text-neutral-900 sm:text-5xl md:text-6xl">
             The easiest way to collect
           </h1>
           <span
-            className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1]"
+            className="text-4xl leading-[1.1] font-bold sm:text-5xl md:text-6xl"
             style={{ color: "#e8527a" }}
           >
             glowing testimonials
@@ -72,25 +78,26 @@ export default function Hero() {
         </div>
 
         {/* Sub-headline */}
-        <p className="text-base sm:text-lg md:text-xl text-neutral-500 max-w-2xl -mt-2 px-2">
-          Collect, organize, and display beautiful customer testimonials on your website in minutes — no code required.
+        <p className="-mt-2 max-w-2xl px-2 text-base text-neutral-500 sm:text-lg md:text-xl">
+          Collect, organize, and display beautiful customer testimonials on your website in minutes
+          — no code required.
         </p>
 
         {/* Input card */}
-        <div className="w-full max-w-2xl bg-white border border-neutral-200 rounded-2xl shadow-md overflow-hidden">
+        <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-md">
           <div className="px-5 py-4">
-            <p className="text-left text-neutral-400 text-base">
+            <p className="text-left text-base text-neutral-400">
               🚀 Paste a customer's email and collect a testimonial instantly…
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-t border-neutral-100">
-            <span className="flex items-center gap-1.5 bg-neutral-100 text-neutral-700 text-xs font-medium rounded-full px-3 py-1.5">
+          <div className="flex flex-wrap items-center gap-3 border-t border-neutral-100 px-5 py-3">
+            <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700">
               <Star className="size-3 fill-pink-500 text-pink-500" />
               Smart mode
             </span>
             <div className="flex-1" />
             <Link href="/login">
-              <Button className="rounded-full h-8 px-5 text-sm bg-neutral-900 hover:bg-neutral-700 text-white">
+              <Button className="h-8 rounded-full bg-neutral-900 px-5 text-sm text-white hover:bg-neutral-700">
                 Get started free →
               </Button>
             </Link>
@@ -98,12 +105,12 @@ export default function Hero() {
         </div>
 
         {/* Category chips */}
-        <div className="flex flex-wrap justify-center gap-2 -mt-2">
+        <div className="-mt-2 flex flex-wrap justify-center gap-2">
           {CATEGORY_CHIPS.map(({ icon: Icon, label }) => (
             <button
               key={label}
               type="button"
-              className="flex items-center gap-1.5 text-xs font-medium text-neutral-600 bg-white/80 border border-neutral-200 rounded-full px-3 py-1.5 hover:border-neutral-400 hover:text-neutral-900 transition-all"
+              className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-all hover:border-neutral-400 hover:text-neutral-900"
             >
               <Icon className="size-3" />
               {label}

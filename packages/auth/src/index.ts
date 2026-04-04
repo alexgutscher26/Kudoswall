@@ -4,12 +4,7 @@ import { env } from "@my-better-t-app/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { 
-  magicLink, 
-  emailOTP, 
-  haveIBeenPwned, 
-  lastLoginMethod 
-} from "better-auth/plugins";
+import { magicLink, emailOTP, haveIBeenPwned, lastLoginMethod } from "better-auth/plugins";
 
 export function createAuth() {
   const db = createDb();
@@ -22,11 +17,11 @@ export function createAuth() {
     trustedOrigins: [env.CORS_ORIGIN],
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
-    
+
     emailAndPassword: {
       enabled: true,
     },
-    
+
     socialProviders: {
       github: {
         clientId: env.GITHUB_CLIENT_ID || "",

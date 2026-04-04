@@ -7,7 +7,8 @@ import EmbedPage from "./embed-page";
 
 export const metadata = {
   title: "Embed Widget — TestimonialWall",
-  description: "Customize and embed your testimonial wall on any website with a single line of code.",
+  description:
+    "Customize and embed your testimonial wall on any website with a single line of code.",
 };
 
 export default async function EmbedRoute() {
