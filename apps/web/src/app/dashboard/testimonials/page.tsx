@@ -81,6 +81,7 @@ export default async function TestimonialsPage({
       <TestimonialInbox 
         initialTestimonials={data.testimonials as any} 
         project={data.project} 
+        projects={dashData.projects.map(p => ({ id: p.id, name: p.name }))}
       />
     </DashboardShell>
   );

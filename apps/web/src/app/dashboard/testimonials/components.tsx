@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { 
   Star, 
   User, 
@@ -12,7 +13,8 @@ import {
   Search,
   Filter,
   ExternalLink,
-  Plus
+  Plus,
+  ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -51,15 +53,27 @@ interface InboxProps {
     name: string;
     slug: string;
   };
+  projects: {
+    id: string;
+    name: string;
+  }[];
 }
 
-export function TestimonialInbox({ initialTestimonials, project }: InboxProps) {
+export function TestimonialInbox({ initialTestimonials, project, projects }: InboxProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials);
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">("pending");
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const handleProjectSwitch = (projectId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("project", projectId);
+    router.push(`/dashboard/testimonials?${params.toString()}`);
+  };
 
   const filteredTestimonials = testimonials.filter((t) => {
     const matchesTab = activeTab === "all" || t.status === activeTab;
@@ -110,22 +124,90 @@ export function TestimonialInbox({ initialTestimonials, project }: InboxProps) {
   return (
     <div className="flex flex-col gap-6">
       {/* Search & Rating Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-          <input
-            type="text"
-            placeholder="Search testimonials..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-50/50 border border-neutral-100 rounded-xl py-2 pl-10 pr-4 text-[14px] focus:outline-hidden focus:ring-2 focus:ring-pink-100 transition-all outline-none"
-          />
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        {/* Project Switcher */}
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="group flex items-center gap-3 px-4 py-2 bg-white border border-neutral-100 rounded-2xl shadow-sm hover:shadow-md hover:border-neutral-200 transition-all outline-none"
+            >
+              <div className="size-8 rounded-xl bg-pink-50 flex items-center justify-center shrink-0">
+                <MessageSquareQuote className="size-4 text-pink-500" />
+              </div>
+              <div className="text-left min-w-[120px]">
+                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest leading-none mb-1">
+                  Collection Link
+                </p>
+                <p className="text-[14px] font-bold text-neutral-900 leading-none truncate">
+                  {project.name}
+                </p>
+              </div>
+              <ChevronDown className="size-4 text-neutral-300 group-hover:text-neutral-500 transition-colors ml-2" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 p-2 rounded-2xl border-neutral-100 shadow-2xl bg-white animate-in zoom-in-95 duration-200">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3 py-2">
+                  Switch Collection Link
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                <div className="max-h-60 overflow-y-auto">
+                  <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
+                    {projects.map((p) => (
+                      <DropdownMenuRadioItem 
+                        key={p.id} 
+                        value={p.id}
+                        className="rounded-xl text-[14px] font-medium py-2.5 px-3 focus:bg-pink-50 focus:text-pink-600 transition-colors"
+                      >
+                        {p.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </div>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+              <DropdownMenuItem 
+                onClick={() => router.push("/dashboard")}
+                className="rounded-xl text-[13px] font-bold text-neutral-900 hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white px-3 py-2.5 transition-all flex items-center gap-2 cursor-pointer mt-1"
+              >
+                <Plus className="size-3.5" />
+                New Collection Link
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="h-8 w-px bg-neutral-100 hidden sm:block" />
+
+          {/* Stats quick view (optional, but looks premium) */}
+          <div className="hidden sm:flex items-center gap-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Total</span>
+              <span className="text-[14px] font-bold text-neutral-900">{testimonials.length}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Pending</span>
+              <span className="text-[14px] font-bold text-neutral-900">
+                {testimonials.filter(t => t.status === 'pending').length}
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search testimonials..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-neutral-100 rounded-2xl py-2.5 pl-10 pr-4 text-[14px] shadow-sm focus:outline-hidden focus:ring-2 focus:ring-pink-100 focus:border-pink-200 transition-all outline-none"
+            />
+          </div>
+          
           <DropdownMenu>
             <DropdownMenuTrigger
               className={`
-                relative flex items-center gap-2 text-[13px] font-medium px-3 py-2 rounded-xl border transition-all outline-none
+                h-[46px] relative flex items-center gap-2 text-[13px] font-bold px-4 py-2 rounded-2xl border transition-all shadow-sm outline-none
                 ${minRating !== null 
                   ? "bg-pink-50 border-pink-200 text-pink-600" 
                   : "bg-white border-neutral-100 text-neutral-600 hover:bg-neutral-50"
@@ -135,32 +217,32 @@ export function TestimonialInbox({ initialTestimonials, project }: InboxProps) {
               <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
               Rating
               {minRating !== null && (
-                <span className="absolute -top-1 -right-1 size-2 bg-pink-500 rounded-full border-2 border-white shadow-sm" />
+                <span className="absolute -top-1 -right-1 size-2.5 bg-pink-500 rounded-full border-2 border-white shadow-sm" />
               )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 p-1.5 rounded-xl border-neutral-100 shadow-xl bg-white">
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-neutral-100 shadow-2xl bg-white">
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-2 py-1.5">
+                <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3 py-2">
                   Minimum Rating
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-neutral-50" />
+                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
                 <DropdownMenuRadioGroup 
                   value={minRating?.toString() || "all"} 
                   onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
                 >
-                  <DropdownMenuRadioItem value="all" className="rounded-lg text-[13px]">
+                  <DropdownMenuRadioItem value="all" className="rounded-xl text-[14px] py-2 px-3 focus:bg-neutral-50 transition-colors">
                     All Ratings
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="5" className="rounded-lg text-[13px] flex items-center gap-2">
-                      <Star className="size-3 text-amber-400 fill-amber-400" />
+                  <DropdownMenuRadioItem value="5" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
+                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
                       <span>5 Stars only</span>
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="4" className="rounded-lg text-[13px] flex items-center gap-2">
-                      <Star className="size-3 text-amber-400 fill-amber-400" />
+                  <DropdownMenuRadioItem value="4" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
+                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
                       <span>4+ Stars</span>
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="3" className="rounded-lg text-[13px] flex items-center gap-2">
-                      <Star className="size-3 text-amber-400 fill-amber-400" />
+                  <DropdownMenuRadioItem value="3" className="rounded-xl text-[14px] py-2 px-3 flex items-center gap-2 focus:bg-neutral-50 transition-colors">
+                      <Star className="size-3.5 text-amber-400 fill-amber-400" />
                       <span>3+ Stars</span>
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
@@ -168,10 +250,10 @@ export function TestimonialInbox({ initialTestimonials, project }: InboxProps) {
               
               {minRating !== null && (
                 <>
-                  <DropdownMenuSeparator className="bg-neutral-50" />
+                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
                   <DropdownMenuItem 
                     onClick={() => setMinRating(null)}
-                    className="rounded-lg text-[12px] text-pink-600 font-medium focus:text-pink-700 focus:bg-pink-50 cursor-pointer"
+                    className="rounded-xl text-[13px] text-pink-600 font-bold px-3 py-2 hover:bg-pink-50 focus:bg-pink-50 cursor-pointer text-center justify-center transition-colors"
                   >
                     Clear Filter
                   </DropdownMenuItem>
