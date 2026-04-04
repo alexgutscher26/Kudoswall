@@ -129,11 +129,13 @@
   }
 
   /* Dashboard Modal States */
+  html[data-modal-open="true"] .dashboard-sidebar,
   body[data-modal-open="true"] .dashboard-sidebar {
-    @apply hidden;
+    display: none !important;
   }
 
+  html[data-modal-open="true"] .dashboard-content,
   body[data-modal-open="true"] .dashboard-content {
-    @apply ml-0!;
+    margin-left: 0 !important;
   }
 }

@@ -50,3 +50,5 @@ export function createAuth() {
     ],
   });
 }
+
+export const auth = createAuth();
