@@ -127,4 +127,13 @@
   html {
     @apply font-sans;
   }
+
+  /* Dashboard Modal States */
+  body[data-modal-open="true"] .dashboard-sidebar {
+    @apply hidden;
+  }
+
+  body[data-modal-open="true"] .dashboard-content {
+    @apply ml-0!;
+  }
 }

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   MessageSquareQuote,
@@ -266,7 +266,7 @@ function DesktopSidebar({
   const pathname = usePathname();
   return (
     <aside
-      className="fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col lg:flex"
+      className="dashboard-sidebar fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col lg:flex"
       style={{
         backgroundColor: "#ffffff",
         borderRight: "1px solid rgba(0,0,0,0.07)",
@@ -602,6 +602,17 @@ function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
 function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -1035,7 +1046,7 @@ export default function DashboardShell({
       <NewCollectionModal open={newCollectionOpen} onClose={() => setNewCollectionOpen(false)} />
 
       {/* Main content — offset only on lg+ */}
-      <div className="relative flex min-h-screen flex-1 flex-col lg:ml-60">
+      <div className="dashboard-content relative flex min-h-screen flex-1 flex-col lg:ml-60">
         <DotGrid opacity={0.08} />
 
         {/* Soft central glow */}

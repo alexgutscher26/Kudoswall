@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Star,
@@ -15,6 +15,8 @@ import {
   ExternalLink,
   Plus,
   ChevronDown,
+  Copy,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -73,6 +75,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [rawTestimonial, setRawTestimonial] = useState<Testimonial | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // Fetch testimonials with real-time polling
@@ -115,19 +118,25 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this testimonial?")) return;
-
-    startTransition(async () => {
-      try {
-        await deleteTestimonial(id);
-        await queryClient.invalidateQueries(
-          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
-        );
-        toast.success("Testimonial deleted");
-      } catch (error) {
-        toast.error("Failed to delete testimonial");
-      }
+  const handleDelete = (id: string) => {
+    toast("Delete testimonial?", {
+      description: "Are you sure you want to delete this? This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: () => {
+          startTransition(async () => {
+            try {
+              await deleteTestimonial(id);
+              await queryClient.invalidateQueries(
+                trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+              );
+              toast.success("Testimonial deleted");
+            } catch (error) {
+              toast.error("Failed to delete testimonial");
+            }
+          });
+        },
+      },
     });
   };
 
@@ -161,7 +170,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 shadow-2xl duration-200"
+              className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl duration-200"
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
@@ -222,7 +231,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               placeholder="Search testimonials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-2xl border border-neutral-100 bg-white py-2.5 pr-4 pl-10 text-[14px] shadow-sm transition-all outline-none focus:border-pink-200 focus:ring-2 focus:ring-pink-100 focus:outline-hidden"
+              className="w-full rounded-2xl border border-neutral-100 bg-white py-2.5 pr-4 pl-10 text-[14px] text-neutral-900 shadow-sm transition-all outline-none placeholder:text-neutral-400 focus:border-pink-200 focus:ring-2 focus:ring-pink-100 focus:outline-hidden"
             />
           </div>
 
@@ -242,7 +251,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 rounded-2xl border-neutral-100 bg-white p-2 shadow-2xl"
+              className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
@@ -359,6 +368,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               testimonial={t}
               onUpdateStatus={handleStatusUpdate}
               onDelete={handleDelete}
+              onViewRaw={() => setRawTestimonial(t)}
             />
           ))
         ) : (
@@ -375,6 +385,12 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
           </div>
         )}
       </div>
+
+      <RawDataModal
+        open={!!rawTestimonial}
+        testimonial={rawTestimonial}
+        onClose={() => setRawTestimonial(null)}
+      />
     </div>
   );
 }
@@ -383,10 +399,12 @@ function TestimonialCard({
   testimonial,
   onUpdateStatus,
   onDelete,
+  onViewRaw,
 }: {
   testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
+  onViewRaw: () => void;
 }) {
   const t = testimonial;
   return (
@@ -493,9 +511,107 @@ function TestimonialCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 text-[12px] font-bold tracking-widest text-neutral-300 uppercase transition-colors hover:text-neutral-600">
+            <button
+              onClick={onViewRaw}
+              className="flex items-center gap-2 text-[12px] font-bold tracking-widest text-neutral-400 uppercase transition-colors hover:text-neutral-600"
+            >
               <ExternalLink className="size-3.5" />
               Raw Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RawDataModal({
+  open,
+  testimonial,
+  onClose,
+}: {
+  open: boolean;
+  testimonial: Testimonial | null;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [open]);
+
+  if (!open || !testimonial) return null;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(JSON.stringify(testimonial, null, 2));
+    setCopied(true);
+    toast.success("JSON copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
+        onClick={onClose}
+      />
+
+      {/* Content */}
+      <div
+        className="animate-in zoom-in-95 relative w-full max-w-2xl overflow-hidden rounded-[32px] bg-white shadow-2xl duration-300"
+        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+      >
+        <div className="relative p-7 sm:p-9">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h3
+                className="text-xl font-bold tracking-tight text-neutral-900"
+                style={{ fontFamily: "'Georgia', serif" }}
+              >
+                Raw Testimonial Data
+              </h3>
+              <p className="mt-1 text-[13px] text-neutral-400">
+                Detailed metadata and payload for integration.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
+            >
+              <X className="size-5 text-neutral-400" />
+            </button>
+          </div>
+
+          <div className="relative rounded-2xl border border-neutral-100 bg-neutral-800 p-6 shadow-inner">
+            <div className="absolute top-4 right-4 flex gap-2">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-2 rounded-lg bg-neutral-700 px-3 py-1.5 text-[11px] font-bold text-neutral-300 transition-all hover:bg-neutral-600 hover:text-white"
+              >
+                {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+                {copied ? "Copied!" : "Copy JSON"}
+              </button>
+            </div>
+            <pre className="scrollbar-hide max-h-[400px] overflow-auto font-mono text-[13px] leading-relaxed text-neutral-300">
+              <code>{JSON.stringify(testimonial, null, 2)}</code>
+            </pre>
+          </div>
+
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={onClose}
+              className="rounded-full bg-neutral-900 px-8 py-3 text-[14px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              Close Metadata
             </button>
           </div>
         </div>
