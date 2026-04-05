@@ -1,9 +1,10 @@
 import { createAuth } from "@my-better-t-app/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-
+import { Suspense } from "react";
 import DashboardShell from "./dashboard";
 import { getDashboardData } from "./actions";
+import DashboardLoading from "./loading";
 
 export const metadata = {
   title: "Dashboard — TestimonialWall",
@@ -11,7 +12,8 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  const session = await createAuth().api.getSession({
+  const auth = createAuth();
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 
@@ -19,17 +21,22 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent
+        userName={session.user.name ?? "User"}
+        userEmail={session.user.email ?? ""}
+      />
+    </Suspense>
+  );
+}
+
+async function DashboardContent({ userName, userEmail }: { userName: string; userEmail: string }) {
   const data = await getDashboardData();
 
   if (!data) {
     redirect("/login");
   }
 
-  return (
-    <DashboardShell
-      userName={session.user.name ?? "User"}
-      userEmail={session.user.email ?? ""}
-      initialData={data}
-    />
-  );
+  return <DashboardShell userName={userName} userEmail={userEmail} initialData={data} />;
 }

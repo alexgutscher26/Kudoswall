@@ -70,24 +70,23 @@ export async function getDashboardData() {
 
   const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
 
-  const projects = await db.query.project.findMany({
-    where: eq(project.workspaceId, ws.id),
-    orderBy: desc(project.createdAt),
-  });
-
-  // Get some basic stats
-  // <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500" />
-  const [testimonialCount] = await db
-    .select({ value: count() })
-    .from(testimonial)
-    .innerJoin(project, eq(testimonial.projectId, project.id))
-    .where(eq(project.workspaceId, ws.id));
-
-  const [pendingCount] = await db
-    .select({ value: count() })
-    .from(testimonial)
-    .innerJoin(project, eq(testimonial.projectId, project.id))
-    .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending")));
+  // Fetch everything in parallel to eliminate waterfalls
+  const [projects, [testimonialCount], [pendingCount]] = await Promise.all([
+    db.query.project.findMany({
+      where: eq(project.workspaceId, ws.id),
+      orderBy: desc(project.createdAt),
+    }),
+    db
+      .select({ value: count() })
+      .from(testimonial)
+      .innerJoin(project, eq(testimonial.projectId, project.id))
+      .where(eq(project.workspaceId, ws.id)),
+    db
+      .select({ value: count() })
+      .from(testimonial)
+      .innerJoin(project, eq(testimonial.projectId, project.id))
+      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending"))),
+  ]);
 
   const recentTestimonials =
     projects.length > 0

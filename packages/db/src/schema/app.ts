@@ -26,7 +26,10 @@ export const workspace = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("workspace_slug_idx").on(table.slug)],
+  (table) => [
+    index("workspace_slug_idx").on(table.slug),
+    index("workspace_owner_id_idx").on(table.ownerId),
+  ],
 );
 
 export const project = pgTable(
@@ -48,6 +51,7 @@ export const project = pgTable(
       .notNull(),
   },
   (table) => [
+    index("project_workspace_id_idx").on(table.workspaceId),
     index("project_workspace_slug_idx").on(table.workspaceId, table.slug),
     index("project_collection_slug_idx").on(table.collectionSlug),
   ],
@@ -77,7 +81,10 @@ export const testimonial = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index("testimonial_project_id_idx").on(table.projectId)],
+  (table) => [
+    index("testimonial_project_id_idx").on(table.projectId),
+    index("testimonial_status_idx").on(table.status),
+  ],
 );
 
 // ─── Relations ────────────────────────────────────────────────────────────────
