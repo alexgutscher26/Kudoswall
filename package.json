@@ -42,12 +42,16 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.66",
+    "@ai-sdk/google": "^3.0.58",
+    "@ai-sdk/openai": "^3.0.50",
     "@my-better-t-app/env": "workspace:*",
     "@trpc/server": "catalog:",
+    "ai": "^6.0.146",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "next": "catalog:",
-    "zod": "catalog:"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
