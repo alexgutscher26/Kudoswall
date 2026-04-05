@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/server-db";
 import { project } from "@my-better-t-app/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
 
 interface CollectPageProps {
@@ -12,7 +12,7 @@ interface CollectPageProps {
 
 async function getProjectByCollectionSlug(slug: string) {
   const result = await db.query.project.findFirst({
-    where: eq(project.collectionSlug, slug),
+    where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
     with: {
       workspace: true,
     },

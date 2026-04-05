@@ -79,6 +79,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [rawTestimonial, setRawTestimonial] = useState<Testimonial | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -228,7 +233,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
                 Collection Link
               </p>
               <p className="max-w-[140px] truncate text-[14px] font-bold text-neutral-900 group-hover:text-pink-600 sm:max-w-[200px]">
-                {typeof window !== "undefined"
+                {mounted
                   ? `${window.location.host}/collect/${project.slug}`
                   : `/collect/${project.slug}`}
               </p>

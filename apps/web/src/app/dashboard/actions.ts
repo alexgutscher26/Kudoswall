@@ -52,6 +52,7 @@ export async function createProject(formData: FormData) {
     workspaceId: ws.id,
     name,
     slug,
+    collectionSlug: slug,
   });
 
   revalidatePath("/dashboard");
