@@ -1,5 +1,13 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, integer, boolean, pgEnum, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  pgEnum,
+  index,
+  doublePrecision,
+} from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const testimonialStatusEnum = pgEnum("testimonial_status", [
@@ -65,7 +73,7 @@ export const testimonial = pgTable(
       .notNull()
       .references(() => project.id, { onDelete: "cascade" }),
     content: text("content"),
-    rating: integer("rating").default(5),
+    rating: doublePrecision("rating").default(5.0),
     authorName: text("author_name"),
     authorEmail: text("author_email"),
     authorImage: text("author_image"),
