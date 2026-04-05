@@ -53,7 +53,7 @@ export default async function TestimonialsPage({
             Create your first project to start collecting and managing testimonials.
           </p>
           <Link
-            href="/dashboard"
+            href="?new=project"
             className="inline-flex items-center gap-2 rounded-full bg-[#171717] px-6 py-3 text-[14px] font-bold text-white shadow-lg shadow-black/5 transition-all hover:opacity-90 active:scale-[0.98]"
           >
             <Plus className="size-4" />

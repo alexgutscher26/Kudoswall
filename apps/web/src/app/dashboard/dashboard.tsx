@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
@@ -557,7 +557,15 @@ function GettingStarted() {
 
 // ─── Quick actions ────────────────────────────────────────────────────────────
 
-function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
+function QuickActions({
+  onNewCollection,
+  onCopyLink,
+  hasProjects,
+}: {
+  onNewCollection: () => void;
+  onCopyLink: () => void;
+  hasProjects: boolean;
+}) {
   return (
     <div
       className="overflow-hidden rounded-2xl border border-neutral-100"
@@ -571,7 +579,7 @@ function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
           <li key={label}>
             <button
               type="button"
-              onClick={label === "Copy Collection Link" ? onNewCollection : undefined}
+              onClick={label === "Copy Collection Link" ? onCopyLink : onNewCollection}
               className="group flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-neutral-50"
             >
               <div
@@ -582,10 +590,12 @@ function QuickActions({ onNewCollection }: { onNewCollection: () => void }) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] leading-tight font-medium text-neutral-800">
-                  {label === "Copy Collection Link" ? "New Collection Link" : label}
+                  {label === "Copy Collection Link" && !hasProjects ? "New Collection Link" : label}
                 </p>
                 <p className="mt-0.5 text-[11px] leading-tight text-neutral-400">
-                  {label === "Copy Collection Link" ? "Create a dedicated wall page" : desc}
+                  {label === "Copy Collection Link" && !hasProjects
+                    ? "Create a dedicated wall page"
+                    : desc}
                 </p>
               </div>
               <ChevronRight className="size-3.5 text-neutral-200 transition-colors group-hover:text-neutral-400" />
@@ -614,6 +624,7 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
     };
   }, [open]);
 
+  const router = useRouter();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -624,6 +635,7 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
       if (result.success) {
         toast.success("Collection link created!");
         onClose();
+        router.refresh();
       }
     } catch (error) {
       toast.error("Failed to create collection link");
@@ -964,8 +976,22 @@ export default function DashboardShell({
   initialData?: any;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+
+  // Auto-open modal if `new=project` is in URL
+  useEffect(() => {
+    if (searchParams.get("new") === "project") {
+      setNewCollectionOpen(true);
+      // Clean up URL to avoid re-opening on refresh
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("new");
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      router.replace(newUrl as Route, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   // Live polling for dashboard data
   const { data: liveData } = useQuery({
@@ -1013,6 +1039,19 @@ export default function DashboardShell({
         },
       ]
     : [];
+
+  const handleCopyCollectionLink = () => {
+    if (activeData?.projects?.length > 0) {
+      const p = activeData.projects[0];
+      const url = `${window.location.origin}/collect/${p.slug}`;
+      navigator.clipboard.writeText(url);
+      toast.success("Collection link copied!", {
+        description: url,
+      });
+    } else {
+      setNewCollectionOpen(true);
+    }
+  };
 
   function handleSignOut() {
     authClient.signOut({
@@ -1138,7 +1177,11 @@ export default function DashboardShell({
                 {/* Right column */}
                 <div className="space-y-4 sm:space-y-5 xl:col-span-1">
                   <GettingStarted />
-                  <QuickActions onNewCollection={() => setNewCollectionOpen(true)} />
+                  <QuickActions
+                    onNewCollection={() => setNewCollectionOpen(true)}
+                    onCopyLink={handleCopyCollectionLink}
+                    hasProjects={activeData?.projects?.length > 0}
+                  />
                 </div>
               </div>
 

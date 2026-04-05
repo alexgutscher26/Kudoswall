@@ -7,16 +7,20 @@ import {
   User,
   Check,
   Archive,
-  Trash2,
-  Clock,
-  MessageSquareQuote,
   Search,
-  Filter,
-  ExternalLink,
   Plus,
-  ChevronDown,
+  MessageSquareQuote,
   Copy,
+  Clock,
+  MoreVertical,
+  Trash2,
+  ExternalLink,
+  ChevronDown,
+  Filter,
   X,
+  Type,
+  Video,
+  Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -147,26 +151,34 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     { id: "all", label: "All", icon: MessageSquareQuote },
   ];
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/collect/${project.slug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Collection link copied!", {
+      description: url,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Search & Rating Filter Bar */}
-      <div className="flex flex-col items-stretch justify-between gap-4 lg:flex-row lg:items-center">
-        {/* Project Switcher */}
-        <div className="flex items-center gap-3">
+      {/* Header Toolbar: Collection Info & Quick Actions */}
+      <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Project Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-4 py-2 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-50">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-50 transition-colors group-hover:bg-pink-100">
                 <MessageSquareQuote className="size-4 text-pink-500" />
               </div>
-              <div className="min-w-[120px] text-left">
-                <p className="mb-1 text-[10px] leading-none font-bold tracking-widest text-neutral-400 uppercase">
-                  Collection Link
+              <div className="text-left">
+                <p className="mb-0.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Active Collection
                 </p>
-                <p className="truncate text-[14px] leading-none font-bold text-neutral-900">
-                  {project.name}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-[14px] font-bold text-neutral-900">{project.name}</p>
+                  <ChevronDown className="size-3.5 text-neutral-300 transition-colors group-hover:text-neutral-500" />
+                </div>
               </div>
-              <ChevronDown className="ml-2 size-4 text-neutral-300 transition-colors group-hover:text-neutral-500" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
@@ -174,7 +186,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             >
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  Switch Collection Link
+                  Switch Collection
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
                 <div className="max-h-60 overflow-y-auto">
@@ -202,25 +214,26 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="hidden h-8 w-px bg-neutral-100 sm:block" />
-
-          {/* Stats quick view (optional, but looks premium) */}
-          <div className="hidden items-center gap-4 sm:flex">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold tracking-widest text-neutral-300 uppercase">
-                Total
-              </span>
-              <span className="text-[14px] font-bold text-neutral-900">{testimonials.length}</span>
+          {/* Collection Link Action */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-4 py-2 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md"
+          >
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-neutral-50 transition-colors group-hover:bg-neutral-100">
+              <Copy className="size-4 text-neutral-400 transition-colors group-hover:text-neutral-600" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold tracking-widest text-neutral-300 uppercase">
-                Pending
-              </span>
-              <span className="text-[14px] font-bold text-neutral-900">
-                {testimonials.filter((t) => t.status === "pending").length}
-              </span>
+            <div className="text-left">
+              <p className="mb-0.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                Collection Link
+              </p>
+              <p className="max-w-[140px] truncate text-[14px] font-bold text-neutral-900 group-hover:text-pink-600 sm:max-w-[200px]">
+                {typeof window !== "undefined"
+                  ? `${window.location.host}/collect/${project.slug}`
+                  : `/collect/${project.slug}`}
+              </p>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -310,21 +323,30 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
 
       {/* Filter Toolbar (Type Switchers & Status Tabs) */}
       <div className="flex flex-wrap items-center justify-between gap-6 px-1">
-        {/* Type Switchers (Pills) */}
-        <div className="flex items-center gap-2.5">
-          {(["all", "video", "text"] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => setTypeFilter(type)}
-              className={`rounded-full border px-5 py-2 text-[13px] font-bold capitalize transition-all duration-200 ${
-                typeFilter === type
-                  ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm"
-                  : "border-neutral-100 bg-white text-neutral-400 hover:border-neutral-200 hover:text-neutral-500"
-              } `}
-            >
-              {type}
-            </button>
-          ))}
+        {/* Type Switchers (Segmented Control) */}
+        <div className="flex items-center gap-1 rounded-xl bg-neutral-100/50 p-1">
+          {[
+            { id: "all", label: "All", icon: Layers },
+            { id: "video", label: "Video", icon: Video },
+            { id: "text", label: "Text", icon: Type },
+          ].map((type) => {
+            const Icon = type.icon;
+            const isActive = typeFilter === type.id;
+            return (
+              <button
+                key={type.id}
+                onClick={() => setTypeFilter(type.id as any)}
+                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
+                  isActive
+                    ? "border border-black/5 bg-white text-neutral-900 shadow-sm"
+                    : "text-neutral-500 hover:bg-white/50 hover:text-neutral-700"
+                } `}
+              >
+                <Icon className={`size-3.5 ${isActive ? "text-pink-500" : "text-neutral-400"}`} />
+                {type.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Status Tabs */}
@@ -382,6 +404,15 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
                 ? "Try adjusting your filters to find what you're looking for."
                 : "You haven't received any testimonials for this project yet."}
             </p>
+            {!(searchQuery || typeFilter !== "all" || minRating !== null) && (
+              <button
+                onClick={handleCopyLink}
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#171717] px-6 py-3 text-[14px] font-bold text-white shadow-lg shadow-black/5 transition-all hover:opacity-90 active:scale-[0.98]"
+              >
+                <Copy className="size-4" />
+                Copy Collection Link
+              </button>
+            )}
           </div>
         )}
       </div>
