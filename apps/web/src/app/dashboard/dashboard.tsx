@@ -851,11 +851,23 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
                   {t.authorName || "Anonymous"}
                 </h4>
                 <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`size-2.5 ${i < (t.rating || 5) ? "fill-yellow-400 text-yellow-400" : "fill-neutral-100 text-neutral-100"}`}
-                    />
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <div key={s} className="relative">
+                      {/* Base Star (Grey) */}
+                      <Star className="size-2.5 fill-neutral-100 text-neutral-100" />
+                      {/* Half Star Overlay */}
+                      {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
+                        <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
+                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
+                        </div>
+                      )}
+                      {/* Full Star Overlay */}
+                      {(t.rating ?? 0) >= s && (
+                        <div className="absolute inset-0 z-10 overflow-hidden">
+                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

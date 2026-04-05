@@ -148,6 +148,7 @@ export default function EmbedPage() {
   });
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
+  const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
 
   const embedCode = `<script src="https://cdn.testimonialwall.com/widget.js" 
   data-id="ws_abc123" 
@@ -163,257 +164,301 @@ export default function EmbedPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 xl:flex-row">
-      {/* ── Left: Settings Panel ────────────────────────────────────────── */}
-      <div className="w-full shrink-0 space-y-5 xl:w-[350px]">
-        <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center gap-2">
-            <Settings2 className="size-4 text-neutral-400" />
+    <div className="mx-auto flex max-w-7xl flex-col gap-8 xl:flex-row">
+      <div className="w-full shrink-0 space-y-6 lg:sticky lg:top-8 xl:w-[320px]">
+        {/* Left: Settings Panel */}
+        <div className="overflow-hidden rounded-[32px] border border-neutral-100 bg-white p-6 shadow-sm">
+          <div className="mb-8 flex items-center gap-2.5">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-pink-50 text-pink-500">
+              <Settings2 className="size-4" />
+            </div>
             <h3 className="text-[15px] font-bold tracking-tight text-neutral-900">
               Widget Options
             </h3>
           </div>
 
-          {/* Layout */}
-          <div className="mb-8 space-y-4">
-            <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-              Layout Style
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["grid", "masonry", "carousel", "bento"] as LayoutType[]).map((l) => (
+          <div className="space-y-10">
+            {/* Layout */}
+            <div className="space-y-4">
+              <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Layout Style
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["grid", "masonry", "carousel", "bento"] as LayoutType[]).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => setSettings((s) => ({ ...s, layout: l }))}
+                    className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-[12px] font-bold transition-all ${
+                      settings.layout === l
+                        ? "border-pink-200 bg-pink-50 text-pink-700 shadow-sm shadow-pink-100/50"
+                        : "border-neutral-100 text-neutral-600 hover:bg-neutral-50"
+                    }`}
+                  >
+                    <LayoutIcon type={l} active={settings.layout === l} />
+                    {l.charAt(0).toUpperCase() + l.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Theme */}
+            <div className="space-y-4">
+              <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Visual Theme
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["light", "dark", "glass"] as ThemeType[]).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setSettings((s) => ({ ...s, theme: t }))}
+                    className={`rounded-xl border px-2 py-2.5 text-[11px] font-bold transition-all ${
+                      settings.theme === t
+                        ? "border-pink-200 bg-pink-50 text-pink-700 shadow-sm shadow-pink-100/50"
+                        : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"
+                    }`}
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Accent Color */}
+            <div className="space-y-4">
+              <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Brand Accent
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="group/color relative">
+                  <input
+                    type="color"
+                    value={settings.accentColor}
+                    onChange={(e) => setSettings((s) => ({ ...s, accentColor: e.target.value }))}
+                    className="size-11 cursor-pointer overflow-hidden rounded-xl border-2 border-white bg-transparent p-0 shadow-sm"
+                    title="Choose accent color"
+                  />
+                </div>
+                <code className="font-mono text-[12px] font-bold text-neutral-400">
+                  {settings.accentColor.toUpperCase()}
+                </code>
+              </div>
+            </div>
+
+            {/* Toggles */}
+            <div className="space-y-6 border-t border-neutral-50 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium text-neutral-700">Show star ratings</span>
                 <button
-                  key={l}
                   type="button"
-                  onClick={() => setSettings((s) => ({ ...s, layout: l }))}
-                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-[12px] font-bold transition-all ${
-                    settings.layout === l
-                      ? "border-pink-200 bg-pink-50 text-pink-700"
-                      : "border-neutral-100 text-neutral-600 hover:bg-neutral-50"
-                  }`}
+                  onClick={() => setSettings((s) => ({ ...s, showRating: !s.showRating }))}
+                  className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${settings.showRating ? "bg-emerald-500" : "bg-neutral-200"}`}
                 >
-                  <LayoutIcon type={l} active={settings.layout === l} />
-                  {l.charAt(0).toUpperCase() + l.slice(1)}
+                  <div
+                    className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${settings.showRating ? "translate-x-5.5" : "translate-x-1"}`}
+                  />
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Theme */}
-          <div className="mb-8 space-y-4">
-            <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-              Visual Theme
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["light", "dark", "glass"] as ThemeType[]).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setSettings((s) => ({ ...s, theme: t }))}
-                  className={`rounded-xl border px-2 py-2 text-[11px] font-bold transition-all ${
-                    settings.theme === t
-                      ? "border-pink-200 bg-pink-50 text-pink-700"
-                      : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"
-                  }`}
-                >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Accent Color */}
-          <div className="mb-8 space-y-4">
-            <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-              Brand Accent
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={settings.accentColor}
-                onChange={(e) => setSettings((s) => ({ ...s, accentColor: e.target.value }))}
-                className="size-10 cursor-pointer overflow-hidden rounded-full border-0 bg-transparent p-0"
-                title="Choose accent color"
-              />
-              <code className="font-mono text-[12px] font-bold text-neutral-400">
-                {settings.accentColor.toUpperCase()}
-              </code>
-            </div>
-          </div>
-
-          {/* Toggles */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-neutral-700">Show star ratings</span>
-              <button
-                type="button"
-                onClick={() => setSettings((s) => ({ ...s, showRating: !s.showRating }))}
-                className={`relative flex h-5 w-9 items-center rounded-full transition-colors ${settings.showRating ? "bg-emerald-500" : "bg-neutral-200"}`}
-              >
-                <div
-                  className={`size-3.5 rounded-full bg-white shadow-sm transition-transform ${settings.showRating ? "translate-x-5" : "translate-x-1"}`}
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-neutral-700">Rounded corners</span>
+                  <span className="font-mono text-[11px] font-bold text-neutral-400">
+                    {settings.roundCorners}px
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="32"
+                  value={settings.roundCorners}
+                  onChange={(e) =>
+                    setSettings((s) => ({ ...s, roundCorners: parseInt(e.target.value) }))
+                  }
+                  className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-neutral-100 accent-pink-500"
                 />
-              </button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-neutral-700">Rounded corners</span>
-              <input
-                type="range"
-                min="0"
-                max="32"
-                value={settings.roundCorners}
-                onChange={(e) =>
-                  setSettings((s) => ({ ...s, roundCorners: parseInt(e.target.value) }))
-                }
-                className="h-1 w-20 accent-pink-500"
-              />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Center: Preview Panel ───────────────────────────────────────── */}
-      <div className="flex-1 space-y-5">
-        <div className="relative flex min-h-[500px] flex-col overflow-hidden rounded-[40px] border border-neutral-100 bg-neutral-50 p-2 sm:p-4">
-          {/* Dots Background (Custom opacity) */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
+      {/* Main Workspace: Preview + Code Tabs */}
+      <div className="flex-1 space-y-6">
+        {/* Workspace Controls */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-1 overflow-hidden rounded-2xl bg-neutral-100 p-1.5">
+            <button
+              onClick={() => setActiveTab("preview")}
+              className={`flex items-center gap-2 rounded-xl px-5 py-2 text-[13px] font-bold transition-all ${
+                activeTab === "preview"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-700"
+              }`}
+            >
+              <Eye className="size-4" />
+              Live Preview
+            </button>
+            <button
+              onClick={() => setActiveTab("code")}
+              className={`flex items-center gap-2 rounded-xl px-5 py-2 text-[13px] font-bold transition-all ${
+                activeTab === "code"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-700"
+              }`}
+            >
+              <Code2 className="size-4" />
+              Embed Code
+            </button>
+          </div>
 
-          {/* Top Toolbar */}
-          <div className="relative z-10 flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-1 rounded-full border border-neutral-200 bg-white p-1 shadow-sm">
+          {activeTab === "preview" && (
+            <div className="flex items-center gap-1 rounded-2xl bg-neutral-100 p-1.5">
               <button
                 type="button"
                 onClick={() => setViewMode("desktop")}
-                className={`rounded-full p-1.5 transition-all ${viewMode === "desktop" ? "bg-neutral-100 text-neutral-900" : "text-neutral-400 hover:text-neutral-600"}`}
+                className={`rounded-xl p-2 transition-all ${viewMode === "desktop" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-600"}`}
               >
-                <Monitor className="size-3.5" />
+                <Monitor className="size-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("mobile")}
-                className={`rounded-full p-1.5 transition-all ${viewMode === "mobile" ? "bg-neutral-100 text-neutral-900" : "text-neutral-400 hover:text-neutral-600"}`}
+                className={`rounded-xl p-2 transition-all ${viewMode === "mobile" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-600"}`}
               >
-                <Smartphone className="size-3.5" />
+                <Smartphone className="size-4" />
               </button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400">
-                <Eye className="size-3" /> LIVE PREVIEW
-              </span>
-            </div>
-          </div>
+          )}
+        </div>
 
-          {/* Widget Canvas */}
-          <div className="relative z-10 flex flex-1 items-center justify-center p-4 transition-all duration-500 sm:p-8">
+        {activeTab === "preview" ? (
+          <div className="relative flex min-h-[650px] flex-col overflow-hidden rounded-[48px] border border-neutral-100 bg-neutral-50/50 p-4 sm:p-8">
             <div
-              className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[320px]" : "w-full max-w-3xl"}`}
-            >
+              className="pointer-events-none absolute inset-0 opacity-[0.4]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, rgba(0,0,0,0.1) 1.5px, transparent 1.5px)",
+                backgroundSize: "32px 32px",
+              }}
+            />
+
+            <div className="relative z-10 flex flex-1 items-center justify-center p-4 transition-all duration-500">
               <div
-                className={`grid gap-4 ${viewMode === "mobile" ? "grid-cols-1" : settings.layout === "grid" ? "grid-cols-2" : settings.layout === "carousel" ? "grid-cols-3" : "grid-cols-2"}`}
+                className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-5xl"}`}
               >
-                {MOCK_TESTIMONIALS.map((t, i) => (
-                  <div
-                    key={t.author}
-                    className={
-                      settings.layout === "carousel" && i > 0 && viewMode === "mobile"
-                        ? "hidden"
-                        : ""
-                    }
-                  >
-                    <PreviewCard testimonial={t} settings={settings} />
-                  </div>
-                ))}
+                <div
+                  className={`grid gap-6 ${viewMode === "mobile" ? "grid-cols-1" : settings.layout === "grid" ? "grid-cols-2 lg:grid-cols-3" : settings.layout === "carousel" ? "grid-cols-3 lg:grid-cols-4" : "grid-cols-2 lg:grid-cols-3"}`}
+                >
+                  {MOCK_TESTIMONIALS.map((t, i) => (
+                    <div
+                      key={t.author}
+                      className={
+                        settings.layout === "carousel" && i > 0 && viewMode === "mobile"
+                          ? "hidden"
+                          : ""
+                      }
+                    >
+                      <PreviewCard testimonial={t} settings={settings} />
+                    </div>
+                  ))}
+                  {/* Duplicate items for a fuller preview in the expanded space */}
+                  {viewMode === "desktop" &&
+                    MOCK_TESTIMONIALS.map((t, i) => (
+                      <div key={t.author + i}>
+                        <PreviewCard testimonial={t} settings={settings} />
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* ── Right: Code Panel ──────────────────────────────────────────── */}
-      <div className="w-full shrink-0 space-y-5 xl:w-[350px]">
-        <div className="sticky top-6 overflow-hidden rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2">
-            <Code2 className="size-4 text-emerald-500" />
-            <h3 className="text-[15px] font-bold text-neutral-900">Embed Code</h3>
-          </div>
-          <p className="mb-6 text-[12px] leading-relaxed text-neutral-400">
-            Paste this line of code anywhere in your HTML, Webflow, or Shopify theme. Your wall will
-            load instantly.
-          </p>
-          <div className="group relative mb-8 rounded-2xl bg-neutral-900 p-4">
-            <code className="block font-mono text-[11px] leading-relaxed break-all text-pink-300">
-              {embedCode}
-            </code>
-            <button
-              type="button"
-              onClick={copyToClipboard}
-              className="absolute top-3 right-3 rounded-lg bg-neutral-800 p-2 text-neutral-400 opacity-0 transition-all group-hover:opacity-100 hover:text-white"
-            >
-              {copied ? (
-                <Check className="size-3.5 text-emerald-400" />
-              ) : (
-                <Copy className="size-3.5" />
-              )}
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-              Installation Guides
-            </h4>
-            <button
-              type="button"
-              className="group flex w-full items-center justify-between rounded-xl border border-neutral-50 p-3 transition-all hover:bg-neutral-50"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 text-[10px] font-bold text-emerald-600">
-                  Re
+        ) : (
+          <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+            <div className="rounded-[32px] border border-neutral-100 bg-white p-8 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-900">Get your code</h3>
+                  <p className="mt-1 text-[13px] text-neutral-500">
+                    Add this to your site's HTML to start showing testimonials.
+                  </p>
                 </div>
-                <span className="text-[13px] font-bold text-neutral-700">React / Next.js</span>
+                <button
+                  onClick={copyToClipboard}
+                  className={`flex items-center gap-2 rounded-xl px-6 py-2.5 text-[13px] font-bold transition-all ${
+                    copied
+                      ? "bg-emerald-500 text-white"
+                      : "bg-pink-500 text-white shadow-lg shadow-pink-100 hover:bg-pink-600"
+                  }`}
+                >
+                  {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                  {copied ? "Copied!" : "Copy Code"}
+                </button>
               </div>
-              <ChevronRight className="size-3.5 text-neutral-300 group-hover:text-neutral-500" />
-            </button>
-            <button
-              type="button"
-              className="group flex w-full items-center justify-between rounded-xl border border-neutral-50 p-3 transition-all hover:bg-neutral-50"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-bold text-blue-600">
-                  Wf
-                </div>
-                <span className="text-[13px] font-bold text-neutral-700">Webflow</span>
-              </div>
-              <ChevronRight className="size-3.5 text-neutral-300 group-hover:text-neutral-500" />
-            </button>
-            <button
-              type="button"
-              className="group flex w-full items-center justify-between rounded-xl border border-neutral-50 p-3 transition-all hover:bg-neutral-50"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-pink-50 text-[10px] font-bold text-pink-600">
-                  Sh
-                </div>
-                <span className="text-[13px] font-bold text-neutral-700">Shopify</span>
-              </div>
-              <ChevronRight className="size-3.5 text-neutral-300 group-hover:text-neutral-500" />
-            </button>
-          </div>
 
-          <div className="mt-8 border-t border-neutral-50 pt-6">
-            <a
-              href="#"
-              className="flex items-center justify-center gap-2 text-[12px] font-bold text-neutral-400 transition-colors hover:text-neutral-900"
-            >
-              <HelpCircle className="size-3.5" />
-              Need help embedding?
-            </a>
+              <div className="relative overflow-hidden rounded-2xl bg-neutral-900 p-6">
+                <code className="block font-mono text-[13px] leading-loose text-pink-300">
+                  {embedCode}
+                </code>
+              </div>
+
+              <div className="mt-12">
+                <h4 className="mb-6 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Installation Guides
+                </h4>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {[
+                    {
+                      name: "React / Next.js",
+                      icon: "Re",
+                      color: "bg-emerald-50 text-emerald-600 border-emerald-100",
+                    },
+                    {
+                      name: "Webflow",
+                      icon: "Wf",
+                      color: "bg-blue-50 text-blue-600 border-blue-100",
+                    },
+                    {
+                      name: "Shopify",
+                      icon: "Sh",
+                      color: "bg-pink-50 text-pink-600 border-pink-100",
+                    },
+                  ].map((guide) => (
+                    <button
+                      key={guide.name}
+                      type="button"
+                      className="group flex flex-col gap-4 rounded-[24px] border border-neutral-100 p-5 transition-all hover:border-pink-200 hover:bg-pink-50/30"
+                    >
+                      <div
+                        className={`flex size-10 items-center justify-center rounded-xl border text-[11px] font-bold ${guide.color}`}
+                      >
+                        {guide.icon}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[14px] font-bold text-neutral-800">{guide.name}</span>
+                        <ChevronRight className="size-4 text-neutral-300 group-hover:text-pink-500" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-[32px] border border-neutral-100 bg-neutral-50/50 p-6">
+                <HelpCircle className="mb-4 size-6 text-pink-500" />
+                <h4 className="mb-2 font-bold text-neutral-900">Need help?</h4>
+                <p className="text-[13px] leading-relaxed text-neutral-500">
+                  Can't figure out how to add the code to your site? Check our detailed
+                  documentation or reach out to support.
+                </p>
+                <a href="#" className="mt-4 block font-bold text-neutral-900 hover:text-pink-600">
+                  View Documentation →
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
