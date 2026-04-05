@@ -460,12 +460,24 @@ function TestimonialCard({
         {/* Content Section */}
         <div className="min-w-0 flex-1">
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`size-4 ${(t.rating ?? 0) > i ? "fill-amber-400 text-amber-400" : "fill-neutral-100 text-neutral-100"}`}
-                />
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <div key={s} className="relative">
+                  {/* Base Star (Grey) */}
+                  <Star className="size-4 fill-neutral-100 text-neutral-100" />
+                  {/* Half Star Overlay */}
+                  {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
+                    <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
+                      <Star className="size-4 fill-amber-400 text-amber-400" />
+                    </div>
+                  )}
+                  {/* Full Star Overlay */}
+                  {(t.rating ?? 0) >= s && (
+                    <div className="absolute inset-0 z-10 overflow-hidden">
+                      <Star className="size-4 fill-amber-400 text-amber-400" />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
@@ -473,12 +485,20 @@ function TestimonialCard({
             </span>
           </div>
 
-          <p
-            className="mb-8 text-[17px] leading-relaxed font-medium text-neutral-800 italic sm:text-[18px]"
-            style={{ fontFamily: "'Georgia', serif" }}
-          >
-            "{t.content}"
-          </p>
+          {t.type === "video" && t.videoUrl && (
+            <div className="mb-6 aspect-video w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-100 bg-black shadow-lg">
+              <video src={t.videoUrl} controls className="size-full object-cover" />
+            </div>
+          )}
+
+          {t.content && (
+            <p
+              className="mb-8 text-[17px] leading-relaxed font-medium text-neutral-800 italic sm:text-[18px]"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              "{t.content}"
+            </p>
+          )}
 
           <footer className="flex items-center gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">

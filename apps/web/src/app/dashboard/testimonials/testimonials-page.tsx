@@ -165,14 +165,23 @@ function avatarColor(index: number) {
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          // biome-ignore lint/suspicious/noArrayIndexKey: static decorative list
-          key={i}
-          className="size-3"
-          fill={i < rating ? "#f59e0b" : "none"}
-          style={{ color: i < rating ? "#f59e0b" : "#d4d4d4" }}
-        />
+      {[1, 2, 3, 4, 5].map((s) => (
+        <div key={s} className="relative">
+          {/* Base Star (Grey) */}
+          <Star className="size-3 fill-neutral-100 text-neutral-100" />
+          {/* Half Star Overlay */}
+          {rating >= s - 0.5 && rating < s && (
+            <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+            </div>
+          )}
+          {/* Full Star Overlay */}
+          {rating >= s && (
+            <div className="absolute inset-0 z-10 overflow-hidden">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );

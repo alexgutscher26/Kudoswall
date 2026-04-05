@@ -106,8 +106,18 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
 
     setLoading(true);
     try {
-      // TODO: In a real app, we'd upload the videoBlob and photo to storage here
-      // and get the URL. For now, we'll simulate the text submission.
+      // 1. Simulate Upload for Video
+      let videoUrl: string | undefined;
+      if (videoBlob) {
+        // TODO: In a real app, you'd upload this to R2 / Vercel Blob / S3
+        // For development, we'll use a data URL (not recommended for production due to size)
+        const reader = new FileReader();
+        videoUrl = await new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(videoBlob);
+        });
+      }
+
       await submitTestimonial(project.id, {
         rating,
         content,
@@ -117,6 +127,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
         authorCompany: company || undefined,
         authorLinkedin: linkedin || undefined,
         authorTagline: tagline || undefined,
+        videoUrl: videoUrl,
       });
 
       confetti({

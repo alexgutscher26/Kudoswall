@@ -47,6 +47,7 @@ export async function submitTestimonial(
     authorCompany?: string;
     authorLinkedin?: string;
     authorTagline?: string;
+    videoUrl?: string;
   },
 ) {
   const id = `tst_${nanoid()}`;
@@ -62,8 +63,9 @@ export async function submitTestimonial(
     authorCompany: data.authorCompany,
     authorLinkedin: data.authorLinkedin,
     authorTagline: data.authorTagline,
+    videoUrl: data.videoUrl,
     status: "pending",
-    type: "text", // Could be "video" if videoUrl is present
+    type: data.videoUrl ? "video" : "text",
   });
 
   return { success: true };
