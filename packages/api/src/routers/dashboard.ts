@@ -105,4 +105,31 @@ export const dashboardRouter = router({
         testimonials,
       };
     }),
+  updateProjectSettings: protectedProcedure
+    .input(z.object({ projectId: z.string(), settings: z.any() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { projectId, settings } = input;
+
+      // Verify ownership
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, projectId),
+        with: {
+          workspace: true,
+        },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      await db
+        .update(project)
+        .set({
+          collectionSettingsJson: JSON.stringify(settings),
+        })
+        .where(eq(project.id, projectId));
+
+      return { success: true };
+    }),
 });

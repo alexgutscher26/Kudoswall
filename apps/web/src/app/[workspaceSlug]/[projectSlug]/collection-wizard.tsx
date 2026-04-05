@@ -30,6 +30,7 @@ interface CollectionWizardProps {
     id: string;
     name: string;
     thankYouMessage?: string | null;
+    collectionSettingsJson?: string | null;
     workspace: {
       isPro: boolean;
       branding: {
@@ -44,7 +45,20 @@ interface CollectionWizardProps {
 type Step = "rating" | "text" | "photo" | "video" | "details" | "success";
 
 export default function CollectionWizard({ project }: CollectionWizardProps) {
-  const [step, setStep] = useState<Step>("rating");
+  const settings = useMemo(() => {
+    try {
+      return project.collectionSettingsJson ? JSON.parse(project.collectionSettingsJson) : null;
+    } catch (e) {
+      return null;
+    }
+  }, [project.collectionSettingsJson]);
+
+  const [step, setStep] = useState<Step>(() => {
+    if (settings?.form?.starRating?.enabled === false) {
+      return "text";
+    }
+    return "rating";
+  });
   const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [content, setContent] = useState("");
@@ -58,31 +72,62 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   const [tagline, setTagline] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const accentColor = project.workspace.branding.accentColor || "#e8527a";
+  const accentColor = settings?.accentColor || project.workspace.branding.accentColor || "#e8527a";
   const isPro = project.workspace.isPro;
 
-  const steps: Record<Step, number> = {
-    rating: 0,
-    text: 1,
-    photo: 2,
-    video: 3,
-    details: 4,
-    success: 5,
-  };
+  const steps: Record<Step, number> = useMemo(
+    () => ({
+      rating: 0,
+      text: 1,
+      photo: 2,
+      video: 3,
+      details: 4,
+      success: 5,
+    }),
+    [],
+  );
 
   const nextStep = () => {
     const sequence: Step[] = ["rating", "text", "photo", "video", "details", "success"];
     const currentIndex = sequence.indexOf(step);
-    if (currentIndex < sequence.length - 1) {
-      setStep(sequence[currentIndex + 1]);
+
+    // Logic to skip steps
+    let nextIdx = currentIndex + 1;
+
+    // Skip video if disabled
+    if (
+      sequence[nextIdx] === "video" &&
+      (settings?.video?.enabled === false || (settings?.video?.enabled === undefined && !isPro))
+    ) {
+      nextIdx++;
+    }
+
+    if (nextIdx < sequence.length) {
+      setStep(sequence[nextIdx]);
     }
   };
 
   const prevStep = () => {
     const sequence: Step[] = ["rating", "text", "photo", "video", "details", "success"];
     const currentIndex = sequence.indexOf(step);
-    if (currentIndex > 0) {
-      setStep(sequence[currentIndex - 1]);
+
+    let prevIdx = currentIndex - 1;
+
+    // Skip video if disabled
+    if (
+      sequence[prevIdx] === "video" &&
+      (settings?.video?.enabled === false || (settings?.video?.enabled === undefined && !isPro))
+    ) {
+      prevIdx--;
+    }
+
+    // Skip rating if disabled
+    if (sequence[prevIdx] === "rating" && settings?.form?.starRating?.enabled === false) {
+      prevIdx--; // Should not happen but for safety
+    }
+
+    if (prevIdx >= 0) {
+      setStep(sequence[prevIdx]);
     }
   };
 
@@ -99,8 +144,13 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   };
 
   const handleSubmit = async () => {
-    if (!name || content.length < 50) {
-      toast.error("Please ensure your name is filled and testimonial is at least 50 characters.");
+    const minCount = settings?.form?.minCharCount ?? 50;
+    const isNameRequired = settings?.form?.fields?.fullName?.required !== false;
+
+    if ((isNameRequired && !name) || content.length < minCount) {
+      toast.error(
+        `Please ensure your name is filled and testimonial is at least ${minCount} characters.`,
+      );
       return;
     }
 
@@ -146,7 +196,8 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   };
 
   const charCount = content.length;
-  const isContentValid = charCount >= 50;
+  const minCount = settings?.form?.minCharCount ?? 50;
+  const isContentValid = charCount >= minCount;
 
   if (isCropping && photo) {
     return (
@@ -164,7 +215,17 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 lg:px-0">
+    <div
+      className="mx-auto w-full max-w-xl px-4 lg:px-0"
+      style={{
+        fontFamily:
+          settings?.font === "serif"
+            ? "serif"
+            : settings?.font === "mono"
+              ? "monospace"
+              : "inherit",
+      }}
+    >
       <div className="text-card-foreground relative flex min-h-[500px] flex-col overflow-hidden rounded-[40px] border border-white/50 bg-white/70 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] backdrop-blur-xl">
         {/* Progress Bar */}
         <div className="absolute top-0 right-0 left-0 h-1 overflow-hidden bg-neutral-100/30">
@@ -281,10 +342,10 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                     </div>
                     <div>
                       <h2 className="text-2xl font-black tracking-tighter text-neutral-900">
-                        Share your story
+                        {settings?.form?.fields?.content?.label || "Share your story"}
                       </h2>
                       <p className="text-[11px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
-                        What results did you achieve?
+                        {settings?.video?.prompt || "What results did you achieve?"}
                       </p>
                     </div>
                   </div>
@@ -292,10 +353,13 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   <div className="group relative flex flex-1 flex-col">
                     <textarea
                       autoFocus
-                      className="w-full flex-1 resize-none rounded-[32px] border border-neutral-100 bg-neutral-50/30 p-8 pt-10 text-[18px] leading-relaxed font-medium text-neutral-900 transition-all outline-none placeholder:text-neutral-300 focus:border-neutral-200 focus:bg-white focus:ring-[6px]"
+                      className="w-full flex-1 resize-none rounded-[32px] border border-neutral-100 bg-neutral-50/30 p-8 pt-10 text-[18px] leading-relaxed font-medium text-neutral-900 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[6px]"
                       style={{ "--tw-ring-color": `${accentColor}08` } as any}
                       onChange={(e) => setContent(e.target.value)}
-                      placeholder="I chose TestimonialWall because..."
+                      placeholder={
+                        settings?.form?.fields?.content?.placeholder ||
+                        "I chose TestimonialWall because..."
+                      }
                       value={content}
                     />
 
@@ -304,7 +368,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                       <span
                         className={`text-[11px] font-black tracking-widest uppercase transition-colors ${isContentValid ? "text-emerald-500" : "text-neutral-400"}`}
                       >
-                        {charCount} / 50 MIN
+                        {charCount} / {minCount} MIN
                       </span>
                       <div className="h-4 w-[1px] bg-neutral-200" />
                       <button
@@ -395,6 +459,8 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   <VideoRecorder
                     isPro={isPro}
                     accentColor={accentColor}
+                    maxLength={settings?.video?.maxLength || 60}
+                    prompt={settings?.video?.prompt}
                     onConfirm={(blob) => {
                       setVideoBlob(blob);
                       nextStep();
@@ -429,59 +495,97 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                          Full Name *
+                          {settings?.form?.fields?.fullName?.label || "Full Name"}{" "}
+                          {settings?.form?.fields?.fullName?.required !== false ? "*" : ""}
                         </label>
                         <input
                           className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
                           style={{ "--tw-ring-color": `${accentColor}08` } as any}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Jane Doe"
-                          required
+                          placeholder={settings?.form?.fields?.fullName?.placeholder || "Jane Doe"}
+                          required={settings?.form?.fields?.fullName?.required !== false}
                           value={name}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                          Email
-                        </label>
-                        <input
-                          className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
-                          style={{ "--tw-ring-color": `${accentColor}08` } as any}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="jane@example.com"
-                          type="email"
-                          value={email}
-                        />
-                      </div>
+                      {settings?.form?.fields?.email?.enabled !== false && (
+                        <div className="space-y-1.5">
+                          <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+                            {settings?.form?.fields?.email?.label || "Email"}{" "}
+                            {settings?.form?.fields?.email?.required ? "*" : ""}
+                          </label>
+                          <input
+                            className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
+                            style={{ "--tw-ring-color": `${accentColor}08` } as any}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder={
+                              settings?.form?.fields?.email?.placeholder || "jane@example.com"
+                            }
+                            type="email"
+                            required={settings?.form?.fields?.email?.required}
+                            value={email}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-4 border-t border-neutral-100/50 pt-5">
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {settings?.form?.fields?.company?.enabled !== false && (
+                          <div className="space-y-1.5">
+                            <label className="flex items-center gap-2 pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+                              <Building2 className="size-3" />{" "}
+                              {settings?.form?.fields?.company?.label || "Company"}{" "}
+                              {settings?.form?.fields?.company?.required ? "*" : ""}
+                            </label>
+                            <input
+                              className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
+                              style={{ "--tw-ring-color": `${accentColor}08` } as any}
+                              onChange={(e) => setCompany(e.target.value)}
+                              placeholder={
+                                settings?.form?.fields?.company?.placeholder || "Acme Inc."
+                              }
+                              required={settings?.form?.fields?.company?.required}
+                              value={company}
+                            />
+                          </div>
+                        )}
+                        {settings?.form?.fields?.jobTitle?.enabled !== false && (
+                          <div className="space-y-1.5">
+                            <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+                              {settings?.form?.fields?.jobTitle?.label || "Job Title"}{" "}
+                              {settings?.form?.fields?.jobTitle?.required ? "*" : ""}
+                            </label>
+                            <input
+                              className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
+                              style={{ "--tw-ring-color": `${accentColor}08` } as any}
+                              onChange={(e) => setTagline(e.target.value)}
+                              placeholder={settings?.form?.fields?.jobTitle?.placeholder || "CEO"}
+                              required={settings?.form?.fields?.jobTitle?.required}
+                              value={tagline}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {settings?.form?.fields?.linkedin?.enabled && (
                         <div className="space-y-1.5">
                           <label className="flex items-center gap-2 pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                            <Building2 className="size-3" /> Company
+                            <Linkedin className="size-3" />{" "}
+                            {settings?.form?.fields?.linkedin?.label || "LinkedIn Profile"}{" "}
+                            {settings?.form?.fields?.linkedin?.required ? "*" : ""}
                           </label>
                           <input
                             className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
                             style={{ "--tw-ring-color": `${accentColor}08` } as any}
-                            onChange={(e) => setCompany(e.target.value)}
-                            placeholder="Acme Inc."
-                            value={company}
+                            onChange={(e) => setLinkedin(e.target.value)}
+                            placeholder={
+                              settings?.form?.fields?.linkedin?.placeholder ||
+                              "https://linkedin.com/in/jane"
+                            }
+                            required={settings?.form?.fields?.linkedin?.required}
+                            value={linkedin}
                           />
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                            Job Title
-                          </label>
-                          <input
-                            className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[4px]"
-                            style={{ "--tw-ring-color": `${accentColor}08` } as any}
-                            onChange={(e) => setTagline(e.target.value)}
-                            placeholder="CEO"
-                            value={tagline}
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 
@@ -491,7 +595,9 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                       backgroundColor: name ? accentColor : "#171717",
                       boxShadow: name ? `0 15px 30px -10px ${accentColor}50` : undefined,
                     }}
-                    disabled={loading || !name}
+                    disabled={
+                      loading || (settings?.form?.fields?.fullName?.required !== false && !name)
+                    }
                     onClick={handleSubmit}
                   >
                     {loading ? (
@@ -519,19 +625,36 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                   </div>
                   <div className="space-y-4">
                     <h2 className="text-4xl leading-tight font-black tracking-tighter text-neutral-900">
-                      You&apos;re awesome!
+                      {settings?.pageContent?.thankYou?.headline || "You're awesome!"}
                     </h2>
                     <p className="text-md mx-auto max-w-sm leading-relaxed font-medium text-neutral-500/80">
-                      {project.thankYouMessage ||
+                      {settings?.pageContent?.thankYou?.body ||
+                        project.thankYouMessage ||
                         `Your feedback has been sent to ${project.name}. It helps us more than you know.`}
                     </p>
                   </div>
-                  <button
-                    className="rounded-[18px] border border-neutral-100 bg-white px-8 py-3.5 text-[14px] font-bold text-neutral-600 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:bg-neutral-50 hover:text-neutral-900 active:scale-95"
-                    onClick={() => window.location.reload()}
-                  >
-                    Post another one
-                  </button>
+                  <div className="flex flex-col gap-3">
+                    {settings?.pageContent?.thankYou?.cta?.enabled &&
+                      settings?.pageContent?.thankYou?.cta?.text && (
+                        <a
+                          href={settings.pageContent.thankYou.cta.url}
+                          className="rounded-full px-8 py-3.5 text-[15px] font-black text-white shadow-xl transition-all hover:opacity-90 active:scale-95"
+                          style={{
+                            backgroundColor: accentColor,
+                            boxShadow: `0 10px 25px -5px ${accentColor}40`,
+                          }}
+                        >
+                          {settings.pageContent.thankYou.cta.text}
+                          <ChevronRight className="ml-2 inline size-4" />
+                        </a>
+                      )}
+                    <button
+                      className="rounded-[18px] border border-neutral-100 bg-white px-8 py-3.5 text-[14px] font-bold text-neutral-600 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:bg-neutral-50 hover:text-neutral-900 active:scale-95"
+                      onClick={() => window.location.reload()}
+                    >
+                      Post another one
+                    </button>
+                  </div>
                 </div>
               )}
             </motion.div>

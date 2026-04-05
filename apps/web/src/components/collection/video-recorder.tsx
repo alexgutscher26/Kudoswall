@@ -7,17 +7,21 @@ interface VideoRecorderProps {
   isPro: boolean;
   onConfirm: (blob: Blob) => void;
   accentColor?: string;
+  maxLength?: number;
+  prompt?: string;
 }
 
 export default function VideoRecorder({
   isPro,
   onConfirm,
   accentColor = "#e8527a",
+  maxLength = 60,
+  prompt,
 }: VideoRecorderProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(90);
+  const [timeLeft, setTimeLeft] = useState(maxLength);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +92,7 @@ export default function VideoRecorder({
 
     recorder.start();
     setRecording(true);
-    setTimeLeft(90);
+    setTimeLeft(maxLength);
 
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -112,14 +116,14 @@ export default function VideoRecorder({
   const reset = () => {
     setRecordedBlob(null);
     setPreviewUrl(null);
-    setTimeLeft(90);
+    setTimeLeft(maxLength);
     initStream();
   };
 
   // ─── Free Tier UI ───────────────────────────────────────────────────────────
   if (!isPro) {
     return (
-      <div className="group relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[32px] border border-neutral-100 bg-neutral-50 bg-white p-8 text-center">
+      <div className="group relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[32px] border border-neutral-100 bg-white p-8 text-center">
         <div className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[6px]" />
         <div className="relative z-20 flex flex-col items-center gap-4">
           <div className="mb-2 flex size-16 items-center justify-center rounded-2xl bg-neutral-900 shadow-xl">
@@ -151,14 +155,14 @@ export default function VideoRecorder({
           <button
             type="button"
             onClick={reset}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-200 py-4 text-[14px] font-bold font-medium text-neutral-600 transition-all hover:bg-neutral-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-200 py-4 text-[14px] font-bold text-neutral-600 transition-all hover:bg-neutral-50"
           >
             <RotateCcw className="size-4" /> Re-record
           </button>
           <button
             type="button"
             onClick={() => onConfirm(recordedBlob)}
-            className="flex-[2] rounded-2xl py-4 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            className="flex-2 rounded-2xl py-4 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ backgroundColor: accentColor }}
           >
             Use this video
@@ -247,7 +251,7 @@ export default function VideoRecorder({
       <p className="text-center text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
         {recording
           ? "Recording... Keep talking! 🎙️"
-          : "Smile and share your story for 30-60 seconds"}
+          : prompt || "Smile and share your story for 30-60 seconds"}
       </p>
     </div>
   );

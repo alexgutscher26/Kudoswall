@@ -52,6 +52,7 @@ export const project = pgTable(
     collectionSlug: text("collection_slug").unique(),
     description: text("description"),
     thankYouMessage: text("thank_you_message"),
+    collectionSettingsJson: text("collection_settings_json"),
     active: boolean("active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

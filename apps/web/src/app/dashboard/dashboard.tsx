@@ -37,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
+  { href: "/dashboard/collection", icon: Globe, label: "Collection Page" },
   { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
   { href: "/dashboard/embed", icon: Code2, label: "Embed Widget" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
