@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProjectBySlug } from "./actions";
 import CollectionWizard from "./collection-wizard";
+export const dynamic = "force-dynamic";
 
 interface ProjectPageProps {
   params: Promise<{
