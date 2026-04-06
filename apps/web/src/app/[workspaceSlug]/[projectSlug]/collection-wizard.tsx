@@ -45,9 +45,12 @@ interface CollectionWizardProps {
   };
 }
 
-type Step = "rating" | "text" | "photo" | "video" | "details" | "success";
+type Step = "rating" | "choice" | "text" | "photo" | "video" | "details" | "success";
 
-export default function CollectionWizard({ project }: CollectionWizardProps) {
+export default function CollectionWizard({
+  project,
+  initialType,
+}: CollectionWizardProps & { initialType?: "text" | "video" | null }) {
   const settings = useMemo(() => {
     try {
       return project.collectionSettingsJson ? JSON.parse(project.collectionSettingsJson) : null;
@@ -56,9 +59,11 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
     }
   }, [project.collectionSettingsJson]);
 
+  const [mode, setMode] = useState<"text" | "video" | null>(initialType || null);
   const [step, setStep] = useState<Step>(() => {
     if (settings?.form?.starRating?.enabled === false) {
-      return "text";
+      if (initialType) return initialType === "video" ? "video" : "text";
+      return "choice";
     }
     return "rating";
   });
@@ -92,6 +97,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   const steps: Record<Step, number> = useMemo(
     () => ({
       rating: 0,
+      choice: 0.5,
       text: 1,
       photo: 2,
       video: 3,
@@ -102,40 +108,37 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   );
 
   const nextStep = () => {
-    const sequence: Step[] = ["rating", "text", "photo", "video", "details", "success"];
-    const currentIndex = sequence.indexOf(step);
-
-    // Logic to skip steps
-    let nextIdx = currentIndex + 1;
-
-    // Skip video if disabled
-    if (sequence[nextIdx] === "video" && settings?.video?.enabled !== true) {
-      nextIdx++;
+    if (step === "rating") {
+      if (mode === "video") return setStep("video");
+      if (mode === "text") return setStep("text");
+      return setStep("choice");
     }
 
-    if (nextIdx < sequence.length) {
-      setStep(sequence[nextIdx]);
+    if (step === "choice") {
+      if (mode === "video") return setStep("video");
+      return setStep("text");
     }
+
+    if (step === "text") return setStep("photo");
+    if (step === "photo") return setStep("details");
+    if (step === "video") return setStep("details");
+    if (step === "details") return setStep("success");
   };
 
   const prevStep = () => {
-    const sequence: Step[] = ["rating", "text", "photo", "video", "details", "success"];
-    const currentIndex = sequence.indexOf(step);
-
-    let prevIdx = currentIndex - 1;
-
-    // Skip video if disabled
-    if (sequence[prevIdx] === "video" && settings?.video?.enabled !== true) {
-      prevIdx--;
+    if (step === "choice") return setStep("rating");
+    if (step === "text") {
+      if (initialType) return setStep("rating");
+      return setStep("choice");
     }
-
-    // Skip rating if disabled
-    if (sequence[prevIdx] === "rating" && settings?.form?.starRating?.enabled === false) {
-      prevIdx--; // Should not happen but for safety
+    if (step === "video") {
+      if (initialType) return setStep("rating");
+      return setStep("choice");
     }
-
-    if (prevIdx >= 0) {
-      setStep(sequence[prevIdx]);
+    if (step === "photo") return setStep("text");
+    if (step === "details") {
+      if (mode === "video") return setStep("video");
+      return setStep("photo");
     }
   };
 
@@ -239,7 +242,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
         <div className="absolute top-0 right-0 left-0 h-1 overflow-hidden bg-neutral-100/30">
           <motion.div
             animate={{
-              width: `${(steps[step] / 5) * 100}%`,
+              width: `${(steps[step === "choice" ? "rating" : step] / 5) * 100}%`,
             }}
             className="h-full transition-all duration-500 ease-out"
             style={{ backgroundColor: accentColor }}
@@ -338,6 +341,64 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
                       <span>Poor</span>
                       <span>Amazing</span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {step === "choice" && (
+                <div className="flex flex-1 flex-col items-center justify-center space-y-8 py-2 text-center">
+                  <div
+                    className="flex size-16 items-center justify-center rounded-[22px] shadow-lg shadow-neutral-900/5"
+                    style={{ backgroundColor: `${accentColor}10` }}
+                  >
+                    <Layout className="size-8 text-neutral-900" style={{ color: accentColor }} />
+                  </div>
+                  <div className="space-y-4">
+                    <h2 className="text-3xl leading-tight font-black tracking-tighter text-neutral-900">
+                      How would you like to share?
+                    </h2>
+                    <p className="mx-auto max-w-[280px] text-[15px] font-medium text-neutral-500/80">
+                      Choose the format that works best for you.
+                    </p>
+                  </div>
+
+                  <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                    <button
+                      onClick={() => {
+                        setMode("video");
+                        nextStep();
+                      }}
+                      className="group relative flex flex-col items-center gap-4 rounded-[32px] border border-neutral-100 bg-white p-8 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                    >
+                      <div
+                        className="flex size-14 items-center justify-center rounded-2xl transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: `${accentColor}10` }}
+                      >
+                        <VideoIcon className="size-7" style={{ color: accentColor }} />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-black tracking-tight text-neutral-900">
+                          Video
+                        </h3>
+                        <p className="text-xs font-bold text-neutral-400">Quick & Personal</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setMode("text");
+                        nextStep();
+                      }}
+                      className="group relative flex flex-col items-center gap-4 rounded-[32px] border border-neutral-100 bg-white p-8 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                    >
+                      <div className="flex size-14 items-center justify-center rounded-2xl bg-neutral-900 transition-transform group-hover:scale-110">
+                        <Quote className="size-7 text-white" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-black tracking-tight text-neutral-900">Text</h3>
+                        <p className="text-xs font-bold text-neutral-400">Simple & Classic</p>
+                      </div>
+                    </button>
                   </div>
                 </div>
               )}

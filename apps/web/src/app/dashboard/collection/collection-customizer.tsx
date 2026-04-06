@@ -19,6 +19,7 @@ import {
   Camera,
   Building2,
   Linkedin,
+  Layout,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -131,7 +132,7 @@ export function CollectionCustomizer({
   );
 
   const [activeTab, setActiveTab] = useState<
-    "branding" | "fields" | "content" | "video" | "advanced"
+    "branding" | "fields" | "content" | "video" | "share" | "advanced"
   >("branding");
   const isPro = isProProp ?? workspace.isPro;
 
@@ -225,6 +226,12 @@ export function CollectionCustomizer({
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
           >
             Adv
+          </button>
+          <button
+            onClick={() => setActiveTab("share")}
+            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "share" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+          >
+            Share
           </button>
         </div>
 
@@ -506,6 +513,69 @@ export function CollectionCustomizer({
             </div>
           )}
 
+          {activeTab === "share" && (
+            <div className="space-y-6">
+              <SectionHeader icon={Command} pro title="Share Links" />
+              <p className="text-[11px] leading-relaxed font-medium text-neutral-500">
+                Use these specialized links to guide your customers to a specific testimonial
+                format.
+              </p>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    label: "Smart Choice Link",
+                    desc: "Let customers choose Video or Text",
+                    param: "",
+                    icon: Sparkles,
+                  },
+                  {
+                    label: "Video Only Link",
+                    desc: "Direct to video recorder",
+                    param: "?t=v",
+                    icon: Video,
+                  },
+                  {
+                    label: "Text Only Link",
+                    desc: "Direct to text review form",
+                    param: "?t=t",
+                    icon: Quote,
+                  },
+                ].map((link) => {
+                  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${project.collectionSlug || project.slug}${link.param}`;
+                  return (
+                    <div
+                      key={link.label}
+                      className="group rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4 transition-all hover:bg-white hover:shadow-md"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <link.icon className="size-3 text-pink-500" />
+                          <span className="text-[10px] font-black tracking-widest text-neutral-900 uppercase">
+                            {link.label}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(url);
+                            toast.success(`${link.label} copied!`);
+                          }}
+                          className="rounded-lg bg-neutral-900 px-2.5 py-1 text-[9px] font-bold text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <p className="mb-2 text-[10px] font-medium text-neutral-400">{link.desc}</p>
+                      <div className="truncate rounded-lg bg-white px-2 py-1.5 font-mono text-[9px] text-neutral-500 italic ring-1 ring-neutral-100">
+                        {url}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {activeTab === "advanced" && (
             <div className="space-y-6">
               <SectionHeader icon={Command} pro title="Advanced" />
@@ -588,6 +658,7 @@ export function CollectionCustomizer({
           <div className="flex items-center gap-3">
             {[
               { id: "rating", label: "Rating" },
+              { id: "choice", label: "Choice" },
               { id: "text", label: "Story" },
               { id: "video", label: "Video" },
               { id: "details", label: "Form" },
@@ -658,7 +729,7 @@ function CollectionWizardPreview({
   projectName: string;
   workspaceIsPro: boolean;
   activeTab: string;
-  mockStep: "rating" | "text" | "video" | "details" | "success";
+  mockStep: "rating" | "choice" | "text" | "video" | "details" | "success";
   setMockStep: (step: any) => void;
 }) {
   // Automatically switch preview step when tab changes
@@ -719,7 +790,7 @@ function CollectionWizardPreview({
                 </div>
               )}
               <button
-                onClick={() => setMockStep("text")}
+                onClick={() => setMockStep("choice")}
                 className="rounded-2xl px-8 py-3.5 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
                 style={{
                   backgroundColor: settings.accentColor,
@@ -728,6 +799,59 @@ function CollectionWizardPreview({
               >
                 Next Question
               </button>
+            </div>
+          )}
+
+          {mockStep === "choice" && (
+            <div className="flex flex-1 flex-col items-center justify-center space-y-8 py-2 text-center">
+              <div
+                className="flex size-14 items-center justify-center rounded-[20px] shadow-lg shadow-neutral-900/5"
+                style={{ backgroundColor: `${settings.accentColor}10` }}
+              >
+                <Layout
+                  className="size-6 text-neutral-900"
+                  style={{ color: settings.accentColor }}
+                />
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl leading-tight font-black tracking-tighter text-neutral-900">
+                  How would you like to share?
+                </h2>
+                <p className="mx-auto max-w-[240px] text-[13px] font-medium text-neutral-500/80">
+                  Choose the format that works best for you.
+                </p>
+              </div>
+
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                <button
+                  onClick={() => setMockStep("video")}
+                  className="group relative flex flex-col items-center gap-4 rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110"
+                    style={{ backgroundColor: `${settings.accentColor}10` }}
+                  >
+                    <Video className="size-6" style={{ color: settings.accentColor }} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-md font-black tracking-tight text-neutral-900">Video</h3>
+                    <p className="text-[10px] font-bold text-neutral-400">Quick & Personal</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setMockStep("text")}
+                  className="group relative flex flex-col items-center gap-4 rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                >
+                  <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-900 transition-transform group-hover:scale-110">
+                    <Quote className="size-6 text-white" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-md font-black tracking-tight text-neutral-900">Text</h3>
+                    <p className="text-[10px] font-bold text-neutral-400">Simple & Classic</p>
+                  </div>
+                </button>
+              </div>
             </div>
           )}
 

@@ -8,6 +8,9 @@ interface CollectPageProps {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<{
+    t?: string;
+  }>;
 }
 
 async function getProjectByCollectionSlug(slug: string) {
@@ -39,8 +42,9 @@ async function getProjectByCollectionSlug(slug: string) {
   };
 }
 
-export default async function CollectPage({ params }: CollectPageProps) {
+export default async function CollectPage({ params, searchParams }: CollectPageProps) {
   const { slug } = await params;
+  const { t } = await searchParams;
   const projectData = await getProjectByCollectionSlug(slug);
 
   if (!projectData) {
@@ -68,8 +72,8 @@ export default async function CollectPage({ params }: CollectPageProps) {
           style={{ backgroundColor: `${accentColor}10` }}
         />
         <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
-        <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/[0.03] blur-[130px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] [background-size:32px_32px] opacity-40" />
+        <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40" />
       </div>
 
       <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
@@ -95,7 +99,10 @@ export default async function CollectPage({ params }: CollectPageProps) {
           </div>
         </div>
 
-        <CollectionWizard project={projectData as any} />
+        <CollectionWizard
+          project={projectData as any}
+          initialType={t === "v" ? "video" : t === "t" ? "text" : null}
+        />
       </div>
     </main>
   );
