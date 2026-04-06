@@ -30,8 +30,8 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             router.push("/dashboard");
             toast.success("Sign in successful");
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+          onError: (ctx) => {
+            toast.error(ctx.error.message || ctx.error.statusText || "An error occurred");
           },
         },
       );

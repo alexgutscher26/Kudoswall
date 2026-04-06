@@ -4,7 +4,10 @@ import { env } from "@my-better-t-app/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink, emailOTP, haveIBeenPwned, lastLoginMethod } from "better-auth/plugins";
+import { magicLink } from "better-auth/plugins/magic-link";
+import { emailOTP } from "better-auth/plugins/email-otp";
+import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
+import { lastLoginMethod } from "better-auth/plugins";
 
 export function createAuth() {
   const db = createDb();
@@ -22,6 +25,11 @@ export function createAuth() {
         secure: true,
         sameSite: "lax",
       },
+    },
+    rateLimit: {
+      enabled: true,
+      window: 60, // 1 minute
+      max: 10, // 10 requests per window
     },
 
     emailAndPassword: {

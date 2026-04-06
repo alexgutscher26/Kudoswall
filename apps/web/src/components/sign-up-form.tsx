@@ -32,8 +32,8 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             router.push("/dashboard");
             toast.success("Sign up successful");
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+          onError: (ctx) => {
+            toast.error(ctx.error.message || ctx.error.statusText || "An error occurred");
           },
         },
       );
