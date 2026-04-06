@@ -151,7 +151,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       ? "bg-neutral-900 text-white border-neutral-800"
       : "bg-white text-neutral-900 border-neutral-100";
 
-  const renderCard = (t: any) => {
+  const renderCard = (t: any, index: number) => {
     const isTruncated = settings.truncateText !== "off";
     const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 0;
     const content =
@@ -182,6 +182,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                     alt={t.authorName}
                     width={40}
                     height={40}
+                    priority={index < 3}
                     className="size-full object-cover"
                   />
                 ) : (
@@ -253,9 +254,9 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
-                {testimonials.map((t) => (
+                {testimonials.map((t, index) => (
                   <div key={t.id} className="w-full shrink-0 px-4">
-                    {renderCard(t)}
+                    {renderCard(t, index)}
                   </div>
                 ))}
               </div>
@@ -313,7 +314,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                       : ""
             }`}
           >
-            {testimonials.map((t) => renderCard(t))}
+            {testimonials.map((t, index) => renderCard(t, index))}
           </div>
         )}
 

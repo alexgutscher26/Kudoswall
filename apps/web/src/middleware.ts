@@ -2,17 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const nonce = crypto.randomUUID();
+  const url = new URL(request.url);
+  const isEmbedPage = url.pathname.startsWith("/embed/");
+
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com;
+    img-src 'self' blob: data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors 'none';
+    frame-ancestors ${isEmbedPage ? "*" : "'none'"};
     upgrade-insecure-requests;
   `
     .replace(/\s{2,}/g, " ")
@@ -55,6 +57,12 @@ export function middleware(request: NextRequest) {
   }
 
   response.headers.set("Content-Security-Policy", cspHeader);
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  );
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+
   return response;
 }
 
@@ -68,7 +76,7 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     {
-      source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+      source: "/((?!api|_next/static|_next/image|favicon.ico|widget.js).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

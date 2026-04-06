@@ -6,12 +6,32 @@ import { NextRequest, NextResponse } from "next/server";
 
 // TODO: Implement resend
 
+import { z } from "zod";
+
+const testimonialSchema = z.object({
+  rating: z.number().min(1).max(5),
+  content: z.string().min(1, "Content is required").max(5000),
+  authorName: z.string().min(1, "Name is required").max(100),
+  authorEmail: z.string().email("Invalid email").max(100),
+  authorImage: z.string().optional(),
+  authorCompany: z.string().max(100).optional(),
+  authorLinkedin: z.string().url("Invalid URL").max(200).optional().or(z.literal("")),
+  authorTagline: z.string().max(100).optional(),
+  videoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+});
+
 // Simple in-memory rate limiting (Note: In production with multiple instances, use Redis/KV)
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
+
+  // Robust IP detection (Cloudflare-friendly)
+  const ip =
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    "unknown";
 
   // 1. Rate Limiting Logic (5 submissions per IP per 24h)
   const now = Date.now();
@@ -33,17 +53,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
   }
 
   try {
-    const body = (await req.json()) as {
-      rating: number;
-      content: string;
-      authorName: string;
-      authorEmail: string;
-      authorImage?: string;
-      authorCompany?: string;
-      authorLinkedin?: string;
-      authorTagline?: string;
-      videoUrl?: string;
-    };
+    const rawBody = await req.json();
+    const validated = testimonialSchema.safeParse(rawBody);
+
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: validated.error.format() },
+        { status: 400 },
+      );
+    }
+
+    const body = validated.data;
 
     // 2. Fetch Project by collectionSlug
     const proj = await db.query.project.findFirst({
