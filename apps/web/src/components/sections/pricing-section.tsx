@@ -15,6 +15,7 @@ interface Plan {
   highlight: boolean;
   features: string[];
   badge?: string;
+  isComingSoon?: boolean;
 }
 
 const PLANS: Plan[] = [
@@ -61,9 +62,10 @@ const PLANS: Plan[] = [
     yearlyPrice: "$790",
     period: "per month",
     description: "For teams and agencies managing multiple brands.",
-    cta: "Contact sales",
-    ctaHref: "/login",
+    cta: "Get on the waitlist",
+    ctaHref: "#",
     highlight: false,
+    isComingSoon: true,
     features: [
       "Everything in Pro",
       "Up to 5 team members",
@@ -283,6 +285,7 @@ export default function PricingSection() {
               highlight,
               features,
               badge,
+              isComingSoon,
             }) => (
               <div
                 key={name}
@@ -319,9 +322,13 @@ export default function PricingSection() {
                       className="text-4xl font-black tracking-tighter sm:text-5xl"
                       style={{ color: highlight ? "#ffffff" : "#111827" }}
                     >
-                      {billingCycle === "monthly" ? monthlyPrice : yearlyPrice}
+                      {isComingSoon
+                        ? "Coming Soon"
+                        : billingCycle === "monthly"
+                          ? monthlyPrice
+                          : yearlyPrice}
                     </span>
-                    {period && (
+                    {!isComingSoon && period && (
                       <span
                         className="text-sm font-bold tracking-widest uppercase"
                         style={{ color: highlight ? "rgba(255,255,255,0.5)" : "#9ca3af" }}
