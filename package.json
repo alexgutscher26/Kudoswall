@@ -24,7 +24,14 @@
       "@types/react-dom": "^19.2.3",
       "tailwindcss": "^4.1.18",
       "alchemy": "^0.90.0",
-      "drizzle-orm": "^0.45.1"
+      "drizzle-orm": "^0.45.1",
+      "@opentelemetry/api": "^1.9.0",
+      "@opentelemetry/sdk-node": "^0.55.0",
+      "@opentelemetry/instrumentation-http": "^0.55.0",
+      "@opentelemetry/instrumentation-fetch": "^0.55.0",
+      "@opentelemetry/exporter-trace-otlp-http": "^0.55.0",
+      "@opentelemetry/resources": "^1.28.0",
+      "@opentelemetry/semantic-conventions": "^1.28.0"
     }
   },
   "type": "module",

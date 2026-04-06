@@ -2,6 +2,7 @@
 
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import {
   Building2,
   Camera,
@@ -466,7 +467,13 @@ export default function CollectionWizard({
                     />
                     <div className="relative flex size-32 cursor-pointer items-center justify-center overflow-hidden rounded-[32px] border-2 border-dashed border-neutral-200 bg-white/50 shadow-inner transition-all group-active:scale-95 hover:border-neutral-300 hover:bg-white">
                       {photo ? (
-                        <img alt="Preview" className="size-full object-cover" src={photo} />
+                        <Image
+                          alt="Preview"
+                          className="size-full object-cover"
+                          src={photo}
+                          width={128}
+                          height={128}
+                        />
                       ) : (
                         <div className="flex flex-col items-center gap-2">
                           <div className="rounded-xl bg-neutral-50 p-3 transition-colors group-hover:bg-neutral-100">

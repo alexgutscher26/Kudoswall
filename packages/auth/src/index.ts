@@ -17,6 +17,12 @@ export function createAuth() {
     trustedOrigins: [env.CORS_ORIGIN],
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    advanced: {
+      defaultCookieAttributes: {
+        secure: true,
+        sameSite: "lax",
+      },
+    },
 
     emailAndPassword: {
       enabled: true,
@@ -44,12 +50,12 @@ export function createAuth() {
     plugins: [
       nextCookies(),
       magicLink({
-        sendMagicLink: async ({ email, token, url }, ctx) => {
+        sendMagicLink: async ({ email, url }) => {
           console.log(`[Magic Link] Sent to ${email}: ${url}`);
         },
       }),
       emailOTP({
-        sendVerificationOTP: async ({ email, otp, type }, ctx) => {
+        sendVerificationOTP: async ({ email, otp, type }) => {
           console.log(`[Email OTP] ${type} for ${email}: ${otp}`);
         },
       }),

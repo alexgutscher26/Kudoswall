@@ -17,10 +17,23 @@ export const queryClient = new QueryClient({
   }),
 });
 
+function getCookie(name: string) {
+  if (typeof document === "undefined") return undefined;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+  return undefined;
+}
+
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: "/api/trpc",
+      headers() {
+        return {
+          "x-trpc-csrf": getCookie("csrf-token") || "",
+        };
+      },
       fetch(url, options) {
         return fetch(url, {
           ...options,

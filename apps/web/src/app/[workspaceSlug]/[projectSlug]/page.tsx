@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { getProjectBySlug } from "./actions";
 import CollectionWizard from "./collection-wizard";
+import ErrorBoundary from "@/components/error-boundary";
 export const dynamic = "force-dynamic";
 
 interface ProjectPageProps {
@@ -38,9 +40,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <div className="z-10 mx-auto w-full max-w-4xl space-y-12">
         <div className="space-y-4 text-center">
           {projectData.workspace?.logoUrl && (
-            <img
+            <Image
               src={projectData.workspace.logoUrl}
               alt={projectData.workspace.name}
+              width={48}
+              height={48}
+              priority
               className="mx-auto mb-6 size-12 rounded-xl opacity-50 shadow-sm grayscale"
             />
           )}
@@ -56,7 +61,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </p>
         </div>
 
-        <CollectionWizard project={{ ...projectData, workspaceId: projectData.workspaceId }} />
+        <ErrorBoundary name="Collection Wizard">
+          <CollectionWizard project={projectData} />
+        </ErrorBoundary>
 
         <footer className="mt-12 text-center">
           <p className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">

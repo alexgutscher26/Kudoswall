@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 import { Star, Quote, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { trpc } from "@/utils/trpc";
@@ -176,7 +177,13 @@ export default function Widget({ data, testimonials }: WidgetProps) {
             {settings.showReviewerPhoto && (
               <div className="size-10 shrink-0 overflow-hidden rounded-full bg-neutral-100">
                 {t.authorImage ? (
-                  <img src={t.authorImage} alt={t.authorName} className="size-full object-cover" />
+                  <Image
+                    src={t.authorImage}
+                    alt={t.authorName}
+                    width={40}
+                    height={40}
+                    className="size-full object-cover"
+                  />
                 ) : (
                   <div className="flex size-full items-center justify-center font-bold text-neutral-400">
                     {t.authorName.charAt(0)}

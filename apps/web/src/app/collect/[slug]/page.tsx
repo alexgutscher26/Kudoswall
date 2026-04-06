@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { db } from "@/lib/server-db";
 import { project } from "@my-better-t-app/db/schema";
 import { eq, or } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
+import ErrorBoundary from "@/components/error-boundary";
 
 interface CollectPageProps {
   params: Promise<{
@@ -84,9 +86,12 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
                 className="absolute -inset-2 rounded-[24px] opacity-20 blur-xl transition-opacity group-hover:opacity-40"
                 style={{ backgroundColor: accentColor }}
               />
-              <img
+              <Image
                 src={logoUrl}
                 alt={projectData.workspace.name}
+                width={56}
+                height={56}
+                priority
                 className="relative mx-auto size-14 rounded-[18px] border border-neutral-100 bg-white object-cover p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
               />
             </div>
@@ -99,10 +104,12 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
           </div>
         </div>
 
-        <CollectionWizard
-          project={projectData as any}
-          initialType={t === "v" ? "video" : t === "t" ? "text" : null}
-        />
+        <ErrorBoundary name="Collection Wizard">
+          <CollectionWizard
+            project={projectData as any}
+            initialType={t === "v" ? "video" : t === "t" ? "text" : null}
+          />
+        </ErrorBoundary>
       </div>
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import {
   Star,
   User,
@@ -586,9 +587,11 @@ function TestimonialCard({
           <footer className="flex items-center gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
-                <img
+                <Image
                   src={t.authorImage}
                   alt={t.authorName ?? "Author"}
+                  width={44}
+                  height={44}
                   className="size-full object-cover"
                 />
               ) : (

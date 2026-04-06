@@ -12,6 +12,7 @@ export async function createContext(req: NextRequest) {
     db,
     auth: null,
     session,
+    req,
   };
 }
 

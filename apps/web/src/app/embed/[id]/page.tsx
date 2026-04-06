@@ -3,6 +3,7 @@ import { widget, project, testimonial } from "@my-better-t-app/db/schema";
 import { eq, and, desc, inArray, gte } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Widget from "@/components/widget";
+import ErrorBoundary from "@/components/error-boundary";
 export const dynamic = "force-dynamic";
 
 export default async function EmbedPage({
@@ -94,7 +95,9 @@ export default async function EmbedPage({
 
   return (
     <div className="h-auto bg-transparent p-4">
-      <Widget data={widgetData} testimonials={testimonialsList} />
+      <ErrorBoundary name="Widget">
+        <Widget data={widgetData} testimonials={testimonialsList} />
+      </ErrorBoundary>
     </div>
   );
 }

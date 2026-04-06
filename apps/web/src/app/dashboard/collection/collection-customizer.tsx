@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import Image from "next/image";
 import {
   Palette,
   FormInput,
@@ -684,9 +685,11 @@ export function CollectionCustomizer({
                     className="absolute -inset-2 rounded-[24px] opacity-20 blur-xl transition-opacity group-hover:opacity-40"
                     style={{ backgroundColor: settings.accentColor }}
                   />
-                  <img
+                  <Image
                     src={settings.logoUrl || workspace.logoUrl}
                     alt={workspace.name}
+                    width={56}
+                    height={56}
                     className="relative mx-auto size-14 rounded-[18px] border border-neutral-100 bg-white object-cover p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                   />
                 </div>

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -31,6 +32,7 @@ import { createProject } from "./actions";
 import { gooeyToast as toast } from "goey-toast";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
+import ErrorBoundary from "@/components/error-boundary";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -837,9 +839,11 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
           <div className="flex min-w-0 flex-1 items-center gap-4">
             <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
-                <img
+                <Image
                   src={t.authorImage}
                   alt={t.authorName || "User"}
+                  width={40}
+                  height={40}
                   className="size-full object-cover"
                 />
               ) : (
@@ -1126,82 +1130,84 @@ export default function DashboardShell({
 
         {/* Main content */}
         <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          {children || (
-            <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-              {/* Stats grid — 2 cols on mobile, 4 on xl */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-                {stats.map((stat) => (
-                  <StatCard key={stat.label} {...stat} />
-                ))}
-              </div>
+          <ErrorBoundary name={pageTitle || "Dashboard Content"}>
+            {children || (
+              <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+                {/* Stats grid — 2 cols on mobile, 4 on xl */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+                  {stats.map((stat) => (
+                    <StatCard key={stat.label} {...stat} />
+                  ))}
+                </div>
 
-              {/* Main split */}
-              <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
-                {/* Testimonials panel */}
-                <div
-                  className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
-                  style={{ backgroundColor: "#ffffff" }}
-                >
+                {/* Main split */}
+                <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
+                  {/* Testimonials panel */}
                   <div
-                    className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
-                    style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                    className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
+                    style={{ backgroundColor: "#ffffff" }}
                   >
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-neutral-900">
-                        Recent Testimonials
-                      </p>
-                      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
-                        Latest submissions from your customers
-                      </p>
+                    <div
+                      className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
+                      style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-semibold text-neutral-900">
+                          Recent Testimonials
+                        </p>
+                        <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
+                          Latest submissions from your customers
+                        </p>
+                      </div>
+                      {/* Filter chips */}
+                      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+                        {["All", "Video", "Text"].map((f, i) => (
+                          <button
+                            key={f}
+                            type="button"
+                            className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
+                            style={
+                              i === 0
+                                ? {
+                                    backgroundColor: "#fff5f7",
+                                    color: "#e8527a",
+                                    borderColor: "#fecdd3",
+                                  }
+                                : {
+                                    backgroundColor: "transparent",
+                                    color: "#a3a3a3",
+                                    borderColor: "rgba(0,0,0,0.08)",
+                                  }
+                            }
+                          >
+                            {f}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    {/* Filter chips */}
-                    <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-                      {["All", "Video", "Text"].map((f, i) => (
-                        <button
-                          key={f}
-                          type="button"
-                          className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
-                          style={
-                            i === 0
-                              ? {
-                                  backgroundColor: "#fff5f7",
-                                  color: "#e8527a",
-                                  borderColor: "#fecdd3",
-                                }
-                              : {
-                                  backgroundColor: "transparent",
-                                  color: "#a3a3a3",
-                                  borderColor: "rgba(0,0,0,0.08)",
-                                }
-                          }
-                        >
-                          {f}
-                        </button>
-                      ))}
-                    </div>
+                    {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
+                      <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
+                    ) : (
+                      <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
+                    )}
                   </div>
-                  {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
-                    <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
-                  ) : (
-                    <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
-                  )}
+
+                  {/* Right column */}
+                  <div className="space-y-4 sm:space-y-5 xl:col-span-1">
+                    <GettingStarted />
+                    <QuickActions
+                      onNewCollection={() => setNewCollectionOpen(true)}
+                      onCopyLink={handleCopyCollectionLink}
+                      hasProjects={activeData?.projects?.length > 0}
+                    />
+                  </div>
                 </div>
 
-                {/* Right column */}
-                <div className="space-y-4 sm:space-y-5 xl:col-span-1">
-                  <GettingStarted />
-                  <QuickActions
-                    onNewCollection={() => setNewCollectionOpen(true)}
-                    onCopyLink={handleCopyCollectionLink}
-                    hasProjects={activeData?.projects?.length > 0}
-                  />
-                </div>
+                {/* Bento feature cards */}
+                <FeatureSpotlight onNewCollection={() => setNewCollectionOpen(true)} />
               </div>
-
-              {/* Bento feature cards */}
-              <FeatureSpotlight onNewCollection={() => setNewCollectionOpen(true)} />
-            </div>
-          )}
+            )}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

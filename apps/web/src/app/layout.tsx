@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://testimonialwall.com"),
   title: "TestimonialWall — Collect & Display Customer Testimonials",
   description:
     "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
@@ -26,9 +27,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "TestimonialWall",
+    url: "https://testimonialwall.com",
+    logo: "https://testimonialwall.com/favicon.ico",
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
