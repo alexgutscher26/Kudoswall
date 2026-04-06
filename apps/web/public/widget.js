@@ -94,7 +94,10 @@
     if (event.origin !== baseUrl) return;
 
     if (event.data && event.data.type === "resize" && event.data.widgetId === widgetId) {
-      iframe.style.height = event.data.height + "px";
+      const newHeight = event.data.height + "px";
+      if (iframe.style.height !== newHeight) {
+        iframe.style.height = newHeight;
+      }
     }
   });
 })();

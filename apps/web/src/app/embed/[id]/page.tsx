@@ -93,7 +93,7 @@ export default async function EmbedPage({
   };
 
   return (
-    <div className="min-h-screen bg-transparent p-4">
+    <div className="h-auto bg-transparent p-4">
       <Widget data={widgetData} testimonials={testimonialsList} />
     </div>
   );

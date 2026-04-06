@@ -61,6 +61,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Only track view once on mount
     trackEvent.mutate({
       workspaceId: data.workspaceId,
       widgetId: data.id,
@@ -71,7 +72,9 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     if (window.self !== window.top) {
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          const height = Math.ceil(entry.contentRect.height + 64); // Add some padding
+          // Use the actual scroll height of the content to be more precise
+          // and avoid feedback loops from padding/margins
+          const height = entry.target.scrollHeight;
           window.parent.postMessage({ type: "resize", height, widgetId: data.id }, "*");
         }
       });
@@ -82,7 +85,10 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
       return () => observer.disconnect();
     }
-  }, [data.workspaceId, data.id, trackEvent]);
+    // We only want to run this once when the widget ID changes or on mount.
+    // trackEvent should NOT be in the dependency array as its state changes
+    // trigger re-renders which would cause an infinite loop.
+  }, [data.id, data.workspaceId]);
 
   // Handle Carousel Auto-advance
   useEffect(() => {
