@@ -23,7 +23,7 @@ import {
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { trpc, queryClient } from "@/utils/trpc";
 import {
   DropdownMenu,
@@ -55,6 +55,13 @@ interface Testimonial {
   videoUrl?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
+  testimonialToTags?: {
+    tag: {
+      id: string;
+      name: string;
+      color: string;
+    };
+  }[];
 }
 
 interface InboxProps {
@@ -63,6 +70,7 @@ interface InboxProps {
     id: string;
     name: string;
     slug: string;
+    workspaceId: string;
   };
   projects: {
     id: string;
@@ -110,7 +118,8 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
       t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
-    return matchesTab && matchesType && matchesSearch && matchesRating;
+    const matchesTag = true; // Placeholder for tag filtering
+    return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
   });
 
   const handleStatusUpdate = async (id: string, status: "approved" | "archived" | "pending") => {
@@ -396,6 +405,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               onUpdateStatus={handleStatusUpdate}
               onDelete={handleDelete}
               onViewRaw={() => setRawTestimonial(t)}
+              workspaceId={project.workspaceId}
             />
           ))
         ) : (
@@ -436,16 +446,43 @@ function TestimonialCard({
   onUpdateStatus,
   onDelete,
   onViewRaw,
+  workspaceId,
 }: {
   testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
   onViewRaw: () => void;
+  workspaceId?: string;
 }) {
   const t = testimonial;
+  const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+  const assignTag = useMutation(
+    trpc.tag.assign.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: t.projectId }),
+        );
+        toast.success("Tag assigned");
+      },
+    }),
+  );
+  const unassignTag = useMutation(
+    trpc.tag.unassign.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: t.projectId }),
+        );
+        toast.success("Tag removed");
+      },
+    }),
+  );
+
+  const getIsTagged = (tagId: string) => {
+    return t.testimonialToTags?.some((tt) => tt.tag.id === tagId);
+  };
+
   return (
     <div className="group relative overflow-hidden rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7">
-      {/* Status Accent Line */}
       <div
         className={`absolute top-0 bottom-0 left-0 w-1 ${
           t.status === "approved"
@@ -457,21 +494,17 @@ function TestimonialCard({
       />
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Content Section */}
         <div className="min-w-0 flex-1">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="relative">
-                  {/* Base Star (Grey) */}
                   <Star className="size-4 fill-neutral-100 text-neutral-100" />
-                  {/* Half Star Overlay */}
                   {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
                     <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
                       <Star className="size-4 fill-amber-400 text-amber-400" />
                     </div>
                   )}
-                  {/* Full Star Overlay */}
                   {(t.rating ?? 0) >= s && (
                     <div className="absolute inset-0 z-10 overflow-hidden">
                       <Star className="size-4 fill-amber-400 text-amber-400" />
@@ -483,6 +516,56 @@ function TestimonialCard({
             <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
               · {t.type} Testimonial
             </span>
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            {t.testimonialToTags?.map((tt) => (
+              <span
+                key={tt.tag.id}
+                className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold"
+                style={{
+                  backgroundColor: `${tt.tag.color}10`,
+                  color: tt.tag.color,
+                  borderColor: `${tt.tag.color}30`,
+                }}
+              >
+                {tt.tag.name}
+                <button
+                  onClick={() => unassignTag.mutate({ testimonialId: t.id, tagId: tt.tag.id })}
+                  className="hover:opacity-60"
+                >
+                  <X className="size-2.5" />
+                </button>
+              </span>
+            ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex h-5 items-center gap-1 rounded-full border border-dashed border-neutral-200 px-2 text-[10px] font-bold text-neutral-400 hover:border-neutral-300 hover:text-neutral-500">
+                <Plus className="size-2.5" /> Tag
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 rounded-xl">
+                <DropdownMenuLabel className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Available Tags
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {tags?.map((tag) => (
+                  <DropdownMenuItem
+                    key={tag.id}
+                    disabled={getIsTagged(tag.id)}
+                    onClick={() => assignTag.mutate({ testimonialId: t.id, tagId: tag.id })}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                    {tag.name}
+                    {getIsTagged(tag.id) && <Check className="ml-auto size-3" />}
+                  </DropdownMenuItem>
+                ))}
+                {(!tags || tags.length === 0) && (
+                  <div className="p-2 text-center text-[11px] text-neutral-400">
+                    No tags created yet
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {t.type === "video" && t.videoUrl && (
@@ -523,7 +606,6 @@ function TestimonialCard({
           </footer>
         </div>
 
-        {/* Action Controls */}
         <div className="flex shrink-0 flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-6 lg:flex-col lg:items-end lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
           <div className="flex items-center gap-2.5 lg:flex-col">
             {t.status !== "approved" && (
@@ -554,14 +636,14 @@ function TestimonialCard({
                 }`}
                 title="Archive"
               >
-                <Archive className="size-4.5" />
+                <Archive className="size-4" />
               </button>
               <button
                 onClick={() => onDelete(t.id)}
                 className="flex size-10 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-400 transition-all hover:border-red-100 hover:bg-red-50 hover:text-red-500"
                 title="Delete"
               >
-                <Trash2 className="size-4.5" />
+                <Trash2 className="size-4" />
               </button>
             </div>
           </div>

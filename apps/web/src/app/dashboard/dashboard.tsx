@@ -1098,7 +1098,7 @@ export default function DashboardShell({
       <NewCollectionModal open={newCollectionOpen} onClose={() => setNewCollectionOpen(false)} />
 
       {/* Main content — offset only on lg+ */}
-      <div className="dashboard-content relative flex min-h-screen flex-1 flex-col lg:ml-60">
+      <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
         <DotGrid opacity={0.08} />
 
         {/* Soft central glow */}

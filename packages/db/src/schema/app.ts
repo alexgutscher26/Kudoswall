@@ -7,6 +7,7 @@ import {
   pgEnum,
   index,
   doublePrecision,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
@@ -96,6 +97,55 @@ export const testimonial = pgTable(
   ],
 );
 
+export const tag = pgTable(
+  "tag",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color").default("#e8527a").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("tag_workspace_id_idx").on(table.workspaceId)],
+);
+
+export const testimonialToTag = pgTable(
+  "testimonial_to_tag",
+  {
+    testimonialId: text("testimonial_id")
+      .notNull()
+      .references(() => testimonial.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.testimonialId, table.tagId] }),
+    index("testimonial_to_tag_testimonial_id_idx").on(table.testimonialId),
+    index("testimonial_to_tag_tag_id_idx").on(table.tagId),
+  ],
+);
+
+export const widget = pgTable(
+  "widget",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    settingsJson: text("settings_json").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("widget_workspace_id_idx").on(table.workspaceId)],
+);
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const workspaceRelations = relations(workspace, ({ one, many }) => ({
@@ -104,6 +154,8 @@ export const workspaceRelations = relations(workspace, ({ one, many }) => ({
     references: [user.id],
   }),
   projects: many(project),
+  tags: many(tag),
+  widgets: many(widget),
 }));
 
 export const projectRelations = relations(project, ({ one, many }) => ({
@@ -114,9 +166,36 @@ export const projectRelations = relations(project, ({ one, many }) => ({
   testimonials: many(testimonial),
 }));
 
-export const testimonialRelations = relations(testimonial, ({ one }) => ({
+export const testimonialRelations = relations(testimonial, ({ one, many }) => ({
   project: one(project, {
     fields: [testimonial.projectId],
     references: [project.id],
+  }),
+  testimonialToTags: many(testimonialToTag),
+}));
+
+export const tagRelations = relations(tag, ({ one, many }) => ({
+  workspace: one(workspace, {
+    fields: [tag.workspaceId],
+    references: [workspace.id],
+  }),
+  testimonialToTags: many(testimonialToTag),
+}));
+
+export const testimonialToTagRelations = relations(testimonialToTag, ({ one }) => ({
+  testimonial: one(testimonial, {
+    fields: [testimonialToTag.testimonialId],
+    references: [testimonial.id],
+  }),
+  tag: one(tag, {
+    fields: [testimonialToTag.tagId],
+    references: [tag.id],
+  }),
+}));
+
+export const widgetRelations = relations(widget, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [widget.workspaceId],
+    references: [workspace.id],
   }),
 }));

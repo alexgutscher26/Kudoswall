@@ -3,12 +3,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import DashboardShell from "../dashboard";
-import EmbedPage from "./embed-page";
+import WidgetList from "./widget-list";
 
 export const metadata = {
-  title: "Embed Widget — TestimonialWall",
-  description:
-    "Customize and embed your testimonial wall on any website with a single line of code.",
+  title: "Embed Widgets — TestimonialWall",
+  description: "Manage your testimonial embed configurations and show social proof on any website.",
 };
 
 export default async function EmbedRoute() {
@@ -24,10 +23,12 @@ export default async function EmbedRoute() {
     <DashboardShell
       userName={session.user.name ?? "User"}
       userEmail={session.user.email ?? ""}
-      pageTitle="Embed Widget"
-      pageSubtitle="Customize your wall and copy the embed code to your site"
+      pageTitle="Embed Widgets"
+      pageSubtitle="Manage your testimonial wall configurations"
     >
-      <EmbedPage />
+      <div className="mx-auto max-w-7xl">
+        <WidgetList />
+      </div>
     </DashboardShell>
   );
 }
