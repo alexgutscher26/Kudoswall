@@ -1,3 +1,6 @@
+-- BASELINE: Schema already exists in DB
+-- 0001_neat_bloodscream
+--> statement-breakpoint
 CREATE TABLE "analytics_event" (
 	"id" text PRIMARY KEY NOT NULL,
 	"workspace_id" text NOT NULL,

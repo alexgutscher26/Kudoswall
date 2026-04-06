@@ -20,13 +20,13 @@ async function check() {
     console.log("Columns of 'session' table:");
     console.table(res.rows);
 
-    const tables = await pool.query(`
+    const tablesRes = await pool.query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public'
     `);
     console.log("Tables in 'public' schema:");
-    console.log(res.rows.map((r) => r.table_name));
+    console.log(tablesRes.rows.map((r) => r.table_name).join(", "));
   } catch (err) {
     console.error("Error checking schema:", err);
   } finally {
