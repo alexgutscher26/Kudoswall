@@ -1,232 +1,362 @@
-# 🚀 TestimonialWall: The Super Roadmap
+# 🌌 TestimonialWall: The Infinite Roadmap
 
-## Table of Contents
+## 💎 Table of Contents
 
-1. [Core Foundation & Infrastructure](#1-core-foundation--infrastructure)
-2. [Auth & Multi-tenancy](#2-auth--multi-tenancy)
-3. [The "Sender" Experience (Collection)](#3-the-sender-experience-collection)
-4. [The "Owner" Experience (Dashboard)](#4-the-owner-experience-dashboard)
-5. [Widget & Embed Engine](#5-widget--embed-engine)
-6. [Billing & Monetization](#6-billing--monetization)
-7. [AI & Intelligence](#7-ai--intelligence)
-8. [Integrations & Ecosystem](#8-integrations--ecosystem)
-9. [Enterprise & Agency Suite](#9-enterprise--agency-suite)
-10. [Mobile Strategy & PWA](#10-mobile-strategy--pwa)
-11. [Analytics & Performance](#11-analytics--performance)
-12. [Security, Privacy & Compliance](#12-security-privacy--compliance)
-13. [Advanced Video Suite](#13-advanced-video-suite)
-14. [Performance & Edge Engineering](#14-performance--edge-engineering)
-15. [Internationalization (i18n)](#15-internationalization-i18n)
-16. [Growth & Viral Loops](#16-growth--viral-loops)
-17. [Support & Customer Success](#17-support--customer-success)
-18. [DevOps & Internal Ops](#18-devops--internal-ops)
-19. [Future V2 (Moonshots)](#19-future-v2-moonshots)
+1. [🏛️ Core Foundation & Infrastructure](#1-core-foundation--infrastructure)
+2. [🔐 Auth & Multi-tenancy](#2-auth--multi-tenancy)
+3. [📹 The "Sender" Experience (Collection)](#3-the-sender-experience-collection)
+4. [📊 The "Owner" Experience (Dashboard)](#4-the-owner-experience-dashboard)
+5. [📦 Widget & Embed Engine](#5-widget--embed-engine)
+6. [💳 Billing & Monetization](#6-billing--monetization)
+7. [🤖 AI & Intelligence](#7-ai--intelligence)
+8. [🔌 Integrations & Ecosystem](#8-integrations--ecosystem)
+9. [🏢 Enterprise & Agency Suite](#9-enterprise--agency-suite)
+10. [📱 Mobile Strategy & PWA](#10-mobile-strategy--pwa)
+11. [📈 Analytics & Performance](#11-analytics--performance)
+12. [🛡️ Security, Privacy & Compliance](#12-security-privacy--compliance)
+13. [🎨 Advanced Video Suite](#13-advanced-video-suite)
+14. [🚀 Performance & Edge Engineering](#14-performance--edge-engineering)
+15. [🌍 Internationalization (i18n)](#15-internationalization-i18n)
+16. [🌱 Growth & Viral Loops](#16-growth--viral-loops)
+17. [🤝 Support & Customer Success](#17-support--customer-success)
+18. [🛠️ DevOps & Internal Ops](#18-devops--internal-ops)
+19. [☁️ Public API & Developer Portal](#19-public-api--developer-portal)
+20. [📣 Marketing & SEO Fundamentals](#20-marketing--seo-fundamentals)
+21. [🌠 Future V2 (Moonshots)](#21-future-v2-moonshots)
 
 ---
 
-## 1. Core Foundation & Infrastructure
+## 🏛️ 1. Core Foundation & Infrastructure
 
 - [x] Initialize Turborepo with Next.js 16 (App Router) & Tailwind CSS
 - [x] Set up PostgreSQL Database with Drizzle ORM
 - [x] Configure Cloudflare Pages/Workers deployment via OpenNext
-- [ ] **Data Architecture**:
-  - [ ] Implement database migrations with Drizzle Kit
+- [ ] **Data Architecture Optimization**:
+  - [x] Implement database migrations with Drizzle Kit
   - [ ] Set up automated daily database backups (Cloudflare D1 or external)
   - [ ] Implement read-replicas for high-traffic widget requests
   - [ ] Implement Point-in-time recovery (PITR) strategy
-- [ ] **Storage & Assets**:
+  - [ ] Add Database connection pooling via Prisma Accelerator or similar
+  - [ ] Database partitioning strategy for 10M+ testimonials
+  - [ ] Implement Soft-deletes across all tables for data safety
+  - [ ] Audit-logging for every DB row change (CreatedBy, UpdatedBy)
+- [ ] **Storage & Assets Engine**:
   - [ ] Configure Cloudflare R2 for video & image storage
   - [ ] Life-cycle policies for R2 (archive old videos to Glacier)
   - [ ] CDN distribution for all user-uploaded static assets
+  - [ ] Implement signed URLs for private asset access
+  - [ ] Image compression pipeline (TinyPNG/Sharp on upload)
+  - [ ] Auto-generate multiple video resolutions (360p, 720p, 1080p)
 - [ ] **Edge Strategy**:
   - [ ] Implement Edge Caching for Widgets (Hono or Cloudflare Workers)
   - [ ] KV-store for fast metadata lookups on widgets
+  - [ ] Global CDN purge on testimonial approval
+  - [ ] Multi-region deployment for <50ms latency globally
 
-## 2. Auth & Multi-tenancy
+## 🔐 2. Auth & Multi-tenancy
 
 - [x] Implement Better Auth (Email/Password, Google OAuth)
-- [x] **Advanced Authentication**:
+- [x] **Advanced Authentication Multi-provider**:
   - [x] Add GitHub, LinkedIn, and Magic Link auth providers
-  - [ ] Two-Factor Authentication (2FA) for paid tiers
-  - [ ] SAML/SSO for Enterprise accounts (Agency/Enterprise)
+  - [ ] Two-Factor Authentication (2FA) via Authenticator App
+  - [ ] Backup recovery codes for locked accounts
+  - [ ] Biometric login support (FaceID/TouchID) for dashboard
+  - [ ] Session management (View/Terminate active sessions)
+- [ ] **Enterprise Identity (SSO)**:
+  - [ ] SAML/SSO for Enterprise accounts (Okta, Azure AD)
+  - [ ] SCIM provisioning for large team onboarding
+  - [ ] Custom domain for login (e.g., `auth.yourclient.com`)
 - [ ] **Multi-tenancy Deep-Dive**:
   - [ ] Workspace-based architecture with unique slugs
-  - [ ] Domain-level isolation (Each workspace on its own subdomain optional)
-  - [ ] Organization-wide billing for multiple workspaces
-- [ ] **Team Collaboration**:
-  - [ ] Invite team members with specific roles (Admin, Editor, Viewer)
-  - [ ] Audit logs for team actions (Who approved which testimonial?)
+  - [ ] Workspace switcher interface in top navbar
+  - [ ] Tenant data isolation logic at the ORM level
+  - [ ] Custom subdomain per workspace (e.g., `apple.testimonialwall.com`)
+  - [ ] Organization-wide billing across multiple workspace tenants
+- [ ] **Team Collaboration & RBAC**:
+  - [ ] Invite team members via email link / auto-capture domain
+  - [ ] Granular Roles: Owner, Admin, Editor, Moderator, Viewer
+  - [ ] Custom permission sets per user
+  - [ ] Activity Feed: See what colleagues are working on
+  - [ ] Commenting system for team discussions on testimonials
 
-## 3. The "Sender" Experience (Collection)
+## 📹 3. The "Sender" Experience (Collection)
 
 - [x] **Dynamic Collection Engine**:
   - [x] Multi-step submission wizard (Star rating -> Text -> Photo -> Video)
   - [x] Support for custom fields (Company name, LinkedIn URL, Tagline)
   - [x] In-browser photo cropping for profile pictures
-- [ ] **Video Interaction**:
+- [ ] **Video Recording Excellence**:
   - [ ] Teleprompter tool (Customer sees their script while recording)
   - [ ] Video prompts (Owner records a question, customer records a reply)
-  - [ ] Countdown timer for recording starts
+  - [ ] Countdown timer (3..2..1..) with audio cue
   - [ ] Instant replay and re-record capability
-- [ ] **Branding & Customization**:
-  - [ ] Fully customizable colors, fonts, and dark/light modes
-  - [ ] Add workspace logo and "Thank You" confetti/animations
-  - [ ] Custom "Thank You" redirect URL after submission
+  - [ ] Automatic background noise removal (Noise Gate)
+  - [ ] Visual audio levels indicator during recording
+  - [ ] Fallback for "Upload only" if recording fails
+- [ ] **UI/UX Polishing**:
+  - [ ] Fully responsive design (Mobile-first for selfie recording)
+  - [ ] Dark/Light mode automatic detection
+  - [ ] Confetti animation on successful submission
+  - [ ] "Verify via LinkedIn/Google" button to reduce fake testimonials
+  - [ ] Progress bar for multi-step forms
+  - [ ] Auto-save draft in LocalStorage (Recover if browser crashes)
+- [ ] **Branding & Whitelabeling**:
+  - [ ] Custom fonts (Google Fonts / Uploaded .woff2)
+  - [ ] Full CSS control for matching brand guidelines
+  - [ ] Custom "Thank You" page with CTA button (e.g., "Join our Slack")
+  - [ ] Branded Favicons for collection pages
 
-## 4. The "Owner" Experience (Dashboard)
+## 📊 4. The "Owner" Experience (Dashboard)
 
-- [ ] **Management Inbox**:
-  - [ ] Real-time inbox with filter tabs (Pending, Approved, Featured, Archived)
-  - [ ] Bulk actions: Fast-approve, Fast-delete, Bulk-tag
-  - [ ] Internal notes/comments per testimonial (Team internal only)
-- [ ] **Widget Builder 2.0**:
-  - [ ] Live visual editor (Drag and drop layout customization)
-  - [ ] Real-time CSS injection for advanced users
-  - [ ] Widget presets: "Modern Dark", "Glassmorphism", "Minimal Georgian"
-- [ ] **CRM & Outreach**:
-  - [ ] Automated "Thank You" emails via Resend
-  - [ ] "Request Update" button: Ask customer to change their rating or photo
+- [ ] **Testimonial Inbox 2.0**:
+  - [ ] Real-time inbox with filter tabs (Pending, Approved, Featured)
+  - [ ] Search by Customer Name, Email, or Keyword
+  - [ ] Advanced filtering: By Rating, By Tag, By Language
+  - [ ] Bulk actions: Fast-approve, Fast-delete, Bulk-tag, Export selected
+  - [ ] External link sharing (Share a link to a specific testimonial)
+- [ ] **Widget Visual Editor**:
+  - [ ] Live preview (WYSIWYG) of the widget as you style it
+  - [ ] Drag-and-drop ordering of testimonials on the wall
+  - [ ] Theme library: Minimal, Modern, Glass, Bento, Dark, Neo-brutalism
+  - [ ] Preset configurations (e.g., "SaaS Landing Page", "Mobile App Review")
+  - [ ] Global style variables (Primary color, Border radius, Spacing)
+- [ ] **CRM & Customer Relationship**:
+  - [ ] Customer profile view: See all testimonials from one person
+  - [ ] Outreach tool: Email customers directly from the dashboard
+  - [ ] "Request Update": Ask for a revised video or better photo
+  - [ ] Reward system: Automatically send a discount code via Resend
+  - [ ] Follow-up sequences for ignored requests
 
-## 5. Widget & Embed Engine
+## 📦 5. Widget & Embed Engine
 
-- [x] **High-Performance Bundles**:
-  - [x] Optimize `widget.js` to be <2KB gzipped
-  - [x] Implement iframe-based isolation with auto-resize
-  - [ ] Zero-CLS (Cumulative Layout Shift) by reserving space for assets
-  - [ ] Lazy-load video assets until the user interacts
-- [x] **Layout Library**:
-  - [x] **Grid**: Standard card grid with hover effects
-  - [x] **Masonry**: Dynamic height Pinterest-style cards
-  - [x] **Carousel**: Swipeable/Auto-play slider with pagination
-  - [ ] **Bento**: Premium asymmetric grid for "Wall of Fame"
-  - [ ] **Single-Card**: High-impact quote for landing page heroes
-- [x] **Interactive Elements**:
-  - [x] Social-ready "Copy Code" generation
-  - [x] Dynamic filtering via data-attributes
-  - [ ] Lead-capture CTA at the bottom of the Wall of Love
+- [x] **High-Performance Architecture**:
+  - [x] Optimize `widget.js` bundle size (<2KB gzipped)
+  - [x] Iframe-based isolation with seamless auto-resizer
+  - [ ] Zero Cumulative Layout Shift (CLS): Explicit width/height placeholders
+  - [ ] Lazy-load video assets: Load only when the user scrolls/clicks
+  - [ ] Edge-rendered widget content for instant paint
+- [ ] **Layout Library (The Vault)**:
+  - [x] **Grid**: Classic card grid
+  - [x] **Masonry**: Height-variable Pinterest style
+  - [x] **Carousel**: Touch-enabled slider with auto-play
+  - [ ] **Bento Grid**: Premium asymmetric layout
+  - [ ] **Single Quote**: Minimalist hero section testimonial
+  - [ ] **Video Bubble**: Floating "Story" style bubble in corner
+  - [ ] **Ticker**: Scrolling marquee of social proof
+- [ ] **Interaction & Logic**:
+  - [ ] "Show More" pagination or Infinite Scroll
+  - [ ] Filter bar on the widget (Filter by Type, Rating, or Tags)
+  - [ ] Social sharing buttons directly on the cards
+  - [ ] Lead capture CTA integrated into the bottom of the wall
+  - [ ] Custom CSS hooks for developer-level branding
 
-## 6. Billing & Monetization
+## 💳 6. Billing & Monetization
 
-- [ ] **Subscription Logic**:
-  - [ ] Stripe Checkout integration with monthly/yearly toggles
-  - [ ] Usage-based billing for video minutes or workspace count
-  - [ ] Automatic trial-to-paid conversions
-- [ ] **Promotions & Retention**:
-  - [ ] Coupon code management (Stripe)
-  - [ ] Downgrade flows with "Wait! Here's a discount" popups
-  - [ ] Affiliate referral tracking (Direct integration with Rewardful/FirstPromoter)
+- [ ] **Subscription Foundation**:
+  - [ ] Stripe Checkout integration for Plan onboarding
+  - [ ] Support for Monthly vs Yearly billing cycles (toggles)
+  - [ ] Automated Proration for plan upgrades/downgrades
+  - [ ] Self-serve Billing Portal for users (Update card, Cancel, Invoices)
+- [ ] **Usage-Based Logic**:
+  - [ ] Limit video storage by Gigabytes or Minutes
+  - [ ] Limit testimonial count per month
+  - [ ] Limit workspace/team member seats
+  - [ ] Over-usage automatic billing or hard-stops
+- [ ] **Growth Features**:
+  - [ ] 14-day free trial (no credit card required) flow
+  - [ ] Coupon code management system
+  - [ ] Drip emails for trial expiration (3 days left, 1 day left)
+  - [ ] Retention offers on the "Cancel" page
+  - [ ] Affiliate tracking (Deep integration with Rewardful)
+- [ ] **Tax & Compliance**:
+  - [ ] Stripe Tax / Paddle integration for global VAT/Sales Tax
+  - [ ] Automated per-country tax calculation
+  - [ ] PDF Invoice generation with customer VAT details
 
-## 7. AI & Intelligence
+## 🤖 7. AI & Intelligence
 
-- [ ] **Content Enhancement**:
-  - [ ] **Sentiment Analysis**: Auto-sort testimonials by "Positivity" score
-  - [ ] **AI Summaries**: "What customers love most" banner for Wall of Love
-  - [ ] **Automatic Tagging**: Detect keywords like "Fast Shipping", "Great Support"
-- [ ] **Video Processing**:
-  - [ ] **Whisper Transcription**: Generate subtitles for every video testimonial
-  - [ ] **AI Thumbnail**: Automatically pick the frame with the best smile
-  - [ ] **Smart Crop**: Auto-crop videos to 1:1 or 9:16 for social media
-- [ ] **Safety & Trust**:
-  - [ ] **AI Moderation**: Auto-hide profanity or spam submissions
-  - [ ] **Face Detection**: Ensure profile photos are actually people
+- [ ] **Text & Sentiment Analysis**:
+  - [ ] AI Sentiment Scoring (Sort by "Most Enthusiastic")
+  - [ ] Keyword Extraction: Identify main selling points (e.g., "Support")
+  - [ ] Automated Profanity & Spam filtering
+  - [ ] Feature suggestion: "Your customers often mention X, maybe add it to your FAQ?"
+- [ ] **The Video Studio**:
+  - [ ] AI Transcription (Whisper) for all video testimonials
+  - [ ] Subtitle generation with sync highlight (Karaoke style)
+  - [ ] Smart Thumbnail: AI picks the frame where the person is smiling
+  - [ ] Face Blur: Option for privacy-conscious users
+  - [ ] AI Summary: Generate a 1-sentence headline for every video
+- [ ] **Automation Engine**:
+  - [ ] Auto-tagging based on content (e.g., "High Rating", "Long Story")
+  - [ ] Auto-approve logic based on trust scores (Low-risk users)
+  - [ ] AI-driven response suggestions for "Thank You" emails
 
-## 8. Integrations & Ecosystem
+## 🔌 8. Integrations & Ecosystem
 
-- [ ] **Social & Review Imports**:
-  - [ ] Import from Google Maps, Trustpilot, G2, Capterra
+- [ ] **External Source Imports**:
+  - [ ] Google Maps Reviews importer
+  - [ ] Trustpilot & G2 Crowd connector
+  - [ ] Capterra & AppSumo import tool
+  - [ ] Import from CSV / JSON
   - [ ] X/Twitter & LinkedIn "Mention to Import" bot
-  - [ ] Reddit and Product Hunt integration
 - [ ] **Platform Plugins**:
   - [ ] Official Shopify App for easy storefront embeds
-  - [ ] WordPress Plugin for Gutenberg/Elementor support
-  - [ ] Framer/Webflow official components
-- [ ] **Connectivity**:
-  - [ ] Zapier & Make.com official integrations
-  - [ ] Custom Webhooks for new submissions (Notify Slack/Discord)
+  - [ ] WordPress Gutenberg Block & Elementor Widget
+  - [ ] Framer & Webflow integration guide/component
+  - [ ] Chrome Extension for capturing praise from any URL
+- [ ] **Workflow Connectivity**:
+  - [ ] Zapier & Make.com official apps
+  - [ ] Native Slack/Discord notifications for new submissions
+  - [ ] Hubspot/Salesforce: Sync testimonials to CRM profiles
+  - [ ] Custom Incoming/Outgoing Webhooks
 
-## 9. Enterprise & Agency Suite
+## 🏢 9. Enterprise & Agency Suite
 
-- [ ] **White-label Power**:
-  - [ ] Global whitelabeling (Remove "Powered by" everywhere)
-  - [ ] Custom Domain: Host collection on `testimonials.acme.com`
-  - [ ] Branded emails and notifications
-- [ ] **Organization Controls**:
-  - [ ] Audit logs for every action taken in the workspace
-  - [ ] Data residency options (Store data in specific regions)
-  - [ ] Dedicated Customer Success Manager (Tier feature)
+- [ ] **Agency Multi-client Management**:
+  - [ ] Umbrella account to manage 50+ clients from one login
+  - [ ] White-label dashboards for clients (Remove our branding)
+  - [ ] Client-specific billing models
+- [ ] **Governance & Compliance**:
+  - [ ] Audit logs for every action taken across the org
+  - [ ] Data Residency: Europe-only storage for GDPR compliance
+  - [ ] IP Whitelisting for dashboard access
+  - [ ] Dedicated Support Manager / Slack channel
+- [ ] **Branding Pro**:
+  - [ ] Custom primary domains (collection on `reviews.yourbrand.com`)
+  - [ ] Fully whitelabeled emails (Sent from `support@yourdomain.com`)
+  - [ ] Removal of "Powered by TestimonialWall" on all widgets
 
-## 10. Mobile Strategy & PWA
+## 📱 10. Mobile Strategy & PWA
 
-- [ ] **Mobile Experience**:
-  - [ ] PWA (Progressive Web App) for easier recording on mobile
-  - [ ] "Native-feel" recording UI for iOS/Android
-  - [ ] QR Code generation for collection pages (Print on flyers/receipts)
-- [ ] **Notifications**:
-  - [ ] Push notifications for new submissions (Paid feature)
+- [ ] **PWA (Progressive Web App)**:
+  - [ ] Offline recording support (Sync when back online)
+  - [ ] Add to Home Screen prompts
+  - [ ] Splash screens and optimized mobile UX
+- [ ] **Native Mobile Experience**:
+  - [ ] iOS/Android SDK for native app embeds
+  - [ ] Push notifications for new testimonial alerts
+  - [ ] QR Code Generator: Print codes for receipts/flyers to collect reviews
+- [ ] **Camera Optimization**:
+  - [ ] Background blur (Portrait mode) in-browser
+  - [ ] Flash/Light optimization tips for users
 
-## 11. Analytics & Performance
+## 📈 11. Analytics & Performance
 
 - [ ] **Traffic Insights**:
-  - [ ] Impressions and Click-Through Rate (CTR) for widgets
-  - [ ] Conversion Attribution (Which testimonial led to which signup?)
-- [ ] **Performance Engineering**:
-  - [ ] Weekly reports on widget load times and Core Web Vitals
-  - [ ] Image optimization pipeline (WebP/AVIF auto-conversion)
+  - [ ] Widget Impressions vs. Interactions
+  - [ ] Video Play Rate & Completion Rate
+  - [ ] Click-through rate (CTR) on Widget CTA buttons
+  - [ ] Conversion Attribution: Did seeing this widget lead to a sale?
+- [ ] **Reporting Engine**:
+  - [ ] Weekly/Monthly PDF Performance reports for owners
+  - [ ] Benchmark data: "Your conversion is 20% higher than industry average"
+  - [ ] Heatmap overlay for widgets (Where do users click?)
+- [ ] **Speed Monitoring**:
+  - [ ] Core Web Vitals dashboard for widgets
+  - [ ] Asset load-time tracking across different regions
 
-## 12. Security, Privacy & Compliance
+## 🛡️ 12. Security, Privacy & Compliance
 
-- [ ] **GDPR & Privacy**:
-  - [ ] Cookie-less tracking for widgets
-  - [ ] Data export/deletion tools for end-users
-  - [ ] Privacy Policy & ToS templates for users
+- [ ] **Privacy First**:
+  - [ ] GDPR/CCPA compliant data processing agreements
+  - [ ] Cookie-less widget tracking
+  - [ ] One-click data export and "Right to be forgotten" tool
+  - [ ] Cookie consent banners for collection pages (Optional)
 - [ ] **Hardening**:
-  - [ ] CSP (Content Security Policy) headers for widgets
-  - [ ] Rate limiting on submission endpoints (Spam prevention)
-  - [ ] Encryption at rest for all user data
+  - [ ] Content Security Policy (CSP) headers configuration
+  - [ ] Rate limiting on API and submission endpoints
+  - [ ] Vulnerability scanning via Snyk/GitHub Advanced Security
+  - [ ] Encryption at rest (AES-256) for video assets
+- [ ] **Abuse Prevention**:
+  - [ ] AI-driven spam detection
+  - [ ] IP Blacklisting for known botnets
+  - [ ] Captcha (H-Captcha or Turnstile) on collection forms
 
-## 13. Advanced Video Suite
+## 🎨 13. Advanced Video Suite
 
-- [ ] **Editing & Studio**:
-  - [ ] Add branded overlays/watermarks to video testimonials
-  - [ ] Automatic background music addition (Optional)
-  - [ ] Video transcription in 20+ languages
-- [ ] **Viral Exports**:
-  - [ ] Export videos as TikTok/Reels ready formats
+- [ ] **Browser-based Editor**:
+  - [ ] Top/Bottom video trimming
+  - [ ] Adding branded watermarks / logos to the corner
+  - [ ] Lower-third overlays with Name and Job Title
+  - [ ] Dynamic background music (Library of licensed tracks)
+- [ ] **Export & Distribution**:
+  - [ ] Export as TikTok/Reels (Vertical) with captions burned-in
+  - [ ] 1-Click share to LinkedIn/X feed
+  - [ ] Video gallery "Wall of Fame" for landing pages
 
-## 14. Performance & Edge Engineering
+## 🚀 14. Performance & Edge Engineering
 
-- [ ] **Zero-LCP Widget**: Server-side rendering for widget content on the edge
-- [ ] **Distributed KV**: Use Cloudflare KV for sub-10ms metadata retrieval
+- [ ] **Ultra-Fast Edge**:
+  - [ ] Implement Partial Prerendering (PPR) for Dashboard
+  - [ ] Move widget data from SQL to KV-store (sub-10ms)
+  - [ ] Image & Video optimization on the edge (Cloudflare Images)
+  - [ ] Bundle squeezing: Remove all unused JS from widget loader
 
-## 15. Internationalization (i18n)
+## 🌍 15. Internationalization (i18n)
 
-- [ ] **Public UI**: Translate Collection page into 50+ languages
-- [ ] **RTL Support**: Full support for Arabic, Hebrew, etc.
-- [ ] **Auto-translate**: Use DeepL/Google Translate to auto-translate testimonials
+- [ ] **Dashboard i18n**: Translate into Spanish, French, German, Japanese
+- [ ] **Public UI i18n**: Support for 100+ languages on collection pages
+- [ ] **RTL Support**: Full Arabic/Hebrew support across all UIs
+- [ ] **Auto-translate**: Connect DeepL to auto-translate testimonials in the inbox
 
-## 16. Growth & Viral Loops
+## 🌱 16. Growth & Viral Loops
 
-- [ ] **Chrome Extension**: Quick-capture praise from any website
-- [ ] **Affiliate Loop**: "Powered by TestimonialWall" badge doubles as affiliate link
-- [ ] **Wall of Fame**: Standalone directory for high-performing brands
+- [ ] **Affiliate Magnet**:
+  - [ ] "Powered by" links link to affiliate signup page
+  - [ ] Automatic referral bonus for customers who submit reviews
+- [ ] **Public Directory**:
+  - [ ] Create a "Wall of Fame" public directory for SEO juice
+  - [ ] Allow brands to opt-in for extra exposure
 
-## 17. Support & Customer Success
+## 🤝 17. Support & Customer Success
 
-- [ ] **Help Center**: Integrated documentation and video tutorials
-- [ ] **Onboarding**: Interactive dashboard tour for new users
+- [ ] **Internal Support**:
+  - [ ] Integrated Intercom/Crisp widget in the dashboard
+  - [ ] Interactive product tour (Intro.js or Shepherd.js)
+  - [ ] Knowledge Base (Help Center) sync with workspace
+- [ ] **Onboarding**:
+  - [ ] Checklist: "5 steps to your first testimonial"
+  - [ ] Reward for completing onboarding (e.g., 5 free video mins)
 
-## 18. DevOps & Internal Ops
+## 🛠️ 18. DevOps & Internal Ops
 
-- [ ] **Admin Panel**: Internal tool to manage all users and subscriptions
-- [ ] **CI/CD**: Fully automated staging and production deployment pipelines
-- [ ] **Logging**: Centralized logs using Sentry and Axiom
+- [ ] **Central Command**:
+  - [ ] Internal Admin Panel to manage all users/workspaces
+  - [ ] One-click "Log in as user" for support debugging
+  - [ ] Real-time health monitoring of the R2 storage and DB
+- [ ] **CI/CD Excellence**:
+  - [ ] Automated E2E testing with Playwright on every PR
+  - [ ] Canary deployments for radical new widget features
+  - [ ] Sentry alerting for every client/server error
 
-## 19. Future V2 (Moonshots)
+## ☁️ 19. Public API & Developer Portal
 
-- [ ] **Voice Testimonials**: One-tap voice recording with waveform visualization
-- [ ] **Video Storybook**: Interactive story-mode for testimonials
-- [ ] **AI Video Interviews**: AI agent asks follow-up questions during recording
+- [ ] **API Access**:
+  - [ ] RESTful Public API with API Key management
+  - [ ] Webhook manager (Create/Test/Logs)
+  - [ ] Official Node.js and Go SDKs
+- [ ] **Documentation**:
+  - [ ] Developer Hub (Think Stripe-quality docs)
+  - [ ] Postman Collection for the API
+
+## 📣 20. Marketing & SEO Fundamentals
+
+- [ ] **SEO Strategy**:
+  - [ ] Dynamic Sitemaps for all public collection pages
+  - [ ] JSON-LD Structured Data for every testimonial widget (Google Rich Results)
+  - [ ] Canonical URL management
+  - [ ] Meta tag generator for social previews (OG:Image)
+- [ ] **Growth Content**:
+  - [ ] Automated case study generator from top testimonials
+
+## 🌠 21. Future V2 (Moonshots)
+
+- [ ] **Voice Interface**: One-click voice recording with real-time transcript
+- [ ] **AI Interviewer**: AI video agent asks follow-up questions to customers
+- [ ] **Interactive Storybook**: Swipeable Story-style testimonials for web
+- [ ] **Social Proof Feed**: Live popups showing "X just submitted a review"
 
 ---
 
-_Roadmap updated: 2026-04-03_
+_The Infinite Roadmap is a living document. We iterate, we build, we win._
+_Updated: 2026-04-06 03:00_
