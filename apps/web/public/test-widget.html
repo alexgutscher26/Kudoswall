@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TestimonialWall | Widget Local Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 50px 20px;
+        background-color: #fdfdfd;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        width: 100%;
+        max-width: 1100px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #111;
+        margin-bottom: 10px;
+      }
+      p {
+        color: #666;
+        margin-bottom: 50px;
+      }
+      .debug-box {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+        font-size: 14px;
+        text-align: left;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Widget Local Preview</h1>
+      <p>Testing the <code>widget.js</code> injection and auto-resize engine.</p>
+
+      <div class="debug-box">
+        <strong>How to use this page:</strong>
+        <ol>
+          <li>Open your dashboard and copy a <b>Widget ID</b>.</li>
+          <li>
+            Paste it into the URL as a query param:
+            <code>?id=YOUR_ID</code>
+          </li>
+          <li>The widget will appear below.</li>
+        </ol>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 50px" />
+
+      <!-- This script will dynamically set its data-id from the URL -->
+      <script id="tester-script">
+        console.log("Tester script running...");
+        const params = new URLSearchParams(window.location.search);
+        const widgetId = params.get("id");
+        console.log("Widget ID detected:", widgetId);
+
+        if (widgetId) {
+          console.log("Creating script tag for widget.js at origin:", window.location.origin);
+          const script = document.createElement("script");
+          script.src = window.location.origin + "/widget.js";
+          script.setAttribute("data-id", widgetId);
+          script.async = true;
+          
+          if (params.get("theme")) script.setAttribute("data-theme", params.get("theme"));
+          if (params.get("layout")) script.setAttribute("data-layout", params.get("layout"));
+
+          document.body.appendChild(script);
+          console.log("Script tag appended to body.");
+        } else {
+          console.error("No widget ID in URL!");
+          document.write(
+            '<p style="color: red; font-weight: bold;">No Widget ID found! Please add ?id=... to your URL.</p>',
+          );
+        }
+      </script>
+    </div>
+  </body>
+</html>

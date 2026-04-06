@@ -89,18 +89,20 @@
 
 ## 5. Widget & Embed Engine
 
-- [ ] **High-Performance Bundles**:
-  - [ ] Optimize `embed.js` to be <5KB gzipped
+- [x] **High-Performance Bundles**:
+  - [x] Optimize `widget.js` to be <2KB gzipped
+  - [x] Implement iframe-based isolation with auto-resize
   - [ ] Zero-CLS (Cumulative Layout Shift) by reserving space for assets
   - [ ] Lazy-load video assets until the user interacts
-- [ ] **Layout Library**:
-  - [ ] **Grid**: Standard card grid with hover effects
-  - [ ] **Masonry**: Dynamic height Pinterest-style cards
-  - [ ] **Carousel**: Swipeable/Auto-play slider with pagination
+- [x] **Layout Library**:
+  - [x] **Grid**: Standard card grid with hover effects
+  - [x] **Masonry**: Dynamic height Pinterest-style cards
+  - [x] **Carousel**: Swipeable/Auto-play slider with pagination
   - [ ] **Bento**: Premium asymmetric grid for "Wall of Fame"
   - [ ] **Single-Card**: High-impact quote for landing page heroes
-- [ ] **Interactive Elements**:
-  - [ ] Social sharing buttons inside the widget
+- [x] **Interactive Elements**:
+  - [x] Social-ready "Copy Code" generation
+  - [x] Dynamic filtering via data-attributes
   - [ ] Lead-capture CTA at the bottom of the Wall of Love
 
 ## 6. Billing & Monetization

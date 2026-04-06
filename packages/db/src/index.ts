@@ -9,7 +9,7 @@ const { Pool } = pg;
 /**
  * Singleton database connection for serverless/dev resilience.
  */
-let db: ReturnType<typeof drizzle<typeof schema>> | undefined;
+export let db: ReturnType<typeof drizzle<typeof schema>> | undefined;
 
 export function createDb() {
   if (db) return db;

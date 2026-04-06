@@ -57,15 +57,32 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
-  // Track View
+  // Track View and Handle Height Reporting
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     trackEvent.mutate({
       workspaceId: data.workspaceId,
       widgetId: data.id,
       eventType: "view",
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    // Report height to parent if in iframe
+    if (window.self !== window.top) {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const height = Math.ceil(entry.contentRect.height + 64); // Add some padding
+          window.parent.postMessage({ type: "resize", height, widgetId: data.id }, "*");
+        }
+      });
+
+      if (containerRef.current) {
+        observer.observe(containerRef.current);
+      }
+
+      return () => observer.disconnect();
+    }
+  }, [data.workspaceId, data.id, trackEvent]);
 
   // Handle Carousel Auto-advance
   useEffect(() => {
@@ -82,7 +99,17 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     testimonials.length,
   ]);
 
-  if (testimonials.length === 0) return null;
+  if (testimonials.length === 0) {
+    return (
+      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-[32px] border-2 border-dashed border-neutral-100 p-12 text-center">
+        <Quote className="mb-4 size-8 text-neutral-200" />
+        <h3 className="text-lg font-bold text-neutral-900">No testimonials yet</h3>
+        <p className="mt-1 max-w-[240px] text-sm text-neutral-500">
+          Once you approve some testimonials in your dashboard, they will appear here.
+        </p>
+      </div>
+    );
+  }
 
   const getBorderRadius = () => {
     switch (settings.cardBorderRadius) {
@@ -125,14 +152,18 @@ export default function Widget({ data, testimonials }: WidgetProps) {
         ? t.content.substring(0, maxLength) + "..."
         : t.content;
 
+    const cardStyle: React.CSSProperties = {
+      borderRadius: getBorderRadius(),
+      boxShadow: getShadow(),
+      backdropFilter: settings.backgroundColor === "transparent" ? "blur(12px)" : "none",
+      color: settings.textColor || undefined,
+    };
+
     return (
       <div
         key={t.id}
-        className={`relative flex flex-col overflow-hidden border p-6 transition-all duration-500 ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
-        style={{
-          borderRadius: getBorderRadius(),
-          boxShadow: getShadow(),
-        }}
+        className={`relative flex flex-col overflow-hidden border p-7 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
+        style={cardStyle}
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -148,8 +179,13 @@ export default function Widget({ data, testimonials }: WidgetProps) {
               </div>
             )}
             <div>
-              <h5 className="text-[13px] leading-none font-bold">{t.authorName}</h5>
-              <p className="mt-1 text-[11px] text-neutral-400">
+              <h5
+                className="text-[14px] leading-tight font-bold tracking-tight"
+                style={{ color: settings.textColor || undefined }}
+              >
+                {t.authorName}
+              </h5>
+              <p className="mt-1 text-[11px] font-medium text-neutral-400">
                 {t.authorTagline}{" "}
                 {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
               </p>
@@ -191,7 +227,11 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   };
 
   return (
-    <div className="w-full" style={{ backgroundColor: settings.backgroundColor }}>
+    <div
+      ref={containerRef}
+      className="w-full overflow-hidden"
+      style={{ backgroundColor: settings.backgroundColor }}
+    >
       <div className="mx-auto" style={{ maxWidth: "1200px" }}>
         {settings.layout === "carousel" ? (
           <div className="group relative px-12">
