@@ -20,7 +20,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
 import { submitTestimonial } from "./actions";

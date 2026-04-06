@@ -7,7 +7,7 @@ import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 
 export default function VerifyOTPPage() {

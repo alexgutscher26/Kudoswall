@@ -22,7 +22,7 @@ import {
   Video,
   Layers,
 } from "lucide-react";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { trpc, queryClient } from "@/utils/trpc";
 import {

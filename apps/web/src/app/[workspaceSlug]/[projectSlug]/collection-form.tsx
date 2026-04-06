@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Star, ChevronRight, CheckCircle2 } from "lucide-react";
 import { submitTestimonial } from "./actions";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 
 interface CollectionFormProps {
   project: {

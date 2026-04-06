@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { createProject } from "./actions";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 

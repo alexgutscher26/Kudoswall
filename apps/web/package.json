@@ -28,6 +28,7 @@
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
+    "goey-toast": "catalog:",
     "lucide-react": "catalog:",
     "nanoid": "^5.1.7",
     "next": "catalog:",
@@ -35,7 +36,6 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-easy-crop": "^5.5.7",
-    "sonner": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { trpc, trpcClient } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

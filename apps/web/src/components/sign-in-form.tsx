@@ -3,7 +3,7 @@ import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";

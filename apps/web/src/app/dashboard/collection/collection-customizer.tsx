@@ -21,7 +21,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { motion } from "framer-motion";
 
 interface CollectionCustomizerProps {

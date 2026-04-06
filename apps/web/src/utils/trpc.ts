@@ -2,7 +2,7 @@ import type { AppRouter } from "@my-better-t-app/api/routers/index";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({

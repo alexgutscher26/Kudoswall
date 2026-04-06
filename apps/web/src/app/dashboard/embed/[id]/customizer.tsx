@@ -24,7 +24,7 @@ import {
   Link,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import { useMutation } from "@tanstack/react-query";
