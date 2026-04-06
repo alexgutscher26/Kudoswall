@@ -83,25 +83,16 @@ export default function Hero() {
           — no code required.
         </p>
 
-        {/* Input card */}
-        <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-md">
-          <div className="px-5 py-4">
-            <p className="text-left text-base text-neutral-400">
-              🚀 Paste a customer's email and collect a testimonial instantly…
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 border-t border-neutral-100 px-5 py-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700">
-              <Star className="size-3 fill-pink-500 text-pink-500" />
-              Smart mode
-            </span>
-            <div className="flex-1" />
-            <Link href="/login">
-              <Button className="h-8 rounded-full bg-neutral-900 px-5 text-sm text-white hover:bg-neutral-700">
-                Get started free →
-              </Button>
-            </Link>
-          </div>
+        {/* CTA Buttons */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+          <Link href="/login">
+            <Button className="h-12 rounded-full bg-neutral-900 px-8 text-base font-bold text-white shadow-xl transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
+              Get started free
+            </Button>
+          </Link>
+          <button className="h-12 rounded-full border border-neutral-200 bg-white px-8 text-base font-bold text-neutral-600 transition-all hover:bg-neutral-50 active:scale-[0.98]">
+            Book a demo
+          </button>
         </div>
 
         {/* Category chips */}
