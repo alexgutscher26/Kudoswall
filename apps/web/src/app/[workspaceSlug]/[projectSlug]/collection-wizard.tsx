@@ -19,16 +19,19 @@ import {
   Layout,
   Loader2,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
 import { submitTestimonial } from "./actions";
+import { trpc } from "@/utils/trpc";
+import { useMutation } from "@tanstack/react-query";
 
 interface CollectionWizardProps {
   project: {
     id: string;
     name: string;
+    workspaceId: string;
     thankYouMessage?: string | null;
     collectionSettingsJson?: string | null;
     workspace: {
@@ -71,6 +74,17 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
   const [linkedin, setLinkedin] = useState("");
   const [tagline, setTagline] = useState("");
   const [loading, setLoading] = useState(false);
+  const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
+
+  // Track View
+  useEffect(() => {
+    trackEvent.mutate({
+      workspaceId: project.workspaceId,
+      projectId: project.id,
+      eventType: "view",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const accentColor = settings?.accentColor || project.workspace.branding.accentColor || "#e8527a";
   const isPro = project.workspace.isPro;

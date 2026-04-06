@@ -2,11 +2,13 @@ import { protectedProcedure, publicProcedure, router } from "../index";
 import { dashboardRouter } from "./dashboard";
 import { widgetRouter } from "./widget";
 import { tagRouter } from "./tag";
+import { analyticsRouter } from "./analytics";
 
 export const appRouter = router({
   dashboard: dashboardRouter,
   widget: widgetRouter,
   tag: tagRouter,
+  analytics: analyticsRouter,
   healthCheck: publicProcedure.query(() => {
     return "OK";
   }),

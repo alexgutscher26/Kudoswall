@@ -19,7 +19,8 @@
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "next": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@my-better-t-app/config": "workspace:*",

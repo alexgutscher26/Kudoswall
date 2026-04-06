@@ -55,7 +55,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </p>
         </div>
 
-        <CollectionWizard project={projectData} />
+        <CollectionWizard project={{ ...projectData, workspaceId: projectData.workspaceId }} />
 
         <footer className="mt-12 text-center">
           <p className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">

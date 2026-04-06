@@ -146,6 +146,26 @@ export const widget = pgTable(
   (table) => [index("widget_workspace_id_idx").on(table.workspaceId)],
 );
 
+export const analyticsEvent = pgTable(
+  "analytics_event",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
+    widgetId: text("widget_id").references(() => widget.id, { onDelete: "set null" }),
+    eventType: text("event_type").notNull(), // 'view', 'click'
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("analytics_event_workspace_id_idx").on(table.workspaceId),
+    index("analytics_event_project_id_idx").on(table.projectId),
+    index("analytics_event_widget_id_idx").on(table.widgetId),
+    index("analytics_event_type_idx").on(table.eventType),
+  ],
+);
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const workspaceRelations = relations(workspace, ({ one, many }) => ({
@@ -193,9 +213,25 @@ export const testimonialToTagRelations = relations(testimonialToTag, ({ one }) =
   }),
 }));
 
-export const widgetRelations = relations(widget, ({ one }) => ({
+export const widgetRelations = relations(widget, ({ one, many }) => ({
   workspace: one(workspace, {
     fields: [widget.workspaceId],
     references: [workspace.id],
+  }),
+  analyticsEvents: many(analyticsEvent),
+}));
+
+export const analyticsEventRelations = relations(analyticsEvent, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [analyticsEvent.workspaceId],
+    references: [workspace.id],
+  }),
+  project: one(project, {
+    fields: [analyticsEvent.projectId],
+    references: [project.id],
+  }),
+  widget: one(widget, {
+    fields: [analyticsEvent.widgetId],
+    references: [widget.id],
   }),
 }));

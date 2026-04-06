@@ -41,6 +41,7 @@ export default async function WidgetDetailPage({ params }: { params: Promise<{ i
       <div className="mx-auto max-w-7xl">
         <WidgetCustomizer
           widgetId={w.id}
+          workspaceId={w.workspaceId}
           initialSettings={settings}
           isPro={true} // TODO: Hardcoded to true for testing Pro features change later
         />

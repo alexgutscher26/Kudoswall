@@ -73,10 +73,12 @@ interface WidgetSettings {
 
 export default function WidgetCustomizer({
   widgetId,
+  workspaceId,
   initialSettings,
   isPro,
 }: {
   widgetId: string;
+  workspaceId: string;
   initialSettings: any;
   isPro: boolean;
 }) {
@@ -561,6 +563,7 @@ export default function WidgetCustomizer({
                   name: "Preview",
                   settings,
                   isPro,
+                  workspaceId,
                 }}
                 testimonials={MOCK_DATA}
               />

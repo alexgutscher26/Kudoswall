@@ -40,6 +40,7 @@ export default async function EmbedPage({ params }: { params: Promise<{ id: stri
     name: w.name,
     settings,
     isPro: w.workspace.isPro,
+    workspaceId: w.workspaceId,
   };
 
   return (

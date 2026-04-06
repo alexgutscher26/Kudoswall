@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Star, Quote, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { trpc } from "@/utils/trpc";
+import { useMutation } from "@tanstack/react-query";
 
 interface WidgetProps {
   data: {
@@ -34,6 +36,7 @@ interface WidgetProps {
       locale?: string;
     };
     isPro: boolean;
+    workspaceId: string;
   };
   testimonials: Array<{
     id: string;
@@ -52,6 +55,17 @@ interface WidgetProps {
 export default function Widget({ data, testimonials }: WidgetProps) {
   const { settings, isPro } = data;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
+
+  // Track View
+  useEffect(() => {
+    trackEvent.mutate({
+      workspaceId: data.workspaceId,
+      widgetId: data.id,
+      eventType: "view",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle Carousel Auto-advance
   useEffect(() => {
