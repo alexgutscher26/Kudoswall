@@ -38,7 +38,11 @@ const widgetSettingsSchema = z.object({
   // Advanced
   locale: z.string().default("en"),
   animation: z.enum(["fade", "none"]).default("fade"),
-  maxWidth: z.number().nullable().optional(),
+  headerTitle: z.string().optional(),
+  headerRating: z.number().optional(),
+  headerReviewCount: z.number().optional(),
+  headerAutoStats: z.boolean().default(true),
+  hideHeader: z.boolean().optional(),
 });
 
 export const widgetRouter = router({
@@ -88,11 +92,22 @@ export const widgetRouter = router({
       const id = crypto.randomUUID();
       const defaultSettings = {
         layout: "grid",
-        theme: "auto",
+        theme: "light", // Default to light to match preview
         maxItems: 20,
         showRating: true,
+        showReviewerPhoto: true,
+        showReviewerCompany: true,
+        showDate: true,
+        cardBorderRadius: "small", // 12px
+        cardShadow: "subtle",
         accentColor: "#e8527a",
         backgroundColor: "transparent",
+        maxWidth: 800,
+        headerTitle: "What our customers say",
+        headerRating: 4.9,
+        headerReviewCount: 128,
+        headerAutoStats: true,
+        hideHeader: false,
         locale: "en",
         animation: "fade",
       };

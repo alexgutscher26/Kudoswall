@@ -4,9 +4,9 @@ const STEPS = [
   {
     number: "01",
     icon: Link2,
-    title: "Share your collection link",
+    title: "Create your collection",
     description:
-      "After signing up, you instantly get a unique link. Share it via email, SMS, or social — anywhere you reach customers.",
+      "Create a collection wall in seconds and get a unique link. Share it via email, SMS, or social — anywhere you reach customers.",
     color: "#e8527a",
     bg: "#fff5f7",
   },

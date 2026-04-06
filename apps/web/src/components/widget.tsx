@@ -35,6 +35,12 @@ interface WidgetProps {
       carouselShowArrows?: boolean;
       textColor?: string | null;
       locale?: string;
+      maxWidth?: number | null;
+      headerTitle?: string;
+      headerRating?: number;
+      headerReviewCount?: number;
+      headerAutoStats?: boolean;
+      hideHeader?: boolean;
     };
     isPro: boolean;
     workspaceId: string;
@@ -125,11 +131,11 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       case "small":
         return "12px";
       case "large":
-        return "32px";
+        return "24px";
       case "pill":
         return "999px";
       default:
-        return "32px";
+        return "12px"; // Default to small
     }
   };
 
@@ -149,7 +155,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   const themeClasses =
     settings.theme === "dark"
       ? "bg-neutral-900 text-white border-neutral-800"
-      : "bg-white text-neutral-900 border-neutral-100";
+      : "bg-[#fafafa] text-neutral-900 border-neutral-100";
 
   const renderCard = (t: any, index: number) => {
     const isTruncated = settings.truncateText !== "off";
@@ -169,70 +175,86 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     return (
       <div
         key={t.id}
-        className={`relative flex flex-col overflow-hidden border p-7 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
+        className={`relative flex flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
         style={cardStyle}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {settings.showReviewerPhoto && (
-              <div className="size-10 shrink-0 overflow-hidden rounded-full bg-neutral-100">
-                {t.authorImage ? (
-                  <Image
-                    src={t.authorImage}
-                    alt={t.authorName}
-                    width={40}
-                    height={40}
-                    priority={index < 3}
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <div className="flex size-full items-center justify-center font-bold text-neutral-400">
-                    {t.authorName.charAt(0)}
-                  </div>
-                )}
-              </div>
-            )}
-            <div>
-              <h5
-                className="text-[14px] leading-tight font-bold tracking-tight"
-                style={{ color: settings.textColor || undefined }}
-              >
-                {t.authorName}
-              </h5>
-              <p className="mt-1 text-[11px] font-medium text-neutral-400">
-                {t.authorTagline}{" "}
-                {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
-              </p>
+        {t.type === "video" && (
+          <div
+            className="group/video relative mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg transition-colors"
+            style={{ backgroundColor: `${settings.accentColor}22` }}
+          >
+            <div
+              className="flex size-8 items-center justify-center rounded-full text-white shadow-sm transition-transform group-hover/video:scale-110"
+              style={{ backgroundColor: settings.accentColor }}
+            >
+              <Play className="size-3.5 fill-current" />
             </div>
+            {/* Optional duration mock */}
+            <span className="absolute right-2 bottom-2 rounded bg-white/90 px-1 text-[9px] font-bold text-neutral-500 backdrop-blur-sm">
+              REC
+            </span>
           </div>
-          {t.type === "video" && (
-            <div className="flex size-8 items-center justify-center rounded-full bg-pink-50 text-pink-500">
-              <Play className="size-3 fill-current" />
-            </div>
-          )}
-        </div>
+        )}
+
+        {t.type === "text" && <Quote className="mb-2 size-5 text-neutral-200" />}
 
         {settings.showRating && (
-          <div className="mb-3 flex gap-0.5">
+          <div className="mb-1.5 flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={`size-3 ${i < t.rating ? "fill-current" : "text-neutral-200"}`}
+                className={`size-3.5 ${i < t.rating ? "fill-current" : "text-neutral-200"}`}
                 style={{ color: i < t.rating ? settings.accentColor : undefined }}
               />
             ))}
           </div>
         )}
 
-        <p className="flex-1 text-[14px] leading-relaxed text-neutral-600 italic dark:text-neutral-400">
+        <p className="mb-3 flex-1 text-xs leading-relaxed wrap-break-word text-neutral-600 dark:text-neutral-400">
           "{content}"
           {isTruncated && t.content.length > maxLength && (
             <span className="ml-1 cursor-pointer font-bold text-pink-500">Read more</span>
           )}
         </p>
 
+        <div className="flex items-center gap-2">
+          {settings.showReviewerPhoto && (
+            <div className="size-6 shrink-0 overflow-hidden rounded-full bg-neutral-100">
+              {t.authorImage ? (
+                <Image
+                  src={t.authorImage}
+                  alt={t.authorName}
+                  width={24}
+                  height={24}
+                  priority={index < 3}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <div
+                  className="flex size-full items-center justify-center text-[10px] font-bold text-white"
+                  style={{ backgroundColor: settings.accentColor }}
+                >
+                  {t.authorName.charAt(0)}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <h5
+              className="truncate text-[12px] font-semibold text-neutral-800 dark:text-white"
+              style={{ color: settings.textColor || undefined }}
+            >
+              {t.authorName}
+            </h5>
+            <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-400">
+              {t.authorTagline}{" "}
+              {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
+            </p>
+          </div>
+        </div>
+
         {settings.showDate && (
-          <div className="mt-4 text-[10px] font-bold tracking-widest text-neutral-300 uppercase">
+          <div className="mt-3 text-[9px] font-bold tracking-widest text-neutral-200 uppercase">
             {formatDistanceToNow(new Date(t.createdAt))} ago
           </div>
         )}
@@ -246,96 +268,147 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       className="w-full overflow-hidden"
       style={{ backgroundColor: settings.backgroundColor }}
     >
-      <div className="mx-auto" style={{ maxWidth: "1200px" }}>
-        {settings.layout === "carousel" ? (
-          <div className="group relative px-12">
-            <div className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-              >
-                {testimonials.map((t, index) => (
-                  <div key={t.id} className="w-full shrink-0 px-4">
-                    {renderCard(t, index)}
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* ─── Auto Stats Calculation ────────────────────────────────────────── */}
+      {(() => {
+        const totalRating = testimonials.reduce((acc, t) => acc + t.rating, 0);
+        const avgRating =
+          testimonials.length > 0 ? (totalRating / testimonials.length).toFixed(1) : "0";
+        const reviewCount = testimonials.length;
 
-            {settings.carouselShowArrows !== false && testimonials.length > 1 && (
-              <>
-                <button
-                  onClick={() =>
-                    setCurrentIndex(
-                      (prev) => (prev - 1 + testimonials.length) % testimonials.length,
-                    )
-                  }
-                  className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                >
-                  <ChevronLeft className="size-5" />
-                </button>
-                <button
-                  onClick={() => setCurrentIndex((prev) => (prev + 1) % testimonials.length)}
-                  className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                >
-                  <ChevronRight className="size-5" />
-                </button>
-              </>
-            )}
+        const effectiveRating =
+          settings.headerAutoStats !== false ? Number(avgRating) : settings.headerRating || 4.9;
+        const effectiveCount =
+          settings.headerAutoStats !== false ? reviewCount : settings.headerReviewCount || 128;
 
-            {testimonials.length > 1 && (
-              <div className="mt-6 flex justify-center gap-1.5">
-                {testimonials.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentIndex(i)}
-                    className={`h-1 rounded-full transition-all ${currentIndex === i ? "w-6" : "w-2 bg-neutral-200"}`}
-                    style={{
-                      backgroundColor: currentIndex === i ? settings.accentColor : undefined,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
+        return (
           <div
-            className={`gap-6 ${
-              settings.layout === "masonry" ? "columns-1 md:columns-2 lg:columns-3" : "grid"
-            } ${
-              settings.layout !== "masonry" && settings.columnsOverride === 1
-                ? "grid-cols-1"
-                : settings.layout !== "masonry" && settings.columnsOverride === 2
-                  ? "grid-cols-1 md:grid-cols-2"
-                  : settings.layout !== "masonry" && settings.columnsOverride === 3
-                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    : settings.layout !== "masonry"
-                      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                      : ""
-            }`}
+            className="mx-auto"
+            style={{ maxWidth: settings.maxWidth ? `${settings.maxWidth}px` : "800px" }}
           >
-            {testimonials.map((t, index) => renderCard(t, index))}
-          </div>
-        )}
+            {!settings.hideHeader && (
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-4 px-4 sm:px-0">
+                <div>
+                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">
+                    {settings.headerTitle || "What our customers say"}
+                  </h3>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`size-4 ${i < Math.floor(effectiveRating) ? "fill-amber-400 text-amber-400" : "text-neutral-200"}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[13px] font-medium text-neutral-500">
+                      {effectiveRating} · {effectiveCount} reviews
+                    </span>
+                  </div>
+                </div>
+                {(!settings.hideBadge || !isPro) && (
+                  <a
+                    href="https://testimonialwall.me"
+                    target="_blank"
+                    className="inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold transition-all hover:opacity-80"
+                    style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
+                  >
+                    Powered by TestimonialWall
+                  </a>
+                )}
+              </div>
+            )}
 
-        {(!settings.hideBadge || !isPro) && (
-          <div className="mt-12 flex justify-center">
-            <a
-              href="https://testimonialwall.me"
-              target="_blank"
-              className="flex items-center gap-1.5 rounded-full border border-neutral-100 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-400 shadow-sm transition-all hover:border-pink-100 hover:text-neutral-600"
-            >
-              Powered by{" "}
-              <span
-                className="font-extrabold text-neutral-900"
-                style={{ color: settings.accentColor }}
+            {settings.layout === "carousel" ? (
+              <div className="group relative px-12">
+                <div className="overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-500 ease-in-out"
+                    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                  >
+                    {testimonials.map((t, index) => (
+                      <div key={t.id} className="w-full shrink-0 px-4">
+                        {renderCard(t, index)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {settings.carouselShowArrows !== false && testimonials.length > 1 && (
+                  <>
+                    <button
+                      onClick={() =>
+                        setCurrentIndex(
+                          (prev) => (prev - 1 + testimonials.length) % testimonials.length,
+                        )
+                      }
+                      className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                    >
+                      <ChevronLeft className="size-5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentIndex((prev) => (prev + 1) % testimonials.length)}
+                      className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                    >
+                      <ChevronRight className="size-5" />
+                    </button>
+                  </>
+                )}
+
+                {testimonials.length > 1 && (
+                  <div className="mt-6 flex justify-center gap-1.5">
+                    {testimonials.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentIndex(i)}
+                        className={`h-1 rounded-full transition-all ${currentIndex === i ? "w-6" : "w-2 bg-neutral-200"}`}
+                        style={{
+                          backgroundColor: currentIndex === i ? settings.accentColor : undefined,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                className={`gap-6 ${
+                  settings.layout === "masonry" ? "columns-1 md:columns-2 lg:columns-3" : "grid"
+                } ${
+                  settings.layout !== "masonry" && settings.columnsOverride === 1
+                    ? "grid-cols-1"
+                    : settings.layout !== "masonry" && settings.columnsOverride === 2
+                      ? "grid-cols-1 md:grid-cols-2"
+                      : settings.layout !== "masonry" && settings.columnsOverride === 3
+                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                        : settings.layout !== "masonry"
+                          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                          : ""
+                }`}
               >
-                TestimonialWall
-              </span>
-            </a>
+                {testimonials.map((t, index) => renderCard(t, index))}
+              </div>
+            )}
+
+            {(!settings.hideBadge || !isPro) && settings.hideHeader && (
+              <div className="mt-8 flex justify-center">
+                <a
+                  href="https://testimonialwall.me"
+                  target="_blank"
+                  className="flex items-center gap-1.5 rounded-full border border-neutral-100 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-400 shadow-sm transition-all hover:border-pink-100 hover:text-neutral-600"
+                >
+                  Powered by{" "}
+                  <span
+                    className="font-extrabold text-neutral-900"
+                    style={{ color: settings.accentColor }}
+                  >
+                    TestimonialWall
+                  </span>
+                </a>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 }

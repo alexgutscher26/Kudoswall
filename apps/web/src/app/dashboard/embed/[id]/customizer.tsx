@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Code2,
   Copy,
@@ -22,6 +22,7 @@ import {
   Globe,
   Loader2,
   Link,
+  MoreHorizontal,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -67,6 +68,13 @@ interface WidgetSettings {
   // Advanced
   locale: string;
   animation: "fade" | "none";
+
+  // Header
+  headerTitle: string;
+  headerRating: number;
+  headerReviewCount: number;
+  headerAutoStats: boolean;
+  hideHeader: boolean;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -92,7 +100,7 @@ export default function WidgetCustomizer({
     carouselInterval: 5000,
     carouselShowArrows: true,
     columnsOverride: null,
-    cardBorderRadius: "large",
+    cardBorderRadius: "small", // Corrected default to match marketing
     cardShadow: "subtle",
     showReviewerPhoto: true,
     showReviewerCompany: true,
@@ -107,6 +115,11 @@ export default function WidgetCustomizer({
     hideBadge: false,
     locale: "en",
     animation: "fade",
+    headerTitle: "What our customers say",
+    headerRating: 4.9,
+    headerReviewCount: 128,
+    headerAutoStats: true,
+    hideHeader: false,
     ...initialSettings,
   });
 
@@ -141,7 +154,12 @@ export default function WidgetCustomizer({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const embedCode = `<script src="https://testimonialwall.me/widget.js" 
+  const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  const embedCode = `<script src="${origin || "https://testimonialwall.me"}/widget.js" 
   data-id="${widgetId}" 
   async
 ></script>`;
@@ -150,11 +168,11 @@ export default function WidgetCustomizer({
   const MOCK_DATA = [
     {
       id: "1",
-      authorName: "Sarah Chen",
-      authorTagline: "Head of Marketing",
-      authorCompany: "Acme Corp",
+      authorName: "Jordan K.",
+      authorTagline: "Customer",
+      authorCompany: "Acme Labs",
       content:
-        "TestimonialWall completely transformed how we collect and display social proof. The quality is unmatched.",
+        "Absolutely love this product. The quality is outstanding and shipping was super fast! Changed my business completely.",
       rating: 5,
       createdAt: new Date(),
       type: "text" as const,
@@ -162,22 +180,22 @@ export default function WidgetCustomizer({
     },
     {
       id: "2",
-      authorName: "James Okafor",
-      authorTagline: "Founder",
-      authorCompany: "LaunchPad SaaS",
+      authorName: "Aisha M.",
+      authorTagline: "Verified buyer",
+      authorCompany: "Stellar Design",
       content: "Clean, fast, and simple. Exactly what we needed for our marketing site.",
       rating: 5,
       createdAt: new Date(),
-      type: "text" as const,
+      type: "video" as const,
       authorImage: "",
     },
     {
       id: "3",
-      authorName: "Priya Anand",
-      authorTagline: "CX Lead",
-      authorCompany: "Bloom Studio",
-      content: "Honestly impressed. The embed widget is beautiful and looks native.",
-      rating: 4,
+      authorName: "Tom B.",
+      authorTagline: "Founder",
+      authorCompany: "LaunchPad",
+      content: "Best purchase this year. The support team is also incredibly responsive.",
+      rating: 5,
       createdAt: new Date(),
       type: "text" as const,
       authorImage: "",
@@ -320,7 +338,8 @@ export default function WidgetCustomizer({
                   { key: "showReviewerPhoto", label: "Show reviewer photo", pro: true },
                   { key: "showReviewerCompany", label: "Show company info", pro: true },
                   { key: "showDate", label: "Show submission date", pro: true },
-                ].map((field) => (
+                  { key: "hideHeader", label: "Hide widget header", pro: false, invert: true },
+                ].map((field: any) => (
                   <div key={field.key} className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-neutral-700">{field.label}</span>
                     <div className="flex items-center gap-2">
@@ -334,15 +353,92 @@ export default function WidgetCustomizer({
                             [field.key]: !s[field.key as keyof WidgetSettings],
                           }))
                         }
-                        className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${settings[field.key as keyof WidgetSettings] ? "bg-emerald-500" : "bg-neutral-200"} ${field.pro && !isPro ? "opacity-50" : ""}`}
+                        className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${field.invert ? !settings[field.key as keyof WidgetSettings] : settings[field.key as keyof WidgetSettings] ? "bg-emerald-500" : "bg-neutral-200"} ${field.pro && !isPro ? "opacity-50" : ""}`}
                       >
                         <div
-                          className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${settings[field.key as keyof WidgetSettings] ? "translate-x-5.5" : "translate-x-1"}`}
+                          className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${(field.invert ? !settings[field.key as keyof WidgetSettings] : settings[field.key as keyof WidgetSettings]) ? "translate-x-5.5" : "translate-x-1"}`}
                         />
                       </button>
                     </div>
                   </div>
                 ))}
+
+                {!settings.hideHeader && (
+                  <div className="space-y-4 border-t border-neutral-50 pt-6">
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                        Header Title
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.headerTitle}
+                        onChange={(e) =>
+                          setSettings((s) => ({ ...s, headerTitle: e.target.value }))
+                        }
+                        className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2 text-[13px] focus:border-pink-200 focus:outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                          Rating
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="5"
+                          value={settings.headerRating}
+                          onChange={(e) =>
+                            setSettings((s) => ({ ...s, headerRating: Number(e.target.value) }))
+                          }
+                          className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2 text-[13px] focus:border-pink-200 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                          Reviews
+                        </label>
+                        <input
+                          type="number"
+                          value={settings.headerReviewCount}
+                          onChange={(e) =>
+                            setSettings((s) => ({
+                              ...s,
+                              headerReviewCount: Number(e.target.value),
+                            }))
+                          }
+                          className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2 text-[13px] focus:border-pink-200 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-dotted border-neutral-100 pt-4">
+                      <div className="space-y-0.5">
+                        <span className="text-[13px] font-medium text-neutral-700">
+                          Auto calculate stats
+                        </span>
+                        <p className="text-[11px] text-neutral-400">
+                          Use real rating/count from testimonials
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            headerAutoStats: !s.headerAutoStats,
+                          }))
+                        }
+                        className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${settings.headerAutoStats ? "bg-emerald-500" : "bg-neutral-200"}`}
+                      >
+                        <div
+                          className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${settings.headerAutoStats ? "translate-x-5.5" : "translate-x-1"}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-3 border-t border-neutral-50 pt-6">
                   <div className="flex items-center justify-between">
@@ -549,24 +645,49 @@ export default function WidgetCustomizer({
               className="absolute inset-0 opacity-[0.05]"
               style={{
                 backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)",
-                backgroundSize: "32px 32px",
+                backgroundSize: "20px 20px",
               }}
             />
 
             {/* Dynamic Preview Content */}
             <div
-              className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-6xl"}`}
+              className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-3xl"}`}
             >
-              <Widget
-                data={{
-                  id: widgetId,
-                  name: "Preview",
-                  settings,
-                  isPro,
-                  workspaceId,
-                }}
-                testimonials={MOCK_DATA}
-              />
+              {/* Browser chrome mock */}
+              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
+                {/* Browser bar */}
+                <div
+                  className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3"
+                  style={{ backgroundColor: "#f0efeb" }}
+                >
+                  <div className="flex gap-1.5">
+                    <span className="size-2 rounded-full bg-red-400" />
+                    <span className="size-2 rounded-full bg-amber-400" />
+                    <span className="size-2 rounded-full bg-green-400" />
+                  </div>
+                  <div
+                    className="mx-4 flex-1 rounded-full px-3 py-1 text-center text-[10px] text-neutral-400"
+                    style={{ backgroundColor: "#e8e7e3" }}
+                  >
+                    yourwebsite.com
+                  </div>
+                  <MoreHorizontal className="size-3 text-neutral-400" />
+                </div>
+
+                {/* Widget content */}
+                <div className="min-h-[400px] bg-white p-4 sm:p-8">
+                  <Widget
+                    data={{
+                      id: widgetId,
+                      name: "Preview",
+                      settings,
+                      isPro,
+                      workspaceId,
+                    }}
+                    testimonials={MOCK_DATA}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -610,7 +731,7 @@ export default function WidgetCustomizer({
                 <button
                   onClick={() =>
                     copyToClipboard(
-                      `<iframe src="https://testimonialwall.me/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
+                      `<iframe src="${origin || "https://testimonialwall.me"}/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
                     )
                   }
                   className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
