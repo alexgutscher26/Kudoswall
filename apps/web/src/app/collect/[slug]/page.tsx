@@ -15,6 +15,28 @@ interface CollectPageProps {
   }>;
 }
 
+export async function generateMetadata({ params }: CollectPageProps) {
+  const { slug } = await params;
+  const projectData = await getProjectByCollectionSlug(slug);
+
+  if (!projectData) return {};
+
+  const headline = projectData.settings?.pageContent?.headline || "Share your story";
+  const subheading =
+    projectData.settings?.pageContent?.subheading ||
+    `You're leaving a review for ${projectData.name}`;
+
+  return {
+    title: `${headline} | ${projectData.name} on TestimonialWall`,
+    description: subheading,
+    openGraph: {
+      title: `${headline} | ${projectData.name}`,
+      description: subheading,
+      images: projectData.workspace.logoUrl ? [{ url: projectData.workspace.logoUrl }] : [],
+    },
+  };
+}
+
 async function getProjectByCollectionSlug(slug: string) {
   const result = await db.query.project.findFirst({
     where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
