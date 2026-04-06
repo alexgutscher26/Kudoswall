@@ -94,12 +94,12 @@
   - [ ] Visual audio levels indicator during recording
   - [ ] Fallback for "Upload only" if recording fails
 - [ ] **UI/UX Polishing**:
-  - [ ] Fully responsive design (Mobile-first for selfie recording)
+  - [x] Fully responsive design (Mobile-first for selfie recording)
   - [ ] Dark/Light mode automatic detection
-  - [ ] Confetti animation on successful submission
+  - [x] Confetti animation on successful submission
   - [ ] "Verify via LinkedIn/Google" button to reduce fake testimonials
-  - [ ] Progress bar for multi-step forms
-  - [ ] Auto-save draft in LocalStorage (Recover if browser crashes)
+  - [x] Progress bar for multi-step forms
+  - [x] Auto-save draft in LocalStorage (Recover if browser crashes)
 - [ ] **Branding & Whitelabeling**:
   - [ ] Custom fonts (Google Fonts / Uploaded .woff2)
   - [ ] Full CSS control for matching brand guidelines

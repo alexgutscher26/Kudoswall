@@ -26,6 +26,7 @@ import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
 import { submitTestimonial } from "./actions";
 import { trpc } from "@/utils/trpc";
+import { Progress } from "@my-better-t-app/ui/components/progress";
 import { useMutation } from "@tanstack/react-query";
 
 interface CollectionWizardProps {
@@ -82,6 +83,53 @@ export default function CollectionWizard({
   const [loading, setLoading] = useState(false);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
+  const DRAFT_KEY = `t-wall-draft-${project.id}`;
+
+  // 1. Recovery Logic
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(DRAFT_KEY);
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (draft.rating) setRating(draft.rating);
+        if (draft.content) setContent(draft.content);
+        if (draft.photo) setPhoto(draft.photo);
+        if (draft.name) setName(draft.name);
+        if (draft.email) setEmail(draft.email);
+        if (draft.company) setCompany(draft.company);
+        if (draft.linkedin) setLinkedin(draft.linkedin);
+        if (draft.tagline) setTagline(draft.tagline);
+        if (draft.mode) setMode(draft.mode);
+        if (draft.step && draft.step !== "success") setStep(draft.step);
+
+        toast.success("Recovered your progress!");
+      } catch (e) {
+        console.error("Failed to recover draft", e);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 2. Persistence Logic
+  useEffect(() => {
+    if (step === "success") return;
+
+    const draft = {
+      rating,
+      content,
+      photo,
+      name,
+      email,
+      company,
+      linkedin,
+      tagline,
+      mode,
+      step,
+    };
+
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  }, [DRAFT_KEY, rating, content, photo, name, email, company, linkedin, tagline, mode, step]);
+
   // Track View
   useEffect(() => {
     trackEvent.mutate({
@@ -124,6 +172,50 @@ export default function CollectionWizard({
     if (step === "photo") return setStep("details");
     if (step === "video") return setStep("details");
     if (step === "details") return setStep("success");
+  };
+
+  const fireConfetti = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      // since particles fall down, start a bit higher than random
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: [accentColor, "#171717", "#ffffff"],
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: [accentColor, "#171717", "#ffffff"],
+      });
+    }, 250);
+
+    // Initial big burst
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: [accentColor, "#171717", "#ffffff"],
+      gravity: 1.2,
+      scalar: 1.2,
+      zIndex: 100,
+    });
   };
 
   const prevStep = () => {
@@ -192,13 +284,8 @@ export default function CollectionWizard({
         videoUrl: videoUrl,
       });
 
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: [accentColor, "#171717", "#ffffff"],
-      });
-
+      localStorage.removeItem(DRAFT_KEY);
+      fireConfetti();
       setStep("success");
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
@@ -238,19 +325,18 @@ export default function CollectionWizard({
               : "inherit",
       }}
     >
-      <div className="text-card-foreground relative flex min-h-[500px] flex-col overflow-hidden rounded-[40px] border border-white/50 bg-white/70 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] backdrop-blur-xl">
-        {/* Progress Bar */}
-        <div className="absolute top-0 right-0 left-0 h-1 overflow-hidden bg-neutral-100/30">
-          <motion.div
-            animate={{
-              width: `${(steps[step === "choice" ? "rating" : step] / 5) * 100}%`,
-            }}
-            className="h-full transition-all duration-500 ease-out"
-            style={{ backgroundColor: accentColor }}
+      <div className="text-card-foreground relative flex min-h-[450px] w-full flex-col overflow-hidden rounded-[32px] border border-white/50 bg-white/70 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] backdrop-blur-xl sm:min-h-[520px] sm:rounded-[40px]">
+        {/* Progress System */}
+        <div className="absolute top-0 right-0 left-0 z-20 overflow-hidden">
+          <Progress
+            currentStep={steps[step === "choice" ? "rating" : step]}
+            maxSteps={5}
+            accentColor={accentColor}
+            className="h-1.5 border-b border-white/5 bg-neutral-100/30 backdrop-blur-sm"
           />
         </div>
 
-        <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-10">
+        <div className="flex flex-1 flex-col p-5 sm:p-8 lg:p-10">
           <AnimatePresence mode="wait">
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -279,9 +365,12 @@ export default function CollectionWizard({
                   <div className="flex w-full flex-col items-center space-y-6">
                     <div className="flex items-center gap-1 sm:gap-2">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <div className="group relative p-2 transition-all hover:scale-110" key={s}>
-                          {/* Invisible half-star triggers */}
-                          <div className="absolute inset-0 z-20 flex px-2 py-2">
+                        <div
+                          className="group relative p-1.5 transition-all hover:scale-110 sm:p-2"
+                          key={s}
+                        >
+                          {/* Invisible half-star triggers - extra large for mobile touch */}
+                          <div className="absolute inset-0 z-20 flex p-0 sm:p-2">
                             <div
                               className="h-full w-1/2 cursor-pointer"
                               onMouseEnter={() => setHoveredRating(s - 0.5)}
@@ -304,7 +393,7 @@ export default function CollectionWizard({
 
                           <div className="relative">
                             <Star
-                              className="size-12 fill-none text-neutral-200 transition-all duration-300 sm:size-14"
+                              className="size-11 fill-none text-neutral-200 transition-all duration-300 sm:size-14"
                               style={{ strokeWidth: 1.5 }}
                             />
 
@@ -313,7 +402,7 @@ export default function CollectionWizard({
                               (hoveredRating || rating) < s && (
                                 <div className="pointer-events-none absolute inset-0 z-10 w-1/2 overflow-hidden">
                                   <Star
-                                    className="size-12 fill-current sm:size-14"
+                                    className="size-11 fill-current sm:size-14"
                                     style={{
                                       color: accentColor,
                                       filter: `drop-shadow(0 0 15px ${accentColor}30)`,
@@ -326,7 +415,7 @@ export default function CollectionWizard({
                             {(hoveredRating || rating) >= s && (
                               <div className="pointer-events-none absolute inset-0 z-10">
                                 <Star
-                                  className="size-12 fill-current sm:size-14"
+                                  className="size-11 fill-current sm:size-14"
                                   style={{
                                     color: accentColor,
                                     filter: `drop-shadow(0 0 15px ${accentColor}30)`,
@@ -423,7 +512,7 @@ export default function CollectionWizard({
                   <div className="group relative flex flex-1 flex-col">
                     <textarea
                       autoFocus
-                      className="w-full flex-1 resize-none rounded-[32px] border border-neutral-100 bg-neutral-50/30 p-8 pt-10 text-[18px] leading-relaxed font-medium text-neutral-900 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[6px]"
+                      className="w-full flex-1 resize-none rounded-[28px] border border-neutral-100 bg-neutral-50/30 p-6 pt-10 text-[16px] leading-relaxed font-medium text-neutral-900 transition-all outline-none focus:border-neutral-200 focus:bg-white focus:ring-[6px] sm:rounded-[32px] sm:p-8 sm:text-[18px]"
                       style={{ "--tw-ring-color": `${accentColor}08` } as any}
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={
@@ -434,15 +523,15 @@ export default function CollectionWizard({
                     />
 
                     {/* Character Count Badge */}
-                    <div className="absolute right-8 bottom-6 flex items-center gap-4">
+                    <div className="absolute right-4 bottom-6 flex items-center gap-2 sm:right-8 sm:gap-4">
                       <span
-                        className={`text-[11px] font-black tracking-widest uppercase transition-colors ${isContentValid ? "text-emerald-500" : "text-neutral-400"}`}
+                        className={`text-[10px] font-black tracking-widest uppercase transition-colors sm:text-[11px] ${isContentValid ? "text-emerald-500" : "text-neutral-400"}`}
                       >
-                        {charCount} / {minCount} MIN
+                        {charCount} / {minCount}
                       </span>
                       <div className="h-4 w-[1px] bg-neutral-200" />
                       <button
-                        className="flex items-center gap-2 rounded-2xl px-6 py-3.5 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-20"
+                        className="flex items-center gap-2 rounded-xl px-4 py-3 text-[13px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-20 sm:rounded-2xl sm:px-6 sm:py-3.5 sm:text-[14px]"
                         style={{
                           backgroundColor: accentColor,
                           boxShadow: `0 10px 25px -5px ${accentColor}40`,

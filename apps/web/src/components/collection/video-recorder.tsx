@@ -25,6 +25,14 @@ export default function VideoRecorder({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -34,10 +42,13 @@ export default function VideoRecorder({
   // 1. Initialize Stream
   const initStream = async () => {
     try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { width: 1280, height: 720, facingMode: "user" },
+      const constraints: MediaStreamConstraints = {
+        video: isMobile
+          ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
+          : { width: 1280, height: 720, facingMode: "user" },
         audio: true,
-      });
+      };
+      const s = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(s);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
@@ -148,21 +159,23 @@ export default function VideoRecorder({
   if (recordedBlob && previewUrl) {
     return (
       <div className="flex w-full flex-col gap-4">
-        <div className="relative aspect-video w-full overflow-hidden rounded-[32px] border border-neutral-100 bg-black shadow-2xl">
-          <video src={previewUrl} controls className="size-full object-cover" />
+        <div
+          className={`relative w-full overflow-hidden rounded-[24px] border border-neutral-100 bg-black shadow-2xl sm:rounded-[32px] ${isMobile ? "aspect-3/4" : "aspect-video"}`}
+        >
+          <video src={previewUrl} controls className="size-full object-cover" playsInline />
         </div>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={reset}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-200 py-4 text-[14px] font-bold text-neutral-600 transition-all hover:bg-neutral-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 py-3.5 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-50 sm:rounded-2xl sm:py-4 sm:text-[14px]"
           >
             <RotateCcw className="size-4" /> Re-record
           </button>
           <button
             type="button"
             onClick={() => onConfirm(recordedBlob)}
-            className="flex-2 rounded-2xl py-4 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            className="flex-2 rounded-xl py-3.5 text-[13px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98] sm:rounded-2xl sm:py-4 sm:text-[14px]"
             style={{ backgroundColor: accentColor }}
           >
             Use this video
@@ -175,7 +188,9 @@ export default function VideoRecorder({
   // ─── Recording UI ───────────────────────────────────────────────────────────
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="relative aspect-video w-full overflow-hidden rounded-[32px] border border-neutral-100 bg-neutral-900 shadow-2xl">
+      <div
+        className={`relative w-full overflow-hidden rounded-[24px] border border-neutral-100 bg-neutral-900 shadow-2xl sm:rounded-[32px] ${isMobile ? "aspect-3/4" : "aspect-video"}`}
+      >
         <video
           ref={videoRef}
           autoPlay
@@ -248,7 +263,7 @@ export default function VideoRecorder({
         {/* Guide Prompts Overlays could go here */}
       </div>
 
-      <p className="text-center text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+      <p className="px-4 text-center text-[10px] font-bold tracking-widest text-neutral-400 uppercase sm:px-0 sm:text-[11px]">
         {recording
           ? "Recording... Keep talking! 🎙️"
           : prompt || "Smile and share your story for 30-60 seconds"}

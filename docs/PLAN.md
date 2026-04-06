@@ -1,64 +1,37 @@
-# PLAN: Implementing Drizzle Kit Migrations
+# PLAN: Premium Segmented Progress Bar
 
-This plan outlines the steps to implement a robust database migration strategy for TestimonialWall using Drizzle Kit.
+Implement a high-fidelity, segmented progress bar for multi-step forms to improve UX and provide clear task progression feedback.
 
-## 🎯 Objectives
+## 🏁 Goals
 
-- Transition from `db:push` (development only) to versioned migrations.
-- Ensure automated migration execution in CI/CD and local environments.
-- Verify migration integrity and schema-code alignment.
-
-## 🛠️ Architecture
-
-- **Schema Source**: `packages/db/src/schema`
-- **Migration Output**: `packages/db/src/migrations`
-- **Database**: PostgreSQL
-- **Orchestration**: Bun scripts within `@my-better-t-app/db`
+- [ ] **Reusable Component**: Create a `ProgressBar` in `@my-better-t-app/ui` that can handle any number of steps.
+- [ ] **Visual Clarity**: Show total steps as discrete segments or a clear percentage block.
+- [ ] **Smooth Motion**: Use Framer Motion for fluid transitions between steps.
+- [ ] **Project Integration**: Integrate the new component into `CollectionWizard` first.
 
 ---
 
-## 📅 Roadmap
+## 🛠️ Implementation Phases
 
-### PHASE 1: Foundation (Current Session)
+### Phase 1: UI Component (frontend-specialist)
 
-- [ ] **Step 1: Codebase Discovery** (`explorer-agent`)
-  - Verify schema files for potential issues that might break migrations (circular refs, missing exports).
-  - Check current `.env` state for migration connectivity.
-- [ ] **Step 2: Generate Initial Migrations**
-  - Execute `bun run db:generate` in `packages/db`.
-  - Inspect generated SQL files for correctness.
-- [ ] **Step 3: Verification Script**
-  - Create a migration verification script in `packages/db/scripts/verify-migrations.ts`.
+1. **Creation**: Build `packages/ui/src/components/progress.tsx` using a Radix-like pattern but optimized for a premium look (glassmorphism/glow).
+2. **Features**: Support `maxSteps`, `currentStep`, and custom `accentColor`.
 
-### PHASE 2: Implementation (After Approval)
+### Phase 2: Integration (project-planner)
 
-- [ ] **Step 4: Execute Migrations** (`database-architect`)
-  - Run `bun run db:migrate` to push schema to the live database.
-  - Verify the `drizzle.__migrations` metadata table.
-- [ ] **Step 5: Security & Audit** (`security-auditor`)
-  - Review migration permissions (Principle of Least Privilege).
-  - Ensure `DATABASE_URL` is managed securely via environment variables.
-- [ ] **Step 6: CI/CD Integration** (`devops-engineer`)
-  - Add a pre-deploy migration step to Turborepo/Cloudflare.
+1. **Migration**: Replace the hardcoded `h-1` div in `CollectionWizard.tsx` with the new `@my-better-t-app/ui/Progress` component.
+2. **Step Mapping**: Ensure the `steps` dictionary in the wizard correctly maps to the progress bar's indices.
 
-### PHASE 3: Testing & Polish
+### Phase 3: Verification (test-engineer)
 
-- [ ] **Step 7: Automated Testing** (`test-engineer`)
-  - Implement a "Dry Run" test to ensure future schema changes generate valid SQL.
-- [ ] **Step 8: Documentation** (`documentation-writer`)
-  - Update `packages/db/README.md` with instructions on how to handle schema changes.
+1. **Navigation Test**: Verify progress bar updates correctly when clicking "Next" and "Back".
+2. **Snapshot Test**: Ensure the progress bar doesn't cause layout shifts (CLS) on step transitions.
 
 ---
 
-## ✅ Verification Criteria
+## 📝 Next Steps
 
-- [ ] All schema changes are captured in `.sql` files in `src/migrations`.
-- [ ] Running `db:migrate` results in no differences between schema and DB.
-- [ ] No `db:push` was used for the final deployment.
-
----
-
-## 📂 Logical Dependencies
-
-1. Schema files must be error-free for `db:generate` to succeed.
-2. `DATABASE_URL` must have sufficient privileges (CREATE, ALTER, DROP) for the migration runner.
+1. Approve this plan.
+2. Create the reusable UI component.
+3. Update the Collection Wizard.

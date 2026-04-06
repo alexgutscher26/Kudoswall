@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://apis.google.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com;
     font-src 'self' data:;
@@ -59,7 +59,7 @@ export function middleware(request: NextRequest) {
   response.headers.set("Content-Security-Policy", cspHeader);
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
   );
   response.headers.set("X-XSS-Protection", "1; mode=block");
 
