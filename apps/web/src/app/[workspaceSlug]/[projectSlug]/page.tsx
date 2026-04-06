@@ -17,13 +17,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
+  const settings = projectData.collectionSettingsJson
+    ? (JSON.parse(projectData.collectionSettingsJson) as any)
+    : null;
+  const backgroundColor = settings?.backgroundColor || "#fafafa";
+
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fafafa] px-4 py-12 sm:px-6">
+    <main
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 transition-colors duration-500 sm:px-6"
+      style={{ backgroundColor }}
+    >
       {/* Background patterns */}
       <div className="absolute inset-0 z-0 opacity-40">
         <div className="absolute top-[-10%] right-[-5%] size-96 rounded-full bg-pink-500/10 blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-5%] size-[500px] rounded-full bg-blue-500/5 blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:24px_24px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[24px_24px]" />
       </div>
 
       <div className="z-10 mx-auto w-full max-w-4xl space-y-12">

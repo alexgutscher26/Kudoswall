@@ -95,10 +95,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
     let nextIdx = currentIndex + 1;
 
     // Skip video if disabled
-    if (
-      sequence[nextIdx] === "video" &&
-      (settings?.video?.enabled === false || (settings?.video?.enabled === undefined && !isPro))
-    ) {
+    if (sequence[nextIdx] === "video" && settings?.video?.enabled !== true) {
       nextIdx++;
     }
 
@@ -114,10 +111,7 @@ export default function CollectionWizard({ project }: CollectionWizardProps) {
     let prevIdx = currentIndex - 1;
 
     // Skip video if disabled
-    if (
-      sequence[prevIdx] === "video" &&
-      (settings?.video?.enabled === false || (settings?.video?.enabled === undefined && !isPro))
-    ) {
+    if (sequence[prevIdx] === "video" && settings?.video?.enabled !== true) {
       prevIdx--;
     }
 

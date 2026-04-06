@@ -91,7 +91,11 @@ async function CollectionContent({
         )}
 
         {selectedProject ? (
-          <CollectionCustomizer project={selectedProject} workspace={data.workspace} />
+          <CollectionCustomizer
+            project={selectedProject}
+            workspace={data.workspace}
+            isPro={true} // TODO: Hardcoded to true for testing Pro features
+          />
         ) : (
           <div className="flex h-96 flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-200 bg-white p-12 text-center">
             <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-neutral-50">

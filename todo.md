@@ -228,5 +228,3 @@
 ---
 
 _Roadmap updated: 2026-04-03_
-
-lets implmenet the full functionity of the Embed Widget system lets make the widet preview just mock data for the preview so the user can see and make the options work dont do the embed cdn code yet

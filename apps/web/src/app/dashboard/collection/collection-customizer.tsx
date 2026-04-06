@@ -27,6 +27,7 @@ import { motion } from "framer-motion";
 interface CollectionCustomizerProps {
   project: any;
   workspace: any;
+  isPro?: boolean;
 }
 
 export type CollectionSettings = {
@@ -104,13 +105,17 @@ const DEFAULT_SETTINGS: CollectionSettings = {
     },
   },
   video: {
-    enabled: true,
+    enabled: false,
     prompt: "Tell us about your experience",
     maxLength: 30,
   },
 };
 
-export function CollectionCustomizer({ project, workspace }: CollectionCustomizerProps) {
+export function CollectionCustomizer({
+  project,
+  workspace,
+  isPro: isProProp,
+}: CollectionCustomizerProps) {
   const [settings, setSettings] = useState<CollectionSettings>(() => {
     try {
       return project.collectionSettingsJson
@@ -128,7 +133,7 @@ export function CollectionCustomizer({ project, workspace }: CollectionCustomize
   const [activeTab, setActiveTab] = useState<
     "branding" | "fields" | "content" | "video" | "advanced"
   >("branding");
-  const isPro = workspace.isPro;
+  const isPro = isProProp ?? workspace.isPro;
 
   const updateSettings = useMutation(
     trpc.dashboard.updateProjectSettings.mutationOptions({
@@ -349,35 +354,6 @@ export function CollectionCustomizer({ project, workspace }: CollectionCustomize
                   </div>
                 ))}
               </div>
-
-              <SectionHeader icon={Star} pro title="Star Rating" />
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Enable Rating
-                </span>
-                <input
-                  checked={settings.form.starRating.enabled}
-                  className="accent-pink-500"
-                  disabled={!isPro}
-                  onChange={(e) => setNestedSetting("form.starRating.enabled", e.target.checked)}
-                  type="checkbox"
-                />
-              </div>
-
-              <SectionHeader icon={Shield} pro title="Constraints" />
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Min Character Count
-                </label>
-                <input
-                  className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
-                  disabled={!isPro}
-                  min={0}
-                  onChange={(e) => setNestedSetting("form.minCharCount", parseInt(e.target.value))}
-                  type="number"
-                  value={settings.form.minCharCount}
-                />
-              </div>
             </div>
           )}
 
@@ -533,18 +509,34 @@ export function CollectionCustomizer({ project, workspace }: CollectionCustomize
           {activeTab === "advanced" && (
             <div className="space-y-6">
               <SectionHeader icon={Command} pro title="Advanced" />
-              <div className="space-y-4 overflow-hidden rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/50 p-4">
-                <div className="flex items-center gap-3">
-                  <Lock className="size-4 text-neutral-300" />
-                  <div>
-                    <h4 className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase transition-colors">
-                      Future Features
-                    </h4>
-                    <p className="text-[10px] leading-snug text-neutral-400">
-                      Custom domains, password protection, and expiry dates are coming soon.
-                    </p>
-                  </div>
-                </div>
+
+              <SectionHeader icon={Star} pro title="Star Rating" />
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Enable Rating
+                </span>
+                <input
+                  checked={settings.form.starRating.enabled}
+                  className="accent-pink-500"
+                  disabled={!isPro}
+                  onChange={(e) => setNestedSetting("form.starRating.enabled", e.target.checked)}
+                  type="checkbox"
+                />
+              </div>
+
+              <SectionHeader icon={Shield} pro title="Constraints" />
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Min Character Count
+                </label>
+                <input
+                  className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                  disabled={!isPro}
+                  min={0}
+                  onChange={(e) => setNestedSetting("form.minCharCount", parseInt(e.target.value))}
+                  type="number"
+                  value={settings.form.minCharCount}
+                />
               </div>
 
               <div className="space-y-4">
@@ -581,7 +573,10 @@ export function CollectionCustomizer({ project, workspace }: CollectionCustomize
       </div>
 
       {/* Main Area - Preview */}
-      <div className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 bg-neutral-50">
+      <div
+        className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300"
+        style={{ backgroundColor: settings.backgroundColor }}
+      >
         <div className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-neutral-200 bg-white/80 px-5 py-1.5 shadow-sm backdrop-blur-md">
           <div className="mr-1 flex items-center gap-2 border-r border-neutral-100 pr-3">
             <Eye className="size-3.5 text-pink-500" />
@@ -674,7 +669,7 @@ function CollectionWizardPreview({
       setMockStep("success");
     } else if (activeTab === "video") {
       setMockStep("video");
-    } else if (activeTab === "branding") {
+    } else if (activeTab === "branding" || activeTab === "advanced") {
       setMockStep("rating");
     }
   }, [activeTab, setMockStep]);
