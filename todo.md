@@ -132,9 +132,9 @@
 - [x] **High-Performance Architecture**:
   - [x] Optimize `widget.js` bundle size (<2KB gzipped)
   - [x] Iframe-based isolation with seamless auto-resizer
-  - [ ] Zero Cumulative Layout Shift (CLS): Explicit width/height placeholders
-  - [ ] Lazy-load video assets: Load only when the user scrolls/clicks
-  - [ ] Edge-rendered widget content for instant paint
+  - [x] Zero Cumulative Layout Shift (CLS): Explicit width/height placeholders
+  - [x] Lazy-load video assets: Load only when the user scrolls/clicks
+  - [x] Edge-rendered widget content for instant paint
 - [ ] **Layout Library (The Vault)**:
   - [x] **Grid**: Classic card grid
   - [x] **Masonry**: Height-variable Pinterest style

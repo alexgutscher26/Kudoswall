@@ -6,6 +6,7 @@ import { Star, Quote, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
+import VideoPlayer from "./video-player";
 
 interface WidgetProps {
   data: {
@@ -175,24 +176,16 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     return (
       <div
         key={t.id}
-        className={`relative flex flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
+        className={`relative flex min-h-[160px] flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
         style={cardStyle}
       >
-        {t.type === "video" && (
-          <div
-            className="group/video relative mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg transition-colors"
-            style={{ backgroundColor: `${settings.accentColor}22` }}
-          >
-            <div
-              className="flex size-8 items-center justify-center rounded-full text-white shadow-sm transition-transform group-hover/video:scale-110"
-              style={{ backgroundColor: settings.accentColor }}
-            >
-              <Play className="size-3.5 fill-current" />
-            </div>
-            {/* Optional duration mock */}
-            <span className="absolute right-2 bottom-2 rounded bg-white/90 px-1 text-[9px] font-bold text-neutral-500 backdrop-blur-sm">
-              REC
-            </span>
+        {t.type === "video" && t.videoUrl && (
+          <div className="mb-4 overflow-hidden rounded-lg">
+            <VideoPlayer
+              url={t.videoUrl}
+              thumbnail={t.authorImage}
+              accentColor={settings.accentColor}
+            />
           </div>
         )}
 
@@ -219,19 +212,20 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
         <div className="flex items-center gap-2">
           {settings.showReviewerPhoto && (
-            <div className="size-6 shrink-0 overflow-hidden rounded-full bg-neutral-100">
+            <div className="size-8 shrink-0 overflow-hidden rounded-full bg-neutral-100 shadow-sm ring-2 ring-white">
               {t.authorImage ? (
                 <Image
                   src={t.authorImage}
                   alt={t.authorName}
-                  width={24}
-                  height={24}
-                  priority={index < 3}
+                  width={32}
+                  height={32}
+                  priority={index < 4}
                   className="size-full object-cover"
+                  loading={index < 4 ? undefined : "lazy"}
                 />
               ) : (
                 <div
-                  className="flex size-full items-center justify-center text-[10px] font-bold text-white"
+                  className="flex size-full items-center justify-center text-xs font-bold text-white uppercase"
                   style={{ backgroundColor: settings.accentColor }}
                 >
                   {t.authorName.charAt(0)}
@@ -241,12 +235,12 @@ export default function Widget({ data, testimonials }: WidgetProps) {
           )}
           <div className="min-w-0 flex-1">
             <h5
-              className="truncate text-[12px] font-semibold text-neutral-800 dark:text-white"
+              className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
               style={{ color: settings.textColor || undefined }}
             >
               {t.authorName}
             </h5>
-            <p className="mt-0.5 truncate text-[10px] font-medium text-neutral-400">
+            <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
               {t.authorTagline}{" "}
               {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
             </p>
