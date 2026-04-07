@@ -132,4 +132,27 @@ export const dashboardRouter = router({
 
       return { success: true };
     }),
+
+  deleteProject: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { id } = input;
+
+      // Verify ownership
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, id),
+        with: {
+          workspace: true,
+        },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      await db.delete(project).where(eq(project.id, id));
+
+      return { success: true };
+    }),
 });

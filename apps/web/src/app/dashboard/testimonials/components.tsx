@@ -79,6 +79,13 @@ interface InboxProps {
   }[];
 }
 
+const TABS = [
+  { id: "pending", label: "Pending", icon: Clock },
+  { id: "approved", label: "Approved", icon: Check },
+  { id: "archived", label: "Archived", icon: Archive },
+  { id: "all", label: "All", icon: MessageSquareQuote },
+] as const;
+
 export function TestimonialInbox({ initialTestimonials, project, projects }: InboxProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -101,9 +108,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     ...trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
     initialData: { project, testimonials: initialTestimonials } as any,
     refetchInterval: 5000,
+    staleTime: 5000,
   });
 
-  const testimonials = qData.testimonials;
+  const testimonials = qData?.testimonials ?? initialTestimonials;
+  const displayedTestimonials = mounted ? testimonials : initialTestimonials;
 
   const handleProjectSwitch = (projectId: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -111,7 +120,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     router.push(`/dashboard/testimonials?${params.toString()}`);
   };
 
-  const filteredTestimonials = testimonials.filter((t) => {
+  const filteredTestimonials = displayedTestimonials.filter((t) => {
     const matchesTab = activeTab === "all" || t.status === activeTab;
     const matchesType = typeFilter === "all" || t.type === typeFilter;
     const matchesSearch =
@@ -158,13 +167,6 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
       },
     });
   };
-
-  const tabs = [
-    { id: "pending", label: "Pending", icon: Clock },
-    { id: "approved", label: "Approved", icon: Check },
-    { id: "archived", label: "Archived", icon: Archive },
-    { id: "all", label: "All", icon: MessageSquareQuote },
-  ];
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/collect/${project.slug}`;
@@ -366,10 +368,10 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
 
         {/* Status Tabs */}
         <div className="flex w-fit items-center gap-1 rounded-xl bg-neutral-100/50 p-1">
-          {tabs.map((tab) => {
+          {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const count = testimonials.filter(
+            const count = displayedTestimonials.filter(
               (t) => tab.id === "all" || t.status === tab.id,
             ).length;
 
@@ -600,10 +602,12 @@ function TestimonialCard({
             </div>
             <div className="min-w-0">
               <h4 className="truncate text-[15px] font-bold text-neutral-900">{t.authorName}</h4>
-              <p className="flex items-center gap-2 text-[13px] text-neutral-400">
+              <p className="mt-0.5 truncate text-[13px] text-neutral-400">
                 {t.authorEmail}
-                <span className="size-1 rounded-full bg-neutral-200" />
-                {formatDistanceToNow(new Date(t.createdAt), { addSuffix: true })}
+                <span className="mx-2 inline-block size-1 rounded-full bg-neutral-200" />
+                <span suppressHydrationWarning>
+                  {formatDistanceToNow(new Date(t.createdAt), { addSuffix: true })}
+                </span>
               </p>
             </div>
           </footer>
