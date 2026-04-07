@@ -120,6 +120,7 @@
   - [ ] Theme library: Minimal, Modern, Glass, Bento, Dark, Neo-brutalism
   - [ ] Preset configurations (e.g., "SaaS Landing Page", "Mobile App Review")
   - [ ] Global style variables (Primary color, Border radius, Spacing)
+- [ ] **Testimonial request campaigns**: Send sequenced email asks to a customer list with one click. Track open rates and submission rates per campaign.
 - [ ] **CRM & Customer Relationship**:
   - [ ] Customer profile view: See all testimonials from one person
   - [ ] Outreach tool: Email customers directly from the dashboard
@@ -157,6 +158,7 @@
   - [ ] Support for Monthly vs Yearly billing cycles (toggles)
   - [ ] Automated Proration for plan upgrades/downgrades
   - [ ] Self-serve Billing Portal for users (Update card, Cancel, Invoices)
+  - [ ] Transparent limitations: Free tier limits are communicated proactively, not as a nasty surprise. The upgrade path is always one click away.
 - [ ] **Usage-Based Logic**:
   - [ ] Limit video storage by Gigabytes or Minutes
   - [ ] Limit testimonial count per month
@@ -193,6 +195,7 @@
 
 ## 🔌 8. Integrations & Ecosystem
 
+- [ ] **Multi-channel import**: Pull in G2 reviews, Google Business reviews, Trustpilot reviews, and Twitter mentions into a unified dashboard. Curate the best ones into the public widget.
 - [ ] **External Source Imports**:
   - [ ] Google Maps Reviews importer
   - [ ] Trustpilot & G2 Crowd connector
@@ -246,7 +249,7 @@
   - [ ] Widget Impressions vs. Interactions
   - [ ] Video Play Rate & Completion Rate
   - [ ] Click-through rate (CTR) on Widget CTA buttons
-  - [ ] Conversion Attribution: Did seeing this widget lead to a sale?
+  - [ ] **Attribution layer**: Track which testimonials (or combinations) are shown on pages that convert, enabling optimization of the social proof mix.
 - [ ] **Reporting Engine**:
   - [ ] Weekly/Monthly PDF Performance reports for owners
   - [ ] Benchmark data: "Your conversion is 20% higher than industry average"
@@ -331,7 +334,7 @@
 
 ## ☁️ 19. Public API & Developer Portal
 
-- [ ] **API Access**:
+- [ ] **API access**: Let developers build custom integrations — embedding testimonials in email campaigns, Notion pages, mobile apps.
   - [ ] RESTful Public API with API Key management
   - [ ] Webhook manager (Create/Test/Logs)
   - [ ] Official Node.js and Go SDKs
@@ -347,7 +350,7 @@
   - [x] Canonical URL management
   - [x] Meta tag generator for social previews (OG:Image)
 - [ ] **Growth Content**:
-  - [ ] Automated case study generator from top testimonials
+  - [ ] **Case study generator**: Convert a testimonial into a structured case study using AI — problem, solution, result format — with a shareable public URL.
 
 ## 🌠 21. Future V2 (Moonshots)
 

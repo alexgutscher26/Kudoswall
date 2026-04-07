@@ -630,7 +630,7 @@ function TestimonialCard({
                 className="flex h-10 items-center justify-center gap-2 rounded-xl border border-amber-200/50 bg-amber-50 px-4 text-[13px] font-bold text-amber-600 transition-all hover:bg-amber-100"
               >
                 <Clock className="size-4" />
-                Waitlist
+                Unapprove
               </button>
             )}
             <div className="flex items-center gap-2.5">
