@@ -1,15 +1,13 @@
 const PRODUCT_LINKS = [
   { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Widget preview", href: "#preview" },
+  { label: "Docs", href: "#" },
+  { label: "Blog", href: "#" },
 ] as const;
 
 const COMPANY_LINKS = [
-  { label: "About", href: "#" },
-  { label: "Blog", href: "#" },
-  { label: "Careers", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "Twitter / X", href: "https://twitter.com" },
+  { label: "Indie Hackers", href: "https://indiehackers.com" },
 ] as const;
 
 export default function Footer() {
@@ -39,7 +37,7 @@ export default function Footer() {
               TestimonialWall
             </a>
             <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
-              The easiest way for small businesses to collect and display customer testimonials.
+              The easiest way to collect and display beautiful customer testimonials.
             </p>
           </div>
 
@@ -62,16 +60,18 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Connect */}
           <div>
             <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-              Company
+              Connect
             </p>
             <ul className="flex flex-col gap-2.5">
               {COMPANY_LINKS.map(({ label, href }) => (
                 <li key={label}>
                   <a
                     href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
                   >
                     {label}
@@ -81,7 +81,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal — uses real routes so <Link> is correct here */}
+          {/* Legal */}
           <div>
             <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
               Legal
@@ -103,25 +103,20 @@ export default function Footer() {
                   Terms of service
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
-                >
-                  Cookie policy
-                </a>
-              </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-neutral-100 pt-8 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-neutral-100 pt-8 sm:flex-row">
+          <div className="flex flex-col gap-1 text-center sm:text-left">
+            <p className="text-xs font-bold text-neutral-900">Built by Alex Gutscher</p>
+            <p className="max-w-xs text-xs text-neutral-400">
+              A solo founder who got tired of ugly testimonial widgets.
+            </p>
+          </div>
           <p className="text-xs text-neutral-400">
             © {new Date().getFullYear()} TestimonialWall. All rights reserved.
-          </p>
-          <p className="text-xs text-neutral-400">
-            Built for small business owners who mean business.
           </p>
         </div>
       </div>

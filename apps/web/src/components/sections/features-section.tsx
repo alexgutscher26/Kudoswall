@@ -2,52 +2,50 @@ import { Link2, Palette, Code2, ShieldCheck, BarChart2, Video } from "lucide-rea
 
 const FEATURES = [
   {
-    icon: Link2,
-    title: "One shareable link",
+    icon: Video,
+    title: "Video recording",
     description:
-      "Send customers a single link. They record a video or type a testimonial — no account, no friction.",
-    span: "col-span-2",
+      "Capture high-quality video testimonials directly from your customers' browser with zero friction.",
     accent: "#e8527a",
     bg: "#fff5f7",
   },
   {
-    icon: Video,
-    title: "Video & text",
-    description: "Accept both video recordings and written quotes from the same form.",
-    span: "col-span-1",
+    icon: Code2,
+    title: "One embed snippet",
+    description:
+      "Drop a single line of code into your site to display your beautiful Wall of Love instantly.",
     accent: "#7c3aed",
     bg: "#f5f3ff",
   },
   {
-    icon: Palette,
-    title: "Brand-matched widget",
-    description: "Pick your colors, fonts, and layout. Preview changes live before you publish.",
-    span: "col-span-1",
+    icon: Link2,
+    title: "Filter by use case",
+    description:
+      "Easily organize and display specific testimonials based on product categories or customer personas.",
     accent: "#0ea5e9",
     bg: "#f0f9ff",
   },
   {
-    icon: Code2,
-    title: "Embed anywhere",
+    icon: Palette,
+    title: "Custom branding",
     description:
-      "Copy one `<script>` tag. Drop it into Webflow, WordPress, Squarespace, or any HTML page.",
-    span: "col-span-1",
+      "Customize the colors, fonts, and layout of your widgets to perfectly match your brand identity.",
     accent: "#16a34a",
     bg: "#f0fdf4",
   },
   {
-    icon: ShieldCheck,
-    title: "Content moderation",
-    description: "Review, approve, or flag testimonials before they go live on your site.",
-    span: "col-span-1",
+    icon: BarChart2,
+    title: "CSV export",
+    description:
+      "Export all your collected testimonials into a clean CSV format for offline analysis or archiving.",
     accent: "#ea580c",
     bg: "#fff7ed",
   },
   {
-    icon: BarChart2,
-    title: "Analytics dashboard",
-    description: "See which testimonials get the most engagement and drive conversions.",
-    span: "col-span-2",
+    icon: ShieldCheck,
+    title: "Viral badge",
+    description:
+      "Let your satisfied customers spread the word with a subtle brand badge that generates new leads.",
     accent: "#0891b2",
     bg: "#ecfeff",
   },
@@ -88,12 +86,12 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* Bento grid */}
+        {/* Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {FEATURES.map(({ icon: Icon, title, description, span, accent, bg }) => (
+          {FEATURES.map(({ icon: Icon, title, description, accent, bg }) => (
             <div
               key={title}
-              className={`${span === "col-span-2" ? "md:col-span-2" : "md:col-span-1"} rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6`}
+              className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6"
               style={{ backgroundColor: bg }}
             >
               <div

@@ -65,29 +65,20 @@ export default function Hero() {
         </button>
 
         {/* Main headline */}
-        <div className="-mt-2 flex flex-col gap-1">
-          <h1 className="text-4xl leading-[1.1] font-bold text-neutral-900 sm:text-5xl md:text-6xl">
-            The easiest way to collect
-          </h1>
-          <span
-            className="text-4xl leading-[1.1] font-bold sm:text-5xl md:text-6xl"
-            style={{ color: "#e8527a" }}
-          >
-            glowing testimonials
-          </span>
-        </div>
+        <h1 className="-mt-2 text-4xl leading-[1.1] font-bold text-neutral-900 sm:text-5xl md:text-6xl">
+          Turn happy customers into your <span style={{ color: "#e8527a" }}>best sales tool.</span>
+        </h1>
 
         {/* Sub-headline */}
         <p className="-mt-2 max-w-2xl px-2 text-base text-neutral-500 sm:text-lg md:text-xl">
-          Collect, organize, and display beautiful customer testimonials on your website in minutes
-          — no code required.
+          Collect video & text testimonials in one link. Embed anywhere in 5 minutes.
         </p>
 
         {/* CTA Buttons */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
           <Link href="/login">
             <Button className="h-12 rounded-full bg-neutral-900 px-8 text-base font-bold text-white shadow-xl transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
-              Get started free
+              Start free — no credit card
             </Button>
           </Link>
           <button className="h-12 rounded-full border border-neutral-200 bg-white px-8 text-base font-bold text-neutral-600 transition-all hover:bg-neutral-50 active:scale-[0.98]">

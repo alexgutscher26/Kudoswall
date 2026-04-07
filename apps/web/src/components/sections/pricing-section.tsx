@@ -20,7 +20,7 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
-    name: "Starter",
+    name: "Free",
     monthlyPrice: "Free",
     yearlyPrice: "Free",
     period: "",
@@ -29,10 +29,10 @@ const PLANS: Plan[] = [
     ctaHref: "/login",
     highlight: false,
     features: [
-      "Up to 10 testimonials",
-      "Text reviews only",
-      "Basic embeddable widget",
-      "1 collection link",
+      "Up to 5 testimonials",
+      "1 Workspace",
+      "Text testimonials only",
+      "Grid layout widget",
       "TestimonialWall branding",
     ],
   },
@@ -48,32 +48,35 @@ const PLANS: Plan[] = [
     badge: "Most popular",
     features: [
       "Unlimited testimonials",
+      "1 Workspace",
       "Video + text reviews",
-      "Fully customizable widget",
-      "Unlimited collection links",
-      "Remove TestimonialWall branding",
-      "Advanced filtering by use case",
-      "Content moderation tools",
+      "All 3 widget layouts",
+      "Filter testimonials by tag",
+      "Custom branding & colors",
+      "Remove 'Powered by' badge",
+      "Custom domain for collection",
+      "CSV export",
+      "Zapier / Make integration",
+      "Analytics (views & clicks)",
+      "Priority email support",
     ],
   },
   {
-    name: "Business",
+    name: "Agency",
     monthlyPrice: "$79",
     yearlyPrice: "$790",
     period: "per month",
     description: "For teams and agencies managing multiple brands.",
-    cta: "Get on the waitlist",
-    ctaHref: "#",
+    cta: "Get started now",
+    ctaHref: "/login",
     highlight: false,
-    isComingSoon: true,
     features: [
       "Everything in Pro",
-      "Up to 5 team members",
-      "5 brand workspaces",
-      "Analytics dashboard",
-      "Priority support",
-      "Custom domain for collection page",
-      "API access",
+      "Up to 5 workspaces",
+      "Up to 3 team members",
+      "White-label collection page",
+      "Dedicated onboarding call",
+      "Priority VIP support",
     ],
   },
 ];
@@ -97,22 +100,22 @@ function LTDSection() {
       {/* Multi-layered Aura Glow */}
       <div className="absolute -inset-1.5 rounded-[2.5rem] bg-linear-to-r from-[#e8527a] via-[#bf3fbe] to-[#e8527a] opacity-20 blur transition duration-1000 group-hover:opacity-40" />
 
-      <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-neutral-900 p-6 shadow-2xl sm:gap-12 sm:p-8 md:p-12 lg:flex-row">
+      <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-[2.2rem] border border-white/10 bg-neutral-900 p-6 shadow-2xl sm:gap-8 md:p-10 lg:flex-row">
         {/* Background Sparkles */}
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <Sparkles className="size-32 text-pink-500 blur-lg" />
         </div>
 
-        <div className="z-10 flex-1 space-y-8">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 rounded-full border border-[#e8527a]/40 bg-white/5 px-4 py-1.5 shadow-inner">
-              <Crown className="size-4 text-[#e8527a]" />
-              <span className="text-[11px] font-black tracking-[0.2em] text-[#e8527a] uppercase">
+        <div className="z-10 flex-1 space-y-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border border-[#e8527a]/40 bg-white/5 px-3 py-1 shadow-inner">
+              <Crown className="size-3.5 text-[#e8527a]" />
+              <span className="text-[10px] font-black tracking-[0.2em] text-[#e8527a] uppercase">
                 Founder's Special: Access for Life
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-white/50 uppercase">
-              <Users className="size-3.5" />
+            <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider text-white/50 uppercase">
+              <Users className="size-3" />
               <span>Only {seatsRemaining} seats remaining</span>
             </div>
           </div>
@@ -132,7 +135,7 @@ function LTDSection() {
 
           <div className="grid grid-cols-1 gap-x-8 gap-y-4 pt-2 sm:grid-cols-2">
             {[
-              "Everything in Business",
+              "Everything in Agency",
               "Unlimited video testimonials",
               "Lifetime software updates",
               "100% White-labeling",
@@ -152,7 +155,7 @@ function LTDSection() {
           </div>
         </div>
 
-        <div className="relative z-20 flex w-full flex-col items-center gap-6 rounded-[2rem] bg-white p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] sm:gap-8 sm:p-10 lg:w-[360px]">
+        <div className="relative z-20 flex w-full flex-col items-center gap-5 rounded-[2rem] bg-white p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] sm:gap-6 sm:p-8 lg:w-[340px]">
           <div className="space-y-2">
             <div className="mb-1 flex items-center justify-center gap-2">
               <span className="rounded-full bg-pink-50 px-3 py-1 text-[10px] font-black tracking-widest text-[#e8527a] uppercase">
@@ -209,7 +212,7 @@ export default function PricingSection() {
     <section
       id="pricing"
       style={{ backgroundColor: "#ffffff" }}
-      className="relative overflow-hidden px-4 py-24"
+      className="relative overflow-hidden px-4 py-20"
     >
       {/* Dot-grid texture */}
       <div
@@ -223,17 +226,17 @@ export default function PricingSection() {
 
       <div className="relative mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-16 text-center">
+        <div className="mb-12 text-center">
           <span
-            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
+            className="mb-2 inline-block rounded-full px-3 py-1 text-[10px] font-semibold tracking-widest uppercase"
             style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
           >
             Simple Pricing
           </span>
-          <h2 className="text-4xl leading-tight font-black tracking-tight text-neutral-900 sm:text-5xl md:text-6xl">
+          <h2 className="text-3xl leading-tight font-black tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
             Plans that scale with you.
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg font-medium text-neutral-500">
+          <p className="mx-auto mt-4 max-w-xl text-base font-medium text-neutral-500">
             Join 1,200+ businesses turning testimonials into revenue. Start free, upgrade when
             you're ready.
           </p>
@@ -289,7 +292,7 @@ export default function PricingSection() {
             }) => (
               <div
                 key={name}
-                className="group relative flex flex-col gap-6 rounded-[2.5rem] border-2 p-6 transition-all duration-500 hover:scale-[1.01] sm:gap-8 sm:p-9"
+                className="group relative flex flex-col gap-5 rounded-[2.2rem] border-2 p-5 transition-all duration-500 hover:scale-[1.01] sm:gap-6 sm:p-7"
                 style={{
                   backgroundColor: highlight ? "#171717" : "#fafafa",
                   borderColor: highlight ? "#171717" : "#f1f1f1",
@@ -310,7 +313,7 @@ export default function PricingSection() {
                 )}
 
                 {/* Plan header */}
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <p
                     className="text-xs font-black tracking-[0.2em] uppercase"
                     style={{ color: highlight ? "rgba(255,255,255,0.6)" : "#6b7280" }}
@@ -346,7 +349,7 @@ export default function PricingSection() {
                 </div>
 
                 {/* CTA */}
-                <a href={ctaHref} className="mt-auto block pt-2">
+                <a href={ctaHref} className="block">
                   <Button
                     className="h-14 w-full rounded-2xl text-sm font-black shadow-lg transition-transform group-hover:shadow-pink-500/10 active:scale-95"
                     style={
@@ -360,7 +363,7 @@ export default function PricingSection() {
                 </a>
 
                 {/* Features list */}
-                <ul className="flex flex-col gap-4">
+                <ul className="flex flex-col gap-3">
                   {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-4 text-sm font-bold">
                       <div className="mt-0.5 flex shrink-0 items-center justify-center rounded-full bg-neutral-200/20">
@@ -393,7 +396,7 @@ export default function PricingSection() {
         </div>
 
         {/* Footer note */}
-        <p className="mt-12 text-center text-xs font-medium text-neutral-400">
+        <p className="mt-8 text-center text-xs font-medium text-neutral-400">
           Secure, encrypted payments with bank-level security. Switch plans anytime from your
           dashboard.
         </p>
