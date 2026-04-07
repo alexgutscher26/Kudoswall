@@ -28,10 +28,11 @@ import {
   User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { createProject } from "./actions";
 import { gooeyToast as toast } from "goey-toast";
-import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { trpc, queryClient } from "@/utils/trpc";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
@@ -80,16 +81,6 @@ const STATS = [
     accent: "#16a34a",
     bg: "#f0fdf4",
   },
-] as const;
-
-// ─── Checklist ────────────────────────────────────────────────────────────────
-
-const CHECKLIST = [
-  { label: "Create your account", done: true },
-  { label: "Share your collection link", done: false },
-  { label: "Collect your first testimonial", done: false },
-  { label: "Customize your widget", done: false },
-  { label: "Embed on your website", done: false },
 ] as const;
 
 // ─── Quick actions ────────────────────────────────────────────────────────────
@@ -496,68 +487,6 @@ function EmptyTestimonials({ onNewCollection }: { onNewCollection: () => void })
   );
 }
 
-// ─── Getting started ──────────────────────────────────────────────────────────
-
-function GettingStarted() {
-  const done = CHECKLIST.filter((c) => c.done).length;
-  const total = CHECKLIST.length;
-  const pct = Math.round((done / total) * 100);
-
-  return (
-    <div
-      className="overflow-hidden rounded-2xl border border-neutral-100"
-      style={{ backgroundColor: "#ffffff" }}
-    >
-      <div
-        className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-      >
-        <div>
-          <p className="text-[13px] font-semibold text-neutral-900">Getting Started</p>
-          <p className="mt-0.5 text-[11px] text-neutral-400">
-            {done} / {total} complete
-          </p>
-        </div>
-        <span
-          className="rounded-full px-2.5 py-1 text-[11px] font-bold"
-          style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
-        >
-          {pct}%
-        </span>
-      </div>
-
-      <div className="h-[3px] bg-neutral-100">
-        <div
-          className="h-full transition-all duration-500"
-          style={{ width: `${pct}%`, backgroundColor: "#e8527a" }}
-        />
-      </div>
-
-      <ul className="space-y-3 px-5 py-4">
-        {CHECKLIST.map(({ label, done: isDone }) => (
-          <li key={label} className="flex items-center gap-3">
-            {isDone ? (
-              <CheckCircle2 className="size-4 shrink-0" style={{ color: "#16a34a" }} />
-            ) : (
-              <div
-                className="size-4 shrink-0 rounded-full border-2"
-                style={{ borderColor: "rgba(0,0,0,0.15)" }}
-              />
-            )}
-            <span
-              className={`text-[13px] leading-snug ${
-                isDone ? "text-neutral-300 line-through" : "text-neutral-700"
-              }`}
-            >
-              {label}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 // ─── Quick actions ────────────────────────────────────────────────────────────
 
 function QuickActions({
@@ -903,7 +832,15 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
   );
 }
 
-function ProjectsList({ projects, workspaceSlug }: { projects: any[]; workspaceSlug: string }) {
+function ProjectsList({
+  projects,
+  workspaceSlug,
+  onCopyLink,
+}: {
+  projects: any[];
+  workspaceSlug: string;
+  onCopyLink?: () => void;
+}) {
   if (!projects || projects.length === 0) return null;
 
   return (
@@ -935,6 +872,7 @@ function ProjectsList({ projects, workspaceSlug }: { projects: any[]; workspaceS
                     : `https://wall.me/${workspaceSlug}/${p.slug}`;
                 navigator.clipboard.writeText(url);
                 toast.success("Link copied!");
+                onCopyLink?.();
               }}
               className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
               title="Copy link"
@@ -1019,6 +957,13 @@ export default function DashboardShell({
 
   const activeData = liveData || initialData;
 
+  const completeStep = useMutation({
+    ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+    },
+  });
+
   // Derived stats from initialData
   const stats = activeData
     ? [
@@ -1065,6 +1010,7 @@ export default function DashboardShell({
       toast.success("Collection link copied!", {
         description: url,
       });
+      completeStep.mutate({ step: "step3" });
     } else {
       setNewCollectionOpen(true);
     }
@@ -1186,7 +1132,14 @@ export default function DashboardShell({
                       </div>
                     </div>
                     {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
-                      <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
+                      <div className="flex flex-col gap-4">
+                        <ProjectsList
+                          projects={activeData.projects}
+                          workspaceSlug={activeData.workspace.slug}
+                          onCopyLink={() => completeStep.mutate({ step: "step3" })}
+                        />
+                        <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
+                      </div>
                     ) : (
                       <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
                     )}
@@ -1194,7 +1147,9 @@ export default function DashboardShell({
 
                   {/* Right column */}
                   <div className="space-y-4 sm:space-y-5 xl:col-span-1">
-                    <GettingStarted />
+                    {activeData?.onboarding && (
+                      <OnboardingChecklist status={activeData.onboarding} />
+                    )}
                     <QuickActions
                       onNewCollection={() => setNewCollectionOpen(true)}
                       onCopyLink={handleCopyCollectionLink}

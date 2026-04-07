@@ -315,7 +315,7 @@
   - [ ] Interactive product tour (Intro.js or Shepherd.js)
   - [ ] Knowledge Base (Help Center) sync with workspace
 - [ ] **Onboarding**:
-  - [ ] Checklist: "5 steps to your first testimonial"
+  - [x] Checklist: "5 steps to your first testimonial"
   - [ ] Reward for completing onboarding (e.g., 5 free video mins)
 
 ## 🛠️ 18. DevOps & Internal Ops

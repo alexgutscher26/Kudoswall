@@ -30,6 +30,7 @@ export const workspace = pgTable(
     logoUrl: text("logo_url"),
     isPro: boolean("is_pro").default(false).notNull(),
     brandingJson: text("branding_json"),
+    onboardingStatus: text("onboarding_status"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())

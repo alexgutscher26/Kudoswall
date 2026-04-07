@@ -1,5 +1,5 @@
 import { protectedProcedure, router } from "../index";
-import { workspace, project, testimonial } from "@my-better-t-app/db/schema";
+import { workspace, project, testimonial, widget } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray } from "drizzle-orm";
 import { z } from "zod";
 
@@ -21,6 +21,13 @@ async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
     name: `${userName}'s Workspace`,
     slug: generateSlug(userName),
     ownerId: userId,
+    onboardingStatus: JSON.stringify({
+      step1: false,
+      step2: false,
+      step3: false,
+      step4: false,
+      step5: false,
+    }),
   };
 
   await db.insert(workspace).values(newWorkspace);
@@ -49,6 +56,17 @@ export const dashboardRouter = router({
       .innerJoin(project, eq(testimonial.projectId, project.id))
       .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending")));
 
+    const [approvedCount] = await db
+      .select({ value: count() })
+      .from(testimonial)
+      .innerJoin(project, eq(testimonial.projectId, project.id))
+      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "approved")));
+
+    const [widgetCount] = await db
+      .select({ value: count() })
+      .from(widget)
+      .where(eq(widget.workspaceId, ws.id));
+
     const recentTestimonials =
       projects.length > 0
         ? await db.query.testimonial.findMany({
@@ -64,15 +82,26 @@ export const dashboardRouter = router({
           })
         : [];
 
+    // Onboarding Calculation
+    const dbStatus = JSON.parse(ws.onboardingStatus || "{}");
+    const onboarding = {
+      step1: dbStatus.step1 || projects.length > 0,
+      step2: dbStatus.step2 || projects.some((p: any) => p.collectionSettingsJson !== null),
+      step3: dbStatus.step3 || false,
+      step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
+      step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
+    };
+
     return {
       workspace: ws,
       projects,
       recentTestimonials,
+      onboarding,
       stats: {
         testimonials: Number(testimonialCount?.value || 0),
         pending: Number(pendingCount?.value || 0),
-        views: 0, // Mock for now
-        conversion: "—", // Mock for now
+        views: 0,
+        conversion: "—",
       },
     };
   }),
@@ -83,7 +112,6 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { projectId } = input;
 
-      // Verify ownership via the project's workspace
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
         with: {
@@ -105,13 +133,13 @@ export const dashboardRouter = router({
         testimonials,
       };
     }),
+
   updateProjectSettings: protectedProcedure
     .input(z.object({ projectId: z.string(), settings: z.any() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
       const { projectId, settings } = input;
 
-      // Verify ownership
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
         with: {
@@ -139,7 +167,6 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { id } = input;
 
-      // Verify ownership
       const p = await db.query.project.findFirst({
         where: eq(project.id, id),
         with: {
@@ -152,6 +179,30 @@ export const dashboardRouter = router({
       }
 
       await db.delete(project).where(eq(project.id, id));
+      return { success: true };
+    }),
+
+  completeOnboardingStep: protectedProcedure
+    .input(z.object({ step: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { step } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: eq(workspace.ownerId, session.user.id),
+      });
+
+      if (!ws) throw new Error("Workspace not found");
+
+      const status = JSON.parse(ws.onboardingStatus || "{}");
+      status[step] = true;
+
+      await db
+        .update(workspace)
+        .set({
+          onboardingStatus: JSON.stringify(status),
+        })
+        .where(eq(workspace.id, ws.id));
 
       return { success: true };
     }),
