@@ -15,14 +15,10 @@ import {
   LogOut,
   Star,
   Clock,
-  CheckCircle2,
   Copy,
   Plus,
   Globe,
-  Bell,
   ChevronRight,
-  Video,
-  ExternalLink,
   Menu,
   X,
   User,
@@ -78,39 +74,6 @@ const STATS = [
     value: "—",
     sub: "Needs more data",
     icon: BarChart2,
-    accent: "#16a34a",
-    bg: "#f0fdf4",
-  },
-] as const;
-
-// ─── Quick actions ────────────────────────────────────────────────────────────
-
-const QUICK_ACTIONS = [
-  {
-    icon: Copy,
-    label: "Copy Collection Link",
-    desc: "Share with customers to start collecting",
-    accent: "#e8527a",
-    bg: "#fff5f7",
-  },
-  {
-    icon: Video,
-    label: "Preview Submission Form",
-    desc: "See what your customers experience",
-    accent: "#7c3aed",
-    bg: "#f5f3ff",
-  },
-  {
-    icon: Code2,
-    label: "Get Embed Code",
-    desc: "Drop the widget into any website",
-    accent: "#0ea5e9",
-    bg: "#f0f9ff",
-  },
-  {
-    icon: ExternalLink,
-    label: "Visit Marketing Page",
-    desc: "Share your TestimonialWall page",
     accent: "#16a34a",
     bg: "#f0fdf4",
   },
@@ -392,20 +355,6 @@ function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Notification bell */}
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50"
-          style={{ borderColor: "rgba(0,0,0,0.1)" }}
-        >
-          <Bell className="size-[15px] text-neutral-500" />
-          <span
-            className="absolute top-1 right-1 size-1.5 rounded-full"
-            style={{ backgroundColor: "#e8527a" }}
-          />
-        </button>
-
         {/* Upgrade pill */}
         <button
           type="button"
@@ -497,47 +446,7 @@ function QuickActions({
   onNewCollection: () => void;
   onCopyLink: () => void;
   hasProjects: boolean;
-}) {
-  return (
-    <div
-      className="overflow-hidden rounded-2xl border border-neutral-100"
-      style={{ backgroundColor: "#ffffff" }}
-    >
-      <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-        <p className="text-[13px] font-semibold text-neutral-900">Quick Actions</p>
-      </div>
-      <ul className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
-        {QUICK_ACTIONS.map(({ icon: Icon, label, desc, accent, bg }) => (
-          <li key={label}>
-            <button
-              type="button"
-              onClick={label === "Copy Collection Link" ? onCopyLink : onNewCollection}
-              className="group flex w-full items-center gap-3.5 px-5 py-3.5 text-left transition-colors hover:bg-neutral-50"
-            >
-              <div
-                className="flex size-8 shrink-0 items-center justify-center rounded-xl"
-                style={{ backgroundColor: bg }}
-              >
-                <Icon className="size-3.5" style={{ color: accent }} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] leading-tight font-medium text-neutral-800">
-                  {label === "Copy Collection Link" && !hasProjects ? "New Collection Link" : label}
-                </p>
-                <p className="mt-0.5 text-[11px] leading-tight text-neutral-400">
-                  {label === "Copy Collection Link" && !hasProjects
-                    ? "Create a dedicated wall page"
-                    : desc}
-                </p>
-              </div>
-              <ChevronRight className="size-3.5 text-neutral-200 transition-colors group-hover:text-neutral-400" />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+}) {}
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
@@ -676,79 +585,6 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Bento spotlight ──────────────────────────────────────────────────────────
-
-function FeatureSpotlight({ onNewCollection }: { onNewCollection: () => void }) {
-  return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      {/* Collect — 1 col */}
-      <div
-        className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6"
-        style={{ backgroundColor: "#fff5f7" }}
-      >
-        <div
-          className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
-          style={{ backgroundColor: "#e8527a20" }}
-        >
-          <Star className="size-5" style={{ color: "#e8527a" }} />
-        </div>
-        <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">Collect reviews</h3>
-        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-          Share a single link — customers send video or text with no login required.
-        </p>
-        <button
-          type="button"
-          onClick={onNewCollection}
-          className="flex items-center gap-1 text-[12px] font-semibold transition-opacity hover:opacity-70"
-          style={{ color: "#e8527a" }}
-        >
-          Create your link <ChevronRight className="size-3" />
-        </button>
-      </div>
-
-      {/* Embed — 2 col */}
-      <div
-        className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6 md:col-span-2"
-        style={{ backgroundColor: "#f0f9ff" }}
-      >
-        <div
-          className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
-          style={{ backgroundColor: "#0ea5e920" }}
-        >
-          <Code2 className="size-5" style={{ color: "#0ea5e9" }} />
-        </div>
-        <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">Embed on your website</h3>
-        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-          Copy one{" "}
-          <code className="rounded-md border border-white/80 bg-white/70 px-1.5 py-0.5 font-mono text-[11px]">
-            &lt;script&gt;
-          </code>{" "}
-          tag and drop it into Webflow, WordPress, or any HTML page — testimonials show up
-          instantly.
-        </p>
-        <div
-          className="flex items-center gap-3 rounded-xl border px-3 py-3 sm:px-4"
-          style={{
-            backgroundColor: "rgba(255,255,255,0.7)",
-            borderColor: "rgba(0,0,0,0.08)",
-          }}
-        >
-          <code className="flex-1 truncate font-mono text-[11px] text-neutral-500">
-            &lt;script src="https://cdn.testimonialwall.com/widget.js" /&gt;
-          </code>
-          <button
-            type="button"
-            className="shrink-0 text-neutral-300 transition-colors hover:text-neutral-600"
-            aria-label="Copy embed code"
-          >
-            <Copy className="size-3.5" />
-          </button>
         </div>
       </div>
     </div>
@@ -935,6 +771,7 @@ export default function DashboardShell({
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Video" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {
@@ -986,7 +823,7 @@ export default function DashboardShell({
         {
           label: "Widget Views",
           value: activeData.stats.views.toString(),
-          sub: "Embed to start tracking",
+          sub: activeData.stats.views > 0 ? "Tracking live" : "Embed to start tracking",
           icon: Globe,
           accent: "#0ea5e9",
           bg: "#f0f9ff",
@@ -994,7 +831,7 @@ export default function DashboardShell({
         {
           label: "Conversion Rate",
           value: activeData.stats.conversion,
-          sub: "Needs more data",
+          sub: activeData.stats.views > 0 ? "Real-time performance" : "Needs more data",
           icon: BarChart2,
           accent: "#16a34a",
           bg: "#f0fdf4",
@@ -1107,28 +944,32 @@ export default function DashboardShell({
                       </div>
                       {/* Filter chips */}
                       <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-                        {["All", "Video", "Text"].map((f, i) => (
-                          <button
-                            key={f}
-                            type="button"
-                            className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
-                            style={
-                              i === 0
-                                ? {
-                                    backgroundColor: "#fff5f7",
-                                    color: "#e8527a",
-                                    borderColor: "#fecdd3",
-                                  }
-                                : {
-                                    backgroundColor: "transparent",
-                                    color: "#a3a3a3",
-                                    borderColor: "rgba(0,0,0,0.08)",
-                                  }
-                            }
-                          >
-                            {f}
-                          </button>
-                        ))}
+                        {(["All", "Video", "Text"] as const).map((f) => {
+                          const isActive = testimonialFilter === f;
+                          return (
+                            <button
+                              key={f}
+                              type="button"
+                              onClick={() => setTestimonialFilter(f)}
+                              className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
+                              style={
+                                isActive
+                                  ? {
+                                      backgroundColor: "#fff5f7",
+                                      color: "#e8527a",
+                                      borderColor: "#fecdd3",
+                                    }
+                                  : {
+                                      backgroundColor: "transparent",
+                                      color: "#a3a3a3",
+                                      borderColor: "rgba(0,0,0,0.08)",
+                                    }
+                              }
+                            >
+                              {f}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                     {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
@@ -1138,7 +979,12 @@ export default function DashboardShell({
                           workspaceSlug={activeData.workspace.slug}
                           onCopyLink={() => completeStep.mutate({ step: "step3" })}
                         />
-                        <RecentTestimonialsList testimonials={activeData.recentTestimonials} />
+                        <RecentTestimonialsList
+                          testimonials={activeData.recentTestimonials.filter((t: any) => {
+                            if (testimonialFilter === "All") return true;
+                            return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
+                          })}
+                        />
                       </div>
                     ) : (
                       <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
@@ -1150,16 +996,8 @@ export default function DashboardShell({
                     {activeData?.onboarding && (
                       <OnboardingChecklist status={activeData.onboarding} />
                     )}
-                    <QuickActions
-                      onNewCollection={() => setNewCollectionOpen(true)}
-                      onCopyLink={handleCopyCollectionLink}
-                      hasProjects={activeData?.projects?.length > 0}
-                    />
                   </div>
                 </div>
-
-                {/* Bento feature cards */}
-                <FeatureSpotlight onNewCollection={() => setNewCollectionOpen(true)} />
               </div>
             )}
           </ErrorBoundary>

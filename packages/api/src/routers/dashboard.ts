@@ -1,5 +1,11 @@
 import { protectedProcedure, router } from "../index";
-import { workspace, project, testimonial, widget } from "@my-better-t-app/db/schema";
+import {
+  workspace,
+  project,
+  testimonial,
+  widget,
+  analyticsEvent,
+} from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray } from "drizzle-orm";
 import { z } from "zod";
 
@@ -67,6 +73,14 @@ export const dashboardRouter = router({
       .from(widget)
       .where(eq(widget.workspaceId, ws.id));
 
+    // Fetch View Stats
+    const [viewsResult] = await db
+      .select({ value: count() })
+      .from(analyticsEvent)
+      .where(and(eq(analyticsEvent.workspaceId, ws.id), eq(analyticsEvent.eventType, "view")));
+
+    const totalViews = Number(viewsResult?.value || 0);
+
     const recentTestimonials =
       projects.length > 0
         ? await db.query.testimonial.findMany({
@@ -92,16 +106,21 @@ export const dashboardRouter = router({
       step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
     };
 
+    // Calculate Conversion Rate
+    const testimonialsCount = Number(testimonialCount?.value || 0);
+    const conversionRate =
+      totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
+
     return {
       workspace: ws,
       projects,
       recentTestimonials,
       onboarding,
       stats: {
-        testimonials: Number(testimonialCount?.value || 0),
+        testimonials: testimonialsCount,
         pending: Number(pendingCount?.value || 0),
-        views: 0,
-        conversion: "—",
+        views: totalViews,
+        conversion: conversionRate,
       },
     };
   }),
