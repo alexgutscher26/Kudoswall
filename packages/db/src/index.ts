@@ -4,7 +4,12 @@ import pg from "pg";
 
 import * as schema from "./schema";
 
-const { Pool } = pg;
+const { Pool, types } = pg;
+
+// Set up pg to parse dates correctly to avoid Drizzle mapping errors with better-auth
+// TIMESTAMPTZ: 1184, TIMESTAMP: 1114
+types.setTypeParser(1114, (val) => new Date(val + "Z"));
+types.setTypeParser(1184, (val) => new Date(val));
 
 /**
  * Singleton database connection for serverless/dev resilience.
@@ -16,7 +21,8 @@ export function createDb() {
 
   const pool = new Pool({
     connectionString: env.DATABASE_URL,
-    max: 1, // Only 1 connection at a time in lambda environments
+    max: 10, // Increased from 1 to prevent connection deadlocks in Next.js Parallel queries
+    ssl: { rejectUnauthorized: false },
     connectionTimeoutMillis: 10000, // 10s timeout for cold starts
     idleTimeoutMillis: 10000,
   });

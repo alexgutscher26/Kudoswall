@@ -15,11 +15,17 @@ export function createAuth() {
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: "pg",
-      schema: schema,
+      schema: {
+        user: schema.user,
+        session: schema.session,
+        account: schema.account,
+        verification: schema.verification,
+      },
     }),
     trustedOrigins: [env.CORS_ORIGIN],
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    debug: true,
     advanced: {
       defaultCookieAttributes: {
         secure: true,
