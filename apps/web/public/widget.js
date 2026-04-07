@@ -71,6 +71,7 @@
   }
 
   const embedUrl = `${baseUrl}/embed/${widgetId}${params.toString() ? "?" + params.toString() : ""}`;
+  console.log("TestimonialWall: Embed URL:", embedUrl);
 
   const iframe = document.createElement("iframe");
   iframe.setAttribute("src", embedUrl);
@@ -80,23 +81,49 @@
   iframe.style.width = "100%";
   iframe.style.border = "none";
   iframe.style.overflow = "hidden";
-  iframe.style.minHeight = "400px"; // Increased for visibility
-  iframe.style.display = "block";
-  iframe.style.border = "1px dashed #cccccc"; // Temporary debug border
+  iframe.style.display = "none"; // Hide initially
+  iframe.style.opacity = "0"; // Fade in later
+  iframe.style.transition = "opacity 0.3s ease-in-out";
   iframe.title = "TestimonialWall Widget";
+
+  // State to track if widget is ready
+  let isReady = false;
 
   // Insert iframe after the script tag
   targetScript.parentNode.insertBefore(iframe, targetScript.nextSibling);
 
-  // Listen for resize messages
+  // Fallback: If no ready message within 5 seconds, hide/remove the widget
+  const timeoutId = setTimeout(() => {
+    if (!isReady) {
+      console.warn("TestimonialWall: Widget failed to load or API is unreachable. Hiding widget container.");
+      if (iframe.parentNode) {
+        iframe.style.display = "none";
+        // Optionally remove it completely to prevent DOM bloat
+        // iframe.parentNode.removeChild(iframe);
+      }
+    }
+  }, 5000);
+
+  // Listen for messages from iframe
   window.addEventListener("message", (event) => {
     // Only accept messages from our domain
     if (event.origin !== baseUrl) return;
 
-    if (event.data && event.data.type === "resize" && event.data.widgetId === widgetId) {
-      const newHeight = event.data.height + "px";
-      if (iframe.style.height !== newHeight) {
-        iframe.style.height = newHeight;
+    if (event.data && event.data.widgetId === widgetId) {
+      if (event.data.type === "ready") {
+        console.log("TestimonialWall: Widget ready.");
+        isReady = true;
+        clearTimeout(timeoutId);
+        iframe.style.display = "block";
+        // Small delay to ensure styles are applied before fade
+        setTimeout(() => {
+          iframe.style.opacity = "1";
+        }, 50);
+      } else if (event.data.type === "resize") {
+        const newHeight = event.data.height + "px";
+        if (iframe.style.height !== newHeight) {
+          iframe.style.height = newHeight;
+        }
       }
     }
   });

@@ -78,6 +78,9 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
     // Report height to parent if in iframe
     if (window.self !== window.top) {
+      // Send ready signal immediately so the loader script can show the iframe
+      window.parent.postMessage({ type: "ready", widgetId: data.id }, "*");
+
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
           // Use the actual scroll height of the content to be more precise
