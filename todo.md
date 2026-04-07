@@ -341,11 +341,11 @@
 
 ## 📣 20. Marketing & SEO Fundamentals
 
-- [ ] **SEO Strategy**:
-  - [ ] Dynamic Sitemaps for all public collection pages
-  - [ ] JSON-LD Structured Data for every testimonial widget (Google Rich Results)
-  - [ ] Canonical URL management
-  - [ ] Meta tag generator for social previews (OG:Image)
+- [x] **SEO Strategy**:
+  - [x] Dynamic Sitemaps for all public collection pages
+  - [x] JSON-LD Structured Data for every testimonial widget (Google Rich Results)
+  - [x] Canonical URL management
+  - [x] Meta tag generator for social previews (OG:Image)
 - [ ] **Growth Content**:
   - [ ] Automated case study generator from top testimonials
 

@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/server-db";
-import { project } from "@my-better-t-app/db/schema";
-import { eq, or } from "drizzle-orm";
+import { project, testimonial } from "@my-better-t-app/db/schema";
+import { eq, or, and } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
 import ErrorBoundary from "@/components/error-boundary";
+import { JsonLd } from "@/components/seo/json-ld";
 
 interface CollectPageProps {
   params: Promise<{
@@ -14,6 +15,8 @@ interface CollectPageProps {
     t?: string;
   }>;
 }
+
+const BASE_URL = "https://testimonialwall.com";
 
 export async function generateMetadata({ params }: CollectPageProps) {
   const { slug } = await params;
@@ -26,13 +29,33 @@ export async function generateMetadata({ params }: CollectPageProps) {
     projectData.settings?.pageContent?.subheading ||
     `You're leaving a review for ${projectData.name}`;
 
+  const canonicalUrl = `${BASE_URL}/collect/${slug}`;
+  const ogImageUrl = `${BASE_URL}/api/og?slug=${slug}`;
+
   return {
     title: `${headline} | ${projectData.name} on TestimonialWall`,
     description: subheading,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `${headline} | ${projectData.name}`,
       description: subheading,
-      images: projectData.workspace.logoUrl ? [{ url: projectData.workspace.logoUrl }] : [],
+      url: canonicalUrl,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `Leave a testimonial for ${projectData.name}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${headline} | ${projectData.name}`,
+      description: subheading,
+      images: [ogImageUrl],
     },
   };
 }
@@ -42,6 +65,9 @@ async function getProjectByCollectionSlug(slug: string) {
     where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
     with: {
       workspace: true,
+      testimonials: {
+        where: eq(testimonial.status, "approved"),
+      },
     },
   });
 
@@ -84,11 +110,34 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   const subheading =
     settings?.pageContent?.subheading || `You're leaving a review for ${projectData.name}`;
 
+  // SEO: Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: projectData.workspace.name,
+    logo: projectData.workspace.logoUrl,
+    url: `${BASE_URL}/collect/${slug}`,
+    aggregateRating:
+      projectData.testimonials.length > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: (
+              projectData.testimonials.reduce((acc, current) => acc + (current.rating || 5), 0) /
+              projectData.testimonials.length
+            ).toFixed(1),
+            reviewCount: projectData.testimonials.length,
+            bestRating: "5",
+            worstRating: "1",
+          }
+        : undefined,
+  };
+
   return (
     <main
       className="relative flex h-screen items-center justify-center overflow-hidden px-4 sm:px-6"
       style={{ backgroundColor }}
     >
+      <JsonLd data={jsonLd} />
       {/* Background patterns */}
       <div className="absolute inset-0 z-0">
         <div

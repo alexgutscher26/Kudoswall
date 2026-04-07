@@ -9,24 +9,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch all projects with a collection slug for dynamic collection URLs
   // This helps indexing of public testimonial collection pages
-  const projects = await db
-    .select({ slug: project.collectionSlug })
-    .from(project)
-    .where(isNotNull(project.collectionSlug));
+  const projects = await db.query.project.findMany({
+    where: isNotNull(project.collectionSlug),
+  });
 
   const collectionUrls: MetadataRoute.Sitemap = projects.map((p) => ({
-    url: `${baseUrl}/collect/${p.slug}`,
+    url: `${baseUrl}/collect/${p.collectionSlug}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
-    priority: 0.7,
+    priority: 0.8,
   }));
 
   const staticUrls: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
+      changeFrequency: "daily",
+      priority: 1.0,
     },
     {
       url: `${baseUrl}/privacy`,

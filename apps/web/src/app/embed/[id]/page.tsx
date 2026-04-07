@@ -4,6 +4,8 @@ import { eq, and, desc, inArray, gte } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Widget from "@/components/widget";
 import ErrorBoundary from "@/components/error-boundary";
+import { JsonLd } from "@/components/seo/json-ld";
+
 export const revalidate = 60; // Cache the widget for 60 seconds at the edge (ISR)
 
 export default async function EmbedPage({
@@ -93,8 +95,45 @@ export default async function EmbedPage({
     workspaceId: w.workspaceId,
   };
 
+  // SEO: Structured Data for Widget
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: w.workspace.name,
+    logo: w.workspace.isPro ? w.workspace.logoUrl : undefined,
+    aggregateRating:
+      testimonialsList.length > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: (
+              testimonialsList.reduce((acc, current) => acc + (current.rating || 5), 0) /
+              testimonialsList.length
+            ).toFixed(1),
+            reviewCount: testimonialsList.length,
+            bestRating: "5",
+            worstRating: "1",
+          }
+        : undefined,
+    review: testimonialsList.map((t) => ({
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: t.authorName || "Anonymous",
+      },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: t.rating || 5,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      description: t.content || "",
+      datePublished: t.createdAt.toISOString(),
+    })),
+  };
+
   return (
     <div className="h-auto bg-transparent p-4">
+      <JsonLd data={jsonLd} />
       <ErrorBoundary name="Widget">
         <Widget data={widgetData} testimonials={testimonialsList} />
       </ErrorBoundary>
