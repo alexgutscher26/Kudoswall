@@ -59,7 +59,7 @@ export default function VideoRecorder({
   };
 
   useEffect(() => {
-    if (isPro && !recordedBlob) {
+    if (!recordedBlob) {
       initStream();
     }
     return () => {
@@ -130,30 +130,6 @@ export default function VideoRecorder({
     setTimeLeft(maxLength);
     initStream();
   };
-
-  // ─── Free Tier UI ───────────────────────────────────────────────────────────
-  if (!isPro) {
-    return (
-      <div className="group relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[32px] border border-neutral-100 bg-white p-8 text-center">
-        <div className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[6px]" />
-        <div className="relative z-20 flex flex-col items-center gap-4">
-          <div className="mb-2 flex size-16 items-center justify-center rounded-2xl bg-neutral-900 shadow-xl">
-            <Lock className="size-8 text-pink-500" />
-          </div>
-          <h3 className="text-xl font-bold text-neutral-900">
-            Video Testimonials are a Pro Feature
-          </h3>
-          <p className="max-w-[280px] text-[13px] text-neutral-500">
-            The owner needs to upgrade their plan to enable video recordings. Text reviews are still
-            available!
-          </p>
-          <div className="mt-2 flex items-center gap-2 rounded-full bg-pink-50 px-4 py-1.5 text-[11px] font-bold text-pink-600">
-            <Sparkles className="size-3" /> UPGRADE PRO TO ENABLE
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // ─── Preview UI ─────────────────────────────────────────────────────────────
   if (recordedBlob && previewUrl) {

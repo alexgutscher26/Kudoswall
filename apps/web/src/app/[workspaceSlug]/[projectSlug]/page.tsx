@@ -1,9 +1,23 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { getProjectBySlug } from "./actions";
 import CollectionWizard from "./collection-wizard";
 import ErrorBoundary from "@/components/error-boundary";
+import { Manrope, Inter } from "next/font/google";
+import { X } from "lucide-react";
+import Link from "next/link";
+
 export const dynamic = "force-dynamic";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "700", "800"],
+  variable: "--font-manrope",
+});
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-inter",
+});
 
 interface ProjectPageProps {
   params: Promise<{
@@ -20,57 +34,64 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  const settings = projectData.collectionSettingsJson
-    ? (JSON.parse(projectData.collectionSettingsJson) as any)
-    : null;
-  const backgroundColor = settings?.backgroundColor || "#fafafa";
+  const projectName = projectData.name || "SocialProof Pro";
 
   return (
-    <main
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 transition-colors duration-500 sm:px-6"
-      style={{ backgroundColor }}
+    <div
+      className={`flex min-h-screen flex-col bg-[#f7f9fb] font-[family-name:var(--font-inter)] text-[#191c1e] ${manrope.variable} ${inter.variable}`}
     >
-      {/* Background patterns */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <div className="absolute top-[-10%] right-[-5%] size-96 rounded-full bg-pink-500/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-5%] size-[500px] rounded-full bg-blue-500/5 blur-[150px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[24px_24px]" />
-      </div>
-
-      <div className="z-10 mx-auto w-full max-w-4xl space-y-12">
-        <div className="space-y-4 text-center">
-          {projectData.workspace?.logoUrl && (
-            <Image
-              src={projectData.workspace.logoUrl}
-              alt={projectData.workspace.name}
-              width={48}
-              height={48}
-              priority
-              className="mx-auto mb-6 size-12 rounded-xl opacity-50 shadow-sm grayscale"
-            />
-          )}
-          <h1 className="text-4xl font-black tracking-tight text-neutral-900 sm:text-5xl">
-            Share your story
-          </h1>
-          <p className="mx-auto max-w-xl font-medium text-neutral-500">
-            You're leaving a review for{" "}
-            <span className="font-bold text-neutral-900 underline decoration-pink-500/30 underline-offset-4">
-              {projectData.name}
-            </span>
-            .
-          </p>
+      {/* TopAppBar */}
+      <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between bg-white/80 px-6 backdrop-blur-xl dark:bg-slate-950/80">
+        <div className="max-w-[80vw] truncate pr-4 font-[family-name:var(--font-manrope)] text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+          {projectName}
         </div>
+        <div className="flex shrink-0 items-center gap-4">
+          <Link
+            href="/"
+            className="scale-95 text-slate-900 transition-opacity duration-200 hover:opacity-70 dark:text-slate-50"
+          >
+            <X className="size-6" />
+          </Link>
+        </div>
+      </header>
 
-        <ErrorBoundary name="Collection Wizard">
-          <CollectionWizard project={projectData} />
-        </ErrorBoundary>
+      {/* Main Content Canvas */}
+      <main className="mx-auto flex w-full max-w-2xl grow flex-col items-center px-4 pt-24 pb-12 sm:px-6">
+        <div className="w-full">
+          <ErrorBoundary name="Collection Wizard">
+            <CollectionWizard project={projectData} />
+          </ErrorBoundary>
+        </div>
+      </main>
 
-        <footer className="mt-12 text-center">
-          <p className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
-            Powered by TestimonialWall
-          </p>
-        </footer>
-      </div>
-    </main>
+      {/* Footer */}
+      <footer className="mt-auto w-full bg-slate-900 dark:bg-slate-950">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between px-8 py-12 md:flex-row">
+          <div className="mb-6 text-xs tracking-wide text-slate-300 uppercase md:mb-0 dark:text-slate-400">
+            © {new Date().getFullYear()} {projectName}. All rights reserved.
+          </div>
+          <nav className="flex gap-8">
+            <a
+              className="text-xs tracking-wide text-slate-400 uppercase transition-colors hover:text-[#4edea3]"
+              href="#"
+            >
+              Support
+            </a>
+            <a
+              className="text-xs tracking-wide text-slate-400 uppercase transition-colors hover:text-[#4edea3]"
+              href="#"
+            >
+              Privacy Policy
+            </a>
+            <a
+              className="text-xs tracking-wide text-slate-400 uppercase transition-colors hover:text-[#4edea3]"
+              href="#"
+            >
+              Terms of Service
+            </a>
+          </nav>
+        </div>
+      </footer>
+    </div>
   );
 }

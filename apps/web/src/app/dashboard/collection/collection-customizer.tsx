@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import {
@@ -18,13 +18,9 @@ import {
   Lock,
   Quote,
   Camera,
-  Building2,
-  Linkedin,
-  Layout,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
-import { motion } from "framer-motion";
 
 interface CollectionCustomizerProps {
   project: any;
@@ -148,7 +144,25 @@ export function CollectionCustomizer({
     }),
   );
 
+  // Debounced auto-save: fires 1.5s after the last change
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      updateSettings.mutate({ projectId: project.id, settings });
+    }, 1500);
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSave = () => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     updateSettings.mutate({
       projectId: project.id,
       settings,
@@ -735,339 +749,311 @@ function CollectionWizardPreview({
   mockStep: "rating" | "choice" | "text" | "video" | "details" | "success";
   setMockStep: (step: any) => void;
 }) {
-  // Automatically switch preview step when tab changes
   useEffect(() => {
-    if (activeTab === "fields") {
-      setMockStep("details");
-    } else if (activeTab === "content") {
-      setMockStep("success");
-    } else if (activeTab === "video") {
-      setMockStep("video");
-    } else if (activeTab === "branding" || activeTab === "advanced") {
-      setMockStep("rating");
-    }
+    if (activeTab === "fields") setMockStep("details");
+    // Content tab: headline/subheading are on the rating step; thankYou is on success.
+    // Show rating so users immediately see their headline/subheading changes reflected.
+    else if (activeTab === "content") setMockStep("rating");
+    else if (activeTab === "video") setMockStep("video");
+    else if (activeTab === "branding" || activeTab === "advanced") setMockStep("rating");
+    else if (activeTab === "share") setMockStep("rating");
   }, [activeTab, setMockStep]);
 
-  // Font family class mapping
-  const fontClass =
-    settings.fontFamily === "serif"
-      ? "font-serif"
-      : settings.fontFamily === "mono"
-        ? "font-mono"
-        : "font-sans";
+  const stepInfo: Record<string, { text: string; title: string; percent: number }> = {
+    rating: { text: "Step 1 of 4", title: "Rate Your Experience", percent: 25 },
+    choice: { text: "Step 1 of 4", title: "Choose Format", percent: 25 },
+    text: { text: "Step 2 of 4", title: "Detailed Feedback", percent: 50 },
+    video: { text: "Step 2 of 4", title: "Record Video", percent: 50 },
+    details: { text: "Step 3 of 4", title: "Identity & Photo", percent: 75 },
+    success: { text: "Complete", title: "Thank You", percent: 100 },
+  };
+  const info = stepInfo[mockStep];
 
   return (
-    <div className={`mx-auto w-full max-w-xl ${fontClass}`}>
-      <div className="text-card-foreground relative flex min-h-[450px] flex-col overflow-hidden rounded-[40px] border border-white/50 bg-white/70 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] backdrop-blur-xl">
-        {/* Progress Bar */}
-        <div className="absolute top-0 right-0 left-0 h-1 overflow-hidden bg-neutral-100/30">
-          <div className="h-full w-1/3" style={{ backgroundColor: settings.accentColor }} />
+    <div className="mx-auto w-full max-w-lg">
+      {/* Step Indicator */}
+      {mockStep !== "success" && (
+        <div className="mb-6">
+          <div className="mb-2 flex items-end justify-between">
+            <div>
+              <span className="font-sans text-[10px] tracking-widest text-[#45464d] uppercase">
+                {info.text}
+              </span>
+              <h2 className="mt-0.5 text-base font-bold text-[#191c1e]">{info.title}</h2>
+            </div>
+            <span className="font-sans text-[11px] font-medium text-[#45464d]">
+              {info.percent}% Complete
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e6e8ea]">
+            <div
+              className="h-full rounded-full bg-[#000000] transition-all duration-500"
+              style={{ width: `${info.percent}%` }}
+            />
+          </div>
         </div>
+      )}
 
-        <div className="flex flex-1 flex-col p-8">
+      {/* Card */}
+      <div className="relative overflow-hidden rounded-xl border border-[#c6c6cd]/20 bg-white p-5 shadow-sm">
+        <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-[#d5e3fd]/20 blur-3xl" />
+
+        <div className="relative z-10">
+          {/* Rating Step */}
           {mockStep === "rating" && (
-            <div className="flex flex-1 flex-col items-center justify-center space-y-8 text-center">
-              <div className="space-y-4">
-                <div
-                  className="mx-auto flex size-20 items-center justify-center rounded-[28px]"
-                  style={{ backgroundColor: `${settings.accentColor}15` }}
-                >
-                  <Sparkles className="size-10" style={{ color: settings.accentColor }} />
-                </div>
-                <h2 className="text-4xl leading-tight font-black tracking-tighter text-neutral-900">
-                  How was your experience?
-                </h2>
-                <p className="mx-auto max-w-xs text-[16px] font-medium text-neutral-500/80">
-                  We value your feedback and want to know how we did.
-                </p>
-              </div>
+            <div className="py-2 text-center">
+              <p className="mb-1 text-[11px] font-semibold tracking-widest text-[#45464d] uppercase">
+                {settings.pageContent.subheading || "We value your feedback"}
+              </p>
+              <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#191c1e]">
+                {settings.pageContent.headline || "How was your experience?"}
+              </h1>
               {settings.form.starRating.enabled && (
-                <div className="flex gap-2">
+                <div className="mb-8 flex justify-center gap-2">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
-                      className="size-12 fill-current"
-                      style={{ color: s <= 4 ? settings.accentColor : "#f5f5f5" }}
+                      className={`size-9 transition-all ${s <= 4 ? "fill-[#000000] text-[#000000]" : "text-[#e0e3e5]"}`}
                     />
                   ))}
                 </div>
               )}
+              <div className="mb-6 flex flex-wrap justify-center gap-2">
+                <div className="flex items-center gap-1.5 rounded-lg bg-[#e6e8ea] px-3 py-1">
+                  <CheckCircle2 className="size-3.5 text-[#009668]" />
+                  <span className="text-[10px] font-semibold tracking-wider text-[#45464d] uppercase">
+                    Verified User
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-lg bg-[#e6e8ea] px-3 py-1">
+                  <Shield className="size-3.5 text-[#7c839b]" />
+                  <span className="text-[10px] font-semibold tracking-wider text-[#45464d] uppercase">
+                    Privacy Guaranteed
+                  </span>
+                </div>
+              </div>
               <button
                 onClick={() => setMockStep("choice")}
-                className="rounded-2xl px-8 py-3.5 text-[14px] font-bold text-white shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{
-                  backgroundColor: settings.accentColor,
-                  boxShadow: `0 10px 25px -5px ${settings.accentColor}40`,
-                }}
+                className="rounded-lg bg-[#000000] px-8 py-2.5 text-[11px] font-bold tracking-widest text-white uppercase transition-all hover:opacity-90"
               >
-                Next Question
+                Next Step →
               </button>
             </div>
           )}
 
+          {/* Choice Step */}
           {mockStep === "choice" && (
-            <div className="flex flex-1 flex-col items-center justify-center space-y-8 py-2 text-center">
-              <div
-                className="flex size-14 items-center justify-center rounded-[20px] shadow-lg shadow-neutral-900/5"
-                style={{ backgroundColor: `${settings.accentColor}10` }}
-              >
-                <Layout
-                  className="size-6 text-neutral-900"
-                  style={{ color: settings.accentColor }}
-                />
-              </div>
-              <div className="space-y-4">
-                <h2 className="text-2xl leading-tight font-black tracking-tighter text-neutral-900">
-                  How would you like to share?
-                </h2>
-                <p className="mx-auto max-w-[240px] text-[13px] font-medium text-neutral-500/80">
-                  Choose the format that works best for you.
-                </p>
-              </div>
-
-              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="py-2 text-center">
+              <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e]">
+                How would you like to share?
+              </h1>
+              <p className="mb-6 text-sm text-[#45464d]">
+                Choose the format that works best for you.
+              </p>
+              <div className="mb-6 grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setMockStep("video")}
-                  className="group relative flex flex-col items-center gap-4 rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                  className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
                 >
-                  <div
-                    className="flex size-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: `${settings.accentColor}10` }}
-                  >
-                    <Video className="size-6" style={{ color: settings.accentColor }} />
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[#f2f4f6]">
+                    <Video className="size-5 text-[#000000]" />
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-md font-black tracking-tight text-neutral-900">Video</h3>
-                    <p className="text-[10px] font-bold text-neutral-400">Quick & Personal</p>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#191c1e]">Video</h3>
+                    <p className="text-[10px] text-[#76777d]">Quick & Personal</p>
                   </div>
                 </button>
-
                 <button
                   onClick={() => setMockStep("text")}
-                  className="group relative flex flex-col items-center gap-4 rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:border-neutral-200 hover:shadow-xl active:scale-[0.98]"
+                  className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
                 >
-                  <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-900 transition-transform group-hover:scale-110">
-                    <Quote className="size-6 text-white" />
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[#000000]">
+                    <Quote className="size-5 text-white" />
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-md font-black tracking-tight text-neutral-900">Text</h3>
-                    <p className="text-[10px] font-bold text-neutral-400">Simple & Classic</p>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#191c1e]">Text</h3>
+                    <p className="text-[10px] text-[#76777d]">Simple & Classic</p>
                   </div>
                 </button>
               </div>
             </div>
           )}
 
+          {/* Text Step */}
           {mockStep === "text" && (
-            <div className="flex flex-1 flex-col space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex size-12 items-center justify-center rounded-[18px] bg-neutral-900">
-                  <MessageSquare className="size-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-black tracking-tighter text-neutral-900">
-                  Share your story
-                </h2>
-              </div>
-              <div className="flex-1 rounded-[24px] border border-neutral-100 bg-neutral-50/50 p-6">
-                <p className="text-sm font-medium text-neutral-300">
+            <div className="text-left">
+              <label className="mb-1 block text-base font-bold text-[#191c1e]">
+                {settings.form.fields?.fullName?.label || "Tell us about your experience."}
+              </label>
+              <p className="mb-3 text-xs leading-relaxed text-[#45464d]">
+                {settings.video?.prompt ||
+                  "What stood out the most? Specific details help others the most."}
+              </p>
+              <div className="relative">
+                <div className="flex h-28 w-full items-start rounded-xl bg-[#f2f4f6] p-3 text-xs text-[#76777d] italic">
                   I chose {projectName} because...
-                </p>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                  0 / {settings.form.minCharCount} MIN
+                </div>
+                <span className="absolute right-3 bottom-3 text-[10px] text-[#76777d]">
+                  0 / {settings.form.minCharCount}
                 </span>
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-3">
                 <button
-                  onClick={() => setMockStep(settings.video.enabled ? "video" : "details")}
-                  className="rounded-full px-6 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: settings.accentColor }}
+                  onClick={() => setMockStep("choice")}
+                  className="text-[10px] font-bold tracking-widest text-[#45464d] uppercase"
                 >
-                  Next
+                  ← Back
                 </button>
-              </div>
-            </div>
-          )}
-
-          {mockStep === "video" && (
-            <div className="flex flex-1 flex-col space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex size-12 items-center justify-center rounded-[18px] bg-neutral-900">
-                  <Video className="size-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-black tracking-tighter text-neutral-900">
-                  Record a video
-                </h2>
-              </div>
-              <div className="flex flex-1 items-center justify-center rounded-[24px] border-2 border-dashed border-neutral-200 bg-neutral-50/50">
-                <div className="space-y-2 text-center">
-                  <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-neutral-200">
-                    <Camera className="size-6 text-neutral-500" />
-                  </div>
-                  <p className="text-xs font-bold text-neutral-400">Click to record</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-end">
                 <button
                   onClick={() => setMockStep("details")}
-                  className="rounded-full px-6 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: settings.accentColor }}
+                  className="rounded-lg bg-[#000000] px-6 py-2 text-[10px] font-bold tracking-widest text-white uppercase"
                 >
-                  Next
+                  Next Step →
                 </button>
               </div>
             </div>
           )}
 
-          {mockStep === "details" && (
-            <div className="flex flex-1 flex-col space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex size-12 items-center justify-center rounded-[18px] bg-neutral-900">
-                  <Quote className="size-6 text-white" />
+          {/* Video Step */}
+          {mockStep === "video" && (
+            <div className="text-center">
+              <h1 className="mb-1 text-xl font-extrabold text-[#191c1e]">Record your video</h1>
+              <p className="mb-4 text-xs text-[#45464d]">
+                {settings.video?.prompt || "Tell us about your experience"}
+              </p>
+              <div className="mb-4 flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#191c1e]">
+                <div className="flex size-10 items-center justify-center rounded-full bg-white/10">
+                  <Camera className="size-5 text-white" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-black tracking-tighter text-neutral-900">
-                    Nearly there!
-                  </h2>
-                </div>
+                <p className="text-[10px] font-bold tracking-widest text-white/60 uppercase">
+                  Camera Preview
+                </p>
               </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                      {settings.form.fields.fullName.label || "Full Name"}{" "}
-                      {settings.form.fields.fullName.required !== false ? "*" : ""}
-                    </label>
-                    <div className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 text-xs text-neutral-300">
-                      {settings.form.fields.fullName.placeholder || "Jane Doe"}
-                    </div>
-                  </div>
-                  {settings.form.fields.email.enabled && (
-                    <div className="space-y-1.5">
-                      <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                        {settings.form.fields.email.label || "Email"}{" "}
-                        {settings.form.fields.email.required ? "*" : ""}
-                      </label>
-                      <div className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 text-xs text-neutral-300">
-                        {settings.form.fields.email.placeholder || "jane@example.com"}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4 border-t border-neutral-100/50 pt-5">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {settings.form.fields.company.enabled && (
-                      <div className="space-y-1.5">
-                        <label className="flex items-center gap-2 pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                          <Building2 className="size-3" />{" "}
-                          {settings.form.fields.company.label || "Company"}{" "}
-                          {settings.form.fields.company.required ? "*" : ""}
-                        </label>
-                        <div className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 text-xs text-neutral-300">
-                          {settings.form.fields.company.placeholder || "Acme Inc."}
-                        </div>
-                      </div>
-                    )}
-                    {settings.form.fields.jobTitle.enabled && (
-                      <div className="space-y-1.5">
-                        <label className="pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                          {settings.form.fields.jobTitle.label || "Job Title"}{" "}
-                          {settings.form.fields.jobTitle.required ? "*" : ""}
-                        </label>
-                        <div className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 text-xs text-neutral-300">
-                          {settings.form.fields.jobTitle.placeholder || "CEO"}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {settings.form.fields.linkedin.enabled && (
-                    <div className="space-y-1.5">
-                      <label className="flex items-center gap-2 pl-1 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                        <Linkedin className="size-3" />{" "}
-                        {settings.form.fields.linkedin.label || "LinkedIn Profile"}{" "}
-                        {settings.form.fields.linkedin.required ? "*" : ""}
-                      </label>
-                      <div className="w-full rounded-xl border border-neutral-100 bg-neutral-50/30 px-5 py-3.5 text-xs text-neutral-300">
-                        {settings.form.fields.linkedin.placeholder ||
-                          "https://linkedin.com/in/jane"}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="flex items-center justify-between border-t border-[#c6c6cd]/20 pt-3">
+                <button
+                  onClick={() => setMockStep("choice")}
+                  className="text-[10px] font-bold tracking-widest text-[#45464d] uppercase"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setMockStep("details")}
+                  className="rounded-lg bg-[#000000] px-6 py-2 text-[10px] font-bold tracking-widest text-white uppercase"
+                >
+                  Next Step →
+                </button>
               </div>
-
-              <button
-                className="mt-4 flex w-full items-center justify-center gap-3 rounded-[20px] py-4.5 text-[16px] font-black tracking-tight text-white shadow-2xl transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{
-                  backgroundColor: settings.accentColor,
-                  boxShadow: `0 15px 30px -10px ${settings.accentColor}50`,
-                }}
-                onClick={() => setMockStep("success")}
-              >
-                Submit review
-                <Sparkles className="size-4" />
-              </button>
             </div>
           )}
 
-          {mockStep === "success" && (
-            <div className="animate-in zoom-in flex flex-1 flex-col items-center justify-center space-y-8 text-center duration-500">
-              <div className="flex size-16 items-center justify-center rounded-[24px] bg-emerald-500">
-                <CheckCircle2 className="size-8 text-white" />
-              </div>
-              <div className="space-y-4">
-                <h2 className="text-4xl leading-tight font-black tracking-tighter text-neutral-900">
-                  {settings.pageContent.thankYou.headline}
-                </h2>
-                <p className="text-md mx-auto max-w-sm leading-relaxed font-medium text-neutral-500/80">
-                  {settings.pageContent.thankYou.body}
-                </p>
-              </div>
-              {settings.pageContent.thankYou.cta.enabled &&
-                settings.pageContent.thankYou.cta.text && (
-                  <div className="flex flex-col gap-3">
-                    <button
-                      className="rounded-xl px-8 py-3 text-xs font-bold text-white transition-opacity hover:opacity-90"
-                      style={{ backgroundColor: settings.accentColor }}
-                    >
-                      {settings.pageContent.thankYou.cta.text}
-                    </button>
-                    <button
-                      onClick={() => setMockStep("rating")}
-                      className="text-[10px] font-bold text-neutral-400 underline"
-                    >
-                      Preview from start
-                    </button>
+          {/* Details Step */}
+          {mockStep === "details" && (
+            <div className="space-y-3 text-left">
+              <h1 className="mb-1 text-xl font-extrabold text-[#191c1e]">Almost done!</h1>
+              <p className="mb-3 text-xs text-[#45464d]">
+                Add your details so we can attribute your testimonial.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[10px] font-bold tracking-widest text-[#45464d] uppercase">
+                    {settings.form.fields.fullName.label}{" "}
+                    {settings.form.fields.fullName.required ? "*" : ""}
+                  </label>
+                  <div className="flex h-8 w-full items-center rounded-lg bg-[#f2f4f6] px-3 text-[10px] text-[#76777d]">
+                    {settings.form.fields.fullName.placeholder}
+                  </div>
+                </div>
+                {settings.form.fields.email.enabled && (
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold tracking-widest text-[#45464d] uppercase">
+                      {settings.form.fields.email.label}{" "}
+                      {settings.form.fields.email.required ? "*" : ""}
+                    </label>
+                    <div className="flex h-8 w-full items-center rounded-lg bg-[#f2f4f6] px-3 text-[10px] text-[#76777d]">
+                      {settings.form.fields.email.placeholder}
+                    </div>
                   </div>
                 )}
-              {(!settings.pageContent.thankYou.cta.enabled ||
-                !settings.pageContent.thankYou.cta.text) && (
+                {settings.form.fields.company.enabled && (
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold tracking-widest text-[#45464d] uppercase">
+                      {settings.form.fields.company.label}
+                    </label>
+                    <div className="flex h-8 w-full items-center rounded-lg bg-[#f2f4f6] px-3 text-[10px] text-[#76777d]">
+                      {settings.form.fields.company.placeholder}
+                    </div>
+                  </div>
+                )}
+                {settings.form.fields.jobTitle.enabled && (
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold tracking-widest text-[#45464d] uppercase">
+                      {settings.form.fields.jobTitle.label}
+                    </label>
+                    <div className="flex h-8 w-full items-center rounded-lg bg-[#f2f4f6] px-3 text-[10px] text-[#76777d]">
+                      {settings.form.fields.jobTitle.placeholder}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {settings.form.fields.linkedin.enabled && (
+                <div className="mt-2">
+                  <label className="mb-1 block text-[10px] font-bold tracking-widest text-[#45464d] uppercase">
+                    {settings.form.fields.linkedin.label}
+                    {settings.form.fields.linkedin.required ? " *" : ""}
+                  </label>
+                  <div className="flex h-8 w-full items-center rounded-lg bg-[#f2f4f6] px-3 text-[10px] text-[#76777d]">
+                    {settings.form.fields.linkedin.placeholder}
+                  </div>
+                </div>
+              )}
+              <div className="mt-2 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-3">
+                <button
+                  onClick={() => setMockStep("text")}
+                  className="text-[10px] font-bold tracking-widest text-[#45464d] uppercase"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setMockStep("success")}
+                  className="rounded-lg bg-[#000000] px-6 py-2 text-[10px] font-bold tracking-widest text-white uppercase"
+                >
+                  Review Testimonial →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Success Step */}
+          {mockStep === "success" && (
+            <div className="py-4 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#d5e3fd]/40">
+                <CheckCircle2 className="size-7 text-[#000000]" />
+              </div>
+              <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e]">
+                {settings.pageContent.thankYou.headline || "You're awesome!"}
+              </h1>
+              <p className="mx-auto mb-6 max-w-xs text-sm text-[#45464d]">
+                {settings.pageContent.thankYou.body ||
+                  "Your feedback has been sent. It helps us more than you know."}
+              </p>
+              {settings.pageContent.thankYou.cta.enabled &&
+                settings.pageContent.thankYou.cta.text && (
+                  <button className="mb-3 rounded-lg bg-[#000000] px-8 py-2.5 text-[11px] font-bold tracking-widest text-white uppercase transition-all hover:opacity-90">
+                    {settings.pageContent.thankYou.cta.text}
+                  </button>
+                )}
+              <div className="mt-4">
                 <button
                   onClick={() => setMockStep("rating")}
-                  className="rounded-xl border border-neutral-100 bg-white px-8 py-2.5 text-[11px] font-bold text-neutral-600 shadow-sm"
+                  className="text-[10px] font-bold text-[#45464d] underline"
                 >
                   Preview from start
                 </button>
-              )}
+              </div>
             </div>
           )}
-          {/* Card Footer Space */}
-          <div className="mt-auto h-0" />
         </div>
       </div>
-
-      {/* Powered By Branding - OUTSIDE the card */}
-      {!workspaceIsPro && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 mt-10 flex items-center justify-center gap-3 duration-500">
-          <div className="flex size-6 items-center justify-center rounded-[7px] bg-neutral-400 text-[11px] font-black text-white shadow-sm ring-4 ring-neutral-100">
-            T
-          </div>
-          <span className="text-[11px] leading-none font-black tracking-widest text-neutral-400 uppercase">
-            Powered by TestimonialWall
-          </span>
-        </div>
-      )}
     </div>
   );
 }
