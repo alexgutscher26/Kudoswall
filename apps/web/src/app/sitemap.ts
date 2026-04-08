@@ -4,7 +4,7 @@ import { project } from "@my-better-t-app/db/schema";
 import { isNotNull } from "drizzle-orm";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://testimonialwall.com";
+  const baseUrl = "https://kudoswall.org";
   const db = createDb();
 
   // Fetch all projects with a collection slug for dynamic collection URLs

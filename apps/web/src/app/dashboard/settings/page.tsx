@@ -6,7 +6,7 @@ import DashboardShell from "../dashboard";
 import SettingsPage from "./settings-page";
 
 export const metadata = {
-  title: "Settings — TestimonialWall",
+  title: "Settings — KudosWall",
   description: "Manage your workspace settings, collection landing page, and billing.",
 };
 

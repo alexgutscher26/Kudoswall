@@ -1,6 +1,6 @@
 # PLAN: Workspace Onboarding System
 
-Implement a "5 Steps to Your First Testimonial" onboarding checklist to guide new users through the core value loop of TestimonialWall.
+Implement a "5 Steps to Your First Testimonial" onboarding checklist to guide new users through the core value loop of KudosWall.
 
 ## 🏁 Goals
 

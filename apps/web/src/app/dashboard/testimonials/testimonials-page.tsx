@@ -51,7 +51,7 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
     company: "Acme Corp",
     avatar: "SC",
     content:
-      "TestimonialWall completely transformed how we collect and display social proof. Setup took under 5 minutes and our conversion rate jumped 23% in the first month. I honestly can't imagine going back.",
+      "KudosWall completely transformed how we collect and display social proof. Setup took under 5 minutes and our conversion rate jumped 23% in the first month. I honestly can't imagine going back.",
     rating: 5,
     type: "text",
     status: "approved",

@@ -1,5 +1,5 @@
 (function () {
-  console.log("TestimonialWall: Initializing...");
+  console.log("KudosWall: Initializing...");
 
   const scripts = document.getElementsByTagName("script");
   let targetScript = document.currentScript;
@@ -15,22 +15,22 @@
   }
 
   if (!targetScript) {
-    console.error("TestimonialWall: Could not find script tag. Ensure data-id is present.");
+    console.error("KudosWall: Could not find script tag. Ensure data-id is present.");
     return;
   }
 
   targetScript.setAttribute("data-initialized", "true");
   const widgetId = targetScript.getAttribute("data-id");
-  console.log("TestimonialWall: Widget ID found:", widgetId);
+  console.log("KudosWall: Widget ID found:", widgetId);
 
   let baseUrl;
   try {
     const scriptUrl = new URL(targetScript.src, window.location.origin);
     baseUrl = scriptUrl.origin;
-    console.log("TestimonialWall: Base URL detected:", baseUrl);
+    console.log("KudosWall: Base URL detected:", baseUrl);
   } catch (e) {
     baseUrl = window.location.origin;
-    console.warn("TestimonialWall: Could not parse script URL, falling back to current origin.");
+    console.warn("KudosWall: Could not parse script URL, falling back to current origin.");
   }
 
   // Extract other data attributes for dynamic filtering
@@ -71,7 +71,7 @@
   }
 
   const embedUrl = `${baseUrl}/embed/${widgetId}${params.toString() ? "?" + params.toString() : ""}`;
-  console.log("TestimonialWall: Embed URL:", embedUrl);
+  console.log("KudosWall: Embed URL:", embedUrl);
 
   const iframe = document.createElement("iframe");
   iframe.setAttribute("src", embedUrl);
@@ -84,7 +84,7 @@
   iframe.style.display = "none"; // Hide initially
   iframe.style.opacity = "0"; // Fade in later
   iframe.style.transition = "opacity 0.3s ease-in-out";
-  iframe.title = "TestimonialWall Widget";
+  iframe.title = "KudosWall Widget";
 
   // State to track if widget is ready
   let isReady = false;
@@ -95,7 +95,7 @@
   // Fallback: If no ready message within 5 seconds, hide/remove the widget
   const timeoutId = setTimeout(() => {
     if (!isReady) {
-      console.warn("TestimonialWall: Widget failed to load or API is unreachable. Hiding widget container.");
+      console.warn("KudosWall: Widget failed to load or API is unreachable. Hiding widget container.");
       if (iframe.parentNode) {
         iframe.style.display = "none";
         // Optionally remove it completely to prevent DOM bloat
@@ -111,7 +111,7 @@
 
     if (event.data && event.data.widgetId === widgetId) {
       if (event.data.type === "ready") {
-        console.log("TestimonialWall: Widget ready.");
+        console.log("KudosWall: Widget ready.");
         isReady = true;
         clearTimeout(timeoutId);
         iframe.style.display = "block";

@@ -29,7 +29,7 @@ export default function CtaSection() {
           Start collecting testimonials <span style={{ color: "#e8527a" }}>today</span>
         </h2>
         <p className="max-w-lg text-lg text-neutral-500">
-          Join 1,200+ business owners using TestimonialWall to turn happy customers into their best
+          Join 1,200+ business owners using KudosWall to turn happy customers into their best
           marketing asset.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">

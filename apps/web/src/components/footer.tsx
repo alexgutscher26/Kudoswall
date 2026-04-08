@@ -34,7 +34,7 @@ export default function Footer() {
               className="text-xl font-bold text-neutral-900"
               style={{ fontFamily: "'Georgia', serif" }}
             >
-              TestimonialWall
+              KudosWall
             </a>
             <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
               The easiest way to collect and display beautiful customer testimonials.
@@ -116,7 +116,7 @@ export default function Footer() {
             </p>
           </div>
           <p className="text-xs text-neutral-400">
-            © {new Date().getFullYear()} TestimonialWall. All rights reserved.
+            © {new Date().getFullYear()} KudosWall. All rights reserved.
           </p>
         </div>
       </div>

@@ -6,7 +6,7 @@ import DashboardShell from "../dashboard";
 import AnalyticsPage from "./analytics-page";
 
 export const metadata = {
-  title: "Analytics — TestimonialWall",
+  title: "Analytics — KudosWall",
   description: "Track impressions, clicks, and conversion rates for your testimonial widgets.",
 };
 

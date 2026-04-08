@@ -8,7 +8,7 @@ import DashboardLoading from "../loading";
 import CollectionList from "./collection-list";
 
 export const metadata = {
-  title: "Manage Collection Pages — TestimonialWall",
+  title: "Manage Collection Pages — KudosWall",
   description: "Manage and create dedicated collection pages for your projects.",
 };
 

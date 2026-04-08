@@ -10,9 +10,9 @@ interface FAQItem {
 
 const FAQS: FAQItem[] = [
   {
-    question: "How does TestimonialWall work?",
+    question: "How does KudosWall work?",
     answer:
-      "TestimonialWall provides you with a unique, shareable link that you can send to your customers. They click the link, record a video or type a text testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
+      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, record a video or type a text testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
   },
   {
     question: "Do my customers need to create an account to leave a review?",
@@ -27,7 +27,7 @@ const FAQS: FAQItem[] = [
   {
     question: "Which platforms does the embed widget support?",
     answer:
-      "TestimonialWall works on any platform that allows you to add HTML/JavaScript. This includes WordPress, Wix, Squarespace, Webflow, Shopify, Framer, and custom-built websites.",
+      "KudosWall works on any platform that allows you to add HTML/JavaScript. This includes WordPress, Wix, Squarespace, Webflow, Shopify, Framer, and custom-built websites.",
   },
   {
     question: "Is there a limit on how many testimonials I can collect?",

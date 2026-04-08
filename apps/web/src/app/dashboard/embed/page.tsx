@@ -6,7 +6,7 @@ import DashboardShell from "../dashboard";
 import WidgetList from "./widget-list";
 
 export const metadata = {
-  title: "Embed Widgets — TestimonialWall",
+  title: "Embed Widgets — KudosWall",
   description: "Manage your testimonial embed configurations and show social proof on any website.",
 };
 

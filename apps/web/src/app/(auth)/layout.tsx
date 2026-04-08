@@ -28,7 +28,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
       {/* Footer Branding */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-neutral-300 uppercase opacity-60">
-        TestimonialWall &mdash; Established 2026
+        KudosWall &mdash; Established 2026
       </div>
     </div>
   );

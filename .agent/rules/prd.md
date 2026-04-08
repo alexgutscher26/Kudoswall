@@ -1,4 +1,4 @@
-# Product Requirements Document: TestimonialWall - Testimonial Collection & Display Platform
+# Product Requirements Document: KudosWall - Testimonial Collection & Display Platform
 
 ## Problem Statement
 

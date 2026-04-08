@@ -46,7 +46,7 @@ export default function Navbar() {
           className="absolute left-1/2 -translate-x-1/2 text-xl font-bold tracking-tight text-neutral-900 select-none"
           style={{ fontFamily: "'Georgia', serif" }}
         >
-          TestimonialWall
+          KudosWall
         </Link>
 
         {/* Right: Auth actions */}

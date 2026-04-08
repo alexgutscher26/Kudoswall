@@ -113,7 +113,7 @@ export default function WidgetPreviewSection() {
                 className="hidden shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold sm:inline"
                 style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
               >
-                Powered by TestimonialWall
+                Powered by KudosWall
               </span>
             </div>
 

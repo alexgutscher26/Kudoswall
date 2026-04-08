@@ -150,7 +150,7 @@ export default function EmbedPage() {
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
 
-  const embedCode = `<script src="https://cdn.testimonialwall.com/widget.js" 
+  const embedCode = `<script src="https://cdn.kudoswall.com/widget.js" 
   data-id="ws_abc123" 
   data-layout="${settings.layout}"
   data-theme="${settings.theme}"

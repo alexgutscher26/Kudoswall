@@ -1,8 +1,8 @@
-# Performance & UX Optimization Plan: TestimonialWall Widget
+# Performance & UX Optimization Plan: KudosWall Widget
 
 ## Overview
 
-This plan outlines the implementation of high-performance features for the TestimonialWall embeddable widget. The goal is to achieve zero Cumulative Layout Shift (CLS), lightning-fast initial paint via Edge Rendering, and optimized asset loading for video testimonials.
+This plan outlines the implementation of high-performance features for the KudosWall embeddable widget. The goal is to achieve zero Cumulative Layout Shift (CLS), lightning-fast initial paint via Edge Rendering, and optimized asset loading for video testimonials.
 
 ## Project Type
 

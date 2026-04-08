@@ -304,12 +304,12 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                 </div>
                 {(!settings.hideBadge || !isPro) && (
                   <a
-                    href="https://testimonialwall.me"
+                    href="https://kudoswall.org"
                     target="_blank"
                     className="inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold transition-all hover:opacity-80"
                     style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
                   >
-                    Powered by TestimonialWall
+                    Powered by KudosWall
                   </a>
                 )}
               </div>
@@ -389,7 +389,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
             {(!settings.hideBadge || !isPro) && settings.hideHeader && (
               <div className="mt-8 flex justify-center">
                 <a
-                  href="https://testimonialwall.me"
+                  href="https://kudoswall.org"
                   target="_blank"
                   className="flex items-center gap-1.5 rounded-full border border-neutral-100 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-400 shadow-sm transition-all hover:border-pink-100 hover:text-neutral-600"
                 >
@@ -398,7 +398,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                     className="font-extrabold text-neutral-900"
                     style={{ color: settings.accentColor }}
                   >
-                    TestimonialWall
+                    KudosWall
                   </span>
                 </a>
               </div>

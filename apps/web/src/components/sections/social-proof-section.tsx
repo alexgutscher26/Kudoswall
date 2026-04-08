@@ -8,7 +8,7 @@ const TESTIMONIALS = [
     avatarColor: "#e8527a",
     rating: 5,
     quote:
-      "TestimonialWall completely changed how I showcase customer love. Within a week I had 20 reviews on my site and my conversion rate jumped 30%.",
+      "KudosWall completely changed how I showcase customer love. Within a week I had 20 reviews on my site and my conversion rate jumped 30%.",
   },
   {
     name: "Marcus Rivera",
@@ -72,7 +72,7 @@ export default function SocialProofSection() {
             Social proof
           </span>
           <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl md:text-5xl">
-            Businesses that trust <span style={{ color: "#e8527a" }}>TestimonialWall</span>
+            Businesses that trust <span style={{ color: "#e8527a" }}>KudosWall</span>
           </h2>
         </div>
 

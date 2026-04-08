@@ -1,6 +1,6 @@
 # Antigravity Project Rules
 
-This document outlines the core behavioral and technical rules that Antigravity (IA assistant) must follow when working on the TestimonialWall project.
+This document outlines the core behavioral and technical rules that Antigravity (IA assistant) must follow when working on the KudosWall project.
 
 ## General Behavior
 

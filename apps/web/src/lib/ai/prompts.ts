@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * @file prompts.ts
- * @description Advanced AI Prompt Library for TestimonialWall.
+ * @description Advanced AI Prompt Library for KudosWall.
  * Designed using localized 'prompt-engineering' and 'ai-sdk-core' skills.
  */
 
@@ -12,7 +12,7 @@ import { z } from "zod";
  */
 export const SYSTEM_PROMPT = `
 # Role
-You are the AI Core of "TestimonialWall," a premium SaaS for managing social proof. 
+You are the AI Core of "KudosWall," a premium SaaS for managing social proof. 
 Your expertise lies in content analysis, sentiment detection, and marketing strategy.
 
 # Capabilities
@@ -91,7 +91,7 @@ Follow the schema and provide your chain-of-thought reasoning in the 'reasoning'
 Extract a "Hero Quote" from the following testimonial. A Hero Quote is a punchy, 5-12 word snippet that would look perfect as a headline.
 
 ### Examples:
-Testimonial: "I've tried 10 different tools and TestimonialWall is the only one that actually works for our enterprise scale."
+Testimonial: "I've tried 10 different tools and KudosWall is the only one that actually works for our enterprise scale."
 Hero Quote: "The only tool that works for our enterprise scale."
 
 Testimonial: "Support was fast, the UI is clean, and our conversion rate went up by 15% in two weeks."
@@ -154,11 +154,11 @@ Input: "${content}"
      */
     GENERATE_COMPARISON: {
       prompt: (competitorName: string, competitorFeatures: string[]) => `
-Generate a balanced, high-value comparison between TestimonialWall and ${competitorName}.
+Generate a balanced, high-value comparison between KudosWall and ${competitorName}.
 Follow Programmatic SEO (PSEO) best practices:
 1. **Focus on Search Intent**: The user is looking for a better alternative or specific trade-offs.
 2. **Proprietary Insight**: Highlight our unique features (e.g., high-fidelity video collection, glassmorphism UI).
-3. **Persuasive Fairness**: Admit where ${competitorName} is strong (e.g., enterprise legacy) but show why TestimonialWall is the modern choice.
+3. **Persuasive Fairness**: Admit where ${competitorName} is strong (e.g., enterprise legacy) but show why KudosWall is the modern choice.
 
 ### Inputs:
 Competitor: ${competitorName}

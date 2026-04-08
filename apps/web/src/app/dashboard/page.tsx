@@ -7,7 +7,7 @@ import { getDashboardData } from "./actions";
 import DashboardLoading from "./loading";
 
 export const metadata = {
-  title: "Dashboard — TestimonialWall",
+  title: "Dashboard — KudosWall",
   description: "Manage your testimonials, embed widget, and analytics.",
 };
 

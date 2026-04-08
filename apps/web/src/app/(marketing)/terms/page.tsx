@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | TestimonialWall",
+  title: "Terms of Service | KudosWall",
   description: "Read our terms of service to understand our agreement.",
 };
 
@@ -14,13 +14,13 @@ export default function TermsPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://testimonialwall.com",
+        item: "https://kudoswall.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Terms of Service",
-        item: "https://testimonialwall.com/terms",
+        item: "https://kudoswall.org/terms",
       },
     ],
   };
@@ -34,7 +34,7 @@ export default function TermsPage() {
       <h1 className="mb-6 text-4xl font-bold text-neutral-900">Terms of Service</h1>
       <p className="mb-4 text-sm text-neutral-500">Last updated: {new Date().getFullYear()}</p>
       <p className="leading-relaxed text-neutral-600">
-        This is a placeholder terms of service for TestimonialWall. Full terms coming soon.
+        This is a placeholder terms of service for KudosWall. Full terms coming soon.
       </p>
     </main>
   );

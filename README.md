@@ -1,4 +1,4 @@
-# TestimonialWall
+# KudosWall
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.1-fb7da4?logo=bun)](https://bun.sh/)
 
-TestimonialWall is a modern, high-performance monorepo application designed for managing and embedding customer testimonials. Built on the Better-T-Stack, it leverages a fully type-safe architecture from the database to the edge.
+KudosWall is a modern, high-performance monorepo application designed for managing and embedding customer testimonials. Built on the Better-T-Stack, it leverages a fully type-safe architecture from the database to the edge.
 
 ## Core Technology Stack
 

@@ -121,7 +121,7 @@ function NavContent({
           className="block text-lg leading-none font-bold tracking-tight text-neutral-900 select-none"
           style={{ fontFamily: "'Georgia', serif" }}
         >
-          TestimonialWall
+          KudosWall
         </Link>
         <span
           className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase"

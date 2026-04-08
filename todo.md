@@ -1,4 +1,4 @@
-# 🌌 TestimonialWall: The Infinite Roadmap
+# 🌌 KudosWall: The Infinite Roadmap
 
 ## 💎 Table of Contents
 
@@ -70,7 +70,7 @@
   - [ ] Workspace-based architecture with unique slugs
   - [ ] Workspace switcher interface in top navbar
   - [ ] Tenant data isolation logic at the ORM level
-  - [ ] Custom subdomain per workspace (e.g., `apple.testimonialwall.com`)
+  - [ ] Custom subdomain per workspace (e.g., `apple.kudoswall.com`)
   - [ ] Organization-wide billing across multiple workspace tenants
 - [ ] **Team Collaboration & RBAC**:
   - [ ] Invite team members via email link / auto-capture domain
@@ -227,7 +227,7 @@
 - [ ] **Branding Pro**:
   - [ ] Custom primary domains (collection on `reviews.yourbrand.com`)
   - [ ] Fully whitelabeled emails (Sent from `support@yourdomain.com`)
-  - [ ] Removal of "Powered by TestimonialWall" on all widgets
+  - [ ] Removal of "Powered by KudosWall" on all widgets
 
 ## 📱 10. Mobile Strategy & PWA
 

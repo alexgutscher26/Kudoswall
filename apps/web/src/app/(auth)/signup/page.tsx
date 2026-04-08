@@ -25,7 +25,7 @@ export default function SignupPage() {
         name,
         callbackURL: "/",
       });
-      toast.success("Account created! Welcome to TestimonialWall.");
+      toast.success("Account created! Welcome to KudosWall.");
     } catch (e: any) {
       toast.error(e.message || "Failed to create account");
     } finally {

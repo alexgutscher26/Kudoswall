@@ -1,4 +1,4 @@
-# TestimonialWall Code Standards
+# KudosWall Code Standards
 
 This project follows strict code quality standards to ensure a maintainable, type-safe, and high-performance monorepo.
 

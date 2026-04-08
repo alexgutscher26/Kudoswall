@@ -92,7 +92,7 @@ export async function GET(request: Request) {
               marginBottom: "32px",
             }}
           >
-            Share your experience on TestimonialWall
+            Share your experience on KudosWall
           </div>
           <div
             style={{

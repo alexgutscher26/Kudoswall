@@ -16,7 +16,7 @@ interface CollectPageProps {
   }>;
 }
 
-const BASE_URL = "https://testimonialwall.com";
+const BASE_URL = "https://kudoswall.org";
 
 export async function generateMetadata({ params }: CollectPageProps) {
   const { slug } = await params;
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: CollectPageProps) {
   const ogImageUrl = `${BASE_URL}/api/og?slug=${slug}`;
 
   return {
-    title: `${headline} | ${projectData.name} on TestimonialWall`,
+    title: `${headline} | ${projectData.name} on KudosWall`,
     description: subheading,
     alternates: {
       canonical: canonicalUrl,

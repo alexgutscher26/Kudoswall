@@ -90,7 +90,7 @@ export default function GlobalError({
               <ChevronRight className="size-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
             </Link>
             <a
-              href="https://status.testimonialwall.com"
+              href="https://status.kudoswall.com"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 text-[14px] font-medium text-neutral-600 transition-colors hover:text-pink-500"

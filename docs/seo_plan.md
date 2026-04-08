@@ -1,6 +1,6 @@
 # 📈 SEO Strategy Implementation Plan
 
-This plan outlines the systematic implementation of advanced SEO features for TestimonialWall to maximize search visibility and click-through rates via Google Rich Results.
+This plan outlines the systematic implementation of advanced SEO features for KudosWall to maximize search visibility and click-through rates via Google Rich Results.
 
 ## 🛠️ Objectives
 
@@ -66,7 +66,7 @@ This plan outlines the systematic implementation of advanced SEO features for Te
 
 ## ✅ Verification Criteria
 
-1. `curl https://testimonialwall.com/sitemap.xml` returns all public collection slugs.
+1. `curl https://kudoswall.org/sitemap.xml` returns all public collection slugs.
 2. Google Rich Results Test (Mocked or Local) confirms valid `AggregateRating`.
 3. Social previews (Twitter/LinkedIn) display dynamic project branding.
 4. `bun run build` passes with no metadata serialization errors.

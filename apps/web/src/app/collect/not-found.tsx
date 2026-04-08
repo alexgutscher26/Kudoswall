@@ -47,7 +47,7 @@ export default function CollectionNotFound() {
           </Link>
 
           <p className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
-            Powered by TestimonialWall
+            Powered by KudosWall
           </p>
         </div>
       </div>

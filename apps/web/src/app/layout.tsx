@@ -16,25 +16,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://testimonialwall.com"),
-  title: "TestimonialWall — Collect & Display Customer Testimonials",
+  metadataBase: new URL("https://kudoswall.org"),
+  title: "KudosWall — Collect & Display Customer Testimonials",
   description:
     "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "TestimonialWall — Collect & Display Customer Testimonials",
+    title: "KudosWall — Collect & Display Customer Testimonials",
     description:
       "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website.",
-    url: "https://testimonialwall.com",
-    siteName: "TestimonialWall",
+    url: "https://kudoswall.org",
+    siteName: "KudosWall",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "TestimonialWall - Collect Glowing Testimonials",
+        alt: "KudosWall - Collect Glowing Testimonials",
       },
     ],
     locale: "en_US",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TestimonialWall — Collect & Display Customer Testimonials",
+    title: "KudosWall — Collect & Display Customer Testimonials",
     description:
       "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget.",
     images: ["/og-image.png"],
@@ -59,32 +59,29 @@ export default async function RootLayout({
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://testimonialwall.com/#organization",
-        name: "TestimonialWall",
-        url: "https://testimonialwall.com",
-        logo: "https://testimonialwall.com/favicon.ico",
-        sameAs: [
-          "https://twitter.com/testimonialwall",
-          "https://linkedin.com/company/testimonialwall",
-        ],
+        "@id": "https://kudoswall.org/#organization",
+        name: "KudosWall",
+        url: "https://kudoswall.org",
+        logo: "https://kudoswall.org/favicon.ico",
+        sameAs: ["https://twitter.com/kudoswall", "https://linkedin.com/company/kudoswall"],
       },
       {
         "@type": "WebSite",
-        "@id": "https://testimonialwall.com/#website",
-        url: "https://testimonialwall.com",
-        name: "TestimonialWall",
-        publisher: { "@id": "https://testimonialwall.com/#organization" },
+        "@id": "https://kudoswall.org/#website",
+        url: "https://kudoswall.org",
+        name: "KudosWall",
+        publisher: { "@id": "https://kudoswall.org/#organization" },
         potentialAction: [
           {
             "@type": "SearchAction",
-            target: "https://testimonialwall.com/search?q={search_term_string}",
+            target: "https://kudoswall.org/search?q={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         ],
       },
       {
         "@type": "SoftwareApplication",
-        name: "TestimonialWall",
+        name: "KudosWall",
         operatingSystem: "Windows, macOS, Linux, Android, iOS",
         applicationCategory: "BusinessApplication",
         offers: {

@@ -33,7 +33,7 @@ const PLANS: Plan[] = [
       "1 Workspace",
       "Text testimonials only",
       "Grid layout widget",
-      "TestimonialWall branding",
+      "KudosWall branding",
     ],
   },
   {

@@ -159,7 +159,7 @@ export default function WidgetCustomizer({
     setOrigin(window.location.origin);
   }, []);
 
-  const embedCode = `<script src="${origin || "https://testimonialwall.me"}/widget.js" 
+  const embedCode = `<script src="${origin || "https://kudoswall.org"}/widget.js" 
   data-id="${widgetId}" 
   async
 ></script>`;
@@ -731,7 +731,7 @@ export default function WidgetCustomizer({
                 <button
                   onClick={() =>
                     copyToClipboard(
-                      `<iframe src="${origin || "https://testimonialwall.me"}/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
+                      `<iframe src="${origin || "https://kudoswall.org"}/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
                     )
                   }
                   className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
