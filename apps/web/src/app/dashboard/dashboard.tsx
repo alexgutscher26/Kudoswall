@@ -549,7 +549,7 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
               <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <Globe className="size-3" />
-                  wall.me/my-workspace/
+                  kudoswall.org/my-workspace/
                   <span className={name ? "text-pink-500" : "text-neutral-300"}>
                     {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
                   </span>
@@ -705,7 +705,7 @@ function ProjectsList({
                 const url =
                   window.location.origin === "http://localhost:3001"
                     ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
-                    : `https://wall.me/${workspaceSlug}/${p.slug}`;
+                    : `https://kudoswall.org/${workspaceSlug}/${p.slug}`;
                 navigator.clipboard.writeText(url);
                 toast.success("Link copied!");
                 onCopyLink?.();

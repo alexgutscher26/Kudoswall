@@ -90,7 +90,7 @@ export default function SettingsPage() {
                   </label>
                   <div className="flex items-center gap-2">
                     <span className="shrink-0 text-[13px] font-medium text-neutral-300">
-                      wall.me/
+                      kudoswall.org/
                     </span>
                     <input
                       type="text"

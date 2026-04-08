@@ -127,7 +127,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
                     URL:
                   </span>
                   <span className="truncate font-mono text-[11px] text-neutral-500 italic">
-                    wall.me/{p.collectionSlug || p.slug}
+                    kudoswall.org/{p.collectionSlug || p.slug}
                   </span>
                 </div>
               </div>
