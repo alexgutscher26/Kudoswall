@@ -1,6 +1,6 @@
 import { Button, Section, Text } from "@react-email/components";
 import * as React from "react";
-import { BaseLayout } from "../components/base-layout";
+import { BaseLayout } from "./components/base-layout";
 
 interface WelcomeEmailProps {
   userName: string;

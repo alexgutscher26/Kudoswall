@@ -1,7 +1,11 @@
 import { Resend } from "resend";
 import * as React from "react";
-import { WelcomeEmail } from "./templates/welcome";
-import { FirstTestimonialEmail } from "./templates/first-testimonial";
+import { WelcomeEmail } from "../emails/welcome";
+import { FirstTestimonialEmail } from "../emails/first-testimonial";
+import { ActivationNudgeEmail } from "../emails/activation-nudge";
+import { UpgradePromptEmail } from "../emails/upgrade-prompt";
+import { WeeklyDigestEmail } from "../emails/weekly-digest";
+import { ReEngagementEmail } from "../emails/re-engagement";
 
 export class EmailService {
   public resend: Resend;
@@ -40,14 +44,51 @@ export class EmailService {
     });
   }
 
-  // Placeholder for paid plan emails (TODO)
   async sendActivationNudge(to: string, userName: string) {
-    // TODO: Implement reactivation logic
-    console.log(`[TODO] Activation nudge to ${to}`);
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Don't leave your social proof on the table 📈",
+      react: React.createElement(ActivationNudgeEmail, { userName }),
+    });
   }
 
-  async sendUpgradePrompt(to: string, userName: string) {
-    // TODO: Implement migration logic for 5th testimonial
-    console.log(`[TODO] Upgrade prompt for ${to}`);
+  async sendUpgradePrompt(to: string, userName: string, approvedCount: number) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "You're crushing it! (And hitting your limit) 🚀",
+      react: React.createElement(UpgradePromptEmail, { userName, approvedCount }),
+    });
+  }
+
+  async sendWeeklyDigest(
+    to: string,
+    userName: string,
+    data: {
+      newTestimonials: number;
+      totalViews: number;
+      conversionRate: string;
+      topTestimonial?: { content: string; author: string };
+    },
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Your week on KudosWall: Statistics and highlights 📊",
+      react: React.createElement(WeeklyDigestEmail, {
+        userName,
+        ...data,
+      }),
+    });
+  }
+
+  async sendReEngagementEmail(to: string, userName: string) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Is your Wall of Love getting lonely? 🥺",
+      react: React.createElement(ReEngagementEmail, { userName }),
+    });
   }
 }

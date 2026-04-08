@@ -1,6 +1,6 @@
 import { Button, Section, Text, Hr } from "@react-email/components";
 import * as React from "react";
-import { BaseLayout } from "../components/base-layout";
+import { BaseLayout } from "./components/base-layout";
 
 interface FirstTestimonialEmailProps {
   userName: string;
