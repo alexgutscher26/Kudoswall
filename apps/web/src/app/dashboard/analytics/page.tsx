@@ -1,4 +1,4 @@
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -7,11 +7,11 @@ import AnalyticsPage from "./analytics-page";
 
 export const metadata = {
   title: "Analytics — KudosWall",
-  description: "Track impressions, clicks, and conversion rates for your testimonial widgets.",
+  description: "Track your testimonial performance, page views, and conversions.",
 };
 
 export default async function AnalyticsRoute() {
-  const session = await createAuth().api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 

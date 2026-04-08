@@ -1,5 +1,5 @@
 import { db } from "@/lib/server-db";
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { widget, workspace } from "@my-better-t-app/db/schema";
@@ -10,7 +10,7 @@ import WidgetCustomizer from "./customizer";
 export default async function WidgetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const session = await createAuth().api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 

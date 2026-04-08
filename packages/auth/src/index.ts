@@ -28,14 +28,14 @@ export function createAuth() {
     debug: true,
     advanced: {
       defaultCookieAttributes: {
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       },
     },
     rateLimit: {
       enabled: true,
       window: 60, // 1 minute
-      max: 10, // 10 requests per window
+      max: 100, // Increased from 10 to handle dashboard polling and parallel queries
     },
 
     emailAndPassword: {

@@ -1,4 +1,4 @@
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -13,7 +13,6 @@ export const metadata = {
 };
 
 export default async function CollectionRoute() {
-  const auth = createAuth();
   const session = await auth.api.getSession({
     headers: await headers(),
   });

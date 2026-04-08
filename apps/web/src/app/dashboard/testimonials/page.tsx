@@ -1,4 +1,4 @@
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import DashboardShell from "../dashboard";
@@ -14,7 +14,7 @@ export default async function TestimonialsPage({
 }) {
   const { project: projectId } = await searchParams;
 
-  const session = await createAuth().api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 

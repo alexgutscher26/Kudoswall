@@ -1,5 +1,5 @@
 import { db } from "@/lib/server-db";
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { project, workspace } from "@my-better-t-app/db/schema";
@@ -15,7 +15,6 @@ export default async function CollectionDetailPage({
 }) {
   const { id } = await params;
 
-  const auth = createAuth();
   const session = await auth.api.getSession({
     headers: await headers(),
   });

@@ -1,4 +1,4 @@
-import { createAuth } from "@my-better-t-app/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function EmbedRoute() {
-  const session = await createAuth().api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 
