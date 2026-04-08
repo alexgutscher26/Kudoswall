@@ -46,14 +46,24 @@ export const analyticsRouter = router({
     .input(z.object({ timeframe: timeframeSchema }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const startDate = getTimefilter(input.timeframe);
-
       const ws = await db.query.workspace.findFirst({
         where: eq(workspace.ownerId, session.user.id),
       });
       if (!ws) throw new Error("No workspace found");
 
-      const viewsResult = await db
+      const daysNum =
+        input.timeframe === "30d"
+          ? 30
+          : input.timeframe === "90d"
+            ? 90
+            : input.timeframe === "all"
+              ? 0
+              : 7;
+      const startDate = daysNum > 0 ? subDays(new Date(), daysNum) : null;
+      const prevStartDate = daysNum > 0 ? subDays(new Date(), daysNum * 2) : null;
+
+      // Current stats
+      const [viewsResult] = await db
         .select({ value: count() })
         .from(analyticsEvent)
         .where(
@@ -63,9 +73,8 @@ export const analyticsRouter = router({
             startDate ? gte(analyticsEvent.createdAt, startDate) : undefined,
           ),
         );
-      const viewsCount = viewsResult[0];
 
-      const testimonialResult = await db
+      const [testimonialResult] = await db
         .select({ value: count() })
         .from(testimonial)
         .innerJoin(project, eq(testimonial.projectId, project.id))
@@ -75,30 +84,69 @@ export const analyticsRouter = router({
             startDate ? gte(testimonial.createdAt, startDate) : undefined,
           ),
         );
-      const testimonialCount = testimonialResult[0];
 
-      const changeDays = input.timeframe === "30d" ? 30 : input.timeframe === "90d" ? 90 : 7;
-      const newTestimonialsResult = await db
-        .select({ value: count() })
-        .from(testimonial)
-        .innerJoin(project, eq(testimonial.projectId, project.id))
-        .where(
-          and(
-            eq(project.workspaceId, ws.id),
-            gte(testimonial.createdAt, subDays(new Date(), changeDays)),
-          ),
-        );
-      const newTestimonialsCount = newTestimonialsResult[0];
+      // Previous stats for change calculation
+      let prevViews = 0;
+      let prevSubmissions = 0;
 
-      const views = Number(viewsCount?.value || 0);
-      const submissions = Number(testimonialCount?.value || 0);
+      if (startDate && prevStartDate) {
+        const [prevViewsResult] = await db
+          .select({ value: count() })
+          .from(analyticsEvent)
+          .where(
+            and(
+              eq(analyticsEvent.workspaceId, ws.id),
+              eq(analyticsEvent.eventType, "view"),
+              gte(analyticsEvent.createdAt, prevStartDate),
+              sql`${analyticsEvent.createdAt} < ${startDate}`,
+            ),
+          );
+        prevViews = Number(prevViewsResult?.value || 0);
+
+        const [prevSubmissionsResult] = await db
+          .select({ value: count() })
+          .from(testimonial)
+          .innerJoin(project, eq(testimonial.projectId, project.id))
+          .where(
+            and(
+              eq(project.workspaceId, ws.id),
+              gte(testimonial.createdAt, prevStartDate),
+              sql`${testimonial.createdAt} < ${startDate}`,
+            ),
+          );
+        prevSubmissions = Number(prevSubmissionsResult?.value || 0);
+      }
+
+      const views = Number(viewsResult?.value || 0);
+      const submissions = Number(testimonialResult?.value || 0);
+
+      const calcChange = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? "+100%" : "0%";
+        const change = ((current - previous) / previous) * 100;
+        return (change >= 0 ? "+" : "") + change.toFixed(0) + "%";
+      };
+
+      const viewsChange = calcChange(views, prevViews);
+      const submissionsChange = calcChange(submissions, prevSubmissions);
+
       const conversionRate = views > 0 ? ((submissions / views) * 100).toFixed(1) + "%" : "0%";
+      const prevConversionRate = prevViews > 0 ? prevSubmissions / prevViews : 0;
+      const currentConvRate = views > 0 ? submissions / views : 0;
+      const conversionChange =
+        prevConversionRate === 0
+          ? currentConvRate > 0
+            ? "+100%"
+            : "0%"
+          : (((currentConvRate - prevConversionRate) / prevConversionRate) * 100).toFixed(0) + "%";
 
       return {
         totalViews: views.toLocaleString(),
         totalTestimonials: submissions.toLocaleString(),
-        newTestimonials: Number(newTestimonialsCount?.value || 0),
+        newTestimonials: submissions,
         conversionRate,
+        viewsChange,
+        submissionsChange,
+        conversionChange,
         viewsRaw: views,
         submissionsRaw: submissions,
       };

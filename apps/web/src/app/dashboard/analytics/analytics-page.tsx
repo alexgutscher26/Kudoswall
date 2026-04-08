@@ -278,8 +278,8 @@ export default function AnalyticsPage() {
     {
       label: "Total Views",
       value: overview?.totalViews || "0",
-      change: "+0%",
-      trend: "up",
+      change: overview?.viewsChange || "0%",
+      trend: (overview?.viewsChange || "0%").startsWith("+") ? "up" : "down",
       icon: Globe,
       accent: "#e8527a",
       bg: "#fff5f7",
@@ -287,8 +287,8 @@ export default function AnalyticsPage() {
     {
       label: "Conversion Rate",
       value: overview?.conversionRate || "0%",
-      change: "+0%",
-      trend: "up",
+      change: overview?.conversionChange || "0%",
+      trend: (overview?.conversionChange || "0%").startsWith("+") ? "up" : "down",
       icon: TrendingUp,
       accent: "#0ea5e9",
       bg: "#f0f9ff",
@@ -296,8 +296,8 @@ export default function AnalyticsPage() {
     {
       label: "Total Testimonials",
       value: overview?.totalTestimonials || "0",
-      change: `+${overview?.newTestimonials || 0}`,
-      trend: "up",
+      change: overview?.submissionsChange || "0%",
+      trend: (overview?.submissionsChange || "0%").startsWith("+") ? "up" : "down",
       icon: MessageSquareQuote,
       accent: "#16a34a",
       bg: "#f0fdf4",

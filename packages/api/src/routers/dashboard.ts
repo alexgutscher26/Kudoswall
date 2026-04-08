@@ -5,9 +5,12 @@ import {
   testimonial,
   widget,
   analyticsEvent,
+  user,
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { EmailService } from "@my-better-t-app/email";
+import { env } from "@my-better-t-app/env/server";
 
 /**
  * Helper to ensure the user has a workspace.
@@ -37,6 +40,17 @@ async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
   };
 
   await db.insert(workspace).values(newWorkspace);
+
+  const emailService = new EmailService(env.RESEND_API_KEY || "");
+  const u = await db.query.user.findFirst({ where: eq(user.id, userId) });
+  if (u?.email) {
+    try {
+      await emailService.sendWelcomeEmail(u.email, u.name || "there");
+    } catch (err) {
+      console.error("Failed to send welcome email", err);
+    }
+  }
+
   return newWorkspace;
 }
 
@@ -225,4 +239,8 @@ export const dashboardRouter = router({
 
       return { success: true };
     }),
+
+  // TODO: (Paid Plan) Implement Weekly Digest (Monday 8am)
+  // This should probably be a separate background job (e.g. Upstash QStash)
+  // getWeeklyDigestData: protectedProcedure.query(async ({ ctx }) => { ... }),
 });

@@ -9,6 +9,9 @@ import { headers } from "next/headers";
 
 const generateSlug = (name: string) =>
   name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
+import { EmailService } from "@my-better-t-app/email";
+import { env } from "@my-better-t-app/env/server";
+import { analyticsEvent, user } from "@my-better-t-app/db/schema";
 
 /**
  * Ensures the user has a workspace, creating one if it doesn't exist.
@@ -103,6 +106,17 @@ export async function getDashboardData() {
         })
       : [];
 
+  const [viewsResult] = await db
+    .select({ value: count() })
+    .from(analyticsEvent)
+    .where(eq(analyticsEvent.workspaceId, ws.id));
+
+  const totalViews = Number(viewsResult?.value || 0);
+  const conversionRate =
+    totalViews > 0
+      ? ((Number(testimonialCount?.value || 0) / totalViews) * 100).toFixed(1) + "%"
+      : "—";
+
   return {
     workspace: ws,
     projects,
@@ -110,8 +124,8 @@ export async function getDashboardData() {
     stats: {
       testimonials: testimonialCount?.value || 0,
       pending: pendingCount?.value || 0,
-      views: 0, // Mock for now
-      conversion: "—", // Mock for now
+      views: totalViews,
+      conversion: conversionRate,
     },
   };
 }
@@ -184,6 +198,40 @@ export async function updateTestimonialStatus(
   }
 
   await db.update(testimonial).set({ status }).where(eq(testimonial.id, id));
+
+  if (status === "approved") {
+    // Check if this is the FIRST approved testimonial for this project/workspace
+    const approvedCountQuery = await db
+      .select({ value: count() })
+      .from(testimonial)
+      .innerJoin(project, eq(testimonial.projectId, project.id))
+      .where(
+        and(eq(project.workspaceId, t.project.workspaceId), eq(testimonial.status, "approved")),
+      );
+
+    const approvedCount = Number(approvedCountQuery[0]?.value || 0);
+
+    if (approvedCount === 1) {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, t.project.workspace.ownerId),
+      });
+      if (u?.email) {
+        const emailService = new EmailService(env.RESEND_API_KEY || "");
+        await emailService.sendFirstTestimonialEmail(
+          u.email,
+          u.name || "there",
+          t.authorName || "Someone",
+          t.content || "Awesome product!",
+          t.rating || 5,
+        );
+      }
+    }
+
+    // TODO: (Paid Plan) 5th Testimonial Upgrade Prompt
+    // if (approvedCount === 5) {
+    //   await emailService.sendUpgradePrompt(u.email, u.name || "there");
+    // }
+  }
 
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/testimonials/${t.projectId}`);

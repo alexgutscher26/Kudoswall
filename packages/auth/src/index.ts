@@ -8,9 +8,11 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { lastLoginMethod } from "better-auth/plugins";
+import { EmailService } from "@my-better-t-app/email";
 
 export function createAuth() {
   const db = createDb();
+  const emailService = new EmailService(env.RESEND_API_KEY || "");
 
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -65,12 +67,24 @@ export function createAuth() {
       nextCookies(),
       magicLink({
         sendMagicLink: async ({ email, url }) => {
-          console.log(`[Magic Link] Sent to ${email}: ${url}`);
+          await emailService.resend.emails.send({
+            from: "Alex from KudosWall <alex@kudoswall.org>",
+            to: email,
+            subject: "Your Magic Link for KudosWall",
+            html: `<p>Click <a href="${url}">here</a> to sign in to KudosWall.</p>`,
+          });
+          console.log(`[Magic Link] Sent to ${email}`);
         },
       }),
       emailOTP({
         sendVerificationOTP: async ({ email, otp, type }) => {
-          console.log(`[Email OTP] ${type} for ${email}: ${otp}`);
+          await emailService.resend.emails.send({
+            from: "Alex from KudosWall <alex@kudoswall.org>",
+            to: email,
+            subject: `${type} for KudosWall`,
+            html: `<p>Your verification code is: <strong>${otp}</strong></p>`,
+          });
+          console.log(`[Email OTP] ${type} for ${email}`);
         },
       }),
       haveIBeenPwned(),

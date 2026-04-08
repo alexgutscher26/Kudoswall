@@ -18,6 +18,7 @@ export const web = await Nextjs("web", {
     GITHUB_CLIENT_SECRET: alchemy.secret.env.GITHUB_CLIENT_SECRET || "",
     GOOGLE_CLIENT_ID: alchemy.secret.env.GOOGLE_CLIENT_ID || "",
     GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET || "",
+    RESEND_API_KEY: alchemy.secret.env.RESEND_API_KEY || "",
   },
   dev: {
     env: {
