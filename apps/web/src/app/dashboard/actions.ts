@@ -226,11 +226,6 @@ export async function updateTestimonialStatus(
         );
       }
     }
-
-    // TODO: (Paid Plan) 5th Testimonial Upgrade Prompt
-    // if (approvedCount === 5) {
-    //   await emailService.sendUpgradePrompt(u.email, u.name || "there");
-    // }
   }
 
   revalidatePath("/dashboard");
