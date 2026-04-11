@@ -3,9 +3,8 @@ import { project, testimonial } from "@my-better-t-app/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-
-// TODO: Implement resend
-
+import { env } from "@my-better-t-app/env/server";
+import { EmailService } from "@my-better-t-app/email";
 import { z } from "zod";
 
 const testimonialSchema = z.object({
@@ -69,7 +68,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     const proj = await db.query.project.findFirst({
       where: eq(project.collectionSlug, slug),
       with: {
-        workspace: true,
+        workspace: {
+          with: {
+            owner: true,
+          },
+        },
       },
     });
 
@@ -100,7 +103,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     rateLimitMap.set(ip, current);
 
     // 5. Fire non-blocking email notification (Placeholder for Resend integration)
-    // resend.emails.send(...)
+    if (env.RESEND_API_KEY && proj.workspace.owner?.email && proj.workspace.owner?.name) {
+      const emailService = new EmailService(env.RESEND_API_KEY);
+      // Fire and forget
+      emailService
+        .sendFirstTestimonialEmail(
+          proj.workspace.owner.email,
+          proj.workspace.owner.name,
+          body.authorName,
+          body.content,
+          body.rating,
+        )
+        .catch((err) => {
+          console.error("Failed to send testimonial email notification:", err);
+        });
+    }
 
     return NextResponse.json({
       success: true,
