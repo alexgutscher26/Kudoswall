@@ -239,8 +239,4 @@ export const dashboardRouter = router({
 
       return { success: true };
     }),
-
-  // TODO: (Paid Plan) Implement Weekly Digest (Monday 8am)
-  // This should probably be a separate background job (e.g. Upstash QStash)
-  // getWeeklyDigestData: protectedProcedure.query(async ({ ctx }) => { ... }),
 });

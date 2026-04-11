@@ -8,6 +8,8 @@ export type CloudflareEnv = typeof server.Env;
 declare global {
   type Env = CloudflareEnv & {
     RESEND_API_KEY?: string;
+    QSTASH_CURRENT_SIGNING_KEY?: string;
+    QSTASH_NEXT_SIGNING_KEY?: string;
   };
 }
 
