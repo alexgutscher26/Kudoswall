@@ -1,5 +1,5 @@
 import { protectedProcedure, router } from "../index";
-import { tag, workspace, testimonialToTag, testimonial } from "@my-better-t-app/db/schema";
+import { tag, workspace, testimonialToTag } from "@my-better-t-app/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
 
