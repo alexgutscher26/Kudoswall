@@ -444,6 +444,136 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   );
 }
 
+const TAG_COLORS = [
+  { name: "Pink", color: "#e8527a" },
+  { name: "Purple", color: "#8b5cf6" },
+  { name: "Indigo", color: "#6366f1" },
+  { name: "Blue", color: "#3b82f6" },
+  { name: "Cyan", color: "#06b6d4" },
+  { name: "Emerald", color: "#10b981" },
+  { name: "Amber", color: "#f59e0b" },
+  { name: "Orange", color: "#f97316" },
+  { name: "Rose", color: "#f43f5e" },
+  { name: "Slate", color: "#64748b" },
+];
+
+function CreateTagModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0].color);
+  const [loading, setLoading] = useState(false);
+
+  const createTag = useMutation(
+    trpc.tag.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.tag.list.queryOptions());
+        toast.success("Tag created!");
+        onClose();
+        setName("");
+      },
+      onError: () => {
+        toast.error("Failed to create tag");
+      },
+    }),
+  );
+
+  useEffect(() => {
+    if (open) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setLoading(true);
+    try {
+      await createTag.mutateAsync({ name, color: selectedColor });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+      <div
+        className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
+        onClick={onClose}
+      />
+      <div
+        className="animate-in zoom-in-95 relative w-full max-w-sm overflow-hidden rounded-[32px] bg-white shadow-2xl duration-300"
+        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+      >
+        <div className="relative p-7 sm:p-9">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-xl font-bold tracking-tight text-neutral-900">Create Tag</h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
+            >
+              <X className="size-5 text-neutral-400" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Tag Name
+              </label>
+              <input
+                autoFocus
+                type="text"
+                required
+                placeholder="e.g. Enterprise"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Color
+              </label>
+              <div className="grid grid-cols-5 gap-3">
+                {TAG_COLORS.map((c) => (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setSelectedColor(c.color)}
+                    className={`flex size-10 items-center justify-center rounded-xl transition-all ${
+                      selectedColor === c.color ? "ring-2 ring-neutral-900 ring-offset-2" : ""
+                    }`}
+                    style={{ backgroundColor: c.color }}
+                    title={c.name}
+                  >
+                    {selectedColor === c.color && <Check className="size-4 text-white" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !name.trim()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-4 py-3 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+            >
+              {loading ? "Creating..." : "Create Tag"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TestimonialCard({
   testimonial,
   onUpdateStatus,
@@ -459,6 +589,8 @@ function TestimonialCard({
 }) {
   const t = testimonial;
   const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+  const [createTagOpen, setCreateTagOpen] = useState(false);
+
   const assignTag = useMutation(
     trpc.tag.assign.mutationOptions({
       onSuccess: () => {
@@ -568,10 +700,20 @@ function TestimonialCard({
                       No tags created yet
                     </div>
                   )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setCreateTagOpen(true)}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[11px] font-bold text-pink-600 transition-colors hover:bg-pink-50"
+                  >
+                    <Plus className="size-3" />
+                    Create New Tag
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          <CreateTagModal open={createTagOpen} onClose={() => setCreateTagOpen(false)} />
 
           {t.type === "video" && t.videoUrl && (
             <div className="mb-6 aspect-video w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-100 bg-black shadow-lg">

@@ -102,6 +102,11 @@ export async function getDashboardData() {
           limit: 5,
           with: {
             project: true,
+            testimonialToTags: {
+              with: {
+                tag: true,
+              },
+            },
           },
         })
       : [];

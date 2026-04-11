@@ -106,6 +106,11 @@ export const dashboardRouter = router({
             limit: 5,
             with: {
               project: true,
+              testimonialToTags: {
+                with: {
+                  tag: true,
+                },
+              },
             },
           })
         : [];
@@ -159,6 +164,13 @@ export const dashboardRouter = router({
       const testimonials = await db.query.testimonial.findMany({
         where: eq(testimonial.projectId, projectId),
         orderBy: desc(testimonial.createdAt),
+        with: {
+          testimonialToTags: {
+            with: {
+              tag: true,
+            },
+          },
+        },
       });
 
       return {
