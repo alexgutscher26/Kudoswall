@@ -18,7 +18,11 @@ async function tryQuery() {
   });
 
   try {
-    const token = "bxxhsyasbClZJCcVenKYAVLjWcWDtSRV";
+    const token = process.argv[2] || process.env.SESSION_TOKEN;
+    if (!token) {
+      console.error("❌ Token not provided. Please provide it as an argument or set SESSION_TOKEN.");
+      process.exit(1);
+    }
     console.log(`Trying query for token: ${token}...`);
     const q = `select "id", "expires_at", "token", "created_at", "updated_at", "ip_address", "user_agent", "user_id" from "session" where "session"."token" = $1`;
     const res = await pool.query(q, [token]);
