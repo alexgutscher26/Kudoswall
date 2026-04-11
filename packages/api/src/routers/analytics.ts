@@ -218,44 +218,47 @@ export const analyticsRouter = router({
         where: eq(widget.workspaceId, ws.id),
       });
 
-      const performance = await Promise.all(
-        widgets.map(async (w) => {
-          const viewsRes = await db
-            .select({ value: count() })
-            .from(analyticsEvent)
-            .where(
-              and(
-                eq(analyticsEvent.widgetId, w.id),
-                eq(analyticsEvent.eventType, "view"),
-                start ? gte(analyticsEvent.createdAt, start) : undefined,
-              ),
-            );
-          const views = viewsRes[0];
+      let stats: { widgetId: string | null; eventType: string; value: number }[] = [];
 
-          const clicksRes = await db
-            .select({ value: count() })
-            .from(analyticsEvent)
-            .where(
-              and(
-                eq(analyticsEvent.widgetId, w.id),
-                eq(analyticsEvent.eventType, "click"),
-                start ? gte(analyticsEvent.createdAt, start) : undefined,
-              ),
-            );
-          const clicksValue = clicksRes[0];
+      if (widgets.length > 0) {
+        const widgetIds = widgets.map((w) => w.id);
 
-          const v = Number(views?.value || 0);
-          const c = Number(clicksValue?.value || 0);
-          const ctrVal = v > 0 ? ((c / v) * 100).toFixed(1) + "%" : "0%";
+        stats = await db
+          .select({
+            widgetId: analyticsEvent.widgetId,
+            eventType: analyticsEvent.eventType,
+            value: count(),
+          })
+          .from(analyticsEvent)
+          .where(
+            and(
+              inArray(analyticsEvent.widgetId, widgetIds),
+              inArray(analyticsEvent.eventType, ["view", "click"]),
+              start ? gte(analyticsEvent.createdAt, start) : undefined,
+            )
+          )
+          .groupBy(analyticsEvent.widgetId, analyticsEvent.eventType);
+      }
 
-          return {
-            name: w.name,
-            views: v,
-            clicks: c,
-            ctr: ctrVal,
-          };
-        }),
-      );
+      const statsMap = stats.reduce((acc, row) => {
+        if (!row.widgetId) return acc;
+        if (!acc[row.widgetId]) acc[row.widgetId] = { view: 0, click: 0 };
+        acc[row.widgetId][row.eventType] = Number(row.value);
+        return acc;
+      }, {} as Record<string, Record<string, number>>);
+
+      const performance = widgets.map((w) => {
+        const v = statsMap[w.id]?.view || 0;
+        const c = statsMap[w.id]?.click || 0;
+        const ctrVal = v > 0 ? ((c / v) * 100).toFixed(1) + "%" : "0%";
+
+        return {
+          name: w.name,
+          views: v,
+          clicks: c,
+          ctr: ctrVal,
+        };
+      });
 
       return performance;
     }),
@@ -274,45 +277,48 @@ export const analyticsRouter = router({
         where: eq(widget.workspaceId, ws.id),
       });
 
-      const performance = await Promise.all(
-        widgets.map(async (w) => {
-          const viewsRes = await db
-            .select({ value: count() })
-            .from(analyticsEvent)
-            .where(
-              and(
-                eq(analyticsEvent.widgetId, w.id),
-                eq(analyticsEvent.eventType, "view"),
-                start ? gte(analyticsEvent.createdAt, start) : undefined,
-              ),
-            );
-          const views = viewsRes[0];
+      let stats: { widgetId: string | null; eventType: string; value: number }[] = [];
 
-          const clicksRes = await db
-            .select({ value: count() })
-            .from(analyticsEvent)
-            .where(
-              and(
-                eq(analyticsEvent.widgetId, w.id),
-                eq(analyticsEvent.eventType, "click"),
-                start ? gte(analyticsEvent.createdAt, start) : undefined,
-              ),
-            );
-          const clicksValue = clicksRes[0];
+      if (widgets.length > 0) {
+        const widgetIds = widgets.map((w) => w.id);
 
-          const v = Number(views?.value || 0);
-          const c = Number(clicksValue?.value || 0);
-          const ctrVal = v > 0 ? ((c / v) * 100).toFixed(1) + "%" : "0%";
+        stats = await db
+          .select({
+            widgetId: analyticsEvent.widgetId,
+            eventType: analyticsEvent.eventType,
+            value: count(),
+          })
+          .from(analyticsEvent)
+          .where(
+            and(
+              inArray(analyticsEvent.widgetId, widgetIds),
+              inArray(analyticsEvent.eventType, ["view", "click"]),
+              start ? gte(analyticsEvent.createdAt, start) : undefined,
+            )
+          )
+          .groupBy(analyticsEvent.widgetId, analyticsEvent.eventType);
+      }
 
-          return {
-            "Widget Name": w.name,
-            Views: v,
-            Clicks: c,
-            CTR: ctrVal,
-            "Created At": format(w.createdAt, "yyyy-MM-dd HH:mm:ss"),
-          };
-        }),
-      );
+      const statsMap = stats.reduce((acc, row) => {
+        if (!row.widgetId) return acc;
+        if (!acc[row.widgetId]) acc[row.widgetId] = { view: 0, click: 0 };
+        acc[row.widgetId][row.eventType] = Number(row.value);
+        return acc;
+      }, {} as Record<string, Record<string, number>>);
+
+      const performance = widgets.map((w) => {
+        const v = statsMap[w.id]?.view || 0;
+        const c = statsMap[w.id]?.click || 0;
+        const ctrVal = v > 0 ? ((c / v) * 100).toFixed(1) + "%" : "0%";
+
+        return {
+          "Widget Name": w.name,
+          Views: v,
+          Clicks: c,
+          CTR: ctrVal,
+          "Created At": format(w.createdAt, "yyyy-MM-dd HH:mm:ss"),
+        };
+      });
 
       return performance;
     }),
