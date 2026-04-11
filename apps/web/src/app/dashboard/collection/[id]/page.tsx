@@ -49,11 +49,7 @@ export default async function CollectionDetailPage({
       pageSubtitle="Customize your collection page experience"
     >
       <div className="mx-auto max-w-7xl">
-        <CollectionCustomizer
-          project={p}
-          workspace={p.workspace}
-          isPro={true} // TODO: Update based on workspace status later
-        />
+        <CollectionCustomizer project={p} workspace={p.workspace} isPro={p.workspace.isPro} />
       </div>
     </DashboardShell>
   );
