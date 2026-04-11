@@ -546,27 +546,29 @@ function TestimonialCard({
                 <Plus className="size-2.5" /> Tag
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 rounded-xl">
-                <DropdownMenuLabel className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Available Tags
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {tags?.map((tag) => (
-                  <DropdownMenuItem
-                    key={tag.id}
-                    disabled={getIsTagged(tag.id)}
-                    onClick={() => assignTag.mutate({ testimonialId: t.id, tagId: tag.id })}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
-                    {tag.name}
-                    {getIsTagged(tag.id) && <Check className="ml-auto size-3" />}
-                  </DropdownMenuItem>
-                ))}
-                {(!tags || tags.length === 0) && (
-                  <div className="p-2 text-center text-[11px] text-neutral-400">
-                    No tags created yet
-                  </div>
-                )}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Available Tags
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {tags?.map((tag) => (
+                    <DropdownMenuItem
+                      key={tag.id}
+                      disabled={getIsTagged(tag.id)}
+                      onClick={() => assignTag.mutate({ testimonialId: t.id, tagId: tag.id })}
+                      className="flex items-center gap-2"
+                    >
+                      <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                      {tag.name}
+                      {getIsTagged(tag.id) && <Check className="ml-auto size-3" />}
+                    </DropdownMenuItem>
+                  ))}
+                  {(!tags || tags.length === 0) && (
+                    <div className="p-2 text-center text-[11px] text-neutral-400">
+                      No tags created yet
+                    </div>
+                  )}
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
