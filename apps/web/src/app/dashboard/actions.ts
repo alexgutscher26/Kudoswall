@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 const generateSlug = (name: string) =>
-  name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
+  name.toLowerCase().replace(/\s+/g, "-") + "-" + crypto.randomUUID().split("-")[0];
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 import { analyticsEvent, user } from "@my-better-t-app/db/schema";

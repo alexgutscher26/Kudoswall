@@ -23,7 +23,7 @@ async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
   if (existing) return existing;
 
   const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
+    name.toLowerCase().replace(/\s+/g, "-") + "-" + crypto.randomUUID().split("-")[0];
 
   const newWorkspace = {
     id: crypto.randomUUID(),
