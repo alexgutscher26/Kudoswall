@@ -127,7 +127,7 @@ export default function SocialProofSection() {
         <div className="mt-12 flex flex-col items-center gap-2">
           <StarRow count={5} />
           <p className="text-sm text-neutral-500">
-            <strong className="text-neutral-900">4.9 / 5</strong> from over 1,200 business owners
+            <strong className="text-neutral-900">4.9 / 5</strong> from business owners
           </p>
         </div>
       </div>

@@ -237,8 +237,8 @@ export default function PricingSection() {
             Plans that scale with you.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base font-medium text-neutral-500">
-            Join 1,200+ businesses turning testimonials into revenue. Start free, upgrade when
-            you're ready.
+            Join businesses turning testimonials into revenue. Start free, upgrade when you're
+            ready.
           </p>
         </div>
 
