@@ -4,7 +4,7 @@ import { db } from "@/lib/server-db";
 import { auth } from "@/lib/auth";
 import { workspace, project, testimonial } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 
 const generateSlug = (name: string) =>
@@ -73,22 +73,50 @@ export async function getDashboardData() {
 
   const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
 
+  const getCachedDashboardStats = unstable_cache(
+    async (workspaceId: string) => {
+      const [[testimonialCount], [pendingCount], [viewsResult]] = await Promise.all([
+        db
+          .select({ value: count() })
+          .from(testimonial)
+          .innerJoin(project, eq(testimonial.projectId, project.id))
+          .where(eq(project.workspaceId, workspaceId)),
+        db
+          .select({ value: count() })
+          .from(testimonial)
+          .innerJoin(project, eq(testimonial.projectId, project.id))
+          .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.status, "pending"))),
+        db
+          .select({ value: count() })
+          .from(analyticsEvent)
+          .where(eq(analyticsEvent.workspaceId, workspaceId)),
+      ]);
+
+      const totalViews = Number(viewsResult?.value || 0);
+      const tCount = Number(testimonialCount?.value || 0);
+      const conversionRate = totalViews > 0 ? ((tCount / totalViews) * 100).toFixed(1) + "%" : "—";
+
+      return {
+        testimonials: tCount,
+        pending: Number(pendingCount?.value || 0),
+        views: totalViews,
+        conversion: conversionRate,
+      };
+    },
+    [`dashboard-stats`],
+    {
+      tags: [`dashboard-stats`],
+      revalidate: 3600, // cache for 1 hour
+    },
+  );
+
   // Fetch everything in parallel to eliminate waterfalls
-  const [projects, [testimonialCount], [pendingCount]] = await Promise.all([
+  const [projects, stats] = await Promise.all([
     db.query.project.findMany({
       where: eq(project.workspaceId, ws.id),
       orderBy: desc(project.createdAt),
     }),
-    db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(eq(project.workspaceId, ws.id)),
-    db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending"))),
+    getCachedDashboardStats(ws.id),
   ]);
 
   const recentTestimonials =
@@ -106,27 +134,11 @@ export async function getDashboardData() {
         })
       : [];
 
-  const [viewsResult] = await db
-    .select({ value: count() })
-    .from(analyticsEvent)
-    .where(eq(analyticsEvent.workspaceId, ws.id));
-
-  const totalViews = Number(viewsResult?.value || 0);
-  const conversionRate =
-    totalViews > 0
-      ? ((Number(testimonialCount?.value || 0) / totalViews) * 100).toFixed(1) + "%"
-      : "—";
-
   return {
     workspace: ws,
     projects,
     recentTestimonials,
-    stats: {
-      testimonials: testimonialCount?.value || 0,
-      pending: pendingCount?.value || 0,
-      views: totalViews,
-      conversion: conversionRate,
-    },
+    stats,
   };
 }
 
