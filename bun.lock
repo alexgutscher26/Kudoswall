@@ -127,14 +127,18 @@
       "name": "@my-better-t-app/db",
       "dependencies": {
         "@my-better-t-app/env": "workspace:*",
+        "@neondatabase/serverless": "^1.0.2",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
+        "nanoid": "^5.1.7",
         "pg": "^8.17.1",
+        "ws": "^8.20.0",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@my-better-t-app/config": "workspace:*",
         "@types/pg": "^8.16.0",
+        "@types/ws": "^8.18.1",
         "drizzle-kit": "^0.31.8",
         "typescript": "^5",
       },
@@ -653,6 +657,8 @@
     "@my-better-t-app/infra": ["@my-better-t-app/infra@workspace:packages/infra"],
 
     "@my-better-t-app/ui": ["@my-better-t-app/ui@workspace:packages/ui"],
+
+    "@neondatabase/serverless": ["@neondatabase/serverless@1.0.2", "", { "dependencies": { "@types/node": "^22.15.30", "@types/pg": "^8.8.0" } }, "sha512-I5sbpSIAHiB+b6UttofhrN/UJXII+4tZPAq1qugzwCwLIL8EZLV7F/JyHUrEIiGgQpEXzpnjlJ+zwcEhheGvCw=="],
 
     "@next/env": ["@next/env@16.2.2", "", {}, "sha512-LqSGz5+xGk9EL/iBDr2yo/CgNQV6cFsNhRR2xhSXYh7B/hb4nePCxlmDvGEKG30NMHDFf0raqSyOZiQrO7BkHQ=="],
 

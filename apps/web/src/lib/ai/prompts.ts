@@ -20,17 +20,21 @@ Your expertise lies in content analysis, sentiment detection, and marketing stra
 - Sentiment and tone detection with conflict resolution.
 - Strategic summarization for marketing landing pages.
 - High-fidelity spam and toxic content filtering.
+- Automated generation of case studies and email responses.
+- Multilingual translation and localization.
 
 # Guidelines
 - Be objective and analytical.
 - Identify "mismatch" between user ratings (stars) and written feedback.
 - Maintain the original "voice" of the customer—do not over-sanitize.
 - Always provide structured JSON output unless explicitly told otherwise.
+- For marketing content, prioritize persuasive, high-conversion language.
 
 # Constraints
 - Do not hallucinate credentials for authors.
 - If content is ambiguous, flag it for human review rather than guessing.
 - Keep "Smart Replies" warm but professional.
+- For translations, preserve the emotional intensity of the original.
 `;
 
 /**
@@ -40,7 +44,9 @@ Your expertise lies in content analysis, sentiment detection, and marketing stra
 export const schemas = {
   analysis: z.object({
     sentiment: z.enum(["positive", "neutral", "negative"]),
+    enthusiasm_score: z.number().min(1).max(10).describe("1-10 scale for enthusiasm sorting"),
     themes: z.array(z.string()).describe("Core themes like Support, Pricing, UI"),
+    keywords: z.array(z.string()).describe("Crucial marketing keywords"),
     is_mismatch: z.boolean().describe("True if stars/rating does not match the text"),
     suggested_tags: z.array(z.string()),
     reasoning: z.string().describe("Chain-of-thought analysis step"),
@@ -51,6 +57,33 @@ export const schemas = {
     confidence: z.number().min(0).max(1),
     reason: z.string().nullable(),
   }),
+  feature_suggestion: z.object({
+    feature_name: z.string(),
+    customer_need: z.string(),
+    frequency_signal: z.enum(["high", "medium", "low"]),
+    marketing_angle: z.string().describe("How to pitch this in an FAQ or LP"),
+  }),
+  email_reply: z.object({
+    subject: z.string(),
+    body: z.string(),
+    tone_verification: z.string().describe("Why this tone was chosen"),
+  }),
+  case_study: z.object({
+    title: z.string(),
+    problem: z.string(),
+    solution: z.string(),
+    result: z.string(),
+    key_stat: z.string().describe("A citable metric if found"),
+  }),
+  translation: z.object({
+    translated_text: z.string(),
+    language: z.string(),
+    cultural_notes: z.string().nullable().describe("Notes on idioms or tone adjustments"),
+  }),
+  interview_followup: z.object({
+    question: z.string(),
+    reasoning: z.string().describe("Why this specific follow-up matters for social proof"),
+  }),
 };
 
 /**
@@ -59,84 +92,109 @@ export const schemas = {
 export const AI_PROMPTS = {
   /**
    * TESTIMONIAL ANALYSIS (Few-Shot + CoT)
+   * Section 7: Text & Sentiment Analysis / Keyword Extraction
    */
   ANALYZE: {
     prompt: (content: string, rating: number) => `
-Analyze this testimonial. First, think step-by-step about the user's intent and tone, then provide the structured analysis.
+Context: A customer has submitted feedback for KudosWall. 
+Objective: Analyze the content for sentiment, enthusiasm, themes, and keywords to enable advanced dashboard filtering and sorting.
+Style: Analytical and precise.
+Response: JSON object following the 'analysis' schema.
 
 ### Examples:
-Input text: "The app is okay, but it crashes every time I try to upload a video. 5 stars for the idea though."
-Rating: 5
-Output reasoning: The user praised the concept ("idea") but reported a critical functional failure ("crashes"). The 5-star rating is clearly a "mismatch" given the technical issues described.
-Output: { "sentiment": "negative", "is_mismatch": true, "themes": ["Bugs", "UX"], "summary": "Technical issues on video upload despite liking the concept." }
-
-Input text: "Absolutely changed our workflow! Best \$20/mo we've ever spent."
-Rating: 5
-Output reasoning: Highly enthusiastic, mentions value-to-price ratio. No mismatch.
-Output: { "sentiment": "positive", "is_mismatch": false, "themes": ["ROI", "Pricing", "Efficiency"], "summary": "Great ROI and workflow impact." }
+<examples>
+  <example>
+    <input>
+      Text: "The app is okay, but it crashes every time I try to upload a video. 5 stars for the idea though."
+      Rating: 5
+    </input>
+    <output>
+      {
+        "sentiment": "negative",
+        "enthusiasm_score": 3,
+        "is_mismatch": true,
+        "themes": ["Bugs", "UX"],
+        "keywords": ["video upload", "crashes"],
+        "summary": "Technical issues on video upload despite liking the concept.",
+        "reasoning": "The user reported a critical functional failure ('crashes'). The 5-star rating is a mismatch for the negative experience described."
+      }
+    </output>
+  </example>
+  <example>
+    <input>
+      Text: "Absolutely changed our workflow! Best $20/mo we've ever spent. Our CEO is obsessed with the new wall."
+      Rating: 5
+    </input>
+    <output>
+      {
+        "sentiment": "positive",
+        "enthusiasm_score": 10,
+        "is_mismatch": false,
+        "themes": ["ROI", "Efficiency"],
+        "keywords": ["workflow", "value", "CEO obsession"],
+        "summary": "High ROI and significant workflow improvement.",
+        "reasoning": "Highly enthusiastic language ('Absolutely changed', 'obsessed'). Mentions price positively. Clean alignment with 5-star rating."
+      }
+    </output>
+  </example>
+</examples>
 
 ### Task:
 Input text: "${content}"
 Rating: ${rating}
-
-Follow the schema and provide your chain-of-thought reasoning in the 'reasoning' field.
 `,
   },
 
   /**
    * SMART SUMMARIZATION (Hero Quote Extraction)
+   * Section 7: AI Summary
    */
   SUMMARIZE: {
     prompt: (content: string) => `
-Extract a "Hero Quote" from the following testimonial. A Hero Quote is a punchy, 5-12 word snippet that would look perfect as a headline.
+Objective: Extract a high-impact "Hero Quote" (5-12 words) for marketing headlines.
+Constraint: Must be a direct snippet or minimal edit of the original text.
+Tone: Persuasive and punchy.
 
 ### Examples:
-Testimonial: "I've tried 10 different tools and KudosWall is the only one that actually works for our enterprise scale."
-Hero Quote: "The only tool that works for our enterprise scale."
-
-Testimonial: "Support was fast, the UI is clean, and our conversion rate went up by 15% in two weeks."
-Hero Quote: "Our conversion rate went up by 15% in two weeks."
+- "I've tried 10 different tools and KudosWall is the only one that actually works." -> "The only tool that actually works for us."
+- "The UI is so glassmorphic and beautiful, my customers keep complimenting it." -> "Beautiful glassmorphic UI that customers love."
 
 ### Task:
-Testimonial: "${content}"
-Hero Quote:
+Testimonial Content: "${content}"
 `,
   },
 
   /**
    * VIDEO TRANSCRIPT REFINEMENT
+   * Section 13: Advanced Video Suite / AI Transcription
    */
   CLEANUP_TRANSCRIPT: {
     prompt: (rawText: string) => `
-You are a transcription editor. Clean the following raw speech-to-text data for readability while maintaining the speaker's personality.
-
-### Instructions:
-1. Remove speech disfluencies (um, uh, like, you know).
-2. Fix run-on sentences with proper punctuation.
-3. Keep industry jargon intact.
-4. Do not paraphrase; keep it as close to the original words as possible.
+Role: You are a professional transcription editor.
+Task: Clean speech-to-text data for subtitles and quotes.
+Instructions:
+1. Remove disfluencies (um, uh, like).
+2. Fix run-on sentences.
+3. Keep industry jargon and personal voice.
+4. Output only the cleaned text.
 
 Raw Text: "${rawText}"
-Cleaned Text:
 `,
   },
 
   /**
    * SPAM & ABUSE DETECTION (Few-Shot)
+   * Section 12: Abuse Prevention
    */
   DETECT_SPAM: {
     prompt: (content: string) => `
-Evaluate if the following testimonial is legitimate or spam/abusive.
+Objective: Filter out marketing spam, bots, and toxic content.
+Constraint: Be strict on external links and profanity.
 
 ### Examples:
-Input: "BUY BITCOIN NOW AT HTTP://SCAM-SITE.COM"
-Output: { "is_legit": false, "confidence": 1.0, "reason": "External marketing link / Crypto spam" }
-
-Input: "i hate this company so much you guys are [PROFANITY]"
-Output: { "is_legit": false, "confidence": 0.95, "reason": "Abusive language / Toxicity" }
-
-Input: "The dashboard is a bit slow on mobile."
-Output: { "is_legit": true, "confidence": 0.9, "reason": null }
+- "BUY BITCOIN NOW" -> { "is_legit": false, "confidence": 1.0, "reason": "Crypto spam" }
+- "i hate you guys [PROFANITY]" -> { "is_legit": false, "confidence": 0.95, "reason": "Toxicity" }
+- "Great tool!" -> { "is_legit": true, "confidence": 0.9, "reason": null }
 
 ### Task:
 Input: "${content}"
@@ -205,6 +263,109 @@ Avoid "thin content" penalties by providing industry-specific insights.
 3. **Trust Signals**: What specific metrics do ${industryName} care about (e.g. Trust, Conversion, Retention)?
 
 Output must be in Markdown format with clear H2/H3 headers.
+`,
+    },
+  },
+
+  /**
+   * INTELLIGENCE ENGINE (Section 7)
+   */
+  INTELLIGENCE: {
+    /**
+     * FEATURE SUGGESTION
+     * "Your customers often mention X, maybe add it to your FAQ?"
+     */
+    SUGGEST_FEATURES: {
+      prompt: (bulkTestimonials: string[]) => `
+Context: Analyzing a collection of recent customer testimonials for KudosWall.
+Objective: Identify recurring feature requests, pain points, or praise that could inform product roadmap or FAQ.
+Style: Strategic and product-focused.
+Input: ${bulkTestimonials.length} testimonials.
+Response: A list of objects following the 'feature_suggestion' schema.
+
+Content to analyze:
+${bulkTestimonials.join("\n---\n")}
+`,
+    },
+
+    /**
+     * AI-DRIVEN RESPONSE SUGGESTIONS
+     * "AI-driven response suggestions for 'Thank You' emails"
+     */
+    GENERATE_REPLY: {
+      prompt: (content: string, authorName: string) => `
+Objective: Generate a warm, professional, and personalized 'Thank You' email to a customer who just left a testimonial.
+Tone: Gracious, authentic, and slightly excited.
+Reference Content: "${content}"
+Author: ${authorName}
+
+Instructions:
+1. Reference a specific point they made in their feedback.
+2. If they mentioned a problem, acknowledge it briefly with a 'we are on it' note.
+3. If they are extremely happy, include a small 'referral' nudge.
+`,
+    },
+  },
+
+  /**
+   * MARKETING & GROWTH (Section 20)
+   */
+  MARKETING: {
+    /**
+     * CASE STUDY GENERATOR
+     * Convert a testimonial into a structured case study (Problem/Solution/Result).
+     */
+    GENERATE_CASE_STUDY: {
+      prompt: (content: string, authorContext: string) => `
+Role: You are a high-conversion SaaS copywriter.
+Task: Transform the provided testimonial into a structured Case Study.
+Format: JSON following the 'case_study' schema.
+Context: Author profile: ${authorContext}
+
+Steps:
+1. Infer the 'Problem' the customer was facing before using us.
+2. Detail the 'Solution' they found within KudosWall.
+3. Highlight the 'Result' (quantify if stats are present).
+4. Extract or derive a 'Key Stat'.
+`,
+    },
+  },
+
+  /**
+   * INTERNATIONALIZATION (Section 15)
+   */
+  I18N: {
+    /**
+     * AUTO-TRANSLATE
+     * Preserving emotional intensity and intent.
+     */
+    TRANSLATE: {
+      prompt: (content: string, targetLanguage: string) => `
+Task: Translate this testimonial into ${targetLanguage}.
+Constraint: Preserve the sentiment, emotional intensity, and any industry-specific terminology.
+Note: If the text is already in ${targetLanguage}, return it as is but provide cultural notes if applicable.
+
+Input Text: "${content}"
+`,
+    },
+  },
+
+  /**
+   * FUTURE V2 (Section 21)
+   */
+  FUTURE: {
+    /**
+     * AI INTERVIEWER
+     * Generate a follow-up question to dig deeper into social proof.
+     */
+    GENERATE_FOLLOW_UP: {
+      prompt: (content: string) => `
+Role: You are a customer success interviewer.
+Task: Based on the customer's initial testimonial, generate ONE powerful follow-up question that would elicit even stronger social proof or a better 'Result' metric.
+Context: "${content}"
+
+Example:
+If they say "It saved us time", follow up with "Exactly how many hours per week did your team reclaim, and what did you spend that time on instead?"
 `,
     },
   },
