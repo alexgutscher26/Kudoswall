@@ -9,7 +9,12 @@ dotenv.config({ path: path.resolve("../../apps/web/.env") });
 
 async function tryDrizzleQuery() {
   const db = createDb();
-  const token = "bxxhsyasbClZJCcVenKYAVLjWcWDtSRV";
+  const token = process.env.SESSION_TOKEN || process.argv[2];
+
+  if (!token) {
+    console.error("❌ ERROR: No session token provided. Please provide it via SESSION_TOKEN env variable or as a command-line argument.");
+    process.exit(1);
+  }
 
   try {
     console.log(`Trying Drizzle query for token: ${token}...`);
