@@ -63,12 +63,6 @@ export default function Navbar() {
             </div>
           ) : (
             <>
-              <Link
-                href="/dashboard"
-                className="mr-2 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
-              >
-                Dashboard
-              </Link>
               <a href="/login">
                 <Button
                   variant="outline"
