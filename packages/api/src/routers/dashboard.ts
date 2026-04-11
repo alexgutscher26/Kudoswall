@@ -12,6 +12,77 @@ import { z } from "zod";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 
+const CollectionSettingsSchema = z.object({
+  thankYouMessage: z.string().optional(),
+  workspaceName: z.string().optional(),
+  logoUrl: z.string().optional(),
+  accentColor: z.string(),
+  backgroundColor: z.string(),
+  fontFamily: z.enum(["sans", "serif", "mono"]),
+  form: z.object({
+    fields: z.object({
+      fullName: z.object({
+        enabled: z.boolean(),
+        required: z.boolean(),
+        label: z.string(),
+        placeholder: z.string(),
+      }),
+      email: z.object({
+        enabled: z.boolean(),
+        required: z.boolean(),
+        label: z.string(),
+        placeholder: z.string(),
+      }),
+      company: z.object({
+        enabled: z.boolean(),
+        required: z.boolean(),
+        label: z.string(),
+        placeholder: z.string(),
+      }),
+      jobTitle: z.object({
+        enabled: z.boolean(),
+        required: z.boolean(),
+        label: z.string(),
+        placeholder: z.string(),
+      }),
+      linkedin: z.object({
+        enabled: z.boolean(),
+        required: z.boolean(),
+        label: z.string(),
+        placeholder: z.string(),
+      }),
+    }),
+    starRating: z.object({ enabled: z.boolean() }),
+    minCharCount: z.number(),
+    additionalContext: z
+      .object({
+        enabled: z.boolean(),
+        label: z.string(),
+        options: z.array(z.string()),
+      })
+      .optional(),
+  }),
+  pageContent: z.object({
+    headline: z.string(),
+    subheading: z.string(),
+    showTestimonialCount: z.boolean(),
+    thankYou: z.object({
+      headline: z.string(),
+      body: z.string(),
+      cta: z.object({ enabled: z.boolean(), text: z.string(), url: z.string() }),
+    }),
+  }),
+  video: z.object({
+    enabled: z.boolean(),
+    prompt: z.string(),
+    maxLength: z.number(),
+  }),
+  customDomain: z.string().optional(),
+  passwordProtection: z.string().optional(),
+  expiryDate: z.string().optional(),
+  redirectUrl: z.string().optional(),
+});
+
 /**
  * Helper to ensure the user has a workspace.
  */
@@ -168,7 +239,7 @@ export const dashboardRouter = router({
     }),
 
   updateProjectSettings: protectedProcedure
-    .input(z.object({ projectId: z.string(), settings: z.any() }))
+    .input(z.object({ projectId: z.string(), settings: CollectionSettingsSchema }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
       const { projectId, settings } = input;
