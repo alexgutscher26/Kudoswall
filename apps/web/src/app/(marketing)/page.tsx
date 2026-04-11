@@ -7,6 +7,7 @@ import PricingSection from "@/components/sections/pricing-section";
 import FaqSection from "@/components/sections/faq-section";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
+import SocialProofSection from "@/components/sections/social-proof-section";
 
 export default function Home() {
   return (
@@ -14,8 +15,7 @@ export default function Home() {
       <Hero />
       <FeaturesSection />
       <HowItWorksSection />
-      <WidgetPreviewSection />
-      {/* <SocialProofSection /> */}
+      <SocialProofSection />
       <PricingSection />
       <FaqSection />
       <CtaSection />

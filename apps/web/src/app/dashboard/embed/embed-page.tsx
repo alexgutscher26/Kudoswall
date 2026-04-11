@@ -150,11 +150,9 @@ export default function EmbedPage() {
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
 
-  const embedCode = `<script src="https://cdn.kudoswall.com/widget.js" 
-  data-id="ws_abc123" 
-  data-layout="${settings.layout}"
-  data-theme="${settings.theme}"
-  data-accent="${settings.accentColor}"
+  const embedCode = `<script src="${typeof window !== "undefined" ? window.location.origin : "https://kudoswall.org"}/widget.js" 
+  data-id="5475dd90-24ad-49b3-99a1-609c939ae199" 
+  async
 ></script>`;
 
   const copyToClipboard = () => {

@@ -6,7 +6,7 @@ import Widget from "@/components/widget";
 import ErrorBoundary from "@/components/error-boundary";
 import { JsonLd } from "@/components/seo/json-ld";
 
-export const revalidate = 60; // Cache the widget for 60 seconds at the edge (ISR)
+export const revalidate = 0; // Disable caching for debugging to ensure live updates
 
 export default async function EmbedPage({
   params,
@@ -30,13 +30,13 @@ export default async function EmbedPage({
   }
 
   let settings = JSON.parse(w.settingsJson);
+  settings.truncateText = "off"; // Explicitly disable truncation so full text shows
 
   // Helper to normalize colors from URL params
   const normalizeColor = (c: string | string[] | undefined) => {
     if (!c || typeof c !== "string") return undefined;
-    // If it's a 3 or 6 char hex code without #, add it
     if (/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(c)) return `#${c}`;
-    return c.startsWith("#") ? c : c; // Already has # or is a named color
+    return c.startsWith("#") ? c : c;
   };
 
   // Allow query param overrides if Pro
@@ -57,7 +57,7 @@ export default async function EmbedPage({
     if (sParams.hideBadge) settings.hideBadge = sParams.hideBadge === "true";
   }
 
-  // Fetch testimonials
+  // Fetch all projects in workspace to gather testimonials
   const projectsList = await db.query.project.findMany({
     where: eq(project.workspaceId, w.workspaceId),
   });
@@ -66,17 +66,18 @@ export default async function EmbedPage({
   if (projectsList.length > 0) {
     const projectIds = projectsList.map((p) => p.id);
 
-    // Apply additional filters
+    // Dynamic where clause
     const whereConditions = [
       inArray(testimonial.projectId, projectIds),
       eq(testimonial.status, "approved"),
     ];
 
-    if (settings.filterMinRating > 0) {
+    // Relaxed filtering for debugging: only apply if explicitly set and > 0
+    if (settings.filterMinRating && settings.filterMinRating > 0) {
       whereConditions.push(gte(testimonial.rating, settings.filterMinRating));
     }
 
-    if (settings.filterType !== "all") {
+    if (settings.filterType && settings.filterType !== "all") {
       whereConditions.push(eq(testimonial.type, settings.filterType));
     }
 
@@ -133,6 +134,13 @@ export default async function EmbedPage({
 
   return (
     <div className="h-auto bg-transparent p-4">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        html, body { background: transparent !important; }
+      `,
+        }}
+      />
       <JsonLd data={jsonLd} />
       <ErrorBoundary name="Widget">
         <Widget data={widgetData} testimonials={testimonialsList} />

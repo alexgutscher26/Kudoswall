@@ -83,9 +83,8 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          // Use the actual scroll height of the content to be more precise
-          // and avoid feedback loops from padding/margins
-          const height = entry.target.scrollHeight;
+          // Use scrollHeight + small buffer to ensure no scrollbars
+          const height = entry.target.scrollHeight + 10;
           window.parent.postMessage({ type: "resize", height, widgetId: data.id }, "*");
         }
       });
@@ -208,9 +207,6 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
         <p className="mb-3 flex-1 text-xs leading-relaxed wrap-break-word text-neutral-600 dark:text-neutral-400">
           "{content}"
-          {isTruncated && t.content.length > maxLength && (
-            <span className="ml-1 cursor-pointer font-bold text-pink-500">Read more</span>
-          )}
         </p>
 
         <div className="flex items-center gap-2">
