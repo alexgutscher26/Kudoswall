@@ -15,7 +15,7 @@ import { env } from "@my-better-t-app/env/server";
 /**
  * Helper to ensure the user has a workspace.
  */
-async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
+export async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
   const existing = await db.query.workspace.findFirst({
     where: eq(workspace.ownerId, userId),
   });
