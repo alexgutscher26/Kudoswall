@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Star, Quote, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
@@ -63,6 +64,7 @@ interface WidgetProps {
 export default function Widget({ data, testimonials }: WidgetProps) {
   const { settings, isPro } = data;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
   // Track View and Handle Height Reporting
@@ -100,9 +102,14 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     // trigger re-renders which would cause an infinite loop.
   }, [data.id, data.workspaceId]);
 
-  // Handle Carousel Auto-advance
+  // Carousel auto-advance logic
   useEffect(() => {
-    if (settings.layout === "carousel" && settings.carouselAutoAdvance && testimonials.length > 1) {
+    if (
+      settings.layout === "carousel" &&
+      settings.carouselAutoAdvance &&
+      testimonials.length > 1 &&
+      !isPaused
+    ) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % testimonials.length);
       }, settings.carouselInterval || 5000);
@@ -113,6 +120,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     settings.carouselAutoAdvance,
     settings.carouselInterval,
     testimonials.length,
+    isPaused,
   ]);
 
   if (testimonials.length === 0) {
@@ -258,7 +266,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-hidden"
+      className="w-full overflow-hidden pb-12"
       style={{ backgroundColor: settings.backgroundColor }}
     >
       {/* ─── Auto Stats Calculation ────────────────────────────────────────── */}
@@ -312,53 +320,93 @@ export default function Widget({ data, testimonials }: WidgetProps) {
             )}
 
             {settings.layout === "carousel" ? (
-              <div className="group relative px-12">
+              <div
+                className="group relative px-4 sm:px-12"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+              >
                 <div className="overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                  <motion.div
+                    className="flex cursor-grab active:cursor-grabbing"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={(_, info) => {
+                      const threshold = 50;
+                      if (info.offset.x < -threshold) {
+                        setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+                      } else if (info.offset.x > threshold) {
+                        setCurrentIndex(
+                          (prev) => (prev - 1 + testimonials.length) % testimonials.length,
+                        );
+                      }
+                    }}
+                    animate={{ x: `-${currentIndex * (100 / (settings.columnsOverride || 1))}%` }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
                     {testimonials.map((t, index) => (
-                      <div key={t.id} className="w-full shrink-0 px-4">
+                      <div
+                        key={t.id}
+                        className="shrink-0 px-2"
+                        style={{ width: `${100 / (settings.columnsOverride || 1)}%` }}
+                      >
                         {renderCard(t, index)}
                       </div>
                     ))}
-                  </div>
+                  </motion.div>
                 </div>
 
+                {/* Navigation Arrows */}
                 {settings.carouselShowArrows !== false && testimonials.length > 1 && (
                   <>
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const pageSize = settings.columnsOverride || 1;
                         setCurrentIndex(
-                          (prev) => (prev - 1 + testimonials.length) % testimonials.length,
-                        )
-                      }
-                      className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                          (prev) => (prev - pageSize + testimonials.length) % testimonials.length,
+                        );
+                      }}
+                      className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full border border-neutral-100 bg-white/90 p-2 shadow-sm transition-all hover:bg-white hover:shadow-md sm:left-2"
+                      aria-label="Previous slide"
                     >
-                      <ChevronLeft className="size-5" />
+                      <ChevronLeft className="size-5 text-neutral-600" />
                     </button>
                     <button
-                      onClick={() => setCurrentIndex((prev) => (prev + 1) % testimonials.length)}
-                      className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                      onClick={() => {
+                        const pageSize = settings.columnsOverride || 1;
+                        setCurrentIndex((prev) => (prev + pageSize) % testimonials.length);
+                      }}
+                      className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full border border-neutral-100 bg-white/90 p-2 shadow-sm transition-all hover:bg-white hover:shadow-md sm:right-2"
+                      aria-label="Next slide"
                     >
-                      <ChevronRight className="size-5" />
+                      <ChevronRight className="size-5 text-neutral-600" />
                     </button>
                   </>
                 )}
 
+                {/* Pagination Dots */}
                 {testimonials.length > 1 && (
-                  <div className="mt-6 flex justify-center gap-1.5">
-                    {testimonials.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentIndex(i)}
-                        className={`h-1 rounded-full transition-all ${currentIndex === i ? "w-6" : "w-2 bg-neutral-200"}`}
-                        style={{
-                          backgroundColor: currentIndex === i ? settings.accentColor : undefined,
-                        }}
-                      />
-                    ))}
+                  <div className="mt-10 flex justify-center gap-2.5">
+                    {Array.from({
+                      length: Math.ceil(testimonials.length / (settings.columnsOverride || 1)),
+                    }).map((_, i) => {
+                      const pageSize = settings.columnsOverride || 1;
+                      const isActive = Math.floor(currentIndex / pageSize) === i;
+                      return (
+                        <motion.button
+                          key={i}
+                          layout
+                          onClick={() => setCurrentIndex(i * pageSize)}
+                          className="h-2 rounded-full transition-colors duration-300"
+                          style={{
+                            width: isActive ? 32 : 8,
+                            backgroundColor: isActive ? settings.accentColor : "rgb(209 213 219)", // neutral-300 for better visibility
+                          }}
+                          initial={false}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          aria-label={`Go to slide group ${i + 1}`}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>

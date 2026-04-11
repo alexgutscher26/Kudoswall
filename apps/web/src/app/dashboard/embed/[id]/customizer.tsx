@@ -273,21 +273,37 @@ export default function WidgetCustomizer({
 
                 {settings.layout === "carousel" && (
                   <div className="space-y-6 border-t border-neutral-50 pt-6">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-medium text-neutral-700">Auto-advance</span>
-                      <input
-                        type="checkbox"
-                        checked={settings.carouselAutoAdvance}
-                        onChange={(e) =>
-                          setSettings((s) => ({ ...s, carouselAutoAdvance: e.target.checked }))
-                        }
-                        disabled={!isPro}
-                      />
+                    {/* Toggles */}
+                    <div className="space-y-4">
+                      <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-neutral-700">
+                        <input
+                          type="checkbox"
+                          checked={settings.carouselAutoAdvance}
+                          className="size-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                          onChange={(e) =>
+                            setSettings((s) => ({ ...s, carouselAutoAdvance: e.target.checked }))
+                          }
+                        />
+                        Auto-advance slides
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-neutral-700">
+                        <input
+                          type="checkbox"
+                          checked={settings.carouselShowArrows ?? true}
+                          className="size-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                          onChange={(e) =>
+                            setSettings((s) => ({ ...s, carouselShowArrows: e.target.checked }))
+                          }
+                        />
+                        Show navigation arrows
+                      </label>
                     </div>
+
+                    {/* Interval */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-neutral-400 uppercase">
-                          Interval
+                          Auto-advance Interval
                         </span>
                         <span className="text-[11px] font-bold text-neutral-900">
                           {settings.carouselInterval / 1000}s
@@ -298,7 +314,11 @@ export default function WidgetCustomizer({
                           <button
                             key={v}
                             onClick={() => setSettings((s) => ({ ...s, carouselInterval: v }))}
-                            className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.carouselInterval === v ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"}`}
+                            className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${
+                              settings.carouselInterval === v
+                                ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm"
+                                : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"
+                            }`}
                           >
                             {v / 1000}s
                           </button>
@@ -654,7 +674,7 @@ export default function WidgetCustomizer({
               className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-3xl"}`}
             >
               {/* Browser chrome mock */}
-              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
+              <div className="rounded-2xl border border-neutral-200 bg-white shadow-2xl">
                 {/* Browser bar */}
                 <div
                   className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3"
