@@ -81,9 +81,6 @@ export default function Hero() {
               Start free — no credit card
             </Button>
           </Link>
-          <button className="h-12 rounded-full border border-neutral-200 bg-white px-8 text-base font-bold text-neutral-600 transition-all hover:bg-neutral-50 active:scale-[0.98]">
-            Book a demo
-          </button>
         </div>
 
         {/* Category chips */}
