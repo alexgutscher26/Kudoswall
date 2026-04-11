@@ -1,10 +1,10 @@
 import { db } from "@/lib/server-db";
-import { project, testimonial } from "@my-better-t-app/db/schema";
+import { project, testimonial, user } from "@my-better-t-app/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-
-// TODO: Implement resend
+import { EmailService } from "@my-better-t-app/email";
+import { getEnvAsync } from "@my-better-t-app/env/server";
 
 import { z } from "zod";
 
@@ -100,7 +100,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     rateLimitMap.set(ip, current);
 
     // 5. Fire non-blocking email notification (Placeholder for Resend integration)
-    // resend.emails.send(...)
+    if (proj.workspace) {
+      const workspaceOwner = await db.query.user.findFirst({
+        where: eq(user.id, proj.workspace.ownerId),
+      });
+
+      if (workspaceOwner?.email) {
+        const env = await getEnvAsync();
+        const emailService = new EmailService(env.RESEND_API_KEY || "");
+
+        // Non-blocking fire and forget email send
+        emailService
+          .sendNewTestimonialNotification(
+            workspaceOwner.email,
+            proj.workspace.name,
+            proj.name,
+            body.authorName,
+            body.content,
+            body.rating || 5,
+          )
+          .catch((err: any) => console.error("Failed to send notification email:", err));
+      }
+    }
 
     return NextResponse.json({
       success: true,

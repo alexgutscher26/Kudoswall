@@ -6,6 +6,7 @@ import { ActivationNudgeEmail } from "../emails/activation-nudge";
 import { UpgradePromptEmail } from "../emails/upgrade-prompt";
 import { WeeklyDigestEmail } from "../emails/weekly-digest";
 import { ReEngagementEmail } from "../emails/re-engagement";
+import { NewTestimonialNotificationEmail } from "../emails/new-testimonial-notification";
 
 export class EmailService {
   public resend: Resend;
@@ -37,6 +38,28 @@ export class EmailService {
       subject: "Your first testimonial just came in 👀",
       react: React.createElement(FirstTestimonialEmail, {
         userName,
+        authorName,
+        content,
+        rating,
+      }),
+    });
+  }
+
+  async sendNewTestimonialNotification(
+    to: string,
+    workspaceName: string,
+    projectName: string,
+    authorName: string,
+    content: string,
+    rating: number,
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: `New testimonial from ${authorName} for ${projectName} 🎉`,
+      react: React.createElement(NewTestimonialNotificationEmail, {
+        workspaceName,
+        projectName,
         authorName,
         content,
         rating,
