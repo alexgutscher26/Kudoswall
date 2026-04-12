@@ -2,8 +2,8 @@
 
 import { db } from "@/lib/server-db";
 import { auth } from "@/lib/auth";
-import { workspace, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, count, inArray } from "drizzle-orm";
+import { workspace, project, testimonial, widget } from "@my-better-t-app/db/schema";
+import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -28,6 +28,19 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     name: `${userName}'s Workspace`,
     slug: generateSlug(userName),
     ownerId: userId,
+    onboardingStatus: JSON.stringify({
+      step1: false,
+      step2: false,
+      step3: false,
+      step4: false,
+      step5: false,
+    }),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    logoUrl: null,
+    isPro: false,
+    brandingJson: null,
   };
 
   await db.insert(workspace).values(newWorkspace);
@@ -74,29 +87,62 @@ export async function getDashboardData() {
   const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
 
   // Fetch everything in parallel to eliminate waterfalls
-  const [projects, [testimonialCount], [pendingCount]] = await Promise.all([
-    db.query.project.findMany({
-      where: eq(project.workspaceId, ws.id),
-      orderBy: desc(project.createdAt),
-    }),
-    db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(eq(project.workspaceId, ws.id)),
-    db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending"))),
-  ]);
+  const [projects, [testimonialCount], [pendingCount], [approvedCount], [widgetCount]] =
+    await Promise.all([
+      db.query.project.findMany({
+        where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
+        orderBy: desc(project.createdAt),
+      }),
+      db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        ),
+      db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            eq(testimonial.status, "pending"),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        ),
+      db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            eq(testimonial.status, "approved"),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        ),
+      db
+        .select({ value: count() })
+        .from(widget)
+        .where(and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt))),
+    ]);
 
   const recentTestimonials =
     projects.length > 0
       ? await db.query.testimonial.findMany({
-          where: inArray(
-            testimonial.projectId,
-            projects.map((p) => p.id),
+          where: and(
+            inArray(
+              testimonial.projectId,
+              projects.map((p) => p.id),
+            ),
+            isNull(testimonial.deletedAt),
           ),
           orderBy: desc(testimonial.createdAt),
           limit: 5,
@@ -114,21 +160,59 @@ export async function getDashboardData() {
   const [viewsResult] = await db
     .select({ value: count() })
     .from(analyticsEvent)
-    .where(eq(analyticsEvent.workspaceId, ws.id));
+    .where(
+      and(
+        eq(analyticsEvent.workspaceId, ws.id),
+        eq(analyticsEvent.eventType, "view"),
+        isNull(analyticsEvent.deletedAt),
+      ),
+    );
 
   const totalViews = Number(viewsResult?.value || 0);
+
+  // Onboarding Calculation
+  const dbStatus = JSON.parse(ws.onboardingStatus || "{}");
+  const onboarding = {
+    step1: dbStatus.step1 || projects.length > 0,
+    step2: dbStatus.step2 || projects.some((p) => p.collectionSettingsJson !== null),
+    step3: dbStatus.step3 || false,
+    step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
+    step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
+  };
+
+  const testimonialsCount = Number(testimonialCount?.value || 0);
   const conversionRate =
-    totalViews > 0
-      ? ((Number(testimonialCount?.value || 0) / totalViews) * 100).toFixed(1) + "%"
-      : "—";
+    totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
 
   return {
-    workspace: ws,
-    projects,
-    recentTestimonials,
+    workspace: {
+      ...ws,
+      createdAt: ws.createdAt.toISOString(),
+      updatedAt: ws.updatedAt.toISOString(),
+      deletedAt: ws.deletedAt?.toISOString() || null,
+    },
+    projects: projects.map((p) => ({
+      ...p,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      deletedAt: p.deletedAt?.toISOString() || null,
+    })),
+    recentTestimonials: recentTestimonials.map((t) => ({
+      ...t,
+      createdAt: t.createdAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
+      deletedAt: t.deletedAt?.toISOString() || null,
+      project: {
+        ...t.project,
+        createdAt: t.project.createdAt.toISOString(),
+        updatedAt: t.project.updatedAt.toISOString(),
+        deletedAt: t.project.deletedAt?.toISOString() || null,
+      },
+    })),
+    onboarding,
     stats: {
-      testimonials: testimonialCount?.value || 0,
-      pending: pendingCount?.value || 0,
+      testimonials: testimonialsCount,
+      pending: Number(pendingCount?.value || 0),
       views: totalViews,
       conversion: conversionRate,
     },
@@ -157,7 +241,7 @@ export async function getProjectTestimonials(projectId: string) {
   }
 
   const testimonials = await db.query.testimonial.findMany({
-    where: eq(testimonial.projectId, projectId),
+    where: and(eq(testimonial.projectId, projectId), isNull(testimonial.deletedAt)),
     orderBy: desc(testimonial.createdAt),
     with: {
       testimonialToTags: {
@@ -169,8 +253,24 @@ export async function getProjectTestimonials(projectId: string) {
   });
 
   return {
-    project: p,
-    testimonials,
+    project: {
+      ...p,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      deletedAt: p.deletedAt?.toISOString() || null,
+      workspace: {
+        ...p.workspace,
+        createdAt: p.workspace.createdAt.toISOString(),
+        updatedAt: p.workspace.updatedAt.toISOString(),
+        deletedAt: p.workspace.deletedAt?.toISOString() || null,
+      },
+    },
+    testimonials: testimonials.map((t) => ({
+      ...t,
+      createdAt: t.createdAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
+      deletedAt: t.deletedAt?.toISOString() || null,
+    })),
   };
 }
 

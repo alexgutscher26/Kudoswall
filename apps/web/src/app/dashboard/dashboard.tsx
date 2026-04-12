@@ -27,9 +27,13 @@ import { authClient } from "@/lib/auth-client";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { createProject } from "./actions";
 import { gooeyToast as toast } from "goey-toast";
-import { trpc, queryClient } from "@/utils/trpc";
+import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
+
+type DashboardData = RouterOutputs["dashboard"]["getData"];
+type Project = DashboardData["projects"][number];
+type RecentTestimonial = DashboardData["recentTestimonials"][number];
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -591,12 +595,12 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
-function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
+function RecentTestimonialsList({ testimonials }: { testimonials: RecentTestimonial[] }) {
   if (!testimonials || testimonials.length === 0) return null;
 
   return (
     <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {testimonials.map((t: any) => (
+      {testimonials.map((t) => (
         <div
           key={t.id}
           className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
@@ -605,7 +609,7 @@ function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
             <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
                 <Image
-                  src={t.authorImage}
+                  src={t.authorImage as string}
                   alt={t.authorName || "User"}
                   width={40}
                   height={40}
@@ -673,7 +677,7 @@ function ProjectsList({
   workspaceSlug,
   onCopyLink,
 }: {
-  projects: any[];
+  projects: Project[];
   workspaceSlug: string;
   onCopyLink?: () => void;
 }) {
@@ -681,7 +685,7 @@ function ProjectsList({
 
   return (
     <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {projects.map((p: any) => (
+      {projects.map((p) => (
         <div
           key={p.id}
           className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
@@ -764,7 +768,7 @@ export default function DashboardShell({
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
-  initialData?: any;
+  initialData?: DashboardData;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -840,7 +844,7 @@ export default function DashboardShell({
     : [];
 
   const handleCopyCollectionLink = () => {
-    if (activeData?.projects?.length > 0) {
+    if (activeData?.projects && activeData.projects.length > 0) {
       const p = activeData.projects[0];
       const url = `${window.location.origin}/collect/${p.slug}`;
       navigator.clipboard.writeText(url);
@@ -980,10 +984,12 @@ export default function DashboardShell({
                           onCopyLink={() => completeStep.mutate({ step: "step3" })}
                         />
                         <RecentTestimonialsList
-                          testimonials={activeData.recentTestimonials.filter((t: any) => {
-                            if (testimonialFilter === "All") return true;
-                            return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
-                          })}
+                          testimonials={activeData.recentTestimonials.filter(
+                            (t: RecentTestimonial) => {
+                              if (testimonialFilter === "All") return true;
+                              return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
+                            },
+                          )}
                         />
                       </div>
                     ) : (

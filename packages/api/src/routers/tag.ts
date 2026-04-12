@@ -1,6 +1,7 @@
 import { protectedProcedure, router } from "../index";
 import { tag, workspace, testimonialToTag, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, isNull } from "drizzle-orm";
+import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 
 export const tagRouter = router({
@@ -14,7 +15,7 @@ export const tagRouter = router({
     if (!ws) return [];
 
     return db.query.tag.findMany({
-      where: eq(tag.workspaceId, ws.id),
+      where: and(eq(tag.workspaceId, ws.id), isNull(tag.deletedAt)),
       orderBy: desc(tag.createdAt),
     });
   }),
@@ -38,6 +39,14 @@ export const tagRouter = router({
         color: input.color,
       });
 
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "tag",
+        entityId: id,
+        action: "create",
+        diff: { name: input.name, color: input.color },
+      });
+
       return { id };
     }),
 
@@ -57,7 +66,15 @@ export const tagRouter = router({
         throw new Error("Forbidden");
       }
 
-      await db.delete(tag).where(eq(tag.id, input.id));
+      await db.update(tag).set({ deletedAt: new Date().toISOString() }).where(eq(tag.id, input.id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "tag",
+        entityId: input.id,
+        action: "delete",
+      });
+
       return { success: true };
     }),
 

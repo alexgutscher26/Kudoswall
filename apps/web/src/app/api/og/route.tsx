@@ -113,8 +113,8 @@ export async function GET(request: Request) {
         height: 630,
       },
     );
-  } catch (e: any) {
-    console.error(`${e.message}`);
+  } catch (e: unknown) {
+    console.error(e instanceof Error ? e.message : String(e));
     return new Response(`Failed to generate image`, {
       status: 500,
     });

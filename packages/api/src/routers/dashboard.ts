@@ -7,15 +7,18 @@ import {
   analyticsEvent,
   user,
 } from "@my-better-t-app/db/schema";
-import { eq, and, desc, count, inArray } from "drizzle-orm";
+import { eq, and, desc, count, sql, gte, inArray, isNull } from "drizzle-orm";
+import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 
+import type { Database } from "@my-better-t-app/db";
+
 /**
  * Helper to ensure the user has a workspace.
  */
-async function getOrCreateWorkspace(db: any, userId: string, userName: string) {
+async function getOrCreateWorkspace(db: Database, userId: string, userName: string) {
   const existing = await db.query.workspace.findFirst({
     where: eq(workspace.ownerId, userId),
   });
@@ -60,7 +63,7 @@ export const dashboardRouter = router({
     const ws = await getOrCreateWorkspace(db, session.user.id, session.user.name);
 
     const projects = await db.query.project.findMany({
-      where: eq(project.workspaceId, ws.id),
+      where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
       orderBy: desc(project.createdAt),
     });
 
@@ -68,39 +71,68 @@ export const dashboardRouter = router({
       .select({ value: count() })
       .from(testimonial)
       .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(eq(project.workspaceId, ws.id));
+      .where(
+        and(
+          eq(project.workspaceId, ws.id),
+          isNull(testimonial.deletedAt),
+          isNull(project.deletedAt),
+        ),
+      );
 
     const [pendingCount] = await db
       .select({ value: count() })
       .from(testimonial)
       .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "pending")));
+      .where(
+        and(
+          eq(project.workspaceId, ws.id),
+          eq(testimonial.status, "pending"),
+          isNull(testimonial.deletedAt),
+          isNull(project.deletedAt),
+        ),
+      );
 
     const [approvedCount] = await db
       .select({ value: count() })
       .from(testimonial)
       .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(and(eq(project.workspaceId, ws.id), eq(testimonial.status, "approved")));
+      .where(
+        and(
+          eq(project.workspaceId, ws.id),
+          eq(testimonial.status, "approved"),
+          isNull(testimonial.deletedAt),
+          isNull(project.deletedAt),
+        ),
+      );
 
     const [widgetCount] = await db
       .select({ value: count() })
       .from(widget)
-      .where(eq(widget.workspaceId, ws.id));
+      .where(and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)));
 
     // Fetch View Stats
     const [viewsResult] = await db
       .select({ value: count() })
       .from(analyticsEvent)
-      .where(and(eq(analyticsEvent.workspaceId, ws.id), eq(analyticsEvent.eventType, "view")));
+      .where(
+        and(
+          eq(analyticsEvent.workspaceId, ws.id),
+          eq(analyticsEvent.eventType, "view"),
+          isNull(analyticsEvent.deletedAt),
+        ),
+      );
 
     const totalViews = Number(viewsResult?.value || 0);
 
     const recentTestimonials =
       projects.length > 0
         ? await db.query.testimonial.findMany({
-            where: inArray(
-              testimonial.projectId,
-              projects.map((p: any) => p.id),
+            where: and(
+              inArray(
+                testimonial.projectId,
+                projects.map((p) => p.id),
+              ),
+              isNull(testimonial.deletedAt),
             ),
             orderBy: desc(testimonial.createdAt),
             limit: 5,
@@ -119,7 +151,7 @@ export const dashboardRouter = router({
     const dbStatus = JSON.parse(ws.onboardingStatus || "{}");
     const onboarding = {
       step1: dbStatus.step1 || projects.length > 0,
-      step2: dbStatus.step2 || projects.some((p: any) => p.collectionSettingsJson !== null),
+      step2: dbStatus.step2 || projects.some((p) => p.collectionSettingsJson !== null),
       step3: dbStatus.step3 || false,
       step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
       step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
@@ -180,7 +212,7 @@ export const dashboardRouter = router({
     }),
 
   updateProjectSettings: protectedProcedure
-    .input(z.object({ projectId: z.string(), settings: z.any() }))
+    .input(z.object({ projectId: z.string(), settings: z.unknown() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
       const { projectId, settings } = input;
@@ -203,6 +235,14 @@ export const dashboardRouter = router({
         })
         .where(eq(project.id, projectId));
 
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "project",
+        entityId: projectId,
+        action: "update",
+        diff: { collectionSettingsJson: settings },
+      });
+
       return { success: true };
     }),
 
@@ -223,7 +263,15 @@ export const dashboardRouter = router({
         throw new Error("Forbidden");
       }
 
-      await db.delete(project).where(eq(project.id, id));
+      await db.update(project).set({ deletedAt: new Date() }).where(eq(project.id, id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "project",
+        entityId: id,
+        action: "delete",
+      });
+
       return { success: true };
     }),
 

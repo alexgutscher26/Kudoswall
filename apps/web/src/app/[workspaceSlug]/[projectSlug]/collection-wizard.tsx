@@ -43,11 +43,38 @@ interface CollectionWizardProps {
 
 type Step = "rating" | "choice" | "text" | "video" | "details" | "review" | "success";
 
+interface CollectionSettings {
+  fontFamily?: string;
+  form?: {
+    starRating?: { enabled: boolean };
+    minCharCount?: number;
+    fields?: {
+      fullName?: { label?: string; required?: boolean };
+      email?: { label?: string; required?: boolean; enabled?: boolean };
+      content?: { label?: string; placeholder?: string };
+      jobTitle?: { label?: string; enabled?: boolean };
+      company?: { label?: string; enabled?: boolean };
+      linkedin?: { label?: string; enabled?: boolean; required?: boolean };
+    };
+  };
+  video?: {
+    prompt?: string;
+    maxLength?: number;
+  };
+  pageContent?: {
+    thankYou?: {
+      headline?: string;
+      body?: string;
+      cta?: { enabled: boolean; text: string; url: string };
+    };
+  };
+}
+
 export default function CollectionWizard({
   project,
   initialType,
 }: CollectionWizardProps & { initialType?: "text" | "video" | null }) {
-  const settings = useMemo(() => {
+  const settings = useMemo<CollectionSettings | null>(() => {
     try {
       return project.collectionSettingsJson ? JSON.parse(project.collectionSettingsJson) : null;
     } catch (e) {
@@ -184,7 +211,7 @@ export default function CollectionWizard({
       return Math.random() * (max - min) + min;
     }
 
-    const interval: any = setInterval(() => {
+    const interval: ReturnType<typeof setInterval> = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
       if (timeLeft <= 0) return clearInterval(interval);
       const particleCount = 50 * (timeLeft / duration);
@@ -552,7 +579,7 @@ export default function CollectionWizard({
                             <Image
                               alt="Preview"
                               className="h-full w-full object-cover transition-opacity"
-                              src={photo}
+                              src={photo as string}
                               width={56}
                               height={56}
                             />
@@ -745,7 +772,7 @@ export default function CollectionWizard({
                           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#e6e8ea]">
                             {photo ? (
                               <Image
-                                src={photo}
+                                src={photo as string}
                                 width={40}
                                 height={40}
                                 className="h-full w-full object-cover"

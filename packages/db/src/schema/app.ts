@@ -18,6 +18,7 @@ export const testimonialStatusEnum = pgEnum("testimonial_status", [
 ]);
 export const testimonialTypeEnum = pgEnum("testimonial_type", ["text", "video"]);
 export const analyticsEventTypeEnum = pgEnum("analytics_event_type", ["view", "click"]);
+export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
 
 export const workspace = pgTable(
   "workspace",
@@ -36,6 +37,7 @@ export const workspace = pgTable(
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
       .notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [
     index("workspace_slug_idx").on(table.slug),
@@ -61,6 +63,7 @@ export const project = pgTable(
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
       .notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [
     index("project_workspace_id_idx").on(table.workspaceId),
@@ -92,6 +95,7 @@ export const testimonial = pgTable(
       .$onUpdate(() => new Date())
       .notNull()
       .defaultNow(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [
     index("testimonial_project_id_idx").on(table.projectId),
@@ -108,7 +112,8 @@ export const tag = pgTable(
       .references(() => workspace.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     color: text("color").default("#e8527a").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { mode: "string" }),
   },
   (table) => [index("tag_workspace_id_idx").on(table.workspaceId)],
 );
@@ -144,6 +149,7 @@ export const widget = pgTable(
       .$onUpdate(() => new Date())
       .notNull()
       .defaultNow(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [index("widget_workspace_id_idx").on(table.workspaceId)],
 );
@@ -159,12 +165,32 @@ export const analyticsEvent = pgTable(
     widgetId: text("widget_id").references(() => widget.id, { onDelete: "set null" }),
     eventType: analyticsEventTypeEnum("event_type").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
   (table) => [
     index("analytics_event_workspace_id_idx").on(table.workspaceId),
     index("analytics_event_project_id_idx").on(table.projectId),
     index("analytics_event_widget_id_idx").on(table.widgetId),
     index("analytics_event_type_idx").on(table.eventType),
+  ],
+);
+
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: text("id").primaryKey(),
+    actorId: text("actor_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    action: auditActionEnum("action").notNull(),
+    diff: text("diff"), // Stored as JSON string
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("audit_log_actor_id_idx").on(table.actorId),
+    index("audit_log_entity_idx").on(table.entityType, table.entityId),
   ],
 );
 
@@ -235,5 +261,12 @@ export const analyticsEventRelations = relations(analyticsEvent, ({ one }) => ({
   widget: one(widget, {
     fields: [analyticsEvent.widgetId],
     references: [widget.id],
+  }),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  actor: one(user, {
+    fields: [auditLog.actorId],
+    references: [user.id],
   }),
 }));

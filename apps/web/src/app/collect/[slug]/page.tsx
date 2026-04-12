@@ -176,7 +176,7 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
                   style={{ backgroundColor: accentColor }}
                 />
                 <Image
-                  src={logoUrl}
+                  src={logoUrl as string}
                   alt={projectData.workspace.name}
                   width={56}
                   height={56}

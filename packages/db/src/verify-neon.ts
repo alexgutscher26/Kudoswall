@@ -16,7 +16,7 @@ async function verify() {
     const result = await db.select().from(workspace).limit(1);
     console.log("✅ Success! Database is reachable.");
     console.log("Workspaces found:", result.length);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ Verification FAILED!");
     console.error(err);
   } finally {

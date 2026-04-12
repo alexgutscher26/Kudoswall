@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { trpc, queryClient } from "@/utils/trpc";
+import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +56,7 @@ interface Testimonial {
   videoUrl?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
+  deletedAt?: string | Date | null;
   testimonialToTags?: {
     tag: {
       id: string;
@@ -67,12 +68,7 @@ interface Testimonial {
 
 interface InboxProps {
   initialTestimonials: Testimonial[];
-  project: {
-    id: string;
-    name: string;
-    slug: string;
-    workspaceId: string;
-  };
+  project: RouterOutputs["dashboard"]["getProjectTestimonials"]["project"];
   projects: {
     id: string;
     name: string;
@@ -104,12 +100,14 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const [isPending, startTransition] = useTransition();
 
   // Fetch testimonials with real-time polling
-  const { data: qData } = useQuery({
-    ...trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
-    initialData: { project, testimonials: initialTestimonials } as any,
-    refetchInterval: 5000,
-    staleTime: 5000,
-  });
+  const { data: qData } = useQuery(
+    trpc.dashboard.getProjectTestimonials.queryOptions(
+      { projectId: project.id },
+      {
+        initialData: { project: project as any, testimonials: initialTestimonials as any },
+      },
+    ),
+  );
 
   const testimonials = qData?.testimonials ?? initialTestimonials;
   const displayedTestimonials = mounted ? testimonials : initialTestimonials;
@@ -120,17 +118,26 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     router.push(`/dashboard/testimonials?${params.toString()}`);
   };
 
-  const filteredTestimonials = displayedTestimonials.filter((t) => {
-    const matchesTab = activeTab === "all" || t.status === activeTab;
-    const matchesType = typeFilter === "all" || t.type === typeFilter;
-    const matchesSearch =
-      t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
-    const matchesTag = true; // Placeholder for tag filtering
-    return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
-  });
+  const filteredTestimonials = displayedTestimonials.filter(
+    (t: {
+      status: string;
+      type: string;
+      authorName: string;
+      content: string;
+      authorEmail: string;
+      rating: any;
+    }) => {
+      const matchesTab = activeTab === "all" || t.status === activeTab;
+      const matchesType = typeFilter === "all" || t.type === typeFilter;
+      const matchesSearch =
+        t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
+      const matchesTag = true; // Placeholder for tag filtering
+      return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
+    },
+  );
 
   const handleStatusUpdate = async (id: string, status: "approved" | "archived" | "pending") => {
     startTransition(async () => {
@@ -372,7 +379,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             const count = displayedTestimonials.filter(
-              (t) => tab.id === "all" || t.status === tab.id,
+              (t: { status: string }) => tab.id === "all" || t.status === tab.id,
             ).length;
 
             return (
@@ -401,7 +408,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
       {/* Testimonials List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredTestimonials.length > 0 ? (
-          filteredTestimonials.map((t) => (
+          filteredTestimonials.map((t: Testimonial) => (
             <TestimonialCard
               key={t.id}
               testimonial={t}
@@ -734,7 +741,7 @@ function TestimonialCard({
             <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
                 <Image
-                  src={t.authorImage}
+                  src={t.authorImage as string}
                   alt={t.authorName ?? "Author"}
                   width={44}
                   height={44}

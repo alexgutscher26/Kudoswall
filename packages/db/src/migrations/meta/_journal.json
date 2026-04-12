@@ -29,6 +29,13 @@
       "when": 1775970399206,
       "tag": "0003_add_analytics_event_type_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775976818883,
+      "tag": "0004_daily_blob",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   lastLoginMethod: text("last_login_method"),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const session = pgTable(

@@ -174,7 +174,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       ? "bg-neutral-900 text-white border-neutral-800"
       : "bg-[#fafafa] text-neutral-900 border-neutral-100";
 
-  const renderCard = (t: any, index: number) => {
+  const renderCard = (t: WidgetProps["testimonials"][number], index: number) => {
     const isTruncated = settings.truncateText !== "off";
     const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 0;
     const content =

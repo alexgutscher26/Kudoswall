@@ -1,6 +1,7 @@
 import { protectedProcedure, router, publicProcedure } from "../index";
 import { widget, workspace, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray, gte } from "drizzle-orm";
+import { eq, and, desc, inArray, gte, isNull } from "drizzle-orm";
+import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 
 const widgetSettingsSchema = z.object({
@@ -56,7 +57,7 @@ export const widgetRouter = router({
     if (!ws) return [];
 
     return db.query.widget.findMany({
-      where: eq(widget.workspaceId, ws.id),
+      where: and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)),
       orderBy: desc(widget.createdAt),
     });
   }),
@@ -65,7 +66,7 @@ export const widgetRouter = router({
     const { db, session } = ctx;
 
     const w = await db.query.widget.findFirst({
-      where: eq(widget.id, input.id),
+      where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
       with: {
         workspace: true,
       },
@@ -119,6 +120,14 @@ export const widgetRouter = router({
         settingsJson: JSON.stringify(defaultSettings),
       });
 
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "widget",
+        entityId: id,
+        action: "create",
+        diff: { name: input.name, settings: defaultSettings },
+      });
+
       return { id };
     }),
 
@@ -134,7 +143,7 @@ export const widgetRouter = router({
       const { db, session } = ctx;
 
       const w = await db.query.widget.findFirst({
-        where: eq(widget.id, input.id),
+        where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
         with: {
           workspace: true,
         },
@@ -151,6 +160,14 @@ export const widgetRouter = router({
           settingsJson: JSON.stringify(input.settings),
         })
         .where(eq(widget.id, input.id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "widget",
+        entityId: input.id,
+        action: "update",
+        diff: { name: input.name, settings: input.settings },
+      });
 
       return { success: true };
     }),
@@ -171,7 +188,15 @@ export const widgetRouter = router({
         throw new Error("Forbidden");
       }
 
-      await db.delete(widget).where(eq(widget.id, input.id));
+      await db.update(widget).set({ deletedAt: new Date() }).where(eq(widget.id, input.id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "widget",
+        entityId: input.id,
+        action: "delete",
+      });
+
       return { success: true };
     }),
 

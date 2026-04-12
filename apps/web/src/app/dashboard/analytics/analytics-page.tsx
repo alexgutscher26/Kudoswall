@@ -17,9 +17,11 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
-import { trpc, trpcClient } from "@/utils/trpc";
+import { trpc, trpcClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
+
+type ExportRow = RouterOutputs["analytics"]["getExportData"][number];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -222,10 +224,10 @@ export default function AnalyticsPage() {
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(","),
-        ...data.map((row: any) =>
+        ...data.map((row: ExportRow) =>
           headers
             .map((fieldName) => {
-              const value = row[fieldName as keyof typeof row] ?? "";
+              const value = row[fieldName as keyof ExportRow] ?? "";
               const strValue = String(value);
               return strValue.includes(",") ? `"${strValue}"` : strValue;
             })

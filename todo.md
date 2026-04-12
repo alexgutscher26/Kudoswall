@@ -43,16 +43,16 @@
 - [x] Configure Cloudflare Pages/Workers deployment via OpenNext
 - [x] Set up Prettier with Tailwind CSS plugin + Lefthook git hooks
 - [x] Implement tRPC v11 for end-to-end type-safe API
-- [ ] Migrate all `any` TypeScript types to strict `unknown` equivalents
-- [ ] Add `strict: true` to all `tsconfig.json` files in packages
+- [x] Migrate all `any` TypeScript types to strict `unknown` equivalents
+- [x] Add `strict: true` to all `tsconfig.json` files in packages
 
 ### 1.2 Data Architecture
 
 - [x] Implement database migrations with Drizzle Kit
 - [x] Core schema: Users, Workspaces, Collections, Testimonials, Tags
 - [x] Relational integrity: `testimonialToTags` join table
-- [ ] Implement soft-deletes (`deletedAt` column) across all tables
-- [ ] Audit-logging table for every DB mutation (actor, timestamp, diff)
+- [x] Implement soft-deletes (`deletedAt` column) across all tables
+- [x] Audit-logging table for every DB mutation (actor, timestamp, diff)
 - [ ] Set up automated daily database backups with restore testing
 - [ ] Implement read-replicas for high-traffic widget queries
 - [ ] Point-in-time recovery (PITR) strategy documentation

@@ -11,7 +11,8 @@ neonConfig.webSocketConstructor = ws;
 /**
  * Singleton database connection for serverless/dev resilience.
  */
-export let db: ReturnType<typeof drizzle<typeof schema>> | undefined;
+export type Database = ReturnType<typeof drizzle<typeof schema>>;
+export let db: Database | undefined;
 
 export function createDb() {
   if (db) return db;
@@ -23,3 +24,5 @@ export function createDb() {
   db = drizzle({ client: pool, schema });
   return db;
 }
+
+export * from "./audit";

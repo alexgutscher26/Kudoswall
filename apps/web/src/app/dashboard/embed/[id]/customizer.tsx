@@ -36,7 +36,7 @@ import Widget from "@/components/widget";
 type LayoutType = "grid" | "masonry" | "carousel";
 type ThemeType = "light" | "dark" | "auto";
 
-interface WidgetSettings {
+export interface WidgetSettings {
   layout: LayoutType;
   theme: ThemeType;
   maxItems: number;
@@ -88,7 +88,7 @@ export default function WidgetCustomizer({
 }: {
   widgetId: string;
   workspaceId: string;
-  initialSettings: any;
+  initialSettings: Partial<WidgetSettings>;
   isPro: boolean;
 }) {
   const router = useRouter();
@@ -137,8 +137,8 @@ export default function WidgetCustomizer({
       onSuccess: () => {
         toast.success("Settings saved");
       },
-      onError: (err: any) => {
-        toast.error(err.message);
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : String(err));
       },
     }),
   );
@@ -370,12 +370,17 @@ export default function WidgetCustomizer({
             {activeTab === "display" && (
               <div className="space-y-6">
                 {[
-                  { key: "showRating", label: "Show star ratings", pro: false },
-                  { key: "showReviewerPhoto", label: "Show reviewer photo", pro: true },
-                  { key: "showReviewerCompany", label: "Show company info", pro: true },
-                  { key: "showDate", label: "Show submission date", pro: true },
-                  { key: "hideHeader", label: "Hide widget header", pro: false, invert: true },
-                ].map((field: any) => (
+                  { key: "showRating" as const, label: "Show star ratings", pro: false },
+                  { key: "showReviewerPhoto" as const, label: "Show reviewer photo", pro: true },
+                  { key: "showReviewerCompany" as const, label: "Show company info", pro: true },
+                  { key: "showDate" as const, label: "Show submission date", pro: true },
+                  {
+                    key: "hideHeader" as const,
+                    label: "Hide widget header",
+                    pro: false,
+                    invert: true,
+                  },
+                ].map((field) => (
                   <div key={field.key} className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-neutral-700">{field.label}</span>
                     <div className="flex items-center gap-2">

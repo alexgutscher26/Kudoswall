@@ -23,8 +23,19 @@ import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
 
 interface CollectionCustomizerProps {
-  project: any;
-  workspace: any;
+  project: {
+    id: string;
+    name: string;
+    slug: string;
+    collectionSlug?: string | null;
+    collectionSettingsJson?: string | null;
+  };
+  workspace: {
+    id: string;
+    name: string;
+    isPro: boolean;
+    logoUrl?: string | null;
+  };
   isPro?: boolean;
 }
 
@@ -138,8 +149,8 @@ export function CollectionCustomizer({
       onSuccess: () => {
         toast.success("Settings saved!");
       },
-      onError: (e: any) => {
-        toast.error(e.message);
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Failed to save settings");
       },
     }),
   );
@@ -169,14 +180,14 @@ export function CollectionCustomizer({
     });
   };
 
-  const setNestedSetting = (path: string, value: any) => {
+  const setNestedSetting = (path: string, value: unknown) => {
     setSettings((prev) => {
       const next = { ...prev };
       const keys = path.split(".");
-      let current: any = next;
+      let current: Record<string, unknown> = next as unknown as Record<string, unknown>;
       for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] };
-        current = current[keys[i]];
+        current[keys[i]] = { ...(current[keys[i]] as any) };
+        current = current[keys[i]] as Record<string, unknown>;
       }
       current[keys[keys.length - 1]] = value;
       return next;
@@ -195,7 +206,7 @@ export function CollectionCustomizer({
     pro,
   }: {
     title: string;
-    icon: any;
+    icon: React.ElementType;
     pro?: boolean;
   }) => (
     <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-2">
@@ -762,7 +773,7 @@ export function CollectionCustomizer({
                     style={{ backgroundColor: settings.accentColor }}
                   />
                   <Image
-                    src={settings.logoUrl || workspace.logoUrl}
+                    src={(settings.logoUrl || workspace.logoUrl) as string}
                     alt={workspace.name}
                     width={56}
                     height={56}

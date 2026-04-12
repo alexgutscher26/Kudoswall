@@ -20,9 +20,10 @@ import { gooeyToast as toast } from "goey-toast";
 
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
+import type { RouterOutputs } from "@/utils/trpc";
 
 interface CollectionListProps {
-  projects: any[];
+  projects: RouterOutputs["dashboard"]["getData"]["projects"];
 }
 
 export default function CollectionList({ projects }: CollectionListProps) {

@@ -24,11 +24,12 @@ async function tryQuery() {
     const res = await pool.query(q, [token]);
     console.log("SUCCESS! Rows found:", res.rowCount);
     console.log(res.rows);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ QUERY FAILED!");
-    console.error("Error Message:", err.message);
-    if (err.detail) console.error("Detail:", err.detail);
-    if (err.hint) console.error("Hint:", err.hint);
+    const error = err as Record<string, unknown>;
+    console.error("Error Message:", error.message || String(err));
+    if (error.detail) console.error("Detail:", error.detail);
+    if (error.hint) console.error("Hint:", error.hint);
   } finally {
     await pool.end();
   }

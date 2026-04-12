@@ -21,6 +21,7 @@ import type { Route } from "next";
 import { gooeyToast as toast } from "goey-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import type { WidgetSettings } from "./[id]/customizer";
 
 export default function WidgetList() {
   const router = useRouter();
@@ -47,8 +48,8 @@ export default function WidgetList() {
         toast.success("Widget created!");
         router.push(`/dashboard/embed/${data.id}` as Route);
       },
-      onError: (err: any) => {
-        toast.error(err.message);
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : "Failed to create widget");
       },
     }),
   );
@@ -107,7 +108,7 @@ export default function WidgetList() {
       {filteredWidgets && filteredWidgets.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredWidgets.map((w) => {
-            const settings = JSON.parse(w.settingsJson);
+            const settings = JSON.parse(w.settingsJson) as WidgetSettings;
             return (
               <div
                 key={w.id}
