@@ -14,7 +14,9 @@ import {
   ArrowRight,
   ArrowLeft,
   User,
+  SkipForward,
 } from "lucide-react";
+import { useLocale } from "@/lib/collection-i18n";
 import { useState, useMemo, useEffect } from "react";
 import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
@@ -58,6 +60,7 @@ interface CollectionSettings {
       linkedin?: { label?: string; enabled?: boolean; required?: boolean };
     };
   };
+  privacyPolicyUrl?: string;
   video?: {
     prompt?: string;
     maxLength?: number;
@@ -198,6 +201,9 @@ export default function CollectionWizard({
   const hasExplicitBackground = Boolean(settings?.backgroundColor);
   const isDark = useDarkMode(!hasExplicitBackground);
 
+  // i18n — auto-detected from navigator.language
+  const { t, dir } = useLocale();
+
   // Slide direction: 1 = forward (enter from right), -1 = backward (enter from left)
   const [direction, setDirection] = useState(1);
 
@@ -221,6 +227,8 @@ export default function CollectionWizard({
   const [linkedin, setLinkedin] = useState("");
   const [tagline, setTagline] = useState("");
   const [loading, setLoading] = useState(false);
+  // Consent state — gating the Submit button on the review step
+  const [hasConsented, setHasConsented] = useState(false);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
   const DRAFT_KEY = `t-wall-draft-${project.id}`;
@@ -241,6 +249,7 @@ export default function CollectionWizard({
           tagline: string;
           mode: "text" | "video";
           step: Step;
+          hasConsented: boolean;
         }>;
         if (draft.rating) setRating(draft.rating);
         if (draft.content) setContent(draft.content);
@@ -252,6 +261,7 @@ export default function CollectionWizard({
         if (draft.tagline) setTagline(draft.tagline);
         if (draft.mode) setMode(draft.mode);
         if (draft.step && draft.step !== "success") setStep(draft.step);
+        if (draft.hasConsented) setHasConsented(draft.hasConsented);
       } catch {
         // Ignore malformed draft
       }
@@ -262,9 +272,34 @@ export default function CollectionWizard({
   // Persist draft to localStorage on change
   useEffect(() => {
     if (step === "success") return;
-    const draft = { rating, content, photo, name, email, company, linkedin, tagline, mode, step };
+    const draft = {
+      rating,
+      content,
+      photo,
+      name,
+      email,
+      company,
+      linkedin,
+      tagline,
+      mode,
+      step,
+      hasConsented,
+    };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-  }, [DRAFT_KEY, rating, content, photo, name, email, company, linkedin, tagline, mode, step]);
+  }, [
+    DRAFT_KEY,
+    rating,
+    content,
+    photo,
+    name,
+    email,
+    company,
+    linkedin,
+    tagline,
+    mode,
+    step,
+    hasConsented,
+  ]);
 
   // Track page view
   useEffect(() => {
@@ -277,16 +312,16 @@ export default function CollectionWizard({
 
   const stepsData = useMemo(() => {
     const mapping: Record<Step, { percent: number; text: string; title: string }> = {
-      rating: { percent: 25, text: "Step 1 of 4", title: "Overall Satisfaction" },
-      choice: { percent: 50, text: "Step 2 of 4", title: "Format Choice" },
-      text: { percent: 50, text: "Step 2 of 4", title: "Detailed Feedback" },
-      video: { percent: 50, text: "Step 2 of 4", title: "Record Video" },
-      details: { percent: 75, text: "Step 3 of 4", title: "Identity & Photo" },
-      review: { percent: 100, text: "Step 4 of 4", title: "Final Review" },
-      success: { percent: 100, text: "Complete", title: "Thank You" },
+      rating: { percent: 25, text: t.step1of4, title: t.titleRating },
+      choice: { percent: 50, text: t.step2of4, title: t.titleChoice },
+      text: { percent: 50, text: t.step2of4, title: t.titleText },
+      video: { percent: 50, text: t.step2of4, title: t.titleVideo },
+      details: { percent: 75, text: t.step3of4, title: t.titleDetails },
+      review: { percent: 100, text: t.step4of4, title: t.titleReview },
+      success: { percent: 100, text: t.complete, title: t.titleSuccess },
     };
     return mapping[step];
-  }, [step]);
+  }, [step, t]);
 
   const nextStep = () => {
     setDirection(1);
@@ -446,6 +481,7 @@ export default function CollectionWizard({
     <div
       className="cw-root mx-auto w-full max-w-lg"
       data-dark={isDark ? "true" : "false"}
+      dir={dir}
       style={{ fontFamily }}
     >
       {/* Scoped CSS custom properties for adaptive color theming */}
@@ -523,14 +559,13 @@ export default function CollectionWizard({
                     className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
                     style={{ color: "var(--cw-text-primary)" }}
                   >
-                    How would you rate your experience?
+                    {t.ratingHeadline}
                   </h1>
                   <p
                     className="mx-auto mb-8 max-w-sm text-base"
                     style={{ color: "var(--cw-text-secondary)" }}
                   >
-                    Your feedback helps us grow and provides authentic proof to others considering
-                    our services.
+                    {t.ratingSubtext}
                   </p>
 
                   {/* Star Rating */}
@@ -572,7 +607,7 @@ export default function CollectionWizard({
                         className="text-[11px] font-semibold tracking-wider uppercase"
                         style={{ color: "var(--cw-text-secondary)" }}
                       >
-                        Verified User
+                        {t.verifiedUser}
                       </span>
                     </div>
                     <div
@@ -584,7 +619,7 @@ export default function CollectionWizard({
                         className="text-[11px] font-semibold tracking-wider uppercase"
                         style={{ color: "var(--cw-text-secondary)" }}
                       >
-                        Privacy Guaranteed
+                        {t.privacyGuaranteed}
                       </span>
                     </div>
                   </div>
@@ -597,7 +632,7 @@ export default function CollectionWizard({
                       color: "var(--cw-fg-inv)",
                     }}
                   >
-                    Next Step
+                    {t.nextStep}
                     <ArrowRight className="size-4" />
                   </button>
                 </>
@@ -610,13 +645,13 @@ export default function CollectionWizard({
                     className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
                     style={{ color: "var(--cw-text-primary)" }}
                   >
-                    How would you like to share?
+                    {t.choiceHeadline}
                   </h1>
                   <p
                     className="mx-auto mb-8 max-w-sm text-base"
                     style={{ color: "var(--cw-text-secondary)" }}
                   >
-                    Choose the format that works best for you.
+                    {t.choiceSubtext}
                   </p>
                   <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                     <button
@@ -638,13 +673,13 @@ export default function CollectionWizard({
                           className="text-base font-bold"
                           style={{ color: "var(--cw-text-primary)" }}
                         >
-                          Video
+                          {t.choiceVideo}
                         </h3>
                         <p
                           className="text-[11px] font-medium"
                           style={{ color: "var(--cw-text-muted)" }}
                         >
-                          Quick &amp; Personal
+                          {t.choiceVideoSub}
                         </p>
                       </div>
                     </button>
@@ -667,13 +702,13 @@ export default function CollectionWizard({
                           className="text-base font-bold"
                           style={{ color: "var(--cw-text-primary)" }}
                         >
-                          Text
+                          {t.choiceText}
                         </h3>
                         <p
                           className="text-[11px] font-medium"
                           style={{ color: "var(--cw-text-muted)" }}
                         >
-                          Simple &amp; Classic
+                          {t.choiceTextSub}
                         </p>
                       </div>
                     </button>
@@ -708,8 +743,7 @@ export default function CollectionWizard({
                       className="cw-field w-full resize-none rounded-xl p-4 text-sm leading-relaxed"
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={
-                        settings?.form?.fields?.content?.placeholder ??
-                        "It was an incredible experience because..."
+                        settings?.form?.fields?.content?.placeholder ?? t.textPlaceholder
                       }
                       value={content}
                       rows={5}
@@ -736,7 +770,7 @@ export default function CollectionWizard({
                       style={{ color: "var(--cw-text-secondary)" }}
                     >
                       <ArrowLeft className="size-4" />
-                      Back
+                      {t.back}
                     </button>
                     <button
                       className="flex items-center gap-3 rounded-md px-10 py-4 text-xs font-bold tracking-widest uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
@@ -747,7 +781,7 @@ export default function CollectionWizard({
                         color: "var(--cw-fg-inv)",
                       }}
                     >
-                      Next Step
+                      {t.nextStep}
                       <ArrowRight className="size-4" />
                     </button>
                   </div>
@@ -761,14 +795,13 @@ export default function CollectionWizard({
                     className="mb-3 text-center text-2xl font-extrabold tracking-tight md:text-3xl"
                     style={{ color: "var(--cw-text-primary)" }}
                   >
-                    Record your video
+                    {t.videoHeadline}
                   </h1>
                   <p
                     className="mx-auto mb-6 max-w-sm text-center text-base"
                     style={{ color: "var(--cw-text-secondary)" }}
                   >
-                    {settings?.video?.prompt ??
-                      "What stood out the most? Sharing specific details helps others."}
+                    {settings?.video?.prompt ?? t.videoSubtext}
                   </p>
 
                   <VideoRecorder
@@ -781,6 +814,22 @@ export default function CollectionWizard({
                     prompt={settings?.video?.prompt}
                     accentColor={project.workspace.branding.accentColor}
                   />
+
+                  {/* ── Skip button: switch to text review instead ── */}
+                  <button
+                    onClick={() => {
+                      setVideoBlob(null);
+                      setMode("text");
+                      setDirection(1);
+                      setStep("text");
+                    }}
+                    className="mx-auto mt-5 flex items-center justify-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70"
+                    style={{ color: "var(--cw-text-muted)" }}
+                    type="button"
+                  >
+                    <SkipForward className="size-3.5" />
+                    {t.videoSkip}
+                  </button>
                 </div>
               )}
 
@@ -838,13 +887,16 @@ export default function CollectionWizard({
                       </div>
                       <div className="text-left">
                         <label
-                          className="mb-0.5 block text-xs font-semibold"
+                          className="mb-0.5 flex items-center gap-1 text-xs font-semibold"
                           style={{ color: "var(--cw-fg)" }}
                         >
-                          Upload Profile Photo
+                          {t.detailsPhoto}
+                          <span className="font-normal" style={{ color: "var(--cw-text-muted)" }}>
+                            {t.detailsPhotoOptional}
+                          </span>
                         </label>
                         <p className="text-[10px]" style={{ color: "var(--cw-text-secondary)" }}>
-                          Recommended: 400x400px
+                          {t.detailsPhotoHint}
                         </p>
                       </div>
                     </div>
@@ -857,7 +909,7 @@ export default function CollectionWizard({
                           htmlFor="full_name"
                           style={{ color: "var(--cw-text-secondary)" }}
                         >
-                          {settings?.form?.fields?.fullName?.label ?? "Full Name"}{" "}
+                          {settings?.form?.fields?.fullName?.label ?? t.detailsFullName}{" "}
                           {settings?.form?.fields?.fullName?.required !== false && "*"}
                         </label>
                         <input
@@ -876,7 +928,7 @@ export default function CollectionWizard({
                             htmlFor="email"
                             style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.email?.label ?? "Email"}{" "}
+                            {settings?.form?.fields?.email?.label ?? t.detailsEmail}{" "}
                             {settings?.form?.fields?.email?.required && "*"}
                           </label>
                           <input
@@ -898,7 +950,7 @@ export default function CollectionWizard({
                               htmlFor="job_title"
                               style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.jobTitle?.label ?? "Job Title"}
+                              {settings?.form?.fields?.jobTitle?.label ?? t.detailsJobTitle}
                             </label>
                             <input
                               id="job_title"
@@ -916,7 +968,7 @@ export default function CollectionWizard({
                               htmlFor="company"
                               style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.company?.label ?? "Company"}
+                              {settings?.form?.fields?.company?.label ?? t.detailsCompany}
                             </label>
                             <input
                               id="company"
@@ -936,7 +988,7 @@ export default function CollectionWizard({
                             htmlFor="linkedin"
                             style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.linkedin?.label ?? "LinkedIn Profile"}{" "}
+                            {settings?.form?.fields?.linkedin?.label ?? t.detailsLinkedIn}{" "}
                             {settings?.form?.fields?.linkedin?.required && "*"}
                           </label>
                           <input
@@ -966,13 +1018,13 @@ export default function CollectionWizard({
                           className="text-xs leading-none font-semibold"
                           style={{ color: "var(--cw-text-primary)" }}
                         >
-                          Identity Verification
+                          {t.identityVerification}
                         </p>
                         <p
                           className="mt-1 text-[10px] leading-relaxed"
                           style={{ color: "var(--cw-text-secondary)" }}
                         >
-                          Your name and title are verified to build trust.
+                          {t.identityVerificationSub}
                         </p>
                       </div>
                     </div>
@@ -988,7 +1040,7 @@ export default function CollectionWizard({
                         }}
                         type="button"
                       >
-                        Back
+                        {t.back}
                       </button>
                       <button
                         className="order-1 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
@@ -1011,7 +1063,7 @@ export default function CollectionWizard({
                         }}
                         type="button"
                       >
-                        Review Testimonial
+                        {t.reviewTestimonial}
                         <ArrowRight className="size-4" />
                       </button>
                     </div>
@@ -1026,14 +1078,13 @@ export default function CollectionWizard({
                     className="mb-2 text-2xl font-extrabold tracking-tight md:text-3xl"
                     style={{ color: "var(--cw-text-primary)" }}
                   >
-                    Ready to submit?
+                    {t.reviewHeadline}
                   </h1>
                   <p
                     className="mb-4 max-w-sm text-sm"
                     style={{ color: "var(--cw-text-secondary)" }}
                   >
-                    Everything looks great. Take one last look at how your testimonial will appear
-                    to others before you hit the button.
+                    {t.reviewSubtext}
                   </p>
 
                   <div className="relative mt-2 mb-5">
@@ -1044,7 +1095,7 @@ export default function CollectionWizard({
                         color: "var(--cw-text-secondary)",
                       }}
                     >
-                      Live Preview
+                      {t.reviewLivePreview}
                     </div>
                     <div
                       className="relative rounded-xl p-5"
@@ -1099,7 +1150,7 @@ export default function CollectionWizard({
                             className="text-[10px] font-bold tracking-tighter uppercase"
                             style={{ color: "var(--cw-fg)" }}
                           >
-                            Verified
+                            {t.reviewVerified}
                           </span>
                         </div>
                       </div>
@@ -1109,7 +1160,7 @@ export default function CollectionWizard({
                           style={{ color: "var(--cw-text-muted)" }}
                         />
                         <p
-                          className="relative z-10 text-sm leading-relaxed italic"
+                          className="relative z-10 text-sm leading-relaxed break-words whitespace-pre-wrap italic"
                           style={{ color: "var(--cw-text-primary)" }}
                         >
                           &quot;{content || "Video Testimonial Attached"}&quot;
@@ -1135,7 +1186,7 @@ export default function CollectionWizard({
                           className="text-[10px] tracking-widest uppercase"
                           style={{ color: "var(--cw-text-secondary)" }}
                         >
-                          {new Date().toLocaleDateString("en-US", {
+                          {new Date().toLocaleDateString(undefined, {
                             month: "long",
                             day: "numeric",
                             year: "numeric",
@@ -1145,33 +1196,66 @@ export default function CollectionWizard({
                     </div>
                   </div>
 
+                  {/* ── Consent Checkbox ── */}
+                  <label
+                    htmlFor="cw-consent"
+                    className="mb-4 flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors"
+                    style={{
+                      backgroundColor: hasConsented
+                        ? "var(--cw-blue-tint-30)"
+                        : "var(--cw-surface)",
+                      border: `1px solid ${
+                        hasConsented ? "var(--cw-blue-tint-border)" : "var(--cw-border-30)"
+                      }`,
+                    }}
+                  >
+                    <input
+                      id="cw-consent"
+                      type="checkbox"
+                      checked={hasConsented}
+                      onChange={(e) => setHasConsented(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 cursor-pointer accent-current"
+                      style={{ accentColor: "var(--cw-fg)" }}
+                    />
+                    <span
+                      className="text-[11px] leading-relaxed"
+                      style={{ color: "var(--cw-text-secondary)" }}
+                    >
+                      {t.consentLabel.replace("{projectName}", project.name)}{" "}
+                      {settings?.privacyPolicyUrl ? (
+                        <a
+                          href={settings.privacyPolicyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 hover:opacity-80"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
+                          {t.consentPrivacyLink}
+                        </a>
+                      ) : null}
+                    </span>
+                  </label>
+
                   <div className="flex w-full flex-col items-center gap-3 sm:flex-row">
                     <button
                       onClick={handleSubmit}
-                      disabled={loading}
-                      className="w-full rounded-lg py-3.5 text-[13px] font-bold shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
+                      disabled={loading || !hasConsented}
+                      className="w-full rounded-lg py-3.5 text-[13px] font-bold shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 sm:flex-1"
                       style={{
                         backgroundColor: "var(--cw-fg)",
                         color: "var(--cw-fg-inv)",
                       }}
                     >
-                      {loading ? "Submitting..." : "Submit Testimonial"}
+                      {loading ? t.submittingButton : t.submitButton}
                     </button>
                     <button
                       onClick={prevStep}
                       className="flex w-full items-center justify-center gap-2 px-6 py-3.5 text-[11px] font-semibold tracking-widest uppercase transition-opacity hover:opacity-70 sm:w-auto"
                       style={{ color: "var(--cw-text-secondary)" }}
                     >
-                      Edit details
+                      {t.editDetails}
                     </button>
                   </div>
-                  <p
-                    className="mt-4 px-4 text-center text-[10px] leading-relaxed"
-                    style={{ color: "var(--cw-text-secondary)" }}
-                  >
-                    By submitting, you agree to our Terms of Service. Your testimonial will be
-                    shared with the team for review and publishing.
-                  </p>
                 </div>
               )}
 
@@ -1188,7 +1272,7 @@ export default function CollectionWizard({
                     className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
                     style={{ color: "var(--cw-text-primary)" }}
                   >
-                    {settings?.pageContent?.thankYou?.headline ?? "You're awesome!"}
+                    {settings?.pageContent?.thankYou?.headline ?? t.defaultThankYouHeadline}
                   </h1>
                   <p
                     className="mx-auto mb-8 max-w-sm text-base"
@@ -1196,7 +1280,7 @@ export default function CollectionWizard({
                   >
                     {settings?.pageContent?.thankYou?.body ??
                       project.thankYouMessage ??
-                      "Your feedback helps us grow and provides authentic proof to others considering our services."}
+                      t.defaultThankYouBody}
                   </p>
 
                   <div className="flex flex-col items-center gap-3">
@@ -1219,7 +1303,7 @@ export default function CollectionWizard({
                       onClick={() => window.location.reload()}
                       style={{ color: "var(--cw-text-secondary)" }}
                     >
-                      Post another review
+                      {t.postAnotherReview}
                     </button>
                   </div>
                 </>
@@ -1255,8 +1339,7 @@ export default function CollectionWizard({
               className="px-4 text-xs leading-relaxed italic"
               style={{ color: "var(--cw-text-secondary)" }}
             >
-              &quot;Real feedback like yours is what makes our community thrive. Thank you for your
-              time.&quot;
+              {t.trustQuote}
             </p>
           </motion.div>
         )}
@@ -1267,8 +1350,7 @@ export default function CollectionWizard({
         className="mt-4 px-4 text-center text-[10px] leading-relaxed font-medium opacity-60"
         style={{ color: "var(--cw-text-secondary)" }}
       >
-        By continuing, you agree to our terms of service and acknowledge that your rating may be
-        used for marketing purposes.
+        {t.footerDisclaimer}
       </p>
     </div>
   );

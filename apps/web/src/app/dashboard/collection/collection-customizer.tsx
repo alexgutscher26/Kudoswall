@@ -81,6 +81,7 @@ export type CollectionSettings = {
   passwordProtection?: string;
   expiryDate?: string;
   redirectUrl?: string;
+  privacyPolicyUrl?: string;
 };
 
 const DEFAULT_SETTINGS: CollectionSettings = {
@@ -688,6 +689,25 @@ export function CollectionCustomizer({
                     placeholder="https://yourwebsite.com/welcome"
                     type="url"
                     value={settings.redirectUrl}
+                  />
+                </div>
+              </div>
+
+              <SectionHeader icon={Shield} pro title="Legal & Compliance" />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Privacy Policy URL
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    disabled={!isPro}
+                    onChange={(e) =>
+                      setSettings((prev) => ({ ...prev, privacyPolicyUrl: e.target.value }))
+                    }
+                    placeholder="https://yourwebsite.com/privacy"
+                    type="url"
+                    value={settings.privacyPolicyUrl || ""}
                   />
                 </div>
               </div>

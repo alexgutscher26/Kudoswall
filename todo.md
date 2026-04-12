@@ -144,9 +144,9 @@
 - [x] Fully responsive mobile-first layout
 - [x] Dark / Light mode detection (`prefers-color-scheme`)
 - [x] Animated step transitions (slide, fade) between wizard steps
-- [ ] "Skip this step" button for optional fields (Video, Photo)
-- [ ] Multi-language support on collection pages (auto-detect browser locale)
-- [ ] End-user consent checkbox for data storage before submission
+- [x] "Skip this step" button for optional fields (Video, Photo)
+- [x] Multi-language support on collection pages (auto-detect browser locale)
+- [x] End-user consent checkbox for data storage before submission
 - [ ] Duplicate submission detection (same email within 30 days)
 - [ ] IP-based rate limiting on the collection submission endpoint
 
