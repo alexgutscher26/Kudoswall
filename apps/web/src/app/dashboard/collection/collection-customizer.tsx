@@ -698,6 +698,7 @@ export function CollectionCustomizer({
 
       {/* Main Area - Preview */}
       <div
+        id="collection-preview-area"
         className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300"
         style={{
           backgroundColor: settings.backgroundColor,
@@ -714,7 +715,12 @@ export function CollectionCustomizer({
         {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
           <style
             dangerouslySetInnerHTML={{
-              __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap');`,
+              __html: `
+                @import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');
+                #collection-preview-area, #collection-preview-area * {
+                  font-family: inherit !important;
+                }
+              `,
             }}
           />
         )}

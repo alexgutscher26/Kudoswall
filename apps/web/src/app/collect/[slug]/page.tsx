@@ -138,7 +138,7 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
       {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
         <style
           dangerouslySetInnerHTML={{
-            __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap');`,
+            __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');`,
           }}
         />
       )}
