@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Code2,
   Copy,
@@ -21,7 +22,6 @@ import {
   Save,
   Globe,
   Loader2,
-  Link,
   MoreHorizontal,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
@@ -741,36 +741,22 @@ export default function WidgetCustomizer({
               </code>
             </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-neutral-100 bg-neutral-50 p-6">
-                <Globe className="mb-4 size-6 text-pink-500" />
-                <h4 className="mb-2 font-bold text-neutral-900">Iframe Fallback</h4>
-                <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-                  Ideal for platforms like Squarespace or Wix that restrict custom scripts.
-                </p>
-                <button
-                  onClick={() =>
-                    copyToClipboard(
-                      `<iframe src="${origin || "https://kudoswall.org"}/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
-                    )
-                  }
-                  className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
-                >
-                  Copy Iframe Code <ArrowRight className="size-3" />
-                </button>
-              </div>
-              <div className="rounded-3xl border border-neutral-100 bg-neutral-50 p-6">
-                <Zap className="mb-4 size-6 text-pink-500" />
-                <h4 className="mb-2 font-bold text-neutral-900">Dynamic Filtering</h4>
-                <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+            <div className="mt-12">
+              <div className="group rounded-[32px] border border-neutral-100 bg-white p-8 shadow-sm transition-all hover:shadow-md">
+                <div className="mb-6 flex size-12 items-center justify-center rounded-2xl bg-pink-50 text-pink-500 transition-transform group-hover:scale-110">
+                  <Zap className="size-6 fill-pink-500/10" />
+                </div>
+                <h4 className="mb-3 text-xl font-bold text-neutral-900">Dynamic Filtering</h4>
+                <p className="mb-6 text-[15px] leading-relaxed text-neutral-500">
                   You can override some settings via data-attributes without coming back here.
                 </p>
-                <a
-                  href="#"
-                  className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
+                <Link
+                  href={"/docs" as Route}
+                  className="inline-flex items-center gap-2 text-[14px] font-bold text-neutral-900 transition-colors hover:text-pink-500"
                 >
-                  View Documentation <ArrowRight className="size-3" />
-                </a>
+                  View Documentation{" "}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
             </div>
           </div>
