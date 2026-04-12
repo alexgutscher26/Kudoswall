@@ -1,37 +1,38 @@
-# PLAN: Premium Segmented Progress Bar
+# PLAN: IP-Based Rate Limiting on Collection Submission Endpoint
 
-Implement a high-fidelity, segmented progress bar for multi-step forms to improve UX and provide clear task progression feedback.
+Implement robust IP-based rate limiting on the collection submission endpoint using Upstash Redis to prevent abuse and spam submissions. This will replace the current in-memory map which resets on server restarts and doesn't scale across multiple instances.
 
 ## 🏁 Goals
 
-- [ ] **Reusable Component**: Create a `ProgressBar` in `@my-better-t-app/ui` that can handle any number of steps.
-- [ ] **Visual Clarity**: Show total steps as discrete segments or a clear percentage block.
-- [ ] **Smooth Motion**: Use Framer Motion for fluid transitions between steps.
-- [ ] **Project Integration**: Integrate the new component into `CollectionWizard` first.
+- [ ] **Scalability**: Move from `Map<string, ...>` to Upstash Redis to support multi-region/serverless deployments.
+- [ ] **Security**: Limit submissions per IP Address (e.g., 5 submissions per 24 hours per IP).
+- [ ] **Accuracy**: Utilize robust IP detection (Cloudflare-friendly headers) already present in the endpoint.
+- [ ] **Standardization**: Implement `@upstash/ratelimit` and `@upstash/redis`.
 
 ---
 
 ## 🛠️ Implementation Phases
 
-### Phase 1: UI Component (frontend-specialist)
+### Phase 1: Environment & Setup (devops-engineer)
 
-1. **Creation**: Build `packages/ui/src/components/progress.tsx` using a Radix-like pattern but optimized for a premium look (glassmorphism/glow).
-2. **Features**: Support `maxSteps`, `currentStep`, and custom `accentColor`.
+1. **Dependencies**: Install `@upstash/ratelimit` and `@upstash/redis` in the appropriate workspace context.
+2. **Environment Configuration**: Ensure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are documented as required.
 
-### Phase 2: Integration (project-planner)
+### Phase 2: Refactoring (backend-specialist)
 
-1. **Migration**: Replace the hardcoded `h-1` div in `CollectionWizard.tsx` with the new `@my-better-t-app/ui/Progress` component.
-2. **Step Mapping**: Ensure the `steps` dictionary in the wizard correctly maps to the progress bar's indices.
+1. **Location**: Edit `apps/web/src/app/api/collection/[slug]/route.ts`.
+2. **Setup Ratelimit**: Initialize the `Ratelimit` using the Upstash Redis client.
+3. **Apply Limits**: Check the IP via `ratelimit.limit(ip)`.
+4. **Error Handling**: Return a `429 Too Many Requests` status cleanly if `success` is false.
+5. **Clean Up**: Remove the old in-memory `rateLimitMap`.
 
-### Phase 3: Verification (test-engineer)
+### Phase 3: Verification (security-auditor / test-engineer)
 
-1. **Navigation Test**: Verify progress bar updates correctly when clicking "Next" and "Back".
-2. **Snapshot Test**: Ensure the progress bar doesn't cause layout shifts (CLS) on step transitions.
+1. **Unit/Integration Check**: Trigger requests to ensure rate limits kick in at the designated threshold.
 
 ---
 
 ## 📝 Next Steps
 
 1. Approve this plan.
-2. Create the reusable UI component.
-3. Update the Collection Wizard.
+2. Orchestrate implementation agents to carry out the dependency installation and refactoring.

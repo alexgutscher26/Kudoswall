@@ -29,6 +29,8 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "^11.13.4",
     "@types/canvas-confetti": "^1.9.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "@vercel/speed-insights": "^2.0.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "catalog:",

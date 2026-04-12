@@ -1,5 +1,7 @@
 import { db } from "@/lib/server-db";
 import { project, testimonial } from "@my-better-t-app/db/schema";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
@@ -20,8 +22,13 @@ const testimonialSchema = z.object({
   videoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
-// Simple in-memory rate limiting (Note: In production with multiple instances, use Redis/KV)
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
+// Upstash Redis Rate Limiting (5 submissions per IP per 24h)
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "24h"),
+  analytics: true,
+  prefix: "@upstash/ratelimit:collection-submission",
+});
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -34,21 +41,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     "unknown";
 
   // 1. Rate Limiting Logic (5 submissions per IP per 24h)
-  const now = Date.now();
-  const limit = 5;
-  const window = 24 * 60 * 60 * 1000;
+  const { success, limit, remaining, reset } = await ratelimit.limit(ip);
 
-  const current = rateLimitMap.get(ip) || { count: 0, reset: now + window };
-
-  if (now > current.reset) {
-    current.count = 0;
-    current.reset = now + window;
-  }
-
-  if (current.count >= limit) {
+  if (!success) {
     return NextResponse.json(
       { error: "Too many submissions. Please try again in 24 hours." },
-      { status: 429 },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": limit.toString(),
+          "X-RateLimit-Remaining": remaining.toString(),
+          "X-RateLimit-Reset": reset.toString(),
+        },
+      },
     );
   }
 
@@ -95,9 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       status: "pending",
     });
 
-    // 4. Update rate limit
-    current.count++;
-    rateLimitMap.set(ip, current);
+    // 4. Rate limit is automatically managed by Upstash on .limit() call.
 
     // 5. Fire non-blocking email notification (Placeholder for Resend integration)
     // resend.emails.send(...)

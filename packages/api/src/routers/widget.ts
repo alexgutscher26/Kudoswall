@@ -1,6 +1,13 @@
 import { protectedProcedure, router, publicProcedure } from "../index";
-import { widget, workspace, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray, gte, isNull } from "drizzle-orm";
+import {
+  widget,
+  workspace,
+  project,
+  testimonial,
+  testimonialToTag,
+  tag,
+} from "@my-better-t-app/db/schema";
+import { eq, and, desc, inArray, gte, isNull, exists } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 
@@ -230,13 +237,29 @@ export const widgetRouter = router({
       const projectIds = projects.map((p) => p.id);
 
       // Base query for approved testimonials
-      let testimonials = await db.query.testimonial.findMany({
+      const testimonials = await db.query.testimonial.findMany({
         where: and(
           inArray(testimonial.projectId, projectIds),
           eq(testimonial.status, "approved"),
+          isNull(testimonial.deletedAt),
           settings.filterMinRating ? gte(testimonial.rating, settings.filterMinRating) : undefined,
           settings.filterType && settings.filterType !== "all"
             ? eq(testimonial.type, settings.filterType)
+            : undefined,
+          settings.filterTags && settings.filterTags.length > 0
+            ? exists(
+                db
+                  .select({ id: testimonialToTag.tagId })
+                  .from(testimonialToTag)
+                  .innerJoin(tag, eq(tag.id, testimonialToTag.tagId))
+                  .where(
+                    and(
+                      eq(testimonialToTag.testimonialId, testimonial.id),
+                      inArray(tag.name, settings.filterTags),
+                      isNull(tag.deletedAt),
+                    ),
+                  ),
+              )
             : undefined,
         ),
         orderBy: desc(testimonial.createdAt),
@@ -249,13 +272,6 @@ export const widgetRouter = router({
           },
         },
       });
-
-      // TODO: Implement tag filtering in DB if possible, or filter here for now
-      if (settings.filterTags && settings.filterTags.length > 0) {
-        testimonials = testimonials.filter((t) =>
-          t.testimonialToTags.some((tt) => settings.filterTags.includes(tt.tag.name)),
-        );
-      }
 
       return {
         widget: {
