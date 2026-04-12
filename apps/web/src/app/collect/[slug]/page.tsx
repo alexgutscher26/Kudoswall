@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/server-db";
 import { project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, or, and } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
 import ErrorBoundary from "@/components/error-boundary";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -133,71 +133,74 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   };
 
   return (
-    <main
-      className="relative flex h-screen items-center justify-center overflow-hidden px-4 sm:px-6"
-      style={{
-        backgroundColor,
-        fontFamily:
-          settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-            ? `'${settings.fontFamily}', sans-serif`
-            : settings?.fontFamily === "mono"
-              ? "monospace"
-              : settings?.fontFamily === "serif"
-                ? "serif"
-                : undefined,
-      }}
-    >
+    <>
       <JsonLd data={jsonLd} />
       {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
-        <link
-          href={`https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap`}
-          rel="stylesheet"
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap');`,
+          }}
         />
       )}
-      {/* Background patterns */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="absolute -top-[10%] -right-[5%] size-[600px] animate-pulse rounded-full blur-[120px]"
-          style={{ backgroundColor: `${accentColor}10` }}
-        />
-        <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
-        <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40" />
-      </div>
-
-      <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
-        <div className="mb-6 space-y-4 text-center">
-          {logoUrl && (
-            <div className="group relative inline-block">
-              <div
-                className="absolute -inset-2 rounded-[24px] opacity-20 blur-xl transition-opacity group-hover:opacity-40"
-                style={{ backgroundColor: accentColor }}
-              />
-              <Image
-                src={logoUrl}
-                alt={projectData.workspace.name}
-                width={56}
-                height={56}
-                priority
-                className="relative mx-auto size-14 rounded-[18px] border border-neutral-100 bg-white object-cover p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
-              />
-            </div>
-          )}
-          <div className="space-y-1">
-            <h1 className="text-3xl leading-tight font-black tracking-tighter text-neutral-900 sm:text-5xl">
-              {headline}
-            </h1>
-            <p className="text-md mx-auto max-w-xl font-medium text-neutral-500">{subheading}</p>
-          </div>
+      <main
+        className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
+        style={{
+          backgroundColor,
+          fontFamily:
+            settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+              ? `"${settings.fontFamily}", sans-serif`
+              : settings?.fontFamily === "mono"
+                ? "monospace"
+                : settings?.fontFamily === "serif"
+                  ? "serif"
+                  : "var(--font-sans), sans-serif",
+        }}
+      >
+        {/* Background patterns */}
+        <div className="absolute inset-0 z-0">
+          <div
+            className="absolute -top-[10%] -right-[5%] size-[600px] animate-pulse rounded-full blur-[120px]"
+            style={{ backgroundColor: `${accentColor}10` }}
+          />
+          <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
+          <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40" />
         </div>
 
-        <ErrorBoundary name="Collection Wizard">
-          <CollectionWizard
-            project={projectData as any}
-            initialType={t === "v" ? "video" : t === "t" ? "text" : null}
-          />
-        </ErrorBoundary>
-      </div>
-    </main>
+        <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
+          <div className="mb-6 space-y-4 text-center">
+            {logoUrl && (
+              <div className="group relative inline-block">
+                <div
+                  className="absolute -inset-2 rounded-[24px] opacity-20 blur-xl transition-opacity group-hover:opacity-40"
+                  style={{ backgroundColor: accentColor }}
+                />
+                <Image
+                  src={logoUrl}
+                  alt={projectData.workspace.name}
+                  width={56}
+                  height={56}
+                  priority
+                  className="relative mx-auto size-14 rounded-[18px] border border-neutral-100 bg-white object-cover p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                />
+              </div>
+            )}
+            <div className="space-y-1">
+              <h1 className="text-3xl leading-tight font-black tracking-tighter text-neutral-900 sm:text-5xl">
+                {headline}
+              </h1>
+              <p className="mx-auto max-w-xl text-lg font-medium text-neutral-500">{subheading}</p>
+            </div>
+          </div>
+
+          <ErrorBoundary name="Collection Wizard">
+            <CollectionWizard
+              project={projectData as any}
+              initialType={t === "v" ? "video" : t === "t" ? "text" : null}
+            />
+          </ErrorBoundary>
+        </div>
+      </main>
+    </>
   );
 }

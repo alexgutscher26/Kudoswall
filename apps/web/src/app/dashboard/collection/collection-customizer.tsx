@@ -702,15 +702,20 @@ export function CollectionCustomizer({
         style={{
           backgroundColor: settings.backgroundColor,
           fontFamily:
-            settings.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-              ? `'${settings.fontFamily}', sans-serif`
-              : settings.fontFamily,
+            settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+              ? `"${settings.fontFamily}", sans-serif`
+              : settings?.fontFamily === "mono"
+                ? "monospace"
+                : settings?.fontFamily === "serif"
+                  ? "serif"
+                  : "var(--font-sans), sans-serif",
         }}
       >
-        {settings.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
-          <link
-            href={`https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap`}
-            rel="stylesheet"
+        {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap');`,
+            }}
           />
         )}
         <div className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-neutral-200 bg-white/80 px-5 py-1.5 shadow-sm backdrop-blur-md">
