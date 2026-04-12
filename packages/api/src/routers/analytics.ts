@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, router } from "../index";
+import { protectedProcedure, publicAnalyticsProcedure, router } from "../index";
 import {
   workspace,
   project,
@@ -20,7 +20,7 @@ const getTimefilter = (timeframe?: string) => {
 };
 
 export const analyticsRouter = router({
-  trackEvent: publicProcedure
+  trackEvent: publicAnalyticsProcedure
     .input(
       z.object({
         workspaceId: z.string(),

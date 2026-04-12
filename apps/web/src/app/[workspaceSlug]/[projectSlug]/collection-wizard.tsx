@@ -4,25 +4,18 @@ import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import {
-  Building2,
   Camera,
   CheckCircle2,
-  ChevronLeft,
-  Linkedin,
   Quote,
   Star,
   Video as VideoIcon,
-  Loader2,
   BadgeCheck,
   ShieldCheck,
   ArrowRight,
   ArrowLeft,
-  Lightbulb,
-  Gauge,
-  Headset,
   User,
 } from "lucide-react";
-import { useState, useMemo, useEffect, type SetStateAction } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
@@ -124,11 +117,16 @@ export default function CollectionWizard({
   }, [DRAFT_KEY, rating, content, photo, name, email, company, linkedin, tagline, mode, step]);
 
   useEffect(() => {
-    trackEvent.mutate({
-      workspaceId: project.workspaceId,
-      projectId: project.id,
-      eventType: "view",
-    });
+    trackEvent.mutate(
+      {
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "view",
+      },
+      {
+        onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message),
+      },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

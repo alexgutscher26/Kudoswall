@@ -38,6 +38,7 @@ interface WidgetProps {
       textColor?: string | null;
       locale?: string;
       maxWidth?: number | null;
+      fontFamily?: string;
       headerTitle?: string;
       headerRating?: number;
       headerReviewCount?: number;
@@ -72,11 +73,16 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
   useEffect(() => {
     // Only track view once on mount
-    trackEvent.mutate({
-      workspaceId: data.workspaceId,
-      widgetId: data.id,
-      eventType: "view",
-    });
+    trackEvent.mutate(
+      {
+        workspaceId: data.workspaceId,
+        widgetId: data.id,
+        eventType: "view",
+      },
+      {
+        onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message),
+      },
+    );
 
     // Report height to parent if in iframe
     if (window.self !== window.top) {
@@ -263,11 +269,21 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     );
   };
 
+  // Resolve fontFamily to a valid CSS font-family stack
+  const resolvedFontFamily = (() => {
+    const f = settings.fontFamily;
+    if (!f || f === "sans") return undefined;
+    if (f === "serif") return "ui-serif, Georgia, serif";
+    if (f === "mono") return "ui-monospace, 'Cascadia Code', monospace";
+    // Custom Google Font — the embed page already loaded the @font-face via <link>
+    return `"${f}", sans-serif`;
+  })();
+
   return (
     <div
       ref={containerRef}
       className="w-full overflow-hidden pb-12"
-      style={{ backgroundColor: settings.backgroundColor }}
+      style={{ backgroundColor: settings.backgroundColor, fontFamily: resolvedFontFamily }}
     >
       {/* ─── Auto Stats Calculation ────────────────────────────────────────── */}
       {(() => {

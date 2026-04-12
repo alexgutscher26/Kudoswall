@@ -68,6 +68,7 @@ interface WidgetSettings {
   // Advanced
   locale: string;
   animation: "fade" | "none";
+  fontFamily: string;
 
   // Header
   headerTitle: string;
@@ -115,6 +116,7 @@ export default function WidgetCustomizer({
     hideBadge: false,
     locale: "en",
     animation: "fade",
+    fontFamily: "sans",
     headerTitle: "What our customers say",
     headerRating: 4.9,
     headerReviewCount: 128,
@@ -158,6 +160,20 @@ export default function WidgetCustomizer({
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  // Dynamically load the Google Font in the customizer preview whenever fontFamily changes.
+  // Uses an idempotent link-injection pattern so rapid font switches don't pile up requests.
+  useEffect(() => {
+    const { fontFamily } = settings;
+    if (!fontFamily || ["sans", "serif", "mono"].includes(fontFamily)) return;
+    const linkId = `kudos-preview-font-${fontFamily.replace(/\s+/g, "-")}`.toLowerCase();
+    if (document.getElementById(linkId)) return; // already injected
+    const link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
+    document.head.appendChild(link);
+  }, [settings.fontFamily]);
 
   const embedCode = `<script src="${origin || "https://kudoswall.org"}/widget.js" 
   data-id="${widgetId}" 

@@ -69,6 +69,14 @@ export const publicProcedure = t.procedure
   .use(ratelimitMiddleware)
   .use(csrfMiddleware);
 
+/**
+ * Public procedure for analytics events (widget views, clicks).
+ * Intentionally skips CSRF validation because the widget runs inside a
+ * cross-origin iframe where the csrf-token cookie is never attached by the
+ * browser (sameSite: lax). Rate-limiting is still enforced.
+ */
+export const publicAnalyticsProcedure = t.procedure.use(tracingMiddleware).use(ratelimitMiddleware);
+
 export const protectedProcedure = t.procedure
   .use(tracingMiddleware)
   .use(ratelimitMiddleware)

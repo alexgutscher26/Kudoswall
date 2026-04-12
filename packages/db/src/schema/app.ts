@@ -17,6 +17,7 @@ export const testimonialStatusEnum = pgEnum("testimonial_status", [
   "archived",
 ]);
 export const testimonialTypeEnum = pgEnum("testimonial_type", ["text", "video"]);
+export const analyticsEventTypeEnum = pgEnum("analytics_event_type", ["view", "click"]);
 
 export const workspace = pgTable(
   "workspace",
@@ -156,7 +157,7 @@ export const analyticsEvent = pgTable(
       .references(() => workspace.id, { onDelete: "cascade" }),
     projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
     widgetId: text("widget_id").references(() => widget.id, { onDelete: "set null" }),
-    eventType: text("event_type").notNull(), // 'view', 'click'
+    eventType: analyticsEventTypeEnum("event_type").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [

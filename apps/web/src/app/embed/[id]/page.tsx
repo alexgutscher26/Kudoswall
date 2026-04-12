@@ -29,8 +29,15 @@ export default async function EmbedPage({
     notFound();
   }
 
-  let settings = JSON.parse(w.settingsJson);
+  const settings = JSON.parse(w.settingsJson);
   settings.truncateText = "off"; // Explicitly disable truncation so full text shows
+
+  // Derive font link server-side so it's in the HTML before React hydrates (no FOUF)
+  const fontFamily = settings.fontFamily as string | undefined;
+  const isCustomFont = Boolean(fontFamily && !["sans", "serif", "mono"].includes(fontFamily));
+  const fontHref = isCustomFont
+    ? `https://fonts.googleapis.com/css2?family=${(fontFamily as string).replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`
+    : null;
 
   // Helper to normalize colors from URL params
   const normalizeColor = (c: string | string[] | undefined) => {
@@ -134,11 +141,28 @@ export default async function EmbedPage({
 
   return (
     <div className="h-auto bg-transparent p-4">
+      {/* Preconnect so DNS resolution happens in parallel with HTML parse */}
+      {fontHref && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          {/* crossOrigin required for CORS fonts from gstatic */}
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link rel="stylesheet" href={fontHref} />
+        </>
+      )}
       <style
         dangerouslySetInnerHTML={{
-          __html: `
-        html, body { background: transparent !important; }
-      `,
+          __html: [
+            "html, body { background: transparent !important; }",
+            // Override Tailwind's font-sans (applied via class on many elements).
+            // Using * + !important is the only reliable fix inside an iframe
+            // where we cannot control the parent stylesheet specificity.
+            isCustomFont
+              ? `*, *::before, *::after { font-family: "${fontFamily}", sans-serif !important; }`
+              : "",
+          ]
+            .filter(Boolean)
+            .join("\n"),
         }}
       />
       <JsonLd data={jsonLd} />

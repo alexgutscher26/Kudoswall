@@ -1,0 +1,2 @@
+CREATE TYPE "public"."analytics_event_type" AS ENUM('view', 'click');--> statement-breakpoint
+ALTER TABLE "analytics_event" ALTER COLUMN "event_type" SET DATA TYPE "public"."analytics_event_type" USING "event_type"::"public"."analytics_event_type";

@@ -22,6 +22,13 @@
       "when": 1775550137780,
       "tag": "0002_legal_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775970399206,
+      "tag": "0003_add_analytics_event_type_enum",
+      "breakpoints": true
     }
   ]
 }
