@@ -45,6 +45,7 @@ type Step = "rating" | "choice" | "text" | "video" | "details" | "review" | "suc
 
 interface CollectionSettings {
   fontFamily?: string;
+  backgroundColor?: string;
   form?: {
     starRating?: { enabled: boolean };
     minCharCount?: number;
@@ -70,6 +71,117 @@ interface CollectionSettings {
   };
 }
 
+/**
+ * Detects system color scheme preference via `prefers-color-scheme`.
+ * Returns `false` when `enabled` is `false` (e.g. project has explicit bg).
+ */
+function useDarkMode(enabled: boolean): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [enabled]);
+
+  return isDark;
+}
+
+/**
+ * Framer Motion variants for directional slide+fade step transitions.
+ * Uses `transform: translateX` for GPU acceleration (no layout thrash).
+ */
+const SLIDE_VARIANTS = {
+  enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -40 : 40, opacity: 0 }),
+} as const;
+
+const SLIDE_TRANSITION = {
+  duration: 0.25,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
+
+/** Scoped CSS custom properties for light/dark color themes. */
+const THEME_CSS = `
+  .cw-root {
+    --cw-card: #ffffff;
+    --cw-surface: #f2f4f6;
+    --cw-badge: #e6e8ea;
+    --cw-border-20: rgba(198, 198, 205, 0.2);
+    --cw-border-30: rgba(198, 198, 205, 0.3);
+    --cw-border-60: rgba(198, 198, 205, 0.65);
+    --cw-text-primary: #191c1e;
+    --cw-text-secondary: #45464d;
+    --cw-text-muted: #76777d;
+    --cw-fg: #000000;
+    --cw-fg-inv: #ffffff;
+    --cw-blue-tint-30: rgba(213, 227, 253, 0.3);
+    --cw-blue-tint-40: rgba(213, 227, 253, 0.4);
+    --cw-blue-tint-border: #d5e3fd;
+    --cw-star-empty: #e0e3e5;
+    --cw-green: #009668;
+    --cw-progress-track: #e6e8ea;
+    --cw-anim-bg: rgba(213, 227, 253, 0.3);
+  }
+  .cw-root[data-dark="true"] {
+    --cw-card: #1c1c1f;
+    --cw-surface: #27272a;
+    --cw-badge: #3f3f46;
+    --cw-border-20: rgba(255, 255, 255, 0.06);
+    --cw-border-30: rgba(255, 255, 255, 0.1);
+    --cw-border-60: rgba(255, 255, 255, 0.22);
+    --cw-text-primary: #fafafa;
+    --cw-text-secondary: #a1a1aa;
+    --cw-text-muted: #71717a;
+    --cw-fg: #ffffff;
+    --cw-fg-inv: #18181b;
+    --cw-blue-tint-30: rgba(63, 63, 70, 0.5);
+    --cw-blue-tint-40: rgba(63, 63, 70, 0.6);
+    --cw-blue-tint-border: rgba(255, 255, 255, 0.1);
+    --cw-star-empty: #3f3f46;
+    --cw-green: #34d399;
+    --cw-progress-track: #3f3f46;
+    --cw-anim-bg: rgba(63, 63, 70, 0.3);
+  }
+  /* Interactive field styles using CSS vars for hover/focus states */
+  .cw-root .cw-field {
+    background-color: var(--cw-surface);
+    color: var(--cw-text-primary);
+    border: 1px solid var(--cw-border-30);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.15s ease;
+  }
+  .cw-root .cw-field::placeholder {
+    color: var(--cw-text-muted);
+    opacity: 1;
+  }
+  .cw-root .cw-field:hover {
+    border-color: var(--cw-border-60);
+  }
+  .cw-root .cw-field:focus {
+    outline: none;
+    background-color: var(--cw-card);
+    box-shadow: 0 0 0 2px var(--cw-fg);
+    border-color: transparent;
+  }
+  /* Choice card button hover */
+  .cw-root .cw-choice-btn {
+    background-color: var(--cw-card);
+    border: 1px solid var(--cw-border-30);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .cw-root .cw-choice-btn:hover {
+    border-color: var(--cw-border-60);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .cw-root .cw-choice-btn:active {
+    transform: scale(0.98);
+  }
+`;
+
 export default function CollectionWizard({
   project,
   initialType,
@@ -77,12 +189,19 @@ export default function CollectionWizard({
   const settings = useMemo<CollectionSettings | null>(() => {
     try {
       return project.collectionSettingsJson ? JSON.parse(project.collectionSettingsJson) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }, [project.collectionSettingsJson]);
 
-  const [mode, setMode] = useState<"text" | "video" | null>(initialType || null);
+  // Dark mode is disabled when the project owner has set an explicit background color
+  const hasExplicitBackground = Boolean(settings?.backgroundColor);
+  const isDark = useDarkMode(!hasExplicitBackground);
+
+  // Slide direction: 1 = forward (enter from right), -1 = backward (enter from left)
+  const [direction, setDirection] = useState(1);
+
+  const [mode, setMode] = useState<"text" | "video" | null>(initialType ?? null);
   const [step, setStep] = useState<Step>(() => {
     if (settings?.form?.starRating?.enabled === false) {
       if (initialType) return initialType === "video" ? "video" : "text";
@@ -106,11 +225,23 @@ export default function CollectionWizard({
 
   const DRAFT_KEY = `t-wall-draft-${project.id}`;
 
+  // Restore draft from localStorage on mount
   useEffect(() => {
     const savedDraft = localStorage.getItem(DRAFT_KEY);
     if (savedDraft) {
       try {
-        const draft = JSON.parse(savedDraft);
+        const draft = JSON.parse(savedDraft) as Partial<{
+          rating: number;
+          content: string;
+          photo: string;
+          name: string;
+          email: string;
+          company: string;
+          linkedin: string;
+          tagline: string;
+          mode: "text" | "video";
+          step: Step;
+        }>;
         if (draft.rating) setRating(draft.rating);
         if (draft.content) setContent(draft.content);
         if (draft.photo) setPhoto(draft.photo);
@@ -121,43 +252,28 @@ export default function CollectionWizard({
         if (draft.tagline) setTagline(draft.tagline);
         if (draft.mode) setMode(draft.mode);
         if (draft.step && draft.step !== "success") setStep(draft.step);
-      } catch (e) {}
+      } catch {
+        // Ignore malformed draft
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Persist draft to localStorage on change
   useEffect(() => {
     if (step === "success") return;
-    const draft = {
-      rating,
-      content,
-      photo,
-      name,
-      email,
-      company,
-      linkedin,
-      tagline,
-      mode,
-      step,
-    };
+    const draft = { rating, content, photo, name, email, company, linkedin, tagline, mode, step };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
   }, [DRAFT_KEY, rating, content, photo, name, email, company, linkedin, tagline, mode, step]);
 
+  // Track page view
   useEffect(() => {
     trackEvent.mutate(
-      {
-        workspaceId: project.workspaceId,
-        projectId: project.id,
-        eventType: "view",
-      },
-      {
-        onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message),
-      },
+      { workspaceId: project.workspaceId, projectId: project.id, eventType: "view" },
+      { onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message) },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const isPro = project.workspace.isPro;
 
   const stepsData = useMemo(() => {
     const mapping: Record<Step, { percent: number; text: string; title: string }> = {
@@ -172,9 +288,8 @@ export default function CollectionWizard({
     return mapping[step];
   }, [step]);
 
-  const currentStepInfo = stepsData;
-
   const nextStep = () => {
+    setDirection(1);
     if (step === "rating") {
       if (mode === "video") return setStep("video");
       if (mode === "text") return setStep("text");
@@ -191,6 +306,7 @@ export default function CollectionWizard({
   };
 
   const prevStep = () => {
+    setDirection(-1);
     if (step === "choice") return setStep("rating");
     if (step === "text" || step === "video") {
       if (initialType) return setStep("rating");
@@ -207,9 +323,7 @@ export default function CollectionWizard({
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
-    function randomInRange(min: number, max: number) {
-      return Math.random() * (max - min) + min;
-    }
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
     const interval: ReturnType<typeof setInterval> = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
@@ -283,7 +397,7 @@ export default function CollectionWizard({
         content: mode === "video" && !content ? "Video Testimonial" : content,
         authorName: name,
         authorEmail: email,
-        authorImage: photo || undefined,
+        authorImage: photo ?? undefined,
         authorCompany: company || undefined,
         authorLinkedin: linkedin || undefined,
         authorTagline: tagline || undefined,
@@ -293,7 +407,7 @@ export default function CollectionWizard({
       localStorage.removeItem(DRAFT_KEY);
       fireConfetti();
       setStep("success");
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -319,20 +433,25 @@ export default function CollectionWizard({
     );
   }
 
+  const fontFamily =
+    settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+      ? `"${settings.fontFamily}", sans-serif`
+      : settings?.fontFamily === "mono"
+        ? "monospace"
+        : settings?.fontFamily === "serif"
+          ? "serif"
+          : "var(--font-sans), sans-serif";
+
   return (
     <div
-      className="mx-auto w-full max-w-lg"
-      style={{
-        fontFamily:
-          settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-            ? `"${settings.fontFamily}", sans-serif`
-            : settings?.fontFamily === "mono"
-              ? "monospace"
-              : settings?.fontFamily === "serif"
-                ? "serif"
-                : "var(--font-sans), sans-serif",
-      }}
+      className="cw-root mx-auto w-full max-w-lg"
+      data-dark={isDark ? "true" : "false"}
+      style={{ fontFamily }}
     >
+      {/* Scoped CSS custom properties for adaptive color theming */}
+      <style>{THEME_CSS}</style>
+
+      {/* Google Font import (only for non-system fonts) */}
       {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
         <style
           dangerouslySetInnerHTML={{
@@ -340,71 +459,99 @@ export default function CollectionWizard({
           }}
         />
       )}
+
       {/* Step Indicator */}
       {step !== "success" && (
         <div className="mb-8">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <span className="text-[11px] tracking-[0.1em] text-[#45464d] uppercase">
-                {currentStepInfo.text}
+              <span
+                className="text-[11px] tracking-[0.1em] uppercase"
+                style={{ color: "var(--cw-text-secondary)" }}
+              >
+                {stepsData.text}
               </span>
-              <h2 className="mt-1 text-lg font-bold text-[#191c1e]">{currentStepInfo.title}</h2>
+              <h2 className="mt-1 text-lg font-bold" style={{ color: "var(--cw-text-primary)" }}>
+                {stepsData.title}
+              </h2>
             </div>
-            <span className="text-xs font-medium text-[#45464d]">
-              {currentStepInfo.percent}% Complete
+            <span className="text-xs font-medium" style={{ color: "var(--cw-text-secondary)" }}>
+              {stepsData.percent}% Complete
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e6e8ea]">
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full"
+            style={{ backgroundColor: "var(--cw-progress-track)" }}
+          >
             <div
-              className="h-full rounded-full bg-[#000000] transition-all duration-500"
-              style={{ width: `${currentStepInfo.percent}%` }}
-            ></div>
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${stepsData.percent}%`, backgroundColor: "var(--cw-fg)" }}
+            />
           </div>
         </div>
       )}
 
       {/* Central Editorial Card */}
-      <div className="group relative overflow-hidden rounded-xl border border-[#c6c6cd]/20 bg-[#ffffff] p-5 shadow-sm md:p-8">
-        {/* Abstract Subtle Background Element */}
-        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#d5e3fd]/30 blur-3xl transition-colors duration-700 group-hover:bg-[#d5e3fd]/50"></div>
+      <div
+        className="group relative overflow-hidden rounded-xl p-5 shadow-sm md:p-8"
+        style={{
+          backgroundColor: "var(--cw-card)",
+          border: "1px solid var(--cw-border-20)",
+        }}
+      >
+        {/* Abstract background accent */}
+        <div
+          className="absolute -top-24 -right-24 h-48 w-48 rounded-full blur-3xl transition-colors duration-700"
+          style={{ backgroundColor: "var(--cw-anim-bg)" }}
+        />
 
         <div className="relative z-10 text-center">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={step}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              custom={direction}
+              variants={SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={SLIDE_TRANSITION}
             >
+              {/* ─── RATING STEP ─── */}
               {step === "rating" && (
                 <>
-                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
                     How would you rate your experience?
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
                     Your feedback helps us grow and provides authentic proof to others considering
                     our services.
                   </p>
 
-                  {/* Star Rating Component */}
+                  {/* Star Rating */}
                   <div className="mb-10 flex justify-center gap-2 md:gap-3">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <button
                         key={s}
                         onMouseEnter={() => setHoveredRating(s)}
                         onMouseLeave={() => setHoveredRating(0)}
-                        onClick={() => {
-                          setRating(s);
-                        }}
+                        onClick={() => setRating(s)}
                         className="group/star outline-none"
                       >
                         <Star
-                          className={`size-10 transition-all duration-200 group-hover/star:scale-110 ${
-                            (hoveredRating || rating) >= s
-                              ? "fill-[#000000] text-[#000000]"
-                              : "text-[#e0e3e5]"
-                          }`}
+                          className="size-10 transition-all duration-200 group-hover/star:scale-110"
+                          style={{
+                            color:
+                              (hoveredRating || rating) >= s
+                                ? "var(--cw-fg)"
+                                : "var(--cw-star-empty)",
+                            fill: (hoveredRating || rating) >= s ? "var(--cw-fg)" : "transparent",
+                          }}
                         />
                       </button>
                     ))}
@@ -412,24 +559,43 @@ export default function CollectionWizard({
 
                   {/* Trust Signals */}
                   <div className="mb-8 flex flex-wrap justify-center gap-3">
-                    <div className="flex items-center gap-2 rounded-lg bg-[#e6e8ea] px-3 py-1.5">
-                      <BadgeCheck className="size-[16px] text-[#009668]" strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold tracking-wider text-[#45464d] uppercase">
+                    <div
+                      className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                      style={{ backgroundColor: "var(--cw-badge)" }}
+                    >
+                      <BadgeCheck
+                        className="size-[16px]"
+                        strokeWidth={2.5}
+                        style={{ color: "var(--cw-green)" }}
+                      />
+                      <span
+                        className="text-[11px] font-semibold tracking-wider uppercase"
+                        style={{ color: "var(--cw-text-secondary)" }}
+                      >
                         Verified User
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 rounded-lg bg-[#e6e8ea] px-3 py-1.5">
+                    <div
+                      className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                      style={{ backgroundColor: "var(--cw-badge)" }}
+                    >
                       <ShieldCheck className="size-[16px] text-[#7c839b]" strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold tracking-wider text-[#45464d] uppercase">
+                      <span
+                        className="text-[11px] font-semibold tracking-wider uppercase"
+                        style={{ color: "var(--cw-text-secondary)" }}
+                      >
                         Privacy Guaranteed
                       </span>
                     </div>
                   </div>
 
-                  {/* Action Button */}
                   <button
                     onClick={nextStep}
-                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-3 font-bold text-[#ffffff] transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
+                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-bold transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
+                    style={{
+                      backgroundColor: "var(--cw-fg)",
+                      color: "var(--cw-fg-inv)",
+                    }}
                   >
                     Next Step
                     <ArrowRight className="size-4" />
@@ -437,60 +603,100 @@ export default function CollectionWizard({
                 </>
               )}
 
+              {/* ─── CHOICE STEP ─── */}
               {step === "choice" && (
                 <>
-                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
                     How would you like to share?
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
                     Choose the format that works best for you.
                   </p>
                   <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                     <button
                       onClick={() => {
+                        setDirection(1);
                         setMode("video");
                         setStep("video");
                       }}
-                      className="group relative flex flex-col items-center gap-3 rounded-xl border border-[#c6c6cd]/30 bg-white p-6 transition-all hover:border-[#c6c6cd]/60 hover:shadow-md active:scale-[0.98]"
+                      className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
                     >
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f2f4f6]">
-                        <VideoIcon className="size-6 text-[#000000]" />
+                      <div
+                        className="flex size-12 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: "var(--cw-surface)" }}
+                      >
+                        <VideoIcon className="size-6" style={{ color: "var(--cw-fg)" }} />
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-[#191c1e]">Video</h3>
-                        <p className="text-[11px] font-medium text-[#76777d]">Quick & Personal</p>
+                        <h3
+                          className="text-base font-bold"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
+                          Video
+                        </h3>
+                        <p
+                          className="text-[11px] font-medium"
+                          style={{ color: "var(--cw-text-muted)" }}
+                        >
+                          Quick &amp; Personal
+                        </p>
                       </div>
                     </button>
                     <button
                       onClick={() => {
+                        setDirection(1);
                         setMode("text");
                         setStep("text");
                       }}
-                      className="group relative flex flex-col items-center gap-3 rounded-xl border border-[#c6c6cd]/30 bg-white p-6 transition-all hover:border-[#c6c6cd]/60 hover:shadow-md active:scale-[0.98]"
+                      className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
                     >
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-[#000000]">
-                        <Quote className="size-6 text-[#ffffff]" />
+                      <div
+                        className="flex size-12 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: "var(--cw-fg)" }}
+                      >
+                        <Quote className="size-6" style={{ color: "var(--cw-fg-inv)" }} />
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-[#191c1e]">Text</h3>
-                        <p className="text-[11px] font-medium text-[#76777d]">Simple & Classic</p>
+                        <h3
+                          className="text-base font-bold"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
+                          Text
+                        </h3>
+                        <p
+                          className="text-[11px] font-medium"
+                          style={{ color: "var(--cw-text-muted)" }}
+                        >
+                          Simple &amp; Classic
+                        </p>
                       </div>
                     </button>
                   </div>
                 </>
               )}
 
+              {/* ─── TEXT STEP ─── */}
               {step === "text" && (
                 <div className="text-left">
                   <label
                     htmlFor="feedback"
-                    className="mb-2 block text-lg leading-tight font-bold text-[#191c1e]"
+                    className="mb-2 block text-lg leading-tight font-bold"
+                    style={{ color: "var(--cw-text-primary)" }}
                   >
-                    {settings?.form?.fields?.content?.label ||
+                    {settings?.form?.fields?.content?.label ??
                       "Tell us more about your experience."}
                   </label>
-                  <p className="mb-4 max-w-lg text-sm leading-relaxed text-[#45464d]">
-                    {settings?.video?.prompt ||
+                  <p
+                    className="mb-4 max-w-lg text-sm leading-relaxed"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.video?.prompt ??
                       "What stood out the most? Sharing specific details helps others understand the true value of our service."}
                   </p>
 
@@ -499,10 +705,10 @@ export default function CollectionWizard({
                       id="feedback"
                       name="feedback"
                       autoFocus
-                      className="w-full resize-none rounded-xl border-none bg-[#f2f4f6] p-4 text-sm leading-relaxed text-[#191c1e] shadow-inner transition-all duration-300 placeholder:text-[#76777d] focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                      className="cw-field w-full resize-none rounded-xl p-4 text-sm leading-relaxed"
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={
-                        settings?.form?.fields?.content?.placeholder ||
+                        settings?.form?.fields?.content?.placeholder ??
                         "It was an incredible experience because..."
                       }
                       value={content}
@@ -510,26 +716,36 @@ export default function CollectionWizard({
                     />
                     <div className="absolute right-4 bottom-4 flex items-center gap-2">
                       <span
-                        className={`text-xs ${isContentValid ? "text-[#009668]" : "text-[#76777d]"}`}
+                        className="text-xs"
+                        style={{
+                          color: isContentValid ? "var(--cw-green)" : "var(--cw-text-muted)",
+                        }}
                       >
                         {charCount} / {minCount}
                       </span>
                     </div>
                   </div>
 
-                  {/* Action Bar */}
-                  <div className="mt-6 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-4">
+                  <div
+                    className="mt-6 flex items-center justify-between border-t pt-4"
+                    style={{ borderColor: "var(--cw-border-20)" }}
+                  >
                     <button
                       onClick={prevStep}
-                      className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000]"
+                      className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase transition-opacity hover:opacity-70"
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
                       <ArrowLeft className="size-4" />
                       Back
                     </button>
                     <button
-                      className="flex items-center gap-3 rounded-md bg-[#000000] px-10 py-4 text-xs font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+                      className="flex items-center gap-3 rounded-md px-10 py-4 text-xs font-bold tracking-widest uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
                       disabled={!isContentValid}
                       onClick={nextStep}
+                      style={{
+                        backgroundColor: "var(--cw-fg)",
+                        color: "var(--cw-fg-inv)",
+                      }}
                     >
                       Next Step
                       <ArrowRight className="size-4" />
@@ -537,13 +753,21 @@ export default function CollectionWizard({
                   </div>
                 </div>
               )}
+
+              {/* ─── VIDEO STEP ─── */}
               {step === "video" && (
                 <div className="w-full text-left">
-                  <h1 className="mb-3 text-center text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1
+                    className="mb-3 text-center text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
                     Record your video
                   </h1>
-                  <p className="mx-auto mb-6 max-w-sm text-center text-base text-[#45464d]">
-                    {settings?.video?.prompt ||
+                  <p
+                    className="mx-auto mb-6 max-w-sm text-center text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.video?.prompt ??
                       "What stood out the most? Sharing specific details helps others."}
                   </p>
 
@@ -553,13 +777,14 @@ export default function CollectionWizard({
                       setVideoBlob(blob);
                       nextStep();
                     }}
-                    maxLength={settings?.video?.maxLength || 120}
+                    maxLength={settings?.video?.maxLength ?? 120}
                     prompt={settings?.video?.prompt}
                     accentColor={project.workspace.branding.accentColor}
                   />
                 </div>
               )}
 
+              {/* ─── DETAILS STEP ─── */}
               {step === "details" && (
                 <div className="mx-auto w-full text-left">
                   <form
@@ -572,14 +797,24 @@ export default function CollectionWizard({
                     {/* Profile Photo Upload */}
                     <div className="mb-1 flex items-center justify-start gap-4">
                       <div className="group relative shrink-0 overflow-visible">
-                        <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-[#c6c6cd]/30 bg-[#f2f4f6] transition-colors group-hover:border-[#000000]/30">
+                        <div
+                          className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-colors"
+                          style={{
+                            borderColor: "var(--cw-border-30)",
+                            backgroundColor: "var(--cw-surface)",
+                          }}
+                        >
                           {!photo ? (
-                            <User className="size-6 text-[#45464d]/40" strokeWidth={1.5} />
+                            <User
+                              className="size-6 opacity-40"
+                              style={{ color: "var(--cw-text-secondary)" }}
+                              strokeWidth={1.5}
+                            />
                           ) : (
                             <Image
                               alt="Preview"
                               className="h-full w-full object-cover transition-opacity"
-                              src={photo as string}
+                              src={photo}
                               width={56}
                               height={56}
                             />
@@ -591,15 +826,26 @@ export default function CollectionWizard({
                             type="file"
                           />
                         </div>
-                        <div className="pointer-events-none absolute -right-1 -bottom-1 rounded-full bg-[#000000] p-1.5 text-[#ffffff] shadow-lg transition-transform group-hover:scale-105">
+                        <div
+                          className="pointer-events-none absolute -right-1 -bottom-1 rounded-full p-1.5 shadow-lg transition-transform group-hover:scale-105"
+                          style={{
+                            backgroundColor: "var(--cw-fg)",
+                            color: "var(--cw-fg-inv)",
+                          }}
+                        >
                           <Camera className="size-3" />
                         </div>
                       </div>
                       <div className="text-left">
-                        <label className="mb-0.5 block text-xs font-semibold text-[#000000]">
+                        <label
+                          className="mb-0.5 block text-xs font-semibold"
+                          style={{ color: "var(--cw-fg)" }}
+                        >
                           Upload Profile Photo
                         </label>
-                        <p className="text-[10px] text-[#45464d]">Recommended: 400x400px</p>
+                        <p className="text-[10px]" style={{ color: "var(--cw-text-secondary)" }}>
+                          Recommended: 400x400px
+                        </p>
                       </div>
                     </div>
 
@@ -607,15 +853,16 @@ export default function CollectionWizard({
                     <div className="grid grid-cols-1 gap-3">
                       <div className="space-y-1">
                         <label
-                          className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                          className="block text-[11px] font-bold tracking-widest uppercase"
                           htmlFor="full_name"
+                          style={{ color: "var(--cw-text-secondary)" }}
                         >
-                          {settings?.form?.fields?.fullName?.label || "Full Name"}{" "}
+                          {settings?.form?.fields?.fullName?.label ?? "Full Name"}{" "}
                           {settings?.form?.fields?.fullName?.required !== false && "*"}
                         </label>
                         <input
                           id="full_name"
-                          className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                          className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Alex Rivera"
                           value={name}
@@ -625,15 +872,16 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.email?.enabled !== false && (
                         <div className="space-y-1">
                           <label
-                            className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest uppercase"
                             htmlFor="email"
+                            style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.email?.label || "Email"}{" "}
+                            {settings?.form?.fields?.email?.label ?? "Email"}{" "}
                             {settings?.form?.fields?.email?.required && "*"}
                           </label>
                           <input
                             id="email"
-                            className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="alex@company.com"
                             type="email"
@@ -646,14 +894,15 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.jobTitle?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest uppercase"
                               htmlFor="job_title"
+                              style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.jobTitle?.label || "Job Title"}
+                              {settings?.form?.fields?.jobTitle?.label ?? "Job Title"}
                             </label>
                             <input
                               id="job_title"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                               onChange={(e) => setTagline(e.target.value)}
                               placeholder="Head of Growth"
                               value={tagline}
@@ -663,14 +912,15 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.company?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest uppercase"
                               htmlFor="company"
+                              style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.company?.label || "Company"}
+                              {settings?.form?.fields?.company?.label ?? "Company"}
                             </label>
                             <input
                               id="company"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                               onChange={(e) => setCompany(e.target.value)}
                               placeholder="TechFlow"
                               value={company}
@@ -682,15 +932,16 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.linkedin?.enabled && (
                         <div className="space-y-1">
                           <label
-                            className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest uppercase"
                             htmlFor="linkedin"
+                            style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.linkedin?.label || "LinkedIn Profile"}{" "}
+                            {settings?.form?.fields?.linkedin?.label ?? "LinkedIn Profile"}{" "}
                             {settings?.form?.fields?.linkedin?.required && "*"}
                           </label>
                           <input
                             id="linkedin"
-                            className="h-10 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-4 text-[15px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="cw-field h-10 w-full rounded-lg px-4 text-[15px]"
                             onChange={(e) => setLinkedin(e.target.value)}
                             placeholder="https://linkedin.com/in/alex"
                             value={linkedin}
@@ -700,15 +951,27 @@ export default function CollectionWizard({
                     </div>
 
                     {/* Trust Verification Signal */}
-                    <div className="mt-1 flex items-center gap-3 rounded-lg bg-[#f2f4f6] px-3 py-2">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[#e6e8ea]">
-                        <ShieldCheck className="size-3.5 text-[#009668]" />
+                    <div
+                      className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2"
+                      style={{ backgroundColor: "var(--cw-surface)" }}
+                    >
+                      <div
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
+                        style={{ backgroundColor: "var(--cw-badge)" }}
+                      >
+                        <ShieldCheck className="size-3.5" style={{ color: "var(--cw-green)" }} />
                       </div>
                       <div>
-                        <p className="text-xs leading-none font-semibold text-[#191c1e]">
+                        <p
+                          className="text-xs leading-none font-semibold"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
                           Identity Verification
                         </p>
-                        <p className="mt-1 text-[10px] leading-relaxed text-[#45464d]">
+                        <p
+                          className="mt-1 text-[10px] leading-relaxed"
+                          style={{ color: "var(--cw-text-secondary)" }}
+                        >
                           Your name and title are verified to build trust.
                         </p>
                       </div>
@@ -718,29 +981,33 @@ export default function CollectionWizard({
                     <div className="flex flex-col items-center justify-between gap-4 pt-4 md:flex-row">
                       <button
                         onClick={prevStep}
-                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#e6e8ea] px-6 py-2.5 text-[11px] font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:opacity-90 md:order-1 md:w-auto"
+                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-opacity hover:opacity-80 md:order-1 md:w-auto"
+                        style={{
+                          backgroundColor: "var(--cw-badge)",
+                          color: "var(--cw-text-secondary)",
+                        }}
                         type="button"
                       >
                         Back
                       </button>
                       <button
-                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 text-[11px] font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
+                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
                         disabled={settings?.form?.fields?.fullName?.required !== false && !name}
                         onClick={(e) => {
                           e.preventDefault();
-                          const minCount = settings?.form?.minCharCount ?? 50;
-                          const isNameRequired =
-                            settings?.form?.fields?.fullName?.required !== false;
-                          if (
-                            mode === "text" &&
-                            ((isNameRequired && !name) || content.length < minCount)
-                          ) {
+                          const mc = settings?.form?.minCharCount ?? 50;
+                          const isNameReq = settings?.form?.fields?.fullName?.required !== false;
+                          if (mode === "text" && ((isNameReq && !name) || content.length < mc)) {
                             toast.error(
-                              `Please ensure your name is filled and testimonial is at least ${minCount} characters.`,
+                              `Please ensure your name is filled and testimonial is at least ${mc} characters.`,
                             );
                             return;
                           }
                           nextStep();
+                        }}
+                        style={{
+                          backgroundColor: "var(--cw-fg)",
+                          color: "var(--cw-fg-inv)",
                         }}
                         type="button"
                       >
@@ -752,68 +1019,122 @@ export default function CollectionWizard({
                 </div>
               )}
 
+              {/* ─── REVIEW STEP ─── */}
               {step === "review" && (
                 <div className="mx-auto w-full text-left">
-                  <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1
+                    className="mb-2 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
                     Ready to submit?
                   </h1>
-                  <p className="mb-4 max-w-sm text-sm text-[#45464d]">
+                  <p
+                    className="mb-4 max-w-sm text-sm"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
                     Everything looks great. Take one last look at how your testimonial will appear
                     to others before you hit the button.
                   </p>
 
                   <div className="relative mt-2 mb-5">
-                    <div className="absolute -top-3 -left-3 z-10 rounded-sm bg-[#e6e8ea] px-3 py-1 text-[10px] font-bold tracking-widest text-[#45464d] uppercase shadow-sm">
+                    <div
+                      className="absolute -top-3 -left-3 z-10 rounded-sm px-3 py-1 text-[10px] font-bold tracking-widest uppercase shadow-sm"
+                      style={{
+                        backgroundColor: "var(--cw-badge)",
+                        color: "var(--cw-text-secondary)",
+                      }}
+                    >
                       Live Preview
                     </div>
-                    <div className="relative rounded-xl border border-[#c6c6cd]/30 bg-[#f2f4f6] p-5 shadow-inner">
+                    <div
+                      className="relative rounded-xl p-5"
+                      style={{
+                        backgroundColor: "var(--cw-surface)",
+                        border: "1px solid var(--cw-border-30)",
+                        boxShadow: "inset 0 2px 4px rgba(0,0,0,0.04)",
+                      }}
+                    >
                       <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#e6e8ea]">
+                          <div
+                            className="h-10 w-10 shrink-0 overflow-hidden rounded-full"
+                            style={{ backgroundColor: "var(--cw-badge)" }}
+                          >
                             {photo ? (
                               <Image
-                                src={photo as string}
+                                src={photo}
                                 width={40}
                                 height={40}
                                 className="h-full w-full object-cover"
                                 alt="Profile"
                               />
                             ) : (
-                              <User className="m-2.5 size-5 text-[#45464d]" />
+                              <User
+                                className="m-2.5 size-5"
+                                style={{ color: "var(--cw-text-secondary)" }}
+                              />
                             )}
                           </div>
                           <div className="text-left">
-                            <h3 className="text-lg leading-tight font-bold text-[#191c1e]">
+                            <h3
+                              className="text-lg leading-tight font-bold"
+                              style={{ color: "var(--cw-text-primary)" }}
+                            >
                               {name}
                             </h3>
-                            <p className="text-xs text-[#45464d]">
+                            <p className="text-xs" style={{ color: "var(--cw-text-secondary)" }}>
                               {tagline} {tagline && company && "at "} {company}
                             </p>
                           </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[#d5e3fd] bg-[#d5e3fd]/40 px-2.5 py-1">
-                          <BadgeCheck className="size-3.5 text-[#000000]" />
-                          <span className="text-[10px] font-bold tracking-tighter text-[#000000] uppercase">
+                        <div
+                          className="flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1"
+                          style={{
+                            backgroundColor: "var(--cw-blue-tint-40)",
+                            border: "1px solid var(--cw-blue-tint-border)",
+                          }}
+                        >
+                          <BadgeCheck className="size-3.5" style={{ color: "var(--cw-fg)" }} />
+                          <span
+                            className="text-[10px] font-bold tracking-tighter uppercase"
+                            style={{ color: "var(--cw-fg)" }}
+                          >
                             Verified
                           </span>
                         </div>
                       </div>
                       <div className="relative mt-2 text-left">
-                        <Quote className="absolute -top-2 -left-3 z-0 size-10 rotate-180 text-[#c6c6cd]/30" />
-                        <p className="relative z-10 text-sm leading-relaxed text-[#191c1e] italic">
+                        <Quote
+                          className="absolute -top-2 -left-3 z-0 size-10 rotate-180 opacity-25"
+                          style={{ color: "var(--cw-text-muted)" }}
+                        />
+                        <p
+                          className="relative z-10 text-sm leading-relaxed italic"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
                           &quot;{content || "Video Testimonial Attached"}&quot;
                         </p>
                       </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-4">
-                        <div className="flex gap-0.5 text-[#000000]">
+                      <div
+                        className="mt-4 flex items-center justify-between border-t pt-4"
+                        style={{ borderColor: "var(--cw-border-20)" }}
+                      >
+                        <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`size-3 ${i < rating ? "fill-current" : "text-[#c6c6cd]/40"}`}
+                              className="size-3"
+                              style={{
+                                color: "var(--cw-fg)",
+                                fill: i < rating ? "var(--cw-fg)" : "none",
+                              }}
                             />
                           ))}
                         </div>
-                        <span className="text-[10px] tracking-widest text-[#45464d] uppercase">
+                        <span
+                          className="text-[10px] tracking-widest uppercase"
+                          style={{ color: "var(--cw-text-secondary)" }}
+                        >
                           {new Date().toLocaleDateString("en-US", {
                             month: "long",
                             day: "numeric",
@@ -828,52 +1149,75 @@ export default function CollectionWizard({
                     <button
                       onClick={handleSubmit}
                       disabled={loading}
-                      className="w-full rounded-lg bg-[#000000] py-3.5 text-[13px] font-bold text-[#ffffff] shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
+                      className="w-full rounded-lg py-3.5 text-[13px] font-bold shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
+                      style={{
+                        backgroundColor: "var(--cw-fg)",
+                        color: "var(--cw-fg-inv)",
+                      }}
                     >
                       {loading ? "Submitting..." : "Submit Testimonial"}
                     </button>
                     <button
                       onClick={prevStep}
-                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 text-[11px] font-semibold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000] sm:w-auto"
+                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 text-[11px] font-semibold tracking-widest uppercase transition-opacity hover:opacity-70 sm:w-auto"
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
                       Edit details
                     </button>
                   </div>
-                  <p className="mt-4 px-4 text-center text-[10px] leading-relaxed text-[#45464d]">
+                  <p
+                    className="mt-4 px-4 text-center text-[10px] leading-relaxed"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
                     By submitting, you agree to our Terms of Service. Your testimonial will be
                     shared with the team for review and publishing.
                   </p>
                 </div>
               )}
 
+              {/* ─── SUCCESS STEP ─── */}
               {step === "success" && (
                 <>
-                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#d5e3fd]/40">
-                    <CheckCircle2 className="size-8 text-[#009668]" />
+                  <div
+                    className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
+                    style={{ backgroundColor: "var(--cw-blue-tint-40)" }}
+                  >
+                    <CheckCircle2 className="size-8" style={{ color: "var(--cw-green)" }} />
                   </div>
-                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    {settings?.pageContent?.thankYou?.headline || "You're awesome!"}
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {settings?.pageContent?.thankYou?.headline ?? "You're awesome!"}
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
-                    {settings?.pageContent?.thankYou?.body ||
-                      project.thankYouMessage ||
-                      `Your feedback helps us grow and provides authentic proof to others considering our services.`}
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.pageContent?.thankYou?.body ??
+                      project.thankYouMessage ??
+                      "Your feedback helps us grow and provides authentic proof to others considering our services."}
                   </p>
 
                   <div className="flex flex-col items-center gap-3">
                     {settings?.pageContent?.thankYou?.cta?.enabled &&
-                      settings?.pageContent?.thankYou?.cta?.text && (
+                      settings.pageContent?.thankYou?.cta?.text && (
                         <a
                           href={settings.pageContent.thankYou.cta.url}
-                          className="inline-flex items-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 text-sm font-bold text-[#ffffff] transition-all hover:opacity-90"
+                          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all hover:opacity-90"
+                          style={{
+                            backgroundColor: "var(--cw-fg)",
+                            color: "var(--cw-fg-inv)",
+                          }}
                         >
                           {settings.pageContent.thankYou.cta.text}
                           <ArrowRight className="size-4" />
                         </a>
                       )}
                     <button
-                      className="text-[13px] font-medium text-[#45464d] hover:underline"
+                      className="text-[13px] font-medium hover:underline"
                       onClick={() => window.location.reload()}
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
                       Post another review
                     </button>
@@ -885,7 +1229,7 @@ export default function CollectionWizard({
         </div>
       </div>
 
-      {/* Contextual Trust Signal */}
+      {/* Contextual Trust Signal (text step only) */}
       <AnimatePresence>
         {step === "text" && (
           <motion.div
@@ -896,7 +1240,10 @@ export default function CollectionWizard({
             className="mx-auto mt-6 flex max-w-sm flex-col items-center text-center"
           >
             <div className="mb-2 flex justify-center">
-              <div className="relative h-10 w-10 overflow-hidden rounded-full border border-[#c6c6cd]/30 shadow-sm">
+              <div
+                className="relative h-10 w-10 overflow-hidden rounded-full shadow-sm"
+                style={{ border: "1px solid var(--cw-border-30)" }}
+              >
                 <img
                   alt="User Profile"
                   className="h-full w-full object-cover"
@@ -904,7 +1251,10 @@ export default function CollectionWizard({
                 />
               </div>
             </div>
-            <p className="px-4 text-xs leading-relaxed text-[#45464d] italic">
+            <p
+              className="px-4 text-xs leading-relaxed italic"
+              style={{ color: "var(--cw-text-secondary)" }}
+            >
               &quot;Real feedback like yours is what makes our community thrive. Thank you for your
               time.&quot;
             </p>
@@ -912,8 +1262,11 @@ export default function CollectionWizard({
         )}
       </AnimatePresence>
 
-      {/* Footer-ish Meta Info */}
-      <p className="mt-4 px-4 text-center text-[10px] leading-relaxed font-medium text-[#45464d] opacity-60">
+      {/* Footer disclaimer */}
+      <p
+        className="mt-4 px-4 text-center text-[10px] leading-relaxed font-medium opacity-60"
+        style={{ color: "var(--cw-text-secondary)" }}
+      >
         By continuing, you agree to our terms of service and acknowledge that your rating may be
         used for marketing purposes.
       </p>

@@ -142,8 +142,8 @@
 - [x] Progress bar across all wizard steps
 - [x] Auto-save draft to LocalStorage (recover if browser crashes)
 - [x] Fully responsive mobile-first layout
-- [ ] Dark / Light mode detection (`prefers-color-scheme`)
-- [ ] Animated step transitions (slide, fade) between wizard steps
+- [x] Dark / Light mode detection (`prefers-color-scheme`)
+- [x] Animated step transitions (slide, fade) between wizard steps
 - [ ] "Skip this step" button for optional fields (Video, Photo)
 - [ ] Multi-language support on collection pages (auto-detect browser locale)
 - [ ] End-user consent checkbox for data storage before submission

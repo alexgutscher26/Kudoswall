@@ -110,6 +110,9 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   const subheading =
     settings?.pageContent?.subheading || `You're leaving a review for ${projectData.name}`;
 
+  // Dark mode: only auto-apply when the project owner has not set a custom background
+  const hasExplicitBg = Boolean(settings?.backgroundColor);
+
   // SEO: Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
@@ -142,8 +145,22 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
           }}
         />
       )}
+      {/* Dark mode: server-rendered CSS media query — zero JS, zero flash.
+          Skipped entirely when the project owner has set an explicit background color. */}
+      {!hasExplicitBg && (
+        <style>{`
+          @media (prefers-color-scheme: dark) {
+            .collect-main  { background-color: #0e0e10 !important; }
+            .collect-heading { color: #fafafa !important; }
+            .collect-subheading { color: #71717a !important; }
+            .collect-dot {
+              background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px) !important;
+            }
+          }
+        `}</style>
+      )}
       <main
-        className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
+        className="collect-main relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
         style={{
           backgroundColor,
           fontFamily:
@@ -164,7 +181,11 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
           />
           <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
           <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40" />
+          {/* Dot pattern: bg moved to inline style so CSS @media can override it */}
+          <div
+            className="collect-dot absolute inset-0 mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40"
+            style={{ backgroundImage: "radial-gradient(#e5e7eb 1px, transparent 1px)" }}
+          />
         </div>
 
         <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
@@ -186,10 +207,12 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
               </div>
             )}
             <div className="space-y-1">
-              <h1 className="text-3xl leading-tight font-black tracking-tighter text-neutral-900 sm:text-5xl">
+              <h1 className="collect-heading text-3xl leading-tight font-black tracking-tighter text-neutral-900 transition-colors duration-300 sm:text-5xl">
                 {headline}
               </h1>
-              <p className="mx-auto max-w-xl text-lg font-medium text-neutral-500">{subheading}</p>
+              <p className="collect-subheading mx-auto max-w-xl text-lg font-medium text-neutral-500 transition-colors duration-300">
+                {subheading}
+              </p>
             </div>
           </div>
 
