@@ -34,7 +34,7 @@ export type CollectionSettings = {
   logoUrl?: string;
   accentColor: string;
   backgroundColor: string;
-  fontFamily: "sans" | "serif" | "mono";
+  fontFamily: string;
   form: {
     fields: {
       fullName: { enabled: boolean; required: boolean; label: string; placeholder: string };
@@ -289,9 +289,48 @@ export function CollectionCustomizer({
                     onChange={(e) => setNestedSetting("fontFamily", e.target.value)}
                     value={settings.fontFamily}
                   >
-                    <option value="sans">Sans-serif (Modern)</option>
-                    <option value="serif">Serif (Classic)</option>
-                    <option value="mono">Monospace (Minimal)</option>
+                    <optgroup label="System Defaults">
+                      <option value="sans">Sans-serif (Modern)</option>
+                      <option value="serif">Serif (Classic)</option>
+                      <option value="mono">Monospace (Minimal)</option>
+                    </optgroup>
+                    <optgroup label="Google Fonts">
+                      <option value="Inter">Inter</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Open Sans">Open Sans</option>
+                      <option value="Montserrat">Montserrat</option>
+                      <option value="Poppins">Poppins</option>
+                      <option value="Lato">Lato</option>
+                      <option value="Oswald">Oswald</option>
+                      <option value="Raleway">Raleway</option>
+                      <option value="Nunito">Nunito</option>
+                      <option value="Playfair Display">Playfair Display</option>
+                      <option value="Merriweather">Merriweather</option>
+                      <option value="Ubuntu">Ubuntu</option>
+                      <option value="PT Sans">PT Sans</option>
+                      <option value="Source Sans Pro">Source Sans Pro</option>
+                      <option value="Quicksand">Quicksand</option>
+                      <option value="Josefin Sans">Josefin Sans</option>
+                      <option value="Mulish">Mulish</option>
+                      <option value="Arvo">Arvo</option>
+                      <option value="Alegreya">Alegreya</option>
+                      <option value="Crimson Text">Crimson Text</option>
+                      <option value="Libre Baskerville">Libre Baskerville</option>
+                      <option value="EB Garamond">EB Garamond</option>
+                      <option value="Cormorant Garamond">Cormorant Garamond</option>
+                      <option value="Work Sans">Work Sans</option>
+                      <option value="Fira Sans">Fira Sans</option>
+                      <option value="Space Mono">Space Mono</option>
+                      <option value="DM Sans">DM Sans</option>
+                      <option value="Outfit">Outfit</option>
+                      <option value="Lexend">Lexend</option>
+                      <option value="Urbanist">Urbanist</option>
+                      <option value="Syne">Syne</option>
+                      <option value="Sora">Sora</option>
+                      <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                      <option value="Jost">Jost</option>
+                      <option value="Fraunces">Fraunces</option>
+                    </optgroup>
                   </select>
                 </div>
               </div>
@@ -660,8 +699,20 @@ export function CollectionCustomizer({
       {/* Main Area - Preview */}
       <div
         className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300"
-        style={{ backgroundColor: settings.backgroundColor }}
+        style={{
+          backgroundColor: settings.backgroundColor,
+          fontFamily:
+            settings.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+              ? `'${settings.fontFamily}', sans-serif`
+              : settings.fontFamily,
+        }}
       >
+        {settings.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+          <link
+            href={`https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap`}
+            rel="stylesheet"
+          />
+        )}
         <div className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-neutral-200 bg-white/80 px-5 py-1.5 shadow-sm backdrop-blur-md">
           <div className="mr-1 flex items-center gap-2 border-r border-neutral-100 pr-3">
             <Eye className="size-3.5 text-pink-500" />
@@ -776,14 +827,12 @@ function CollectionWizardPreview({
         <div className="mb-6">
           <div className="mb-2 flex items-end justify-between">
             <div>
-              <span className="font-sans text-[10px] tracking-widest text-[#45464d] uppercase">
+              <span className="text-[10px] tracking-widest text-[#45464d] uppercase">
                 {info.text}
               </span>
               <h2 className="mt-0.5 text-base font-bold text-[#191c1e]">{info.title}</h2>
             </div>
-            <span className="font-sans text-[11px] font-medium text-[#45464d]">
-              {info.percent}% Complete
-            </span>
+            <span className="text-[11px] font-medium text-[#45464d]">{info.percent}% Complete</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e6e8ea]">
             <div

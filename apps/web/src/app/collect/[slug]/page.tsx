@@ -135,9 +135,25 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   return (
     <main
       className="relative flex h-screen items-center justify-center overflow-hidden px-4 sm:px-6"
-      style={{ backgroundColor }}
+      style={{
+        backgroundColor,
+        fontFamily:
+          settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+            ? `'${settings.fontFamily}', sans-serif`
+            : settings?.fontFamily === "mono"
+              ? "monospace"
+              : settings?.fontFamily === "serif"
+                ? "serif"
+                : undefined,
+      }}
     >
       <JsonLd data={jsonLd} />
+      {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+        <link
+          href={`https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap`}
+          rel="stylesheet"
+        />
+      )}
       {/* Background patterns */}
       <div className="absolute inset-0 z-0">
         <div

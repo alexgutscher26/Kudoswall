@@ -295,20 +295,36 @@ export default function CollectionWizard({
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg">
+    <div
+      className="mx-auto w-full max-w-lg"
+      style={{
+        fontFamily:
+          settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+            ? `'${settings.fontFamily}', sans-serif`
+            : settings?.fontFamily === "mono"
+              ? "monospace"
+              : settings?.fontFamily === "serif"
+                ? "serif"
+                : undefined,
+      }}
+    >
+      {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+        <link
+          href={`https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@400;700;800&display=swap`}
+          rel="stylesheet"
+        />
+      )}
       {/* Step Indicator */}
       {step !== "success" && (
         <div className="mb-8">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <span className="font-sans text-[11px] tracking-[0.1em] text-[#45464d] uppercase">
+              <span className="text-[11px] tracking-[0.1em] text-[#45464d] uppercase">
                 {currentStepInfo.text}
               </span>
-              <h2 className="mt-1 font-(family-name:--font-manrope) text-lg font-bold text-[#191c1e]">
-                {currentStepInfo.title}
-              </h2>
+              <h2 className="mt-1 text-lg font-bold text-[#191c1e]">{currentStepInfo.title}</h2>
             </div>
-            <span className="font-sans text-xs font-medium text-[#45464d]">
+            <span className="text-xs font-medium text-[#45464d]">
               {currentStepInfo.percent}% Complete
             </span>
           </div>
@@ -337,7 +353,7 @@ export default function CollectionWizard({
             >
               {step === "rating" && (
                 <>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
                     How would you rate your experience?
                   </h1>
                   <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
@@ -387,7 +403,7 @@ export default function CollectionWizard({
                   {/* Action Button */}
                   <button
                     onClick={nextStep}
-                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-3 font-(family-name:--font-manrope) font-bold text-[#ffffff] transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
+                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-3 font-bold text-[#ffffff] transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
                   >
                     Next Step
                     <ArrowRight className="size-4" />
@@ -397,7 +413,7 @@ export default function CollectionWizard({
 
               {step === "choice" && (
                 <>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
                     How would you like to share?
                   </h1>
                   <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
@@ -415,9 +431,7 @@ export default function CollectionWizard({
                         <VideoIcon className="size-6 text-[#000000]" />
                       </div>
                       <div>
-                        <h3 className="font-(family-name:--font-manrope) text-base font-bold text-[#191c1e]">
-                          Video
-                        </h3>
+                        <h3 className="text-base font-bold text-[#191c1e]">Video</h3>
                         <p className="text-[11px] font-medium text-[#76777d]">Quick & Personal</p>
                       </div>
                     </button>
@@ -432,9 +446,7 @@ export default function CollectionWizard({
                         <Quote className="size-6 text-[#ffffff]" />
                       </div>
                       <div>
-                        <h3 className="font-(family-name:--font-manrope) text-base font-bold text-[#191c1e]">
-                          Text
-                        </h3>
+                        <h3 className="text-base font-bold text-[#191c1e]">Text</h3>
                         <p className="text-[11px] font-medium text-[#76777d]">Simple & Classic</p>
                       </div>
                     </button>
@@ -446,12 +458,12 @@ export default function CollectionWizard({
                 <div className="text-left">
                   <label
                     htmlFor="feedback"
-                    className="mb-2 block font-(family-name:--font-manrope) text-lg leading-tight font-bold text-[#191c1e]"
+                    className="mb-2 block text-lg leading-tight font-bold text-[#191c1e]"
                   >
                     {settings?.form?.fields?.content?.label ||
                       "Tell us more about your experience."}
                   </label>
-                  <p className="mb-4 max-w-lg font-(family-name:--font-inter) text-sm leading-relaxed text-[#45464d]">
+                  <p className="mb-4 max-w-lg text-sm leading-relaxed text-[#45464d]">
                     {settings?.video?.prompt ||
                       "What stood out the most? Sharing specific details helps others understand the true value of our service."}
                   </p>
@@ -461,7 +473,7 @@ export default function CollectionWizard({
                       id="feedback"
                       name="feedback"
                       autoFocus
-                      className="w-full resize-none rounded-xl border-none bg-[#f2f4f6] p-4 font-(family-name:--font-inter) text-sm leading-relaxed text-[#191c1e] shadow-inner transition-all duration-300 placeholder:text-[#76777d] focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                      className="w-full resize-none rounded-xl border-none bg-[#f2f4f6] p-4 text-sm leading-relaxed text-[#191c1e] shadow-inner transition-all duration-300 placeholder:text-[#76777d] focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={
                         settings?.form?.fields?.content?.placeholder ||
@@ -483,13 +495,13 @@ export default function CollectionWizard({
                   <div className="mt-6 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-4">
                     <button
                       onClick={prevStep}
-                      className="flex items-center gap-2 font-(family-name:--font-inter) text-xs font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000]"
+                      className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000]"
                     >
                       <ArrowLeft className="size-4" />
                       Back
                     </button>
                     <button
-                      className="flex items-center gap-3 rounded-md bg-[#000000] px-10 py-4 font-(family-name:--font-inter) text-xs font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+                      className="flex items-center gap-3 rounded-md bg-[#000000] px-10 py-4 text-xs font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
                       disabled={!isContentValid}
                       onClick={nextStep}
                     >
@@ -501,7 +513,7 @@ export default function CollectionWizard({
               )}
               {step === "video" && (
                 <div className="w-full text-left">
-                  <h1 className="mb-3 text-center font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1 className="mb-3 text-center text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
                     Record your video
                   </h1>
                   <p className="mx-auto mb-6 max-w-sm text-center text-base text-[#45464d]">
@@ -569,7 +581,7 @@ export default function CollectionWizard({
                     <div className="grid grid-cols-1 gap-3">
                       <div className="space-y-1">
                         <label
-                          className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                          className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
                           htmlFor="full_name"
                         >
                           {settings?.form?.fields?.fullName?.label || "Full Name"}{" "}
@@ -577,7 +589,7 @@ export default function CollectionWizard({
                         </label>
                         <input
                           id="full_name"
-                          className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                          className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Alex Rivera"
                           value={name}
@@ -587,7 +599,7 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.email?.enabled !== false && (
                         <div className="space-y-1">
                           <label
-                            className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
                             htmlFor="email"
                           >
                             {settings?.form?.fields?.email?.label || "Email"}{" "}
@@ -595,7 +607,7 @@ export default function CollectionWizard({
                           </label>
                           <input
                             id="email"
-                            className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="alex@company.com"
                             type="email"
@@ -608,14 +620,14 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.jobTitle?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
                               htmlFor="job_title"
                             >
                               {settings?.form?.fields?.jobTitle?.label || "Job Title"}
                             </label>
                             <input
                               id="job_title"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                               onChange={(e) => setTagline(e.target.value)}
                               placeholder="Head of Growth"
                               value={tagline}
@@ -625,14 +637,14 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.company?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
                               htmlFor="company"
                             >
                               {settings?.form?.fields?.company?.label || "Company"}
                             </label>
                             <input
                               id="company"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                               onChange={(e) => setCompany(e.target.value)}
                               placeholder="TechFlow"
                               value={company}
@@ -644,7 +656,7 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.linkedin?.enabled && (
                         <div className="space-y-1">
                           <label
-                            className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
                             htmlFor="linkedin"
                           >
                             {settings?.form?.fields?.linkedin?.label || "LinkedIn Profile"}{" "}
@@ -652,7 +664,7 @@ export default function CollectionWizard({
                           </label>
                           <input
                             id="linkedin"
-                            className="h-10 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-4 font-(family-name:--font-inter) text-[15px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="h-10 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-4 text-[15px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
                             onChange={(e) => setLinkedin(e.target.value)}
                             placeholder="https://linkedin.com/in/alex"
                             value={linkedin}
@@ -667,10 +679,10 @@ export default function CollectionWizard({
                         <ShieldCheck className="size-3.5 text-[#009668]" />
                       </div>
                       <div>
-                        <p className="font-(family-name:--font-inter) text-xs leading-none font-semibold text-[#191c1e]">
+                        <p className="text-xs leading-none font-semibold text-[#191c1e]">
                           Identity Verification
                         </p>
-                        <p className="mt-1 font-(family-name:--font-inter) text-[10px] leading-relaxed text-[#45464d]">
+                        <p className="mt-1 text-[10px] leading-relaxed text-[#45464d]">
                           Your name and title are verified to build trust.
                         </p>
                       </div>
@@ -680,13 +692,13 @@ export default function CollectionWizard({
                     <div className="flex flex-col items-center justify-between gap-4 pt-4 md:flex-row">
                       <button
                         onClick={prevStep}
-                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#e6e8ea] px-6 py-2.5 font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:opacity-90 md:order-1 md:w-auto"
+                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#e6e8ea] px-6 py-2.5 text-[11px] font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:opacity-90 md:order-1 md:w-auto"
                         type="button"
                       >
                         Back
                       </button>
                       <button
-                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
+                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 text-[11px] font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
                         disabled={settings?.form?.fields?.fullName?.required !== false && !name}
                         onClick={(e) => {
                           e.preventDefault();
@@ -716,7 +728,7 @@ export default function CollectionWizard({
 
               {step === "review" && (
                 <div className="mx-auto w-full text-left">
-                  <h1 className="mb-2 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
                     Ready to submit?
                   </h1>
                   <p className="mb-4 max-w-sm text-sm text-[#45464d]">
@@ -725,7 +737,7 @@ export default function CollectionWizard({
                   </p>
 
                   <div className="relative mt-2 mb-5">
-                    <div className="absolute -top-3 -left-3 z-10 rounded-sm bg-[#e6e8ea] px-3 py-1 font-(family-name:--font-inter) text-[10px] font-bold tracking-widest text-[#45464d] uppercase shadow-sm">
+                    <div className="absolute -top-3 -left-3 z-10 rounded-sm bg-[#e6e8ea] px-3 py-1 text-[10px] font-bold tracking-widest text-[#45464d] uppercase shadow-sm">
                       Live Preview
                     </div>
                     <div className="relative rounded-xl border border-[#c6c6cd]/30 bg-[#f2f4f6] p-5 shadow-inner">
@@ -745,24 +757,24 @@ export default function CollectionWizard({
                             )}
                           </div>
                           <div className="text-left">
-                            <h3 className="font-(family-name:--font-manrope) text-lg leading-tight font-bold text-[#191c1e]">
+                            <h3 className="text-lg leading-tight font-bold text-[#191c1e]">
                               {name}
                             </h3>
-                            <p className="font-(family-name:--font-inter) text-xs text-[#45464d]">
+                            <p className="text-xs text-[#45464d]">
                               {tagline} {tagline && company && "at "} {company}
                             </p>
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[#d5e3fd] bg-[#d5e3fd]/40 px-2.5 py-1">
                           <BadgeCheck className="size-3.5 text-[#000000]" />
-                          <span className="font-(family-name:--font-inter) text-[10px] font-bold tracking-tighter text-[#000000] uppercase">
+                          <span className="text-[10px] font-bold tracking-tighter text-[#000000] uppercase">
                             Verified
                           </span>
                         </div>
                       </div>
                       <div className="relative mt-2 text-left">
                         <Quote className="absolute -top-2 -left-3 z-0 size-10 rotate-180 text-[#c6c6cd]/30" />
-                        <p className="relative z-10 font-(family-name:--font-inter) text-sm leading-relaxed text-[#191c1e] italic">
+                        <p className="relative z-10 text-sm leading-relaxed text-[#191c1e] italic">
                           &quot;{content || "Video Testimonial Attached"}&quot;
                         </p>
                       </div>
@@ -775,7 +787,7 @@ export default function CollectionWizard({
                             />
                           ))}
                         </div>
-                        <span className="font-(family-name:--font-inter) text-[10px] tracking-widest text-[#45464d] uppercase">
+                        <span className="text-[10px] tracking-widest text-[#45464d] uppercase">
                           {new Date().toLocaleDateString("en-US", {
                             month: "long",
                             day: "numeric",
@@ -790,18 +802,18 @@ export default function CollectionWizard({
                     <button
                       onClick={handleSubmit}
                       disabled={loading}
-                      className="w-full rounded-lg bg-[#000000] py-3.5 font-(family-name:--font-manrope) text-[13px] font-bold text-[#ffffff] shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
+                      className="w-full rounded-lg bg-[#000000] py-3.5 text-[13px] font-bold text-[#ffffff] shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
                     >
                       {loading ? "Submitting..." : "Submit Testimonial"}
                     </button>
                     <button
                       onClick={prevStep}
-                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 font-(family-name:--font-inter) text-[11px] font-semibold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000] sm:w-auto"
+                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 text-[11px] font-semibold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000] sm:w-auto"
                     >
                       Edit details
                     </button>
                   </div>
-                  <p className="mt-4 px-4 text-center font-(family-name:--font-inter) text-[10px] leading-relaxed text-[#45464d]">
+                  <p className="mt-4 px-4 text-center text-[10px] leading-relaxed text-[#45464d]">
                     By submitting, you agree to our Terms of Service. Your testimonial will be
                     shared with the team for review and publishing.
                   </p>
@@ -813,7 +825,7 @@ export default function CollectionWizard({
                   <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#d5e3fd]/40">
                     <CheckCircle2 className="size-8 text-[#009668]" />
                   </div>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
+                  <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
                     {settings?.pageContent?.thankYou?.headline || "You're awesome!"}
                   </h1>
                   <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
@@ -827,7 +839,7 @@ export default function CollectionWizard({
                       settings?.pageContent?.thankYou?.cta?.text && (
                         <a
                           href={settings.pageContent.thankYou.cta.url}
-                          className="inline-flex items-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 font-(family-name:--font-manrope) text-sm font-bold text-[#ffffff] transition-all hover:opacity-90"
+                          className="inline-flex items-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 text-sm font-bold text-[#ffffff] transition-all hover:opacity-90"
                         >
                           {settings.pageContent.thankYou.cta.text}
                           <ArrowRight className="size-4" />
@@ -866,7 +878,7 @@ export default function CollectionWizard({
                 />
               </div>
             </div>
-            <p className="px-4 font-(family-name:--font-inter) text-xs leading-relaxed text-[#45464d] italic">
+            <p className="px-4 text-xs leading-relaxed text-[#45464d] italic">
               &quot;Real feedback like yours is what makes our community thrive. Thank you for your
               time.&quot;
             </p>
