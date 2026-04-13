@@ -23,6 +23,7 @@ import {
   Video,
   Layers,
   Tag,
+  Download,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -176,6 +177,62 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     navigator.clipboard.writeText(url);
     toast.success("Collection link copied!", {
       description: url,
+    });
+  };
+
+  const handleExport = () => {
+    if (filteredTestimonials.length === 0) {
+      toast.error("No testimonials to export");
+      return;
+    }
+
+    const headers = [
+      "ID",
+      "Author Name",
+      "Author Email",
+      "Author Company",
+      "Rating",
+      "Status",
+      "Type",
+      "Content",
+      "Video URL",
+      "Tags",
+      "Submitted At",
+    ];
+
+    const csvRows = filteredTestimonials.map((t: Testimonial) => {
+      const tags = t.testimonialToTags?.map((tt) => tt.tag.name).join("; ") || "";
+      const row = [
+        t.id,
+        t.authorName || "",
+        t.authorEmail || "",
+        t.authorCompany || "",
+        t.rating?.toString() || "",
+        t.status,
+        t.type,
+        (t.content || "").replace(/"/g, '""'),
+        t.videoUrl || "",
+        tags,
+        new Date(t.createdAt).toISOString(),
+      ];
+      return row.map((val) => `"${val}"`).join(",");
+    });
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `testimonials_${project.slug}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Export successful!", {
+      description: `${filteredTestimonials.length} testimonials exported`,
     });
   };
 
@@ -399,6 +456,15 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <button
+            type="button"
+            onClick={handleExport}
+            className="flex h-[46px] items-center gap-2 rounded-2xl border border-neutral-100 bg-white px-4 py-2 text-[13px] font-bold text-neutral-600 shadow-sm transition-all outline-none hover:bg-neutral-50 hover:text-neutral-900 active:scale-[0.98]"
+          >
+            <Download className="size-3.5 text-neutral-400" />
+            Export CSV
+          </button>
         </div>
       </div>
 
