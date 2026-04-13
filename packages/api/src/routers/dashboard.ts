@@ -40,6 +40,8 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
       step4: false,
       step5: false,
     }),
+    dpaAcceptedAt: null,
+    dpaAcceptedById: null,
   };
 
   await db.insert(workspace).values(newWorkspace);
@@ -224,6 +226,8 @@ export const dashboardRouter = router({
           step4: false,
           step5: false,
         }),
+        dpaAcceptedAt: null,
+        dpaAcceptedById: null,
       };
 
       await db.insert(workspace).values(newWs);
@@ -491,6 +495,126 @@ export const dashboardRouter = router({
       });
 
       return { success: true };
+    }),
+
+  acceptDpa: protectedProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { workspaceId } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+      });
+
+      if (!ws) throw new Error("Workspace not found");
+
+      await db
+        .update(workspace)
+        .set({
+          dpaAcceptedAt: new Date(),
+          dpaAcceptedById: session.user.id,
+        })
+        .where(eq(workspace.id, workspaceId));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "workspace",
+        entityId: workspaceId,
+        action: "update",
+        diff: { dpaAccepted: true },
+      });
+
+      return { success: true };
+    }),
+
+  findRespondentData: protectedProcedure
+    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { workspaceId, email } = input;
+
+      const [countResult] = await db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.authorEmail, email)));
+
+      return { count: Number(countResult?.value || 0) };
+    }),
+
+  exportRespondentData: protectedProcedure
+    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { workspaceId, email } = input;
+
+      const results = await db
+        .select({
+          id: testimonial.id,
+          content: testimonial.content,
+          rating: testimonial.rating,
+          authorName: testimonial.authorName,
+          authorEmail: testimonial.authorEmail,
+          status: testimonial.status,
+          type: testimonial.type,
+          videoUrl: testimonial.videoUrl,
+          createdAt: testimonial.createdAt,
+          projectName: project.name,
+        })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.authorEmail, email)));
+
+      return {
+        exportedAt: new Date().toISOString(),
+        respondent: email,
+        workspaceId,
+        data: results,
+      };
+    }),
+
+  deleteRespondentData: protectedProcedure
+    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { workspaceId, email } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+      });
+
+      if (!ws) throw new Error("Workspace not found");
+
+      // Find all testimonials in this workspace for this email
+      const testimonialsToDelete = await db
+        .select({ id: testimonial.id })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.authorEmail, email)));
+
+      if (testimonialsToDelete.length === 0) {
+        return { success: true, count: 0 };
+      }
+
+      const ids = testimonialsToDelete.map((t) => t.id);
+
+      // Perform deletion
+      await db.delete(testimonial).where(inArray(testimonial.id, ids));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "workspace",
+        entityId: workspaceId,
+        action: "delete",
+        diff: {
+          target: "respondent_data",
+          email,
+          deletedCount: ids.length,
+        },
+      });
+
+      return { success: true, count: ids.length };
     }),
 
   // TODO: (Paid Plan) Implement Weekly Digest (Monday 8am)

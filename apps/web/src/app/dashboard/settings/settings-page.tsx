@@ -1,17 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Globe, CreditCard, Users, Save, Upload, Link, Zap, Trash2 } from "lucide-react";
+import {
+  Settings,
+  Globe,
+  CreditCard,
+  Users,
+  Save,
+  Upload,
+  Link,
+  Zap,
+  Trash2,
+  Shield,
+  FileText,
+  Lock,
+  Database,
+  Check,
+  ExternalLink,
+  Download,
+} from "lucide-react";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 import { trpc } from "@/utils/trpc";
-import { toast } from "sonner";
+import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = "general" | "collection" | "billing" | "team";
+type Tab = "general" | "collection" | "billing" | "team" | "compliance";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -50,8 +67,67 @@ export default function SettingsPage() {
     },
   });
 
+  const acceptDpa = useMutation({
+    ...trpc.dashboard.acceptDpa.mutationOptions(),
+    onSuccess: () => {
+      toast.success("DPA signed and accepted!");
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+    },
+    onError: (err) => {
+      toast.error("Failed to sign DPA: " + err.message);
+    },
+  });
+
   const [workspaceName, setWorkspaceName] = useState("");
   const [slug, setSlug] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
+
+  const {
+    data: searchData,
+    refetch: searchRespondent,
+    isFetching: isSearching,
+  } = useQuery({
+    ...trpc.dashboard.findRespondentData.queryOptions({
+      workspaceId: activeWorkspaceId,
+      email: searchEmail,
+    }),
+    enabled: false,
+  });
+
+  const { refetch: exportRespondent, isFetching: isExporting } = useQuery({
+    ...trpc.dashboard.exportRespondentData.queryOptions({
+      workspaceId: activeWorkspaceId,
+      email: searchEmail,
+    }),
+    enabled: false,
+  });
+
+  const handleExport = async () => {
+    const { data } = await exportRespondent();
+    if (!data) return;
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kudoswall-export-${searchEmail.replace("@", "-at-")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Data exported successfully!");
+  };
+
+  const deleteRespondent = useMutation({
+    ...trpc.dashboard.deleteRespondentData.mutationOptions(),
+    onSuccess: (data) => {
+      toast.success(`Succesfully deleted ${data.count} records.`);
+      searchRespondent();
+    },
+    onError: (err) => {
+      toast.error("Failed to delete respondent data: " + err.message);
+    },
+  });
 
   useEffect(() => {
     if (dashboardData?.workspace) {
@@ -95,6 +171,7 @@ export default function SettingsPage() {
           { id: "collection", label: "Collection Page", icon: Globe },
           { id: "billing", label: "Billing & Plans", icon: CreditCard },
           { id: "team", label: "Team Members", icon: Users },
+          { id: "compliance", label: "Compliance & DPA", icon: Shield },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -401,6 +478,169 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+        {activeTab === "compliance" && (
+          <div className="space-y-8 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
+            <section className="space-y-6">
+              <h3 className="text-lg font-bold tracking-tight text-neutral-900">
+                Data Processing Agreement (DPA)
+              </h3>
+              <p className="text-[13px] text-neutral-400">
+                To comply with GDPR and CCPA, you can sign our Data Processing Agreement. This
+                document outlines how we handle data on behalf of your workspace.
+              </p>
+
+              <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex size-12 items-center justify-center rounded-xl bg-white shadow-sm">
+                      <FileText className="size-6 text-pink-600" />
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-bold text-neutral-800">
+                        KudosWall DPA (v1.0)
+                      </h4>
+                      <p className="text-[11px] font-medium text-neutral-400">
+                        Standard GDPR & CCPA compliant contract.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href="/dpa"
+                      target="_blank"
+                      className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-50"
+                    >
+                      Review <ExternalLink className="size-3.5" />
+                    </a>
+
+                    {!dashboardData?.workspace.dpaAcceptedAt ? (
+                      <button
+                        onClick={() => acceptDpa.mutate({ workspaceId: activeWorkspaceId })}
+                        disabled={acceptDpa.isPending}
+                        className="rounded-full bg-pink-600 px-6 py-2 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-pink-700 disabled:opacity-50"
+                      >
+                        {acceptDpa.isPending ? "Signing..." : "Accept & Sign DPA"}
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-[12px] font-bold text-emerald-600">
+                        <Check className="size-3.5" /> Signed on{" "}
+                        {new Date(
+                          dashboardData?.workspace.dpaAcceptedAt as string,
+                        ).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-6 border-t border-neutral-50 pt-8">
+              <h3 className="text-lg font-bold tracking-tight text-neutral-900">
+                Right to be Forgotten
+              </h3>
+              <p className="text-[13px] text-neutral-400">
+                To comply with GDPR, you can delete all data associated with a specific individual's
+                email address across this workspace.
+              </p>
+
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <input
+                  type="email"
+                  placeholder="respondent@example.com"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[13px] outline-none focus:border-pink-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => searchRespondent()}
+                  disabled={isSearching || !searchEmail.includes("@")}
+                  className="rounded-full bg-neutral-900 px-6 py-2 text-[12px] font-bold text-white transition-all hover:bg-neutral-800 disabled:opacity-50"
+                >
+                  {isSearching ? "Searching..." : "Search Records"}
+                </button>
+              </div>
+
+              {searchData && searchData.count > 0 && (
+                <div className="flex items-center justify-between gap-4 rounded-2xl border border-pink-100 bg-pink-50/50 p-6">
+                  <div>
+                    <p className="text-[14px] font-bold text-neutral-900">
+                      Found {searchData.count} testimonials for this email.
+                    </p>
+                    <p className="text-[12px] text-neutral-500">
+                      Deleting will permanently remove all text and video testimonials.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="button"
+                      disabled={isExporting}
+                      onClick={handleExport}
+                      className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 disabled:opacity-50"
+                    >
+                      <Download className="size-3.5 text-neutral-400" />
+                      {isExporting ? "Exporting..." : "Export (.JSON)"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deleteRespondent.isPending}
+                      onClick={() => {
+                        toast("Are you sure? This will permanently delete all respondent data.", {
+                          action: {
+                            label: "Delete All",
+                            onClick: () =>
+                              deleteRespondent.mutate({
+                                workspaceId: activeWorkspaceId,
+                                email: searchEmail,
+                              }),
+                          },
+                        });
+                      }}
+                      className="flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-rose-700 disabled:opacity-50"
+                    >
+                      <Trash2 className="size-3.5" />
+                      {deleteRespondent.isPending ? "Deleting..." : "Delete All"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {searchData && searchData.count === 0 && (
+                <p className="inline-block rounded-full bg-emerald-50 px-4 py-2 text-[12px] font-medium text-emerald-600">
+                  No records found for this email address.
+                </p>
+              )}
+            </section>
+
+            <section className="space-y-6 border-t border-neutral-50 pt-8">
+              <h3 className="text-lg font-bold tracking-tight text-neutral-900">
+                Privacy Features
+              </h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="group rounded-2xl border border-neutral-50 p-5 transition-all hover:bg-neutral-50/50">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-100">
+                    <Lock className="size-5" />
+                  </div>
+                  <h4 className="text-[14px] font-bold text-neutral-800">Cookie-less Tracking</h4>
+                  <p className="mt-1 text-[11px] leading-relaxed font-medium text-neutral-400">
+                    All widget impressions are tracked using IP/UA fingerprinting. No tracking
+                    cookies are placed on your visitors' browsers.
+                  </p>
+                </div>
+                <div className="group rounded-2xl border border-neutral-50 p-5 transition-all hover:bg-neutral-50/50">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100">
+                    <Database className="size-5" />
+                  </div>
+                  <h4 className="text-[14px] font-bold text-neutral-800">GDPR Compliance</h4>
+                  <p className="mt-1 text-[11px] leading-relaxed font-medium text-neutral-400">
+                    We are fully compliant with GDPR. Your users can request data deletion or export
+                    at any time.
+                  </p>
+                </div>
+              </div>
+            </section>
           </div>
         )}
       </div>

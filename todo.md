@@ -494,7 +494,7 @@
 - [ ] Data Residency options: EU-only storage for GDPR-strict companies
 - [ ] IP Whitelisting for dashboard access
 - [ ] SSO enforcement (Block non-SSO logins for Enterprise)
-- [ ] Contractual DPA (Data Processing Agreement) self-service flow
+- [x] Contractual DPA (Data Processing Agreement) self-service flow
 - [ ] Dedicated support manager + private Slack channel for Enterprise
 
 ### 10.3 Enterprise Branding & Customization
@@ -558,7 +558,7 @@
 - [x] Widget Impression tracking (page load counts per widget)
 - [x] Video Play Rate & Completion Rate (25%, 50%, 75%, 100% milestones)
 - [x] Click-through rate (CTR) on Widget CTA buttons
-- [ ] Unique visitor tracking (cookie-less: IP + UA hash for privacy)
+- [x] Unique visitor tracking (cookie-less: IP + UA hash for privacy)
 - [ ] Traffic source attribution for widget views (referrer tracking)
 
 ### 12.2 Collection Analytics
@@ -593,10 +593,10 @@
 
 ### 13.1 Privacy-First Architecture
 
-- [ ] GDPR/CCPA compliant data processing agreements (DPA)
-- [ ] Cookie-less widget impression tracking (IP + UA fingerprint, no cookies)
-- [ ] One-click "Right to be forgotten" tool (Delete all submitter data)
-- [ ] One-click data export for submitters (JSON/CSV)
+- [x] GDPR/CCPA compliant data processing agreements (DPA)
+- [x] Cookie-less widget impression tracking (IP + UA fingerprint, no cookies)
+- [x] One-click "Right to be forgotten" tool (Delete all submitter data)
+- [x] One-click data export for submitters (JSON/CSV)
 - [ ] Cookie consent banners on collection pages (optional, configurable)
 - [ ] Privacy policy generator for collection page footer
 - [ ] Data retention policies: Auto-delete testimonials after N years if configured
@@ -605,11 +605,11 @@
 
 - [x] Content Security Policy (CSP) headers
 - [x] CORS configuration for widget API
-- [ ] Configure `Strict-Transport-Security` (HSTS) with preload
-- [ ] Configure `X-Content-Type-Options: nosniff`
-- [ ] Configure `X-Frame-Options: SAMEORIGIN` (except for widget iframe)
-- [ ] Configure `Referrer-Policy: strict-origin-when-cross-origin`
-- [ ] Configure `Permissions-Policy` (disable camera/mic by default)
+- [x] Configure `Strict-Transport-Security` (HSTS) with preload
+- [x] Configure `X-Content-Type-Options: nosniff`
+- [x] Configure `X-Frame-Options: SAMEORIGIN` (except for widget iframe)
+- [x] Configure `Referrer-Policy: strict-origin-when-cross-origin`
+- [x] Configure `Permissions-Policy` (disable camera/mic by default)
 - [ ] Rate limiting on all public-facing API endpoints (Upstash Redis)
 - [ ] API key rotation endpoint for public API users
 - [ ] Encryption at rest (AES-256) for video assets in R2

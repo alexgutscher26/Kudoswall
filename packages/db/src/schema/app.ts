@@ -38,6 +38,8 @@ export const workspace = pgTable(
     isPro: boolean("is_pro").default(false).notNull(),
     brandingJson: text("branding_json"),
     onboardingStatus: text("onboarding_status"),
+    dpaAcceptedAt: timestamp("dpa_accepted_at"),
+    dpaAcceptedById: text("dpa_accepted_by_id").references(() => user.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
@@ -47,6 +49,7 @@ export const workspace = pgTable(
   (table) => [
     index("workspace_slug_idx").on(table.slug),
     index("workspace_owner_id_idx").on(table.ownerId),
+    index("workspace_dpa_accepted_idx").on(table.dpaAcceptedAt),
   ],
 );
 
@@ -168,6 +171,7 @@ export const analyticsEvent = pgTable(
       .references(() => workspace.id, { onDelete: "cascade" }),
     projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
     widgetId: text("widget_id").references(() => widget.id, { onDelete: "set null" }),
+    visitorId: text("visitor_id"), // Hash of IP + User-Agent for cookie-less unique tracking
     eventType: analyticsEventTypeEnum("event_type").notNull(),
     metadataJson: text("metadata_json"), // Store additional event data
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -178,6 +182,7 @@ export const analyticsEvent = pgTable(
     index("analytics_event_project_id_idx").on(table.projectId),
     index("analytics_event_widget_id_idx").on(table.widgetId),
     index("analytics_event_type_idx").on(table.eventType),
+    index("analytics_event_visitor_id_idx").on(table.visitorId),
   ],
 );
 

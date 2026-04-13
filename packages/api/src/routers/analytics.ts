@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { protectedProcedure, publicAnalyticsProcedure, router } from "../index";
 import {
   workspace,
@@ -31,13 +32,20 @@ export const analyticsRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, req } = ctx;
+      const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+      const ua = req.headers.get("user-agent") || "";
+
+      // Create a privacy-preserving hash of IP + User Agent
+      const visitorId = createHash("sha256").update(`${ip}-${ua}`).digest("hex");
+
       const id = crypto.randomUUID();
       await db.insert(analyticsEvent).values({
         id: id,
         workspaceId: input.workspaceId,
         projectId: input.projectId,
         widgetId: input.widgetId,
+        visitorId: visitorId,
         eventType: input.eventType,
         metadataJson: input.metadataJson,
       });
@@ -153,12 +161,45 @@ export const analyticsRouter = router({
             : "0%"
           : (((currentConvRate - prevConversionRate) / prevConversionRate) * 100).toFixed(0) + "%";
 
+      // Unique visitors
+      const [uniqueViewsResult] = await db
+        .select({ value: sql<number>`count(distinct ${analyticsEvent.visitorId})` })
+        .from(analyticsEvent)
+        .where(
+          and(
+            eq(analyticsEvent.workspaceId, ws.id),
+            eq(analyticsEvent.eventType, "view"),
+            startDate ? gte(analyticsEvent.createdAt, startDate) : undefined,
+          ),
+        );
+
+      let prevUniqueViews = 0;
+      if (startDate && prevStartDate) {
+        const [prevUniqueViewsResult] = await db
+          .select({ value: sql<number>`count(distinct ${analyticsEvent.visitorId})` })
+          .from(analyticsEvent)
+          .where(
+            and(
+              eq(analyticsEvent.workspaceId, ws.id),
+              eq(analyticsEvent.eventType, "view"),
+              gte(analyticsEvent.createdAt, prevStartDate),
+              sql`${analyticsEvent.createdAt} < ${startDate}`,
+            ),
+          );
+        prevUniqueViews = Number(prevUniqueViewsResult?.value || 0);
+      }
+
+      const uniqueViews = Number(uniqueViewsResult?.value || 0);
+      const uniqueViewsChange = calcChange(uniqueViews, prevUniqueViews);
+
       return {
         totalViews: views.toLocaleString(),
+        uniqueVisitors: uniqueViews.toLocaleString(),
         totalTestimonials: submissions.toLocaleString(),
         newTestimonials: submissions,
         conversionRate,
         viewsChange,
+        uniqueVisitorsChange: uniqueViewsChange,
         submissionsChange,
         conversionChange,
         viewsRaw: views,

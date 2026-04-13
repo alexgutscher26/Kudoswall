@@ -16,6 +16,7 @@ import {
   Download,
   Loader2,
   Check,
+  Users,
 } from "lucide-react";
 import { trpc, trpcClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -298,6 +299,15 @@ export default function AnalyticsPage() {
       bg: "#fff5f7",
     },
     {
+      label: "Unique Visitors",
+      value: overview?.uniqueVisitors || "0",
+      change: overview?.uniqueVisitorsChange || "0%",
+      trend: (overview?.uniqueVisitorsChange || "0%").startsWith("+") ? "up" : "down",
+      icon: Users,
+      accent: "#f59e0b",
+      bg: "#fffbeb",
+    },
+    {
       label: "Conversion Rate",
       value: overview?.conversionRate || "0%",
       change: overview?.conversionChange || "0%",
@@ -405,7 +415,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {STATS_DATA.map((stat) => (
           <PerformanceStatCard key={stat.label} {...stat} />
         ))}
