@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import DashboardShell from "../dashboard";
 import { getDashboardData } from "../actions";
-import DashboardLoading from "../loading";
 import CollectionList from "./collection-list";
+
+import CollectionLoading from "./loading";
 
 export const metadata = {
   title: "Manage Collection Pages — KudosWall",
@@ -28,7 +29,7 @@ export default async function CollectionRoute({
   }
 
   return (
-    <Suspense fallback={<DashboardLoading />}>
+    <Suspense fallback={<CollectionLoading />}>
       <CollectionLayoutContent
         userName={session.user.name ?? "User"}
         userEmail={session.user.email ?? ""}

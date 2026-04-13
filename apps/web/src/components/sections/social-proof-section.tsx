@@ -1,5 +1,4 @@
-"use client";
-import { useEffect, useRef } from "react";
+import WidgetLoader from "./widget-loader";
 
 /**
  * SocialProofSection
@@ -9,32 +8,6 @@ import { useEffect, useRef } from "react";
  * using the drop-in KudosWall script.
  */
 export default function SocialProofSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Only run on client
-    if (typeof window === "undefined") return;
-
-    // Small delay to ensure the DOM is ready for the widget to anchor
-    const timer = setTimeout(() => {
-      if (containerRef.current && !containerRef.current.querySelector("script")) {
-        // This is the React-equivalent of dropping:
-        // <script src="/widget.js" data-id="5475dd90-24ad-49b3-99a1-609c939ae199" async></script>
-        const script = document.createElement("script");
-        script.src = "/widget.js";
-        script.setAttribute("data-id", "5475dd90-24ad-49b3-99a1-609c939ae199");
-        script.async = true;
-
-        // Optional: Adding custom overrides just like a power user might
-        // script.setAttribute("data-theme", "light");
-
-        containerRef.current.appendChild(script);
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <section id="social-proof" className="relative w-full overflow-hidden bg-white py-24 sm:py-32">
       {/* Background Decoration */}
@@ -60,7 +33,7 @@ export default function SocialProofSection() {
 
         {/* The Widget Area */}
         <div className="relative mx-auto max-w-5xl">
-          <div ref={containerRef} className="min-h-[400px] w-full" />
+          <WidgetLoader widgetId="5475dd90-24ad-49b3-99a1-609c939ae199" />
         </div>
       </div>
     </section>

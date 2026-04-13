@@ -13,15 +13,11 @@ import {
   Code2,
   Settings,
   LogOut,
-  Star,
-  Clock,
-  Copy,
   Plus,
   Globe,
   ChevronRight,
   Menu,
   X,
-  User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
@@ -48,42 +44,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ] as const;
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
-
-const STATS = [
-  {
-    label: "Testimonials",
-    value: "0",
-    sub: "Start collecting today",
-    icon: MessageSquareQuote,
-    accent: "#e8527a",
-    bg: "#fff5f7",
-  },
-  {
-    label: "Pending Approval",
-    value: "0",
-    sub: "All clear",
-    icon: Clock,
-    accent: "#7c3aed",
-    bg: "#f5f3ff",
-  },
-  {
-    label: "Widget Views",
-    value: "0",
-    sub: "Embed to start tracking",
-    icon: Globe,
-    accent: "#0ea5e9",
-    bg: "#f0f9ff",
-  },
-  {
-    label: "Conversion Rate",
-    value: "—",
-    sub: "Needs more data",
-    icon: BarChart2,
-    accent: "#16a34a",
-    bg: "#f0fdf4",
-  },
-] as const;
+// ─── Dot-grid background ──────────────────────────────────────────────────────
 
 // ─── Dot-grid background ──────────────────────────────────────────────────────
 
@@ -386,83 +347,7 @@ function TopBar({
   );
 }
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  accent,
-  bg,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  icon: React.ElementType;
-  accent: string;
-  bg: string;
-}) {
-  return (
-    <div
-      className="rounded-2xl border border-neutral-100 p-4 transition-shadow hover:shadow-md sm:p-5"
-      style={{ backgroundColor: bg }}
-    >
-      <div
-        className="mb-3 inline-flex size-9 items-center justify-center rounded-xl"
-        style={{ backgroundColor: `${accent}20` }}
-      >
-        <Icon className="size-4" style={{ color: accent }} />
-      </div>
-      <p className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900 sm:text-3xl">
-        {value}
-      </p>
-      <p className="text-[13px] font-medium text-neutral-700">{label}</p>
-      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">{sub}</p>
-    </div>
-  );
-}
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
-function EmptyTestimonials({ onNewCollection }: { onNewCollection: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-6 py-10 text-center sm:py-14">
-      <div
-        className="mb-4 flex size-14 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: "#fff5f7" }}
-      >
-        <MessageSquareQuote className="size-6" style={{ color: "#e8527a" }} />
-      </div>
-      <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">No testimonials yet</h3>
-      <p className="mb-6 max-w-xs text-[13px] leading-relaxed text-neutral-400">
-        Share your collection link with customers and your first testimonials will appear here —
-        ready to review and approve.
-      </p>
-      <button
-        type="button"
-        onClick={onNewCollection}
-        className="flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
-        style={{ backgroundColor: "#171717" }}
-      >
-        <Plus className="size-3.5" />
-        New Collection Link
-      </button>
-    </div>
-  );
-}
-
-// ─── Quick actions ────────────────────────────────────────────────────────────
-
-function QuickActions({
-  onNewCollection,
-  onCopyLink,
-  hasProjects,
-}: {
-  onNewCollection: () => void;
-  onCopyLink: () => void;
-  hasProjects: boolean;
-}) {}
+// ─── Modal ──────────────────────────────────────────────────────────────────
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
@@ -617,171 +502,6 @@ function NewCollectionModal({
   );
 }
 
-function RecentTestimonialsList({
-  testimonials,
-  workspaceId,
-}: {
-  testimonials: RecentTestimonial[];
-  workspaceId?: string;
-}) {
-  if (!testimonials || testimonials.length === 0) return null;
-
-  return (
-    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {testimonials.map((t) => (
-        <div
-          key={t.id}
-          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
-        >
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
-              {t.authorImage ? (
-                <Image
-                  src={t.authorImage as string}
-                  alt={t.authorName || "User"}
-                  width={40}
-                  height={40}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <User className="size-5 text-neutral-300" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
-                  {t.authorName || "Anonymous"}
-                </h4>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <div key={s} className="relative">
-                      {/* Base Star (Grey) */}
-                      <Star className="size-2.5 fill-neutral-100 text-neutral-100" />
-                      {/* Half Star Overlay */}
-                      {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
-                        <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
-                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                        </div>
-                      )}
-                      {/* Full Star Overlay */}
-                      {(t.rating ?? 0) >= s && (
-                        <div className="absolute inset-0 z-10 overflow-hidden">
-                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p className="mt-0.5 line-clamp-1 text-[12px] text-neutral-500 italic">
-                "{t.content || (t.type === "video" ? "Video testimonial" : "No content")}"
-              </p>
-              <div className="mt-1 flex items-center gap-2">
-                <span className="rounded-md border border-neutral-100/50 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-medium text-neutral-400">
-                  {t.project?.name}
-                </span>
-                <span className="text-[10px] text-neutral-300">
-                  {new Date(t.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="ml-4 flex items-center gap-2">
-            <Link
-              href={`/dashboard/testimonials?id=${t.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-            >
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ProjectsList({
-  projects,
-  workspaceSlug,
-  workspaceId,
-  onCopyLink,
-}: {
-  projects: Project[];
-  workspaceSlug: string;
-  workspaceId?: string;
-  onCopyLink?: () => void;
-}) {
-  if (!projects || projects.length === 0) return null;
-
-  return (
-    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {projects.map((p) => (
-        <div
-          key={p.id}
-          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
-        >
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-pink-50">
-              <LinkIcon className="size-5 text-pink-500" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
-                {p.name}
-              </h4>
-              <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
-                <Globe className="size-3" />/{workspaceSlug}/{p.slug}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                const url =
-                  window.location.origin === "http://localhost:3001"
-                    ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
-                    : `https://kudoswall.org/${workspaceSlug}/${p.slug}`;
-                navigator.clipboard.writeText(url);
-                toast.success("Link copied!");
-                onCopyLink?.();
-              }}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-              title="Copy link"
-            >
-              <Copy className="size-4" />
-            </button>
-            <Link
-              href={`/dashboard/testimonials?project=${p.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-            >
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
-
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 // When `children` is provided it renders instead of the default overview content.
 
@@ -844,43 +564,6 @@ export default function DashboardShell({
   // Sync initialData
   const activeData =
     activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
-
-  const stats = activeData
-    ? [
-        {
-          label: "Testimonials",
-          value: activeData.stats.testimonials.toString(),
-          sub: activeData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
-          icon: MessageSquareQuote,
-          accent: "#e8527a",
-          bg: "#fff5f7",
-        },
-        {
-          label: "Pending Approval",
-          value: activeData.stats.pending.toString(),
-          sub: activeData.stats.pending > 0 ? "New submissions!" : "All clear",
-          icon: Clock,
-          accent: "#7c3aed",
-          bg: "#f5f3ff",
-        },
-        {
-          label: "Widget Views",
-          value: activeData.stats.views.toString(),
-          sub: activeData.stats.views > 0 ? "Tracking live" : "Embed to start tracking",
-          icon: Globe,
-          accent: "#0ea5e9",
-          bg: "#f0f9ff",
-        },
-        {
-          label: "Conversion Rate",
-          value: activeData.stats.conversion,
-          sub: activeData.stats.views > 0 ? "Real-time performance" : "Needs more data",
-          icon: BarChart2,
-          accent: "#16a34a",
-          bg: "#f0fdf4",
-        },
-      ]
-    : [];
 
   const completeStep = useMutation({
     ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
@@ -996,99 +679,7 @@ export default function DashboardShell({
 
           {/* Main content */}
           <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-            <ErrorBoundary name={pageTitle || "Dashboard Content"}>
-              {children || (
-                <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-                  {/* Stats grid — 2 cols on mobile, 4 on xl */}
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-                    {stats.map((stat) => (
-                      <StatCard key={stat.label} {...stat} />
-                    ))}
-                  </div>
-
-                  {/* Main split */}
-                  <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
-                    {/* Testimonials panel */}
-                    <div
-                      className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
-                      style={{ backgroundColor: "#ffffff" }}
-                    >
-                      <div
-                        className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
-                        style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                      >
-                        <div className="min-w-0">
-                          <p className="text-[14px] font-semibold text-neutral-900">
-                            Recent Testimonials
-                          </p>
-                          <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
-                            Latest submissions from your customers
-                          </p>
-                        </div>
-                        {/* Filter chips */}
-                        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-                          {(["All", "Video", "Text"] as const).map((f) => {
-                            const isActive = testimonialFilter === f;
-                            return (
-                              <button
-                                key={f}
-                                type="button"
-                                onClick={() => setTestimonialFilter(f)}
-                                className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
-                                style={
-                                  isActive
-                                    ? {
-                                        backgroundColor: "#fff5f7",
-                                        color: "#e8527a",
-                                        borderColor: "#fecdd3",
-                                      }
-                                    : {
-                                        backgroundColor: "transparent",
-                                        color: "#a3a3a3",
-                                        borderColor: "rgba(0,0,0,0.08)",
-                                      }
-                                }
-                              >
-                                {f}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      {activeData?.recentTestimonials &&
-                      activeData.recentTestimonials.length > 0 ? (
-                        <div className="flex flex-col gap-4">
-                          <ProjectsList
-                            projects={activeData.projects}
-                            workspaceSlug={activeData.workspace.slug}
-                            workspaceId={activeWorkspaceId}
-                            onCopyLink={() => completeStep.mutate({ step: "step3" })}
-                          />
-                          <RecentTestimonialsList
-                            workspaceId={activeWorkspaceId}
-                            testimonials={activeData.recentTestimonials.filter(
-                              (t: RecentTestimonial) => {
-                                if (testimonialFilter === "All") return true;
-                                return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
-                              },
-                            )}
-                          />
-                        </div>
-                      ) : (
-                        <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
-                      )}
-                    </div>
-
-                    {/* Right column */}
-                    <div className="space-y-4 sm:space-y-5 xl:col-span-1">
-                      {activeData?.onboarding && (
-                        <OnboardingChecklist status={activeData.onboarding} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </ErrorBoundary>
+            <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
           </main>
         </div>
       </div>

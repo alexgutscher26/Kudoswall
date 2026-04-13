@@ -669,11 +669,11 @@
 
 ### 15.1 Next.js Performance
 
-- [ ] Implement Partial Prerendering (PPR) for the dashboard home page
-- [ ] Convert heavy client components to React Server Components where possible
-- [ ] Implement React Compiler (`react-compiler` Babel plugin) for auto-memoization
-- [ ] Eliminate unnecessary `use client` boundaries across the codebase
-- [ ] Add `<Suspense>` boundaries with skeleton loaders for all async data
+- [x] Implement Partial Prerendering (PPR) for the dashboard home page
+- [x] Convert heavy client components to React Server Components where possible
+- [x] Implement React Compiler (`react-compiler` Babel plugin) for auto-memoization
+- [x] Eliminate unnecessary `use client` boundaries across the codebase
+- [x] Add `<Suspense>` boundaries with skeleton loaders for all async data
 
 ### 15.2 Widget Performance
 

@@ -7,13 +7,15 @@ import { TestimonialInbox } from "./components";
 import { MessageSquareQuote, Plus } from "lucide-react";
 import Link from "next/link";
 
+import { Suspense } from "react";
+import TestimonialsLoading from "./loading";
+
 export default async function TestimonialsPage({
   searchParams,
 }: {
   searchParams: Promise<{ project?: string; workspaceId?: string }>;
 }) {
   const paramsRaw = await searchParams;
-  const { project: projectId, workspaceId } = paramsRaw;
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -23,6 +25,28 @@ export default async function TestimonialsPage({
     redirect("/login");
   }
 
+  return (
+    <Suspense fallback={<TestimonialsLoading />}>
+      <TestimonialsContentWrapper
+        userName={session.user.name ?? "User"}
+        userEmail={session.user.email ?? ""}
+        searchParams={paramsRaw}
+      />
+    </Suspense>
+  );
+}
+
+async function TestimonialsContentWrapper({
+  userName,
+  userEmail,
+  searchParams,
+}: {
+  userName: string;
+  userEmail: string;
+  searchParams: { project?: string; workspaceId?: string };
+}) {
+  const { project: projectId, workspaceId } = searchParams;
+
   // Fetch dashboard data with the selected workspace
   const dashData = await getDashboardData(workspaceId);
   if (!dashData) {
@@ -30,9 +54,8 @@ export default async function TestimonialsPage({
   }
 
   // If no workspaceId is in the URL, redirect to a URL that has it
-  // to ensure state is consistent across navigations and bookmarks
   if (!workspaceId && dashData.workspace.id) {
-    const params = new URLSearchParams(paramsRaw as any);
+    const params = new URLSearchParams(searchParams as any);
     params.set("workspaceId", dashData.workspace.id);
     redirect(`/dashboard/testimonials?${params.toString()}`);
   }
@@ -47,8 +70,8 @@ export default async function TestimonialsPage({
   if (!activeProjectId) {
     return (
       <DashboardShell
-        userName={session.user.name ?? "User"}
-        userEmail={session.user.email ?? ""}
+        userName={userName}
+        userEmail={userEmail}
         pageTitle="Testimonials"
         pageSubtitle="Manage your testimonials and approve them for your wall."
         initialData={dashData}
@@ -82,8 +105,8 @@ export default async function TestimonialsPage({
 
   return (
     <DashboardShell
-      userName={session.user.name ?? "User"}
-      userEmail={session.user.email ?? ""}
+      userName={userName}
+      userEmail={userEmail}
       pageTitle={`Inbox — ${data.project.name}`}
       pageSubtitle="Manage your testimonials and approve them for your wall."
       initialData={dashData}

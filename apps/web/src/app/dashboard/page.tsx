@@ -5,11 +5,14 @@ import { Suspense } from "react";
 import DashboardShell from "./dashboard";
 import { getDashboardData } from "./actions";
 import DashboardLoading from "./loading";
+import Overview from "./Overview";
 
 export const metadata = {
   title: "Dashboard — KudosWall",
   description: "Manage your testimonials, embed widget, and analytics.",
 };
+
+export const experimental_ppr = true;
 
 export default async function DashboardPage({
   searchParams,
@@ -17,7 +20,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ workspaceId?: string }>;
 }) {
   const paramsRaw = await searchParams;
-  const { workspaceId } = paramsRaw;
+
   let session;
   try {
     session = await auth.api.getSession({
@@ -25,38 +28,35 @@ export default async function DashboardPage({
     });
   } catch (err: any) {
     console.error("❌ Auth getSession failed:", err.message);
-    if (err.cause) console.error("   Cause:", err.cause.message);
-    if (err.stack) console.error(err.stack);
-    redirect("/login");
+    session = null;
   }
 
   if (!session?.user) {
     redirect("/login");
   }
 
+  // We show the shell immediately, and suspend the data-heavy content
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <DashboardContent
+      <DashboardContentWrapper
         userName={session.user.name ?? "User"}
         userEmail={session.user.email ?? ""}
-        workspaceId={workspaceId}
-        params={paramsRaw}
+        searchParams={paramsRaw}
       />
     </Suspense>
   );
 }
 
-async function DashboardContent({
+async function DashboardContentWrapper({
   userName,
   userEmail,
-  workspaceId,
-  params,
+  searchParams,
 }: {
   userName: string;
   userEmail: string;
-  workspaceId?: string;
-  params: any;
+  searchParams: { workspaceId?: string };
 }) {
+  const { workspaceId } = searchParams;
   const data = await getDashboardData(workspaceId);
 
   if (!data) {
@@ -64,9 +64,8 @@ async function DashboardContent({
   }
 
   // If no workspaceId is in the URL, redirect to a URL that has it
-  // to ensure state is consistent across navigations and bookmarks
   if (!workspaceId && data.workspace.id) {
-    const nextParams = new URLSearchParams(params);
+    const nextParams = new URLSearchParams(searchParams as any);
     nextParams.set("workspaceId", data.workspace.id);
     redirect(`/dashboard?${nextParams.toString()}`);
   }
@@ -77,6 +76,8 @@ async function DashboardContent({
       userEmail={userEmail}
       initialData={data}
       initialWorkspaceId={workspaceId}
-    />
+    >
+      <Overview data={data} workspaceId={workspaceId} />
+    </DashboardShell>
   );
 }

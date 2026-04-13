@@ -8,12 +8,15 @@ import DashboardShell from "../../dashboard";
 import { CollectionCustomizer } from "../collection-customizer";
 import { getDashboardData } from "../../actions";
 
+import { Suspense } from "react";
+import CollectionCustomizerLoading from "./loading";
+
 export default async function CollectionDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const paramsRaw = await params;
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -23,6 +26,31 @@ export default async function CollectionDetailPage({
     redirect("/login");
   }
 
+  return (
+    <Suspense fallback={<CollectionCustomizerLoading />}>
+      <CollectionDetailContentWrapper
+        userName={session.user.name ?? "User"}
+        userEmail={session.user.email ?? ""}
+        params={paramsRaw}
+        userId={session.user.id}
+      />
+    </Suspense>
+  );
+}
+
+async function CollectionDetailContentWrapper({
+  userName,
+  userEmail,
+  params,
+  userId,
+}: {
+  userName: string;
+  userEmail: string;
+  params: { id: string };
+  userId: string;
+}) {
+  const { id } = params;
+
   const p = await db.query.project.findFirst({
     where: eq(project.id, id),
     with: {
@@ -30,7 +58,7 @@ export default async function CollectionDetailPage({
     },
   });
 
-  if (!p || p.workspace.ownerId !== session.user.id) {
+  if (!p || p.workspace.ownerId !== userId) {
     notFound();
   }
 
@@ -42,8 +70,8 @@ export default async function CollectionDetailPage({
 
   return (
     <DashboardShell
-      userName={session.user.name ?? "User"}
-      userEmail={session.user.email ?? ""}
+      userName={userName}
+      userEmail={userEmail}
       initialData={data}
       pageTitle={`Edit: ${p.name}`}
       pageSubtitle="Customize your collection page experience"

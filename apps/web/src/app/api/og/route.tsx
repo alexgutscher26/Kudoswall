@@ -3,8 +3,6 @@ import { createDb } from "@my-better-t-app/db";
 import { project } from "@my-better-t-app/db/schema";
 import { eq, or } from "drizzle-orm";
 
-export const runtime = "nodejs";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
