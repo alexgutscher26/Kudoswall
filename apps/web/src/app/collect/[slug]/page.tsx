@@ -6,6 +6,8 @@ import { eq, or } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
 import ErrorBoundary from "@/components/error-boundary";
 import { JsonLd } from "@/components/seo/json-ld";
+import { CookieConsentBanner } from "@/components/collection/cookie-consent-banner";
+import { CollectionFooter } from "@/components/collection/collection-footer";
 
 interface CollectPageProps {
   params: Promise<{
@@ -60,6 +62,52 @@ export async function generateMetadata({ params }: CollectPageProps) {
   };
 }
 
+const DEFAULT_SETTINGS = {
+  accentColor: "#e8527a",
+  backgroundColor: "#fafafa",
+  fontFamily: "sans",
+  form: {
+    fields: {
+      fullName: { enabled: true, required: true, label: "Full Name", placeholder: "Jane Doe" },
+      email: { enabled: true, required: false, label: "Email", placeholder: "jane@example.com" },
+      company: { enabled: true, required: false, label: "Company", placeholder: "Acme Inc." },
+      jobTitle: { enabled: true, required: false, label: "Job Title", placeholder: "CEO" },
+      linkedin: {
+        enabled: false,
+        required: false,
+        label: "LinkedIn Profile",
+        placeholder: "https://linkedin.com/in/jane",
+      },
+    },
+    starRating: { enabled: true },
+    minCharCount: 50,
+  },
+  pageContent: {
+    headline: "Share your experience",
+    subheading: "We value your feedback and want to know how we did.",
+    showTestimonialCount: false,
+    thankYou: {
+      headline: "You're awesome!",
+      body: "Your feedback has been sent. It helps us more than you know.",
+      cta: { enabled: false, text: "", url: "" },
+    },
+  },
+  video: {
+    enabled: false,
+    prompt: "Tell us about your experience",
+    maxLength: 30,
+  },
+  compliance: {
+    cookieConsent: {
+      enabled: false,
+      message: "We use cookies to ensure you get the best experience on our website.",
+      buttonText: "Got it!",
+    },
+    showFooterPrivacy: true,
+    footerPrivacyText: "Privacy Policy",
+  },
+};
+
 async function getProjectByCollectionSlug(slug: string) {
   const result = await db.query.project.findFirst({
     where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
@@ -73,7 +121,33 @@ async function getProjectByCollectionSlug(slug: string) {
 
   if (!result) return null;
 
-  const settings = result.collectionSettingsJson ? JSON.parse(result.collectionSettingsJson) : null;
+  const parsed = result.collectionSettingsJson ? JSON.parse(result.collectionSettingsJson) : {};
+
+  // Deep merge basics for consistency
+  const settings = {
+    ...DEFAULT_SETTINGS,
+    ...parsed,
+    form: {
+      ...DEFAULT_SETTINGS.form,
+      ...(parsed.form || {}),
+      fields: {
+        ...DEFAULT_SETTINGS.form.fields,
+        ...(parsed.form?.fields || {}),
+      },
+    },
+    pageContent: {
+      ...DEFAULT_SETTINGS.pageContent,
+      ...(parsed.pageContent || {}),
+    },
+    compliance: {
+      ...DEFAULT_SETTINGS.compliance,
+      ...(parsed.compliance || {}),
+      cookieConsent: {
+        ...DEFAULT_SETTINGS.compliance.cookieConsent,
+        ...(parsed.compliance?.cookieConsent || {}),
+      },
+    },
+  };
 
   // Enhance with branding logic
   return {
@@ -222,8 +296,28 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
               initialType={t === "v" ? "video" : t === "t" ? "text" : null}
             />
           </ErrorBoundary>
+
+          <CollectionFooter
+            workspaceName={projectData.workspace.name}
+            projectName={projectData.name}
+            projectSlug={slug}
+            showPrivacy={settings?.compliance?.showFooterPrivacy ?? true}
+            privacyText={settings?.compliance?.footerPrivacyText || "Privacy Policy"}
+            privacyUrl={settings?.privacyPolicyUrl}
+            hasInternalPrivacy={!!settings?.compliance?.privacyPolicyContent}
+          />
         </div>
       </main>
+
+      <CookieConsentBanner
+        enabled={true}
+        message={
+          settings?.compliance?.cookieConsent?.message ||
+          "We use cookies to ensure you get the best experience on our website."
+        }
+        buttonText={settings?.compliance?.cookieConsent?.buttonText || "Got it!"}
+        accentColor={accentColor}
+      />
     </>
   );
 }

@@ -597,8 +597,8 @@
 - [x] Cookie-less widget impression tracking (IP + UA fingerprint, no cookies)
 - [x] One-click "Right to be forgotten" tool (Delete all submitter data)
 - [x] One-click data export for submitters (JSON/CSV)
-- [ ] Cookie consent banners on collection pages (optional, configurable)
-- [ ] Privacy policy generator for collection page footer
+- [x] Cookie consent banners on collection pages (optional, configurable)
+- [x] Privacy policy generator for collection page footer
 - [ ] Data retention policies: Auto-delete testimonials after N years if configured
 
 ### 13.2 Application Hardening

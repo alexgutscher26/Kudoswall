@@ -72,6 +72,16 @@ interface CollectionSettings {
       cta?: { enabled: boolean; text: string; url: string };
     };
   };
+  compliance?: {
+    cookieConsent: {
+      enabled: boolean;
+      message: string;
+      buttonText: string;
+    };
+    showFooterPrivacy: boolean;
+    footerPrivacyText: string;
+    privacyPolicyContent?: string;
+  };
 }
 
 /**

@@ -83,6 +83,16 @@ export type CollectionSettings = {
   expiryDate?: string;
   redirectUrl?: string;
   privacyPolicyUrl?: string;
+  compliance?: {
+    cookieConsent: {
+      enabled: boolean;
+      message: string;
+      buttonText: string;
+    };
+    showFooterPrivacy: boolean;
+    footerPrivacyText: string;
+    privacyPolicyContent?: string;
+  };
 };
 
 const DEFAULT_SETTINGS: CollectionSettings = {
@@ -120,6 +130,16 @@ const DEFAULT_SETTINGS: CollectionSettings = {
     prompt: "Tell us about your experience",
     maxLength: 30,
   },
+  compliance: {
+    cookieConsent: {
+      enabled: false,
+      message: "We use cookies to ensure you get the best experience on our website.",
+      buttonText: "Got it!",
+    },
+    showFooterPrivacy: true,
+    footerPrivacyText: "Privacy Policy",
+    privacyPolicyContent: "",
+  },
 };
 
 export function CollectionCustomizer({
@@ -129,9 +149,47 @@ export function CollectionCustomizer({
 }: CollectionCustomizerProps) {
   const [settings, setSettings] = useState<CollectionSettings>(() => {
     try {
-      return project.collectionSettingsJson
+      const parsed = project.collectionSettingsJson
         ? JSON.parse(project.collectionSettingsJson)
-        : DEFAULT_SETTINGS;
+        : {};
+
+      // Deep merge basic structure to ensure missing fields from old projects don't cause crashes
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        form: {
+          ...DEFAULT_SETTINGS.form,
+          ...(parsed.form || {}),
+          fields: {
+            ...DEFAULT_SETTINGS.form.fields,
+            ...(parsed.form?.fields || {}),
+          },
+          starRating: {
+            ...DEFAULT_SETTINGS.form.starRating,
+            ...(parsed.form?.starRating || {}),
+          },
+        },
+        pageContent: {
+          ...DEFAULT_SETTINGS.pageContent,
+          ...(parsed.pageContent || {}),
+          thankYou: {
+            ...DEFAULT_SETTINGS.pageContent?.thankYou,
+            ...(parsed.pageContent?.thankYou || {}),
+          },
+        },
+        video: {
+          ...DEFAULT_SETTINGS.video,
+          ...(parsed.video || {}),
+        },
+        compliance: {
+          ...DEFAULT_SETTINGS.compliance!,
+          ...(parsed.compliance || {}),
+          cookieConsent: {
+            ...DEFAULT_SETTINGS.compliance!.cookieConsent,
+            ...(parsed.compliance?.cookieConsent || {}),
+          },
+        },
+      };
     } catch (e) {
       return DEFAULT_SETTINGS;
     }
@@ -751,6 +809,117 @@ export function CollectionCustomizer({
                     type="url"
                     value={settings.privacyPolicyUrl || ""}
                   />
+                  <p className="text-[10px] text-neutral-400">
+                    Linked in the collection form consent checkbox.
+                  </p>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Cookie Consent Banner
+                    </span>
+                    <input
+                      checked={settings.compliance?.cookieConsent?.enabled || false}
+                      className="accent-pink-500"
+                      disabled={!isPro}
+                      onChange={(e) =>
+                        setNestedSetting("compliance.cookieConsent.enabled", e.target.checked)
+                      }
+                      type="checkbox"
+                    />
+                  </div>
+                  {(settings.compliance?.cookieConsent?.enabled || false) && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Banner Message
+                        </label>
+                        <textarea
+                          className="h-16 w-full resize-none rounded-lg border border-neutral-100 bg-white px-3 py-2 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.cookieConsent.message", e.target.value)
+                          }
+                          value={settings.compliance?.cookieConsent?.message || ""}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Button Text
+                        </label>
+                        <input
+                          className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.cookieConsent.buttonText", e.target.value)
+                          }
+                          type="text"
+                          value={settings.compliance?.cookieConsent?.buttonText || ""}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Show Footer Privacy Link
+                    </span>
+                    <input
+                      checked={settings.compliance?.showFooterPrivacy ?? true}
+                      className="accent-pink-500"
+                      disabled={!isPro}
+                      onChange={(e) =>
+                        setNestedSetting("compliance.showFooterPrivacy", e.target.checked)
+                      }
+                      type="checkbox"
+                    />
+                  </div>
+                  {(settings.compliance?.showFooterPrivacy ?? true) && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Footer Link Text
+                        </label>
+                        <input
+                          className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.footerPrivacyText", e.target.value)
+                          }
+                          type="text"
+                          value={settings.compliance?.footerPrivacyText || "Privacy Policy"}
+                        />
+                      </div>
+
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                            Privacy Policy Content (Markdown)
+                          </label>
+                          <button
+                            onClick={() => {
+                              const template = `## Privacy Policy for ${project.name}\n\nWe value your privacy. This policy explains how ${workspace.name} ("we", "us", or "our") collects, uses, and shares information when you provide a testimonial for ${project.name}.\n\n### 1. Information We Collect\nWhen you submit a testimonial, we collect your name, email address, and any other information you choose to provide (such as your photo, company name, or social media links).\n\n### 2. How We Use Your Information\nWe use your information to display your testimonial on our website and marketing materials. You grant us a non-exclusive, world-wide, perpetual license to use your content.\n\n### 3. Sharing Your Information\nYour testimonial (including your name and photo) will be publicly visible. Your email address will not be shared publicly.\n\n### 4. Your Rights\nYou can request the removal of your testimonial at any time by contacting us at support@example.com.`;
+                              setNestedSetting("compliance.privacyPolicyContent", template);
+                            }}
+                            className="text-[10px] font-bold text-pink-500 hover:underline"
+                          >
+                            Generate Template
+                          </button>
+                        </div>
+                        <textarea
+                          className="h-32 w-full resize-none rounded-lg border border-neutral-100 bg-white px-3 py-2 text-[11px] leading-relaxed font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.privacyPolicyContent", e.target.value)
+                          }
+                          placeholder="Markdown supported..."
+                          value={settings.compliance?.privacyPolicyContent || ""}
+                        />
+                        <p className="text-[10px] text-neutral-400 italic">
+                          If empty, we'll use your Privacy Policy URL above.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

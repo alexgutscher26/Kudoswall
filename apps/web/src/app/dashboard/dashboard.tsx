@@ -27,8 +27,11 @@ import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
 import { gooeyToast as toast } from "goey-toast";
 import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
+import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import { createProject } from "./actions";
 
 type DashboardData = RouterOutputs["dashboard"]["getData"];
 type Project = DashboardData["projects"][number];
@@ -782,10 +785,6 @@ function LinkIcon({ className }: { className?: string }) {
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 // When `children` is provided it renders instead of the default overview content.
 
-import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
-import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
-import { createProject } from "./actions";
-
 export default function DashboardShell({
   userName,
   userEmail,
@@ -827,6 +826,11 @@ export default function DashboardShell({
     initialWorkspaceId || urlWorkspaceId || initialData?.workspace.id || "",
   );
 
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Synchronize state with initialData from server
   useEffect(() => {
     if (initialData?.workspace.id && initialData.workspace.id !== activeWorkspaceId) {
@@ -834,25 +838,13 @@ export default function DashboardShell({
     }
   }, [initialData?.workspace.id]);
 
-  // Live polling for dashboard data
-  const { data: liveData } = useQuery({
-    ...trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
-    initialData: activeWorkspaceId === initialData?.workspace.id ? initialData : undefined,
-    refetchInterval: 5000,
-  });
+  // Derived data state (polled content)
+  const [polledData, setPolledData] = useState<DashboardData | null>(null);
 
-  // If we are switching workspaces, we MUST show loading state/new data, not the old initialData
+  // Sync initialData
   const activeData =
-    activeWorkspaceId === initialData?.workspace.id ? liveData || initialData : liveData;
+    activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
 
-  const completeStep = useMutation({
-    ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
-    },
-  });
-
-  // Derived stats from initialData
   const stats = activeData
     ? [
         {
@@ -890,6 +882,14 @@ export default function DashboardShell({
       ]
     : [];
 
+  const completeStep = useMutation({
+    ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
+    onSuccess: () => {
+      // Use imported global queryClient instead of useQueryClient() to be SSR-safe
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+    },
+  });
+
   const handleCopyCollectionLink = () => {
     if (activeData?.projects && activeData.projects.length > 0) {
       const p = activeData.projects[0];
@@ -917,6 +917,15 @@ export default function DashboardShell({
       activeWorkspaceId={activeWorkspaceId}
       setActiveWorkspaceId={setActiveWorkspaceId}
     >
+      {/* Live Data Poller (Client Only) */}
+      {isMounted && (
+        <DashboardPoller
+          workspaceId={activeWorkspaceId}
+          onData={setPolledData}
+          initialData={activeWorkspaceId === initialData?.workspace.id ? initialData : null}
+        />
+      )}
+
       <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
         {/* Desktop sidebar */}
         <DesktopSidebar
@@ -1085,4 +1094,34 @@ export default function DashboardShell({
       </div>
     </WorkspaceProvider>
   );
+}
+
+/**
+ * Client-only component to handle live data polling and mutations.
+ * This avoids SSR issues with useQuery/useMutation in the main DashboardShell.
+ */
+function DashboardPoller({
+  workspaceId,
+  onData,
+  initialData,
+}: {
+  workspaceId: string;
+  onData: (data: DashboardData) => void;
+  initialData?: DashboardData | null;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const { data } = useQuery({
+    ...trpc.dashboard.getData.queryOptions({ workspaceId }),
+    initialData: initialData || undefined,
+    refetchInterval: 5000,
+    enabled: mounted && !!workspaceId,
+  });
+
+  useEffect(() => {
+    if (data) onData(data);
+  }, [data, onData]);
+
+  return null;
 }
