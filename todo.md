@@ -599,7 +599,7 @@
 - [x] One-click data export for submitters (JSON/CSV)
 - [x] Cookie consent banners on collection pages (optional, configurable)
 - [x] Privacy policy generator for collection page footer
-- [ ] Data retention policies: Auto-delete testimonials after N years if configured
+- [x] Data retention policies: Auto-delete testimonials after N years if configured
 
 ### 13.2 Application Hardening
 

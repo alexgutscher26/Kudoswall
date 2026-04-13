@@ -80,6 +80,8 @@ export default function SettingsPage() {
 
   const [workspaceName, setWorkspaceName] = useState("");
   const [slug, setSlug] = useState("");
+  const [retentionEnabled, setRetentionEnabled] = useState(false);
+  const [retentionDays, setRetentionDays] = useState(365);
   const [searchEmail, setSearchEmail] = useState("");
 
   const {
@@ -133,6 +135,8 @@ export default function SettingsPage() {
     if (dashboardData?.workspace) {
       setWorkspaceName(dashboardData.workspace.name);
       setSlug(dashboardData.workspace.slug);
+      setRetentionEnabled(dashboardData.workspace.retentionEnabled);
+      setRetentionDays(dashboardData.workspace.retentionDays || 365);
     }
   }, [dashboardData]);
 
@@ -141,6 +145,8 @@ export default function SettingsPage() {
       id: activeWorkspaceId,
       name: workspaceName,
       slug: slug,
+      retentionEnabled: retentionEnabled,
+      retentionDays: retentionDays,
     });
   };
 
@@ -641,6 +647,89 @@ export default function SettingsPage() {
                 </div>
               </div>
             </section>
+
+            <section className="space-y-6 border-t border-neutral-50 pt-8">
+              <h3 className="text-lg font-bold tracking-tight text-neutral-900">
+                Data Retention Policy
+              </h3>
+              <p className="text-[13px] text-neutral-400">
+                Automatically delete testimonials after a certain period of time to comply with your
+                local data retention laws.
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between rounded-2xl border border-neutral-50 p-4 transition-all hover:bg-neutral-50/50">
+                  <div>
+                    <h4 className="text-[14px] font-bold text-neutral-800">
+                      Auto-delete Testimonials
+                    </h4>
+                    <p className="text-[11px] text-neutral-400">
+                      If enabled, testimonials will be permanently deleted after the retention
+                      period.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRetentionEnabled(!retentionEnabled)}
+                    className={`relative flex h-5 w-10 items-center rounded-full px-1 transition-all ${
+                      retentionEnabled ? "bg-pink-600" : "bg-neutral-200"
+                    }`}
+                  >
+                    <div
+                      className={`size-3.5 rounded-full bg-white transition-all ${
+                        retentionEnabled ? "translate-x-4.5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {retentionEnabled && (
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50/50 p-5">
+                    <div className="flex items-start gap-3">
+                      <Database className="mt-1 size-5 text-amber-600" />
+                      <div className="flex-1">
+                        <h4 className="text-[14px] font-bold text-neutral-800">Retention Period</h4>
+                        <p className="mb-4 text-[11px] text-neutral-400">
+                          Configure how long you want to keep testimonials before they are
+                          permanently deleted.
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={retentionDays}
+                            onChange={(e) => setRetentionDays(Number(e.target.value))}
+                            className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[13px] font-medium outline-none focus:border-amber-500"
+                          >
+                            <option value={30}>30 Days</option>
+                            <option value={90}>90 Days</option>
+                            <option value={180}>180 Days</option>
+                            <option value={365}>1 Year</option>
+                            <option value={730}>2 Years</option>
+                            <option value={1095}>3 Years</option>
+                            <option value={1825}>5 Years</option>
+                          </select>
+                          <span className="text-[12px] font-medium text-amber-700">
+                            Warning: Deletion is permanent and cannot be undone.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className="flex justify-end pt-6">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={updateWorkspace.isPending}
+                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                style={{ backgroundColor: "#171717" }}
+              >
+                <Save className="size-4" />
+                {updateWorkspace.isPending ? "Saving..." : "Save Settings"}
+              </button>
+            </div>
           </div>
         )}
       </div>

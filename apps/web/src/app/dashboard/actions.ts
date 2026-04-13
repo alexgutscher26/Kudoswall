@@ -43,6 +43,8 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     brandingJson: null,
     dpaAcceptedAt: null,
     dpaAcceptedById: null,
+    retentionEnabled: false,
+    retentionDays: 365,
   };
 
   await db.insert(workspace).values(newWorkspace);
@@ -207,6 +209,8 @@ export async function getDashboardData(workspaceId?: string) {
       deletedAt: ws.deletedAt?.toISOString() || null,
       dpaAcceptedAt: ws.dpaAcceptedAt?.toISOString() || null,
       dpaAcceptedById: ws.dpaAcceptedById,
+      retentionEnabled: ws.retentionEnabled,
+      retentionDays: ws.retentionDays,
     },
     projects: projects.map((p) => ({
       ...p,
@@ -282,6 +286,8 @@ export async function getProjectTestimonials(projectId: string) {
         deletedAt: p.workspace.deletedAt?.toISOString() || null,
         dpaAcceptedAt: p.workspace.dpaAcceptedAt?.toISOString() || null,
         dpaAcceptedById: p.workspace.dpaAcceptedById,
+        retentionEnabled: p.workspace.retentionEnabled,
+        retentionDays: p.workspace.retentionDays,
       },
     },
     testimonials: testimonials.map((t) => ({

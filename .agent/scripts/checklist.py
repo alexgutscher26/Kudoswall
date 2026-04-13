@@ -23,8 +23,17 @@ Priority Order:
 import sys
 import subprocess
 import argparse
+import io
 from pathlib import Path
 from typing import List, Tuple, Optional
+
+# Configure stdout for UTF-8 to handle emojis on Windows
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        # Fallback for older python
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # ANSI colors for terminal output
 class Colors:

@@ -6,6 +6,7 @@ import {
   boolean,
   pgEnum,
   index,
+  integer,
   doublePrecision,
   primaryKey,
 } from "drizzle-orm/pg-core";
@@ -40,6 +41,8 @@ export const workspace = pgTable(
     onboardingStatus: text("onboarding_status"),
     dpaAcceptedAt: timestamp("dpa_accepted_at"),
     dpaAcceptedById: text("dpa_accepted_by_id").references(() => user.id),
+    retentionEnabled: boolean("retention_enabled").default(false).notNull(),
+    retentionDays: integer("retention_days").default(365), // Default to 1 year if enabled
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
