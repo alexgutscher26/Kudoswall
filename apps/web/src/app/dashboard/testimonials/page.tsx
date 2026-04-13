@@ -12,7 +12,8 @@ export default async function TestimonialsPage({
 }: {
   searchParams: Promise<{ project?: string; workspaceId?: string }>;
 }) {
-  const { project: projectId, workspaceId } = await searchParams;
+  const paramsRaw = await searchParams;
+  const { project: projectId, workspaceId } = paramsRaw;
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -31,9 +32,8 @@ export default async function TestimonialsPage({
   // If no workspaceId is in the URL, redirect to a URL that has it
   // to ensure state is consistent across navigations and bookmarks
   if (!workspaceId && dashData.workspace.id) {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(paramsRaw as any);
     params.set("workspaceId", dashData.workspace.id);
-    if (projectId) params.set("project", projectId);
     redirect(`/dashboard/testimonials?${params.toString()}`);
   }
 
@@ -63,7 +63,7 @@ export default async function TestimonialsPage({
             Create your first project to start collecting and managing testimonials.
           </p>
           <Link
-            href="?new=project"
+            href={`?new=project&workspaceId=${dashData.workspace.id}`}
             className="inline-flex items-center gap-2 rounded-full bg-[#171717] px-6 py-3 text-[14px] font-bold text-white shadow-lg shadow-black/5 transition-all hover:opacity-90 active:scale-[0.98]"
           >
             <Plus className="size-4" />

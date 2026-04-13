@@ -16,7 +16,8 @@ export default async function AnalyticsRoute({
 }: {
   searchParams: Promise<{ workspaceId?: string }>;
 }) {
-  const { workspaceId } = await searchParams;
+  const paramsRaw = await searchParams;
+  const { workspaceId } = paramsRaw;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -32,7 +33,9 @@ export default async function AnalyticsRoute({
   }
 
   if (!workspaceId) {
-    redirect(`/dashboard/analytics?workspaceId=${dashData.workspace.id}`);
+    const nextParams = new URLSearchParams(paramsRaw as any);
+    nextParams.set("workspaceId", dashData.workspace.id);
+    redirect(`/dashboard/analytics?${nextParams.toString()}`);
   }
 
   return (

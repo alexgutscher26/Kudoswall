@@ -16,7 +16,8 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ workspaceId?: string }>;
 }) {
-  const { workspaceId } = await searchParams;
+  const paramsRaw = await searchParams;
+  const { workspaceId } = paramsRaw;
   let session;
   try {
     session = await auth.api.getSession({
@@ -39,6 +40,7 @@ export default async function DashboardPage({
         userName={session.user.name ?? "User"}
         userEmail={session.user.email ?? ""}
         workspaceId={workspaceId}
+        params={paramsRaw}
       />
     </Suspense>
   );
@@ -48,10 +50,12 @@ async function DashboardContent({
   userName,
   userEmail,
   workspaceId,
+  params,
 }: {
   userName: string;
   userEmail: string;
   workspaceId?: string;
+  params: any;
 }) {
   const data = await getDashboardData(workspaceId);
 
@@ -62,7 +66,9 @@ async function DashboardContent({
   // If no workspaceId is in the URL, redirect to a URL that has it
   // to ensure state is consistent across navigations and bookmarks
   if (!workspaceId && data.workspace.id) {
-    redirect(`/dashboard?workspaceId=${data.workspace.id}`);
+    const nextParams = new URLSearchParams(params);
+    nextParams.set("workspaceId", data.workspace.id);
+    redirect(`/dashboard?${nextParams.toString()}`);
   }
 
   return (

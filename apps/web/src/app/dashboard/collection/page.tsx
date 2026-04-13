@@ -17,7 +17,8 @@ export default async function CollectionRoute({
 }: {
   searchParams: Promise<{ workspaceId?: string }>;
 }) {
-  const { workspaceId } = await searchParams;
+  const paramsRaw = await searchParams;
+  const { workspaceId } = paramsRaw;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -32,6 +33,7 @@ export default async function CollectionRoute({
         userName={session.user.name ?? "User"}
         userEmail={session.user.email ?? ""}
         workspaceId={workspaceId}
+        params={paramsRaw}
       />
     </Suspense>
   );
@@ -41,10 +43,12 @@ async function CollectionLayoutContent({
   userName,
   userEmail,
   workspaceId,
+  params,
 }: {
   userName: string;
   userEmail: string;
   workspaceId?: string;
+  params: any;
 }) {
   const data = await getDashboardData(workspaceId);
 
@@ -54,7 +58,9 @@ async function CollectionLayoutContent({
 
   // Auto-redirect if workspaceId is missing from URL
   if (!workspaceId && data.workspace.id) {
-    redirect(`/dashboard/collection?workspaceId=${data.workspace.id}`);
+    const nextParams = new URLSearchParams(params);
+    nextParams.set("workspaceId", data.workspace.id);
+    redirect(`/dashboard/collection?${nextParams.toString()}`);
   }
 
   return (

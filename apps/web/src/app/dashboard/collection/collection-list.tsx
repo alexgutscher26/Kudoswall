@@ -22,6 +22,7 @@ import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import type { RouterOutputs } from "@/utils/trpc";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 interface CollectionListProps {
   projects: RouterOutputs["dashboard"]["getData"]["projects"];
@@ -30,6 +31,7 @@ interface CollectionListProps {
 export default function CollectionList({ projects }: CollectionListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const { activeWorkspaceId } = useWorkspace();
 
   const deleteProject = useMutation(
     trpc.dashboard.deleteProject.mutationOptions({
@@ -50,7 +52,9 @@ export default function CollectionList({ projects }: CollectionListProps) {
   );
 
   const onCreateClick = () => {
-    router.push("/dashboard/collection?new=project" as Route);
+    router.push(
+      `/dashboard/collection?new=project${activeWorkspaceId ? `&workspaceId=${activeWorkspaceId}` : ""}` as Route,
+    );
   };
 
   const filteredProjects = projects.filter((p) =>
@@ -170,7 +174,9 @@ export default function CollectionList({ projects }: CollectionListProps) {
               </div>
 
               <Link
-                href={`/dashboard/collection/${p.id}` as Route}
+                href={
+                  `/dashboard/collection/${p.id}${activeWorkspaceId ? `?workspaceId=${activeWorkspaceId}` : ""}` as Route
+                }
                 className="absolute inset-0 z-10"
               />
             </div>
