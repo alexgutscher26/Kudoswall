@@ -2,14 +2,23 @@ import Hero from "@/components/hero";
 import FeaturesSection from "@/components/sections/features-section";
 import HowItWorksSection from "@/components/sections/how-it-works-section";
 import WidgetPreviewSection from "@/components/sections/widget-preview-section";
-// import SocialProofSection from "@/components/sections/social-proof-section";
 import PricingSection from "@/components/sections/pricing-section";
 import FaqSection from "@/components/sections/faq-section";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
 import SocialProofSection from "@/components/sections/social-proof-section";
+import { headers } from "next/headers";
+import { getProjectByCustomDomain } from "@/proxy";
+import CollectionPageView from "@/components/collection-page-view";
 
-export default function Home() {
+export default async function Home() {
+  const host = (await headers()).get("host") || "";
+  const project = await getProjectByCustomDomain(host);
+
+  if (project) {
+    return <CollectionPageView project={project} />;
+  }
+
   return (
     <main>
       <Hero />
