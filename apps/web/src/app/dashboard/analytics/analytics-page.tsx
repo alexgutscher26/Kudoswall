@@ -20,6 +20,7 @@ import {
 import { trpc, trpcClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 type ExportRow = RouterOutputs["analytics"]["getExportData"][number];
 
@@ -193,6 +194,7 @@ function PerformanceChart({ data }: { data: { name: string; views: number }[] })
 // ─── Main Content ─────────────────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
+  const { activeWorkspaceId } = useWorkspace();
   const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [isExporting, setIsExporting] = useState(false);
@@ -205,17 +207,26 @@ export default function AnalyticsPage() {
     all: "All Time",
   };
 
-  const overviewQuery = useQuery(trpc.analytics.getOverview.queryOptions({ timeframe }));
-  const chartQuery = useQuery(trpc.analytics.getChartData.queryOptions({ timeframe }));
-  const widgetPerformanceQuery = useQuery(
-    trpc.analytics.getWidgetPerformance.queryOptions({ timeframe }),
+  const overviewQuery = useQuery(
+    trpc.analytics.getOverview.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
   );
-  const topTestimonialsQuery = useQuery(trpc.analytics.getTopTestimonials.queryOptions());
+  const chartQuery = useQuery(
+    trpc.analytics.getChartData.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
+  );
+  const widgetPerformanceQuery = useQuery(
+    trpc.analytics.getWidgetPerformance.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
+  );
+  const topTestimonialsQuery = useQuery(
+    trpc.analytics.getTopTestimonials.queryOptions({ workspaceId: activeWorkspaceId }),
+  );
 
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const data = await trpcClient.analytics.getExportData.query({ timeframe });
+      const data = await trpcClient.analytics.getExportData.query({
+        timeframe,
+        workspaceId: activeWorkspaceId,
+      });
       if (!data || data.length === 0) {
         toast.error("No data available to export");
         return;

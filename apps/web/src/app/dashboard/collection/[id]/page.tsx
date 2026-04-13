@@ -23,12 +23,6 @@ export default async function CollectionDetailPage({
     redirect("/login");
   }
 
-  // Fetch initial dashboard data as well to pass to the shell and ensure revalidations
-  const data = await getDashboardData();
-  if (!data) {
-    redirect("/login");
-  }
-
   const p = await db.query.project.findFirst({
     where: eq(project.id, id),
     with: {
@@ -40,6 +34,12 @@ export default async function CollectionDetailPage({
     notFound();
   }
 
+  // Fetch initial dashboard data as well to pass to the shell and ensure revalidations
+  const data = await getDashboardData(p.workspaceId);
+  if (!data) {
+    redirect("/login");
+  }
+
   return (
     <DashboardShell
       userName={session.user.name ?? "User"}
@@ -47,6 +47,7 @@ export default async function CollectionDetailPage({
       initialData={data}
       pageTitle={`Edit: ${p.name}`}
       pageSubtitle="Customize your collection page experience"
+      initialWorkspaceId={p.workspaceId}
     >
       <div className="mx-auto max-w-7xl">
         <CollectionCustomizer

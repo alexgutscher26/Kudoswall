@@ -47,7 +47,7 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
   return newWorkspace;
 }
 
-export async function createProject(formData: FormData) {
+export async function createProject(formData: FormData, workspaceId?: string) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -59,13 +59,17 @@ export async function createProject(formData: FormData) {
   const name = formData.get("name") as string;
   if (!name) throw new Error("Project name is required");
 
-  const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
+  let wsId = workspaceId;
+  if (!wsId) {
+    const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
+    wsId = ws.id;
+  }
 
   const slug = generateSlug(name);
 
   await db.insert(project).values({
     id: crypto.randomUUID(),
-    workspaceId: ws.id,
+    workspaceId: wsId,
     name,
     slug,
     collectionSlug: slug,
@@ -75,7 +79,7 @@ export async function createProject(formData: FormData) {
   return { success: true };
 }
 
-export async function getDashboardData() {
+export async function getDashboardData(workspaceId?: string) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -84,7 +88,16 @@ export async function getDashboardData() {
     return null;
   }
 
-  const ws = await getOrCreateWorkspace(session.user.id, session.user.name);
+  let ws;
+  if (workspaceId) {
+    ws = await db.query.workspace.findFirst({
+      where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+    });
+  }
+
+  if (!ws) {
+    ws = await getOrCreateWorkspace(session.user.id, session.user.name);
+  }
 
   // Fetch everything in parallel to eliminate waterfalls
   const [projects, [testimonialCount], [pendingCount], [approvedCount], [widgetCount]] =

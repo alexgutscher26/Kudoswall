@@ -21,6 +21,7 @@ import type { Route } from "next";
 import { gooeyToast as toast } from "goey-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 import type { WidgetSettings } from "./[id]/customizer";
 
 export default function WidgetList() {
@@ -40,7 +41,12 @@ export default function WidgetList() {
     };
   }, [isCreateModalOpen]);
 
-  const { data: widgets, isLoading, refetch } = useQuery(trpc.widget.list.queryOptions());
+  const { activeWorkspaceId } = useWorkspace();
+  const {
+    data: widgets,
+    isLoading,
+    refetch,
+  } = useQuery(trpc.widget.list.queryOptions({ workspaceId: activeWorkspaceId }));
 
   const createWidget = useMutation(
     trpc.widget.create.mutationOptions({
@@ -66,7 +72,7 @@ export default function WidgetList() {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWidgetName.trim()) return;
-    createWidget.mutate({ name: newWidgetName });
+    createWidget.mutate({ name: newWidgetName, workspaceId: activeWorkspaceId });
   };
 
   const filteredWidgets = widgets?.filter((w) =>

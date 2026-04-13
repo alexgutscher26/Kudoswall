@@ -10,9 +10,9 @@ import Link from "next/link";
 export default async function TestimonialsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ project?: string }>;
+  searchParams: Promise<{ project?: string; workspaceId?: string }>;
 }) {
-  const { project: projectId } = await searchParams;
+  const { project: projectId, workspaceId } = await searchParams;
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -22,10 +22,19 @@ export default async function TestimonialsPage({
     redirect("/login");
   }
 
-  // Fetch dashboard data to get the list of projects for fallback
-  const dashData = await getDashboardData();
+  // Fetch dashboard data with the selected workspace
+  const dashData = await getDashboardData(workspaceId);
   if (!dashData) {
     redirect("/dashboard");
+  }
+
+  // If no workspaceId is in the URL, redirect to a URL that has it
+  // to ensure state is consistent across navigations and bookmarks
+  if (!workspaceId && dashData.workspace.id) {
+    const params = new URLSearchParams();
+    params.set("workspaceId", dashData.workspace.id);
+    if (projectId) params.set("project", projectId);
+    redirect(`/dashboard/testimonials?${params.toString()}`);
   }
 
   // If no project is specified, pick the first one from the workspace
@@ -43,6 +52,7 @@ export default async function TestimonialsPage({
         pageTitle="Testimonials"
         pageSubtitle="Manage your testimonials and approve them for your wall."
         initialData={dashData}
+        initialWorkspaceId={workspaceId}
       >
         <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
           <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-pink-50">
@@ -77,6 +87,7 @@ export default async function TestimonialsPage({
       pageTitle={`Inbox — ${data.project.name}`}
       pageSubtitle="Manage your testimonials and approve them for your wall."
       initialData={dashData}
+      initialWorkspaceId={workspaceId}
     >
       <TestimonialInbox
         key={activeProjectId}

@@ -58,123 +58,185 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
 }
 
 export const dashboardRouter = router({
-  getData: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
-    const ws = await getOrCreateWorkspace(db, session.user.id, session.user.name);
+  getData: protectedProcedure
+    .input(z.object({ workspaceId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const workspaceId = input?.workspaceId;
 
-    const projects = await db.query.project.findMany({
-      where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
-      orderBy: desc(project.createdAt),
-    });
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
 
-    const [testimonialCount] = await db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(
-        and(
-          eq(project.workspaceId, ws.id),
-          isNull(testimonial.deletedAt),
-          isNull(project.deletedAt),
-        ),
-      );
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
 
-    const [pendingCount] = await db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(
-        and(
-          eq(project.workspaceId, ws.id),
-          eq(testimonial.status, "pending"),
-          isNull(testimonial.deletedAt),
-          isNull(project.deletedAt),
-        ),
-      );
+      if (!ws) {
+        ws = await getOrCreateWorkspace(db, session.user.id, session.user.name);
+      }
 
-    const [approvedCount] = await db
-      .select({ value: count() })
-      .from(testimonial)
-      .innerJoin(project, eq(testimonial.projectId, project.id))
-      .where(
-        and(
-          eq(project.workspaceId, ws.id),
-          eq(testimonial.status, "approved"),
-          isNull(testimonial.deletedAt),
-          isNull(project.deletedAt),
-        ),
-      );
+      const projects = await db.query.project.findMany({
+        where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
+        orderBy: desc(project.createdAt),
+      });
 
-    const [widgetCount] = await db
-      .select({ value: count() })
-      .from(widget)
-      .where(and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)));
+      const [testimonialCount] = await db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        );
 
-    // Fetch View Stats
-    const [viewsResult] = await db
-      .select({ value: count() })
-      .from(analyticsEvent)
-      .where(
-        and(
-          eq(analyticsEvent.workspaceId, ws.id),
-          eq(analyticsEvent.eventType, "view"),
-          isNull(analyticsEvent.deletedAt),
-        ),
-      );
+      const [pendingCount] = await db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            eq(testimonial.status, "pending"),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        );
 
-    const totalViews = Number(viewsResult?.value || 0);
+      const [approvedCount] = await db
+        .select({ value: count() })
+        .from(testimonial)
+        .innerJoin(project, eq(testimonial.projectId, project.id))
+        .where(
+          and(
+            eq(project.workspaceId, ws.id),
+            eq(testimonial.status, "approved"),
+            isNull(testimonial.deletedAt),
+            isNull(project.deletedAt),
+          ),
+        );
 
-    const recentTestimonials =
-      projects.length > 0
-        ? await db.query.testimonial.findMany({
-            where: and(
-              inArray(
-                testimonial.projectId,
-                projects.map((p) => p.id),
+      const [widgetCount] = await db
+        .select({ value: count() })
+        .from(widget)
+        .where(and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)));
+
+      // Fetch View Stats
+      const [viewsResult] = await db
+        .select({ value: count() })
+        .from(analyticsEvent)
+        .where(
+          and(
+            eq(analyticsEvent.workspaceId, ws.id),
+            eq(analyticsEvent.eventType, "view"),
+            isNull(analyticsEvent.deletedAt),
+          ),
+        );
+
+      const totalViews = Number(viewsResult?.value || 0);
+
+      const recentTestimonials =
+        projects.length > 0
+          ? await db.query.testimonial.findMany({
+              where: and(
+                inArray(
+                  testimonial.projectId,
+                  projects.map((p) => p.id),
+                ),
+                isNull(testimonial.deletedAt),
               ),
-              isNull(testimonial.deletedAt),
-            ),
-            orderBy: desc(testimonial.createdAt),
-            limit: 5,
-            with: {
-              project: true,
-              testimonialToTags: {
-                with: {
-                  tag: true,
+              orderBy: desc(testimonial.createdAt),
+              limit: 5,
+              with: {
+                project: true,
+                testimonialToTags: {
+                  with: {
+                    tag: true,
+                  },
                 },
               },
-            },
-          })
-        : [];
+            })
+          : [];
 
-    // Onboarding Calculation
-    const dbStatus = JSON.parse(ws.onboardingStatus || "{}");
-    const onboarding = {
-      step1: dbStatus.step1 || projects.length > 0,
-      step2: dbStatus.step2 || projects.some((p) => p.collectionSettingsJson !== null),
-      step3: dbStatus.step3 || false,
-      step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
-      step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
-    };
+      // Onboarding Calculation
+      const dbStatus = JSON.parse(ws.onboardingStatus || "{}");
+      const onboarding = {
+        step1: dbStatus.step1 || projects.length > 0,
+        step2: dbStatus.step2 || projects.some((p) => p.collectionSettingsJson !== null),
+        step3: dbStatus.step3 || false,
+        step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
+        step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
+      };
 
-    // Calculate Conversion Rate
-    const testimonialsCount = Number(testimonialCount?.value || 0);
-    const conversionRate =
-      totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
+      // Calculate Conversion Rate
+      const testimonialsCount = Number(testimonialCount?.value || 0);
+      const conversionRate =
+        totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
 
-    return {
-      workspace: ws,
-      projects,
-      recentTestimonials,
-      onboarding,
-      stats: {
-        testimonials: testimonialsCount,
-        pending: Number(pendingCount?.value || 0),
-        views: totalViews,
-        conversion: conversionRate,
-      },
-    };
+      return {
+        workspace: ws,
+        projects,
+        recentTestimonials,
+        onboarding,
+        stats: {
+          testimonials: testimonialsCount,
+          pending: Number(pendingCount?.value || 0),
+          views: totalViews,
+          conversion: conversionRate,
+        },
+      };
+    }),
+
+  listWorkspaces: protectedProcedure.query(async ({ ctx }) => {
+    const { db, session } = ctx;
+    return db.query.workspace.findMany({
+      where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
+      orderBy: desc(workspace.createdAt),
+    });
   }),
+
+  createWorkspace: protectedProcedure
+    .input(z.object({ name: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { name } = input;
+
+      const generateSlug = (n: string) =>
+        n.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
+
+      const newWs = {
+        id: crypto.randomUUID(),
+        name,
+        slug: generateSlug(name),
+        ownerId: session.user.id,
+        onboardingStatus: JSON.stringify({
+          step1: false,
+          step2: false,
+          step3: false,
+          step4: false,
+          step5: false,
+        }),
+      };
+
+      await db.insert(workspace).values(newWs);
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "workspace",
+        entityId: newWs.id,
+        action: "create",
+      });
+
+      return newWs;
+    }),
 
   getProjectTestimonials: protectedProcedure
     .input(z.object({ projectId: z.string() }))
@@ -330,14 +392,21 @@ export const dashboardRouter = router({
     }),
 
   completeOnboardingStep: protectedProcedure
-    .input(z.object({ step: z.string() }))
+    .input(z.object({ step: z.string(), workspaceId: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { step } = input;
+      const { step, workspaceId } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      } else {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
 
       if (!ws) throw new Error("Workspace not found");
 
@@ -350,6 +419,76 @@ export const dashboardRouter = router({
           onboardingStatus: JSON.stringify(status),
         })
         .where(eq(workspace.id, ws.id));
+
+      return { success: true };
+    }),
+
+  updateWorkspace: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { id, name, slug } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: and(eq(workspace.id, id), eq(workspace.ownerId, session.user.id)),
+      });
+
+      if (!ws) throw new Error("Workspace not found");
+
+      await db
+        .update(workspace)
+        .set({
+          ...(name ? { name } : {}),
+          ...(slug ? { slug } : {}),
+        })
+        .where(eq(workspace.id, id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "workspace",
+        entityId: id,
+        action: "update",
+        diff: { name, slug },
+      });
+
+      return { success: true };
+    }),
+
+  deleteWorkspace: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { id } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: and(eq(workspace.id, id), eq(workspace.ownerId, session.user.id)),
+      });
+
+      if (!ws) throw new Error("Workspace not found");
+
+      // Don't allow deleting the last active workspace
+      const allWs = await db.query.workspace.findMany({
+        where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
+      });
+
+      if (allWs.length <= 1) {
+        throw new Error("Cannot delete your only workspace.");
+      }
+
+      await db.update(workspace).set({ deletedAt: new Date() }).where(eq(workspace.id, id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "workspace",
+        entityId: id,
+        action: "delete",
+      });
 
       return { success: true };
     }),

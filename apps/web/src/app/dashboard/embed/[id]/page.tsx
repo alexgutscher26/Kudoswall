@@ -37,6 +37,7 @@ export default async function WidgetDetailPage({ params }: { params: Promise<{ i
       userEmail={session.user.email ?? ""}
       pageTitle={`Edit: ${w.name}`}
       pageSubtitle="Customize your embed widget settings"
+      initialWorkspaceId={w.workspaceId}
     >
       <div className="mx-auto max-w-7xl">
         <WidgetCustomizer

@@ -54,20 +54,32 @@ const widgetSettingsSchema = z.object({
 });
 
 export const widgetRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
+  list: protectedProcedure
+    .input(z.object({ workspaceId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const workspaceId = input?.workspaceId;
 
-    const ws = await db.query.workspace.findFirst({
-      where: eq(workspace.ownerId, session.user.id),
-    });
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
 
-    if (!ws) return [];
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
 
-    return db.query.widget.findMany({
-      where: and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)),
-      orderBy: desc(widget.createdAt),
-    });
-  }),
+      if (!ws) return [];
+
+      return db.query.widget.findMany({
+        where: and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)),
+        orderBy: desc(widget.createdAt),
+      });
+    }),
 
   getById: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
     const { db, session } = ctx;
@@ -87,13 +99,23 @@ export const widgetRouter = router({
   }),
 
   create: protectedProcedure
-    .input(z.object({ name: z.string() }))
+    .input(z.object({ name: z.string(), workspaceId: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
+      const { workspaceId } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
 
       if (!ws) throw new Error("Workspace not found");
 

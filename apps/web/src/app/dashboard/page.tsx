@@ -11,7 +11,12 @@ export const metadata = {
   description: "Manage your testimonials, embed widget, and analytics.",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ workspaceId?: string }>;
+}) {
+  const { workspaceId } = await searchParams;
   let session;
   try {
     session = await auth.api.getSession({
@@ -33,17 +38,39 @@ export default async function DashboardPage() {
       <DashboardContent
         userName={session.user.name ?? "User"}
         userEmail={session.user.email ?? ""}
+        workspaceId={workspaceId}
       />
     </Suspense>
   );
 }
 
-async function DashboardContent({ userName, userEmail }: { userName: string; userEmail: string }) {
-  const data = await getDashboardData();
+async function DashboardContent({
+  userName,
+  userEmail,
+  workspaceId,
+}: {
+  userName: string;
+  userEmail: string;
+  workspaceId?: string;
+}) {
+  const data = await getDashboardData(workspaceId);
 
   if (!data) {
     redirect("/login");
   }
 
-  return <DashboardShell userName={userName} userEmail={userEmail} initialData={data} />;
+  // If no workspaceId is in the URL, redirect to a URL that has it
+  // to ensure state is consistent across navigations and bookmarks
+  if (!workspaceId && data.workspace.id) {
+    redirect(`/dashboard?workspaceId=${data.workspace.id}`);
+  }
+
+  return (
+    <DashboardShell
+      userName={userName}
+      userEmail={userEmail}
+      initialData={data}
+      initialWorkspaceId={workspaceId}
+    />
+  );
 }

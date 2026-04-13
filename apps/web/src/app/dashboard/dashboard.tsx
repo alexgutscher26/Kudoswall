@@ -24,8 +24,7 @@ import {
   User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
-import { createProject } from "./actions";
+import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
 import { gooeyToast as toast } from "goey-toast";
 import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -107,6 +106,8 @@ function NavContent({
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
 }: {
   pathname: string;
   onNavClick?: () => void;
@@ -114,35 +115,31 @@ function NavContent({
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
 }) {
   return (
     <>
-      {/* Logo */}
-      <div className="shrink-0 px-5 py-5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-        <Link
-          href="/"
-          onClick={onNavClick}
-          className="block text-lg leading-none font-bold tracking-tight text-neutral-900 select-none"
-          style={{ fontFamily: "'Georgia', serif" }}
-        >
-          KudosWall
-        </Link>
-        <span
-          className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase"
-          style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
-        >
-          Dashboard
-        </span>
+      {/* Workspace Switcher */}
+      <div className="px-3 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+        <WorkspaceSwitcher
+          currentWorkspaceId={currentWorkspaceId}
+          onWorkspaceChange={onWorkspaceChange}
+        />
       </div>
 
       {/* Nav links */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href;
+          const linkHref = currentWorkspaceId
+            ? (`${href}?workspaceId=${currentWorkspaceId}` as Route)
+            : (href as Route);
+
           return (
             <Link
               key={href}
-              href={href as Route}
+              href={linkHref}
               onClick={onNavClick}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
                 isActive
@@ -218,11 +215,15 @@ function DesktopSidebar({
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
 }: {
   userName: string;
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
 }) {
   const pathname = usePathname();
   return (
@@ -239,6 +240,8 @@ function DesktopSidebar({
         userEmail={userEmail}
         onSignOut={onSignOut}
         onNewCollection={onNewCollection}
+        currentWorkspaceId={currentWorkspaceId}
+        onWorkspaceChange={onWorkspaceChange}
       />
     </aside>
   );
@@ -253,6 +256,8 @@ function MobileDrawer({
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
 }: {
   open: boolean;
   onClose: () => void;
@@ -260,6 +265,8 @@ function MobileDrawer({
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
 }) {
   const pathname = usePathname();
 
@@ -297,6 +304,8 @@ function MobileDrawer({
           userEmail={userEmail}
           onSignOut={onSignOut}
           onNewCollection={onNewCollection}
+          currentWorkspaceId={currentWorkspaceId}
+          onWorkspaceChange={onWorkspaceChange}
         />
       </div>
     </>
@@ -454,7 +463,17 @@ function QuickActions({
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
-function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function NewCollectionModal({
+  open,
+  onClose,
+  workspaceId,
+  workspaceSlug,
+}: {
+  open: boolean;
+  onClose: () => void;
+  workspaceId: string;
+  workspaceSlug: string;
+}) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -476,7 +495,7 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
     const formData = new FormData(e.currentTarget);
 
     try {
-      const result = await createProject(formData);
+      const result = await createProject(formData, workspaceId);
       if (result.success) {
         toast.success("Collection link created!");
         onClose();
@@ -553,13 +572,13 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
               <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <Globe className="size-3" />
-                  kudoswall.org/my-workspace/
+                  kudoswall.org/{workspaceSlug}/
                   <span className={name ? "text-pink-500" : "text-neutral-300"}>
                     {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
                   </span>
                 </div>
                 <div className="text-[10px] font-medium text-neutral-300">
-                  Local: localhost:3001/my-workspace/...
+                  Local: localhost:3001/{workspaceSlug}/...
                 </div>
               </code>
             </div>
@@ -595,7 +614,13 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
-function RecentTestimonialsList({ testimonials }: { testimonials: RecentTestimonial[] }) {
+function RecentTestimonialsList({
+  testimonials,
+  workspaceId,
+}: {
+  testimonials: RecentTestimonial[];
+  workspaceId?: string;
+}) {
   if (!testimonials || testimonials.length === 0) return null;
 
   return (
@@ -660,7 +685,7 @@ function RecentTestimonialsList({ testimonials }: { testimonials: RecentTestimon
           </div>
           <div className="ml-4 flex items-center gap-2">
             <Link
-              href={`/dashboard/testimonials?id=${t.id}`}
+              href={`/dashboard/testimonials?id=${t.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
               className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
             >
               <ChevronRight className="size-4" />
@@ -675,10 +700,12 @@ function RecentTestimonialsList({ testimonials }: { testimonials: RecentTestimon
 function ProjectsList({
   projects,
   workspaceSlug,
+  workspaceId,
   onCopyLink,
 }: {
   projects: Project[];
   workspaceSlug: string;
+  workspaceId?: string;
   onCopyLink?: () => void;
 }) {
   if (!projects || projects.length === 0) return null;
@@ -720,7 +747,7 @@ function ProjectsList({
               <Copy className="size-4" />
             </button>
             <Link
-              href={`/dashboard/testimonials?project=${p.id}`}
+              href={`/dashboard/testimonials?project=${p.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
               className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
             >
               <ChevronRight className="size-4" />
@@ -755,6 +782,10 @@ function LinkIcon({ className }: { className?: string }) {
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 // When `children` is provided it renders instead of the default overview content.
 
+import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import { createProject } from "./actions";
+
 export default function DashboardShell({
   userName,
   userEmail,
@@ -762,13 +793,15 @@ export default function DashboardShell({
   pageTitle,
   pageSubtitle,
   initialData,
+  initialWorkspaceId,
 }: {
   userName: string;
   userEmail: string;
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
-  initialData?: DashboardData;
+  initialData?: DashboardData | null;
+  initialWorkspaceId?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -789,14 +822,28 @@ export default function DashboardShell({
     }
   }, [searchParams, pathname, router]);
 
+  const urlWorkspaceId = searchParams.get("workspaceId");
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(
+    initialWorkspaceId || urlWorkspaceId || initialData?.workspace.id || "",
+  );
+
+  // Synchronize state with initialData from server
+  useEffect(() => {
+    if (initialData?.workspace.id && initialData.workspace.id !== activeWorkspaceId) {
+      setActiveWorkspaceId(initialData.workspace.id);
+    }
+  }, [initialData?.workspace.id]);
+
   // Live polling for dashboard data
   const { data: liveData } = useQuery({
-    ...trpc.dashboard.getData.queryOptions(),
-    initialData,
+    ...trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+    initialData: activeWorkspaceId === initialData?.workspace.id ? initialData : undefined,
     refetchInterval: 5000,
   });
 
-  const activeData = liveData || initialData;
+  // If we are switching workspaces, we MUST show loading state/new data, not the old initialData
+  const activeData =
+    activeWorkspaceId === initialData?.workspace.id ? liveData || initialData : liveData;
 
   const completeStep = useMutation({
     ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
@@ -866,149 +913,176 @@ export default function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      {/* Desktop sidebar */}
-      <DesktopSidebar
-        userName={userName}
-        userEmail={userEmail}
-        onSignOut={handleSignOut}
-        onNewCollection={() => setNewCollectionOpen(true)}
-      />
+    <WorkspaceProvider
+      activeWorkspaceId={activeWorkspaceId}
+      setActiveWorkspaceId={setActiveWorkspaceId}
+    >
+      <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
+        {/* Desktop sidebar */}
+        <DesktopSidebar
+          userName={userName}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          onNewCollection={() => setNewCollectionOpen(true)}
+          currentWorkspaceId={activeWorkspaceId}
+          onWorkspaceChange={(id) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("workspaceId", id);
+            // When switching workspaces, we often want to go back to the overview
+            // to avoid "Project not found" errors on specific sub-pages
+            router.push(`/dashboard?${params.toString()}` as any);
+          }}
+        />
 
-      {/* Mobile drawer */}
-      <MobileDrawer
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        userName={userName}
-        userEmail={userEmail}
-        onSignOut={handleSignOut}
-        onNewCollection={() => setNewCollectionOpen(true)}
-      />
+        {/* Mobile drawer */}
+        <MobileDrawer
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          userName={userName}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          onNewCollection={() => setNewCollectionOpen(true)}
+          currentWorkspaceId={activeWorkspaceId}
+          onWorkspaceChange={(id) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("workspaceId", id);
+            router.push(`/dashboard?${params.toString()}` as any);
+          }}
+        />
 
-      {/* Modal */}
-      <NewCollectionModal open={newCollectionOpen} onClose={() => setNewCollectionOpen(false)} />
+        {/* Modal */}
+        <NewCollectionModal
+          open={newCollectionOpen}
+          onClose={() => setNewCollectionOpen(false)}
+          workspaceId={activeWorkspaceId}
+          workspaceSlug={activeData?.workspace.slug || "loading"}
+        />
 
-      {/* Main content — offset only on lg+ */}
-      <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
-        <DotGrid opacity={0.08} />
+        {/* Main content — offset only on lg+ */}
+        <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
+          <DotGrid opacity={0.08} />
 
-        {/* Soft central glow */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-start justify-center"
-          style={{ zIndex: 0 }}
-        >
+          {/* Soft central glow */}
           <div
-            className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
-            style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-          />
-        </div>
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-start justify-center"
+            style={{ zIndex: 0 }}
+          >
+            <div
+              className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
+              style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+            />
+          </div>
 
-        {/* Top bar */}
-        <div className="relative z-10">
-          <TopBar
-            userName={userName}
-            onMenuOpen={() => setMobileMenuOpen(true)}
-            pageTitle={pageTitle}
-            pageSubtitle={pageSubtitle}
-            isLive
-          />
-        </div>
+          {/* Top bar */}
+          <div className="relative z-10">
+            <TopBar
+              userName={userName}
+              onMenuOpen={() => setMobileMenuOpen(true)}
+              pageTitle={pageTitle}
+              pageSubtitle={pageSubtitle}
+              isLive
+            />
+          </div>
 
-        {/* Main content */}
-        <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <ErrorBoundary name={pageTitle || "Dashboard Content"}>
-            {children || (
-              <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-                {/* Stats grid — 2 cols on mobile, 4 on xl */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-                  {stats.map((stat) => (
-                    <StatCard key={stat.label} {...stat} />
-                  ))}
-                </div>
+          {/* Main content */}
+          <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+            <ErrorBoundary name={pageTitle || "Dashboard Content"}>
+              {children || (
+                <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+                  {/* Stats grid — 2 cols on mobile, 4 on xl */}
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+                    {stats.map((stat) => (
+                      <StatCard key={stat.label} {...stat} />
+                    ))}
+                  </div>
 
-                {/* Main split */}
-                <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
-                  {/* Testimonials panel */}
-                  <div
-                    className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
-                    style={{ backgroundColor: "#ffffff" }}
-                  >
+                  {/* Main split */}
+                  <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
+                    {/* Testimonials panel */}
                     <div
-                      className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
-                      style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                      className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
+                      style={{ backgroundColor: "#ffffff" }}
                     >
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-semibold text-neutral-900">
-                          Recent Testimonials
-                        </p>
-                        <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
-                          Latest submissions from your customers
-                        </p>
+                      <div
+                        className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
+                        style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[14px] font-semibold text-neutral-900">
+                            Recent Testimonials
+                          </p>
+                          <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
+                            Latest submissions from your customers
+                          </p>
+                        </div>
+                        {/* Filter chips */}
+                        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+                          {(["All", "Video", "Text"] as const).map((f) => {
+                            const isActive = testimonialFilter === f;
+                            return (
+                              <button
+                                key={f}
+                                type="button"
+                                onClick={() => setTestimonialFilter(f)}
+                                className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
+                                style={
+                                  isActive
+                                    ? {
+                                        backgroundColor: "#fff5f7",
+                                        color: "#e8527a",
+                                        borderColor: "#fecdd3",
+                                      }
+                                    : {
+                                        backgroundColor: "transparent",
+                                        color: "#a3a3a3",
+                                        borderColor: "rgba(0,0,0,0.08)",
+                                      }
+                                }
+                              >
+                                {f}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      {/* Filter chips */}
-                      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-                        {(["All", "Video", "Text"] as const).map((f) => {
-                          const isActive = testimonialFilter === f;
-                          return (
-                            <button
-                              key={f}
-                              type="button"
-                              onClick={() => setTestimonialFilter(f)}
-                              className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
-                              style={
-                                isActive
-                                  ? {
-                                      backgroundColor: "#fff5f7",
-                                      color: "#e8527a",
-                                      borderColor: "#fecdd3",
-                                    }
-                                  : {
-                                      backgroundColor: "transparent",
-                                      color: "#a3a3a3",
-                                      borderColor: "rgba(0,0,0,0.08)",
-                                    }
-                              }
-                            >
-                              {f}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {activeData?.recentTestimonials &&
+                      activeData.recentTestimonials.length > 0 ? (
+                        <div className="flex flex-col gap-4">
+                          <ProjectsList
+                            projects={activeData.projects}
+                            workspaceSlug={activeData.workspace.slug}
+                            workspaceId={activeWorkspaceId}
+                            onCopyLink={() => completeStep.mutate({ step: "step3" })}
+                          />
+                          <RecentTestimonialsList
+                            workspaceId={activeWorkspaceId}
+                            testimonials={activeData.recentTestimonials.filter(
+                              (t: RecentTestimonial) => {
+                                if (testimonialFilter === "All") return true;
+                                return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
+                              },
+                            )}
+                          />
+                        </div>
+                      ) : (
+                        <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
+                      )}
                     </div>
-                    {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
-                      <div className="flex flex-col gap-4">
-                        <ProjectsList
-                          projects={activeData.projects}
-                          workspaceSlug={activeData.workspace.slug}
-                          onCopyLink={() => completeStep.mutate({ step: "step3" })}
-                        />
-                        <RecentTestimonialsList
-                          testimonials={activeData.recentTestimonials.filter(
-                            (t: RecentTestimonial) => {
-                              if (testimonialFilter === "All") return true;
-                              return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
-                            },
-                          )}
-                        />
-                      </div>
-                    ) : (
-                      <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
-                    )}
-                  </div>
 
-                  {/* Right column */}
-                  <div className="space-y-4 sm:space-y-5 xl:col-span-1">
-                    {activeData?.onboarding && (
-                      <OnboardingChecklist status={activeData.onboarding} />
-                    )}
+                    {/* Right column */}
+                    <div className="space-y-4 sm:space-y-5 xl:col-span-1">
+                      {activeData?.onboarding && (
+                        <OnboardingChecklist status={activeData.onboarding} />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </ErrorBoundary>
-        </main>
+              )}
+            </ErrorBoundary>
+          </main>
+        </div>
       </div>
-    </div>
+    </WorkspaceProvider>
   );
 }

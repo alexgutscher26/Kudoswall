@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Globe, CreditCard, Users, Save, Upload, Link, Zap, Trash2 } from "lucide-react";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+import { trpc } from "@/utils/trpc";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/utils/trpc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -11,8 +17,74 @@ type Tab = "general" | "collection" | "billing" | "team";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("general");
-  const [workspaceName, setWorkspaceName] = useState("Acme Marketing");
-  const [slug, setSlug] = useState("acme-marketing");
+  const { activeWorkspaceId } = useWorkspace();
+  const router = useRouter();
+
+  const { data: dashboardData, isLoading } = useQuery({
+    ...trpc.dashboard.getData.queryOptions({
+      workspaceId: activeWorkspaceId,
+    }),
+  });
+
+  const updateWorkspace = useMutation({
+    ...trpc.dashboard.updateWorkspace.mutationOptions(),
+    onSuccess: () => {
+      toast.success("Workspace updated!");
+      router.refresh();
+      // Invalidate dashboard data
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+    },
+    onError: (err) => {
+      toast.error("Failed to update workspace: " + err.message);
+    },
+  });
+
+  const deleteWorkspace = useMutation({
+    ...trpc.dashboard.deleteWorkspace.mutationOptions(),
+    onSuccess: () => {
+      toast.success("Workspace deleted!");
+      window.location.href = "/dashboard";
+    },
+    onError: (err) => {
+      toast.error("Failed to delete workspace: " + err.message);
+    },
+  });
+
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [slug, setSlug] = useState("");
+
+  useEffect(() => {
+    if (dashboardData?.workspace) {
+      setWorkspaceName(dashboardData.workspace.name);
+      setSlug(dashboardData.workspace.slug);
+    }
+  }, [dashboardData]);
+
+  const handleSave = () => {
+    updateWorkspace.mutate({
+      id: activeWorkspaceId,
+      name: workspaceName,
+      slug: slug,
+    });
+  };
+
+  const handleDelete = () => {
+    if (
+      confirm(
+        "Are you sure you want to delete this workspace? This action cannot be undone and will delete all associated projects and testimonials.",
+      )
+    ) {
+      deleteWorkspace.mutate({ id: activeWorkspaceId });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-4 border-pink-500/20 border-t-pink-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 md:flex-row">
@@ -42,10 +114,12 @@ export default function SettingsPage() {
         <div className="mt-6 border-t border-neutral-100 pt-6">
           <button
             type="button"
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-bold text-rose-500 transition-all hover:bg-rose-50"
+            onClick={handleDelete}
+            disabled={deleteWorkspace.isPending}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-bold text-rose-500 transition-all hover:bg-rose-50 disabled:opacity-50"
           >
             <Trash2 className="size-4" />
-            Delete Workspace
+            {deleteWorkspace.isPending ? "Deleting..." : "Delete Workspace"}
           </button>
         </div>
       </div>
@@ -140,11 +214,13 @@ export default function SettingsPage() {
             <div className="flex justify-end pt-6">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                onClick={handleSave}
+                disabled={updateWorkspace.isPending}
+                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                 style={{ backgroundColor: "#171717" }}
               >
                 <Save className="size-4" />
-                Save Changes
+                {updateWorkspace.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

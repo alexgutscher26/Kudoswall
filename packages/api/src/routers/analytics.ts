@@ -45,12 +45,24 @@ export const analyticsRouter = router({
     }),
 
   getOverview: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      const { workspaceId } = input;
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
 
       const daysNum =
@@ -155,12 +167,24 @@ export const analyticsRouter = router({
     }),
 
   getChartData: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      const { workspaceId } = input;
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
 
       let daysNum = 7;
@@ -207,13 +231,25 @@ export const analyticsRouter = router({
     }),
 
   getWidgetPerformance: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
+      const { workspaceId } = input;
       const start = getTimefilter(input.timeframe);
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
 
       const widgets = await db.query.widget.findMany({
@@ -263,13 +299,25 @@ export const analyticsRouter = router({
     }),
 
   getExportData: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
+      const { workspaceId } = input;
       const start = getTimefilter(input.timeframe);
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
 
       const widgets = await db.query.widget.findMany({
@@ -319,29 +367,43 @@ export const analyticsRouter = router({
       return performance;
     }),
 
-  getTopTestimonials: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
-    const ws = await db.query.workspace.findFirst({
-      where: eq(workspace.ownerId, session.user.id),
-    });
-    if (!ws) throw new Error("No workspace found");
+  getTopTestimonials: protectedProcedure
+    .input(z.object({ workspaceId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const workspaceId = input?.workspaceId;
 
-    const top = await db.query.testimonial.findMany({
-      where: and(
-        inArray(
-          testimonial.projectId,
-          db.select({ id: project.id }).from(project).where(eq(project.workspaceId, ws.id)),
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+        });
+      }
+
+      if (!ws) throw new Error("No workspace found");
+
+      const top = await db.query.testimonial.findMany({
+        where: and(
+          inArray(
+            testimonial.projectId,
+            db.select({ id: project.id }).from(project).where(eq(project.workspaceId, ws.id)),
+          ),
+          eq(testimonial.status, "approved"),
         ),
-        eq(testimonial.status, "approved"),
-      ),
-      orderBy: desc(testimonial.rating),
-      limit: 5,
-    });
+        orderBy: desc(testimonial.rating),
+        limit: 5,
+      });
 
-    return top.map((t) => ({
-      author: t.authorName || "Anonymous",
-      company: t.authorCompany || "",
-      rating: t.rating,
-    }));
-  }),
+      return top.map((t) => ({
+        author: t.authorName || "Anonymous",
+        company: t.authorCompany || "",
+        rating: t.rating,
+      }));
+    }),
 });
