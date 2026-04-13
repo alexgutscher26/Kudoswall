@@ -738,11 +738,11 @@
 - [x] JSON-LD Structured Data for testimonial widgets (Google Rich Results)
 - [x] Canonical URL management
 - [x] Open Graph / Twitter Card meta tags for collection pages
-- [ ] `robots.txt` with specific allow/disallow rules
-- [ ] Breadcrumb Schema markup
-- [ ] FAQ Schema on marketing pages
-- [ ] Hreflang tags for localized pages
-- [ ] Core Web Vitals optimization: LCP <2.5s, CLS <0.1, INP <200ms on all pages
+- [x] `robots.txt` with specific allow/disallow rules
+- [x] Breadcrumb Schema markup
+- [x] FAQ Schema on marketing pages
+- [x] Hreflang tags for localized pages
+- [x] Core Web Vitals optimization: LCP <2.5s, CLS <0.1, INP <200ms on all pages
 
 ### 17.2 Content Marketing Engine
 

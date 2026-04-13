@@ -1,38 +1,38 @@
-# PLAN: IP-Based Rate Limiting on Collection Submission Endpoint
+# Orchestration Plan: Core Web Vitals Optimization
 
-Implement robust IP-based rate limiting on the collection submission endpoint using Upstash Redis to prevent abuse and spam submissions. This will replace the current in-memory map which resets on server restarts and doesn't scale across multiple instances.
+## Task
 
-## 🏁 Goals
+Optimize Core Web Vitals across the application focusing on:
 
-- [ ] **Scalability**: Move from `Map<string, ...>` to Upstash Redis to support multi-region/serverless deployments.
-- [ ] **Security**: Limit submissions per IP Address (e.g., 5 submissions per 24 hours per IP).
-- [ ] **Accuracy**: Utilize robust IP detection (Cloudflare-friendly headers) already present in the endpoint.
-- [ ] **Standardization**: Implement `@upstash/ratelimit` and `@upstash/redis`.
+- **LCP (Largest Contentful Paint)** < 2.5s
+- **CLS (Cumulative Layout Shift)** < 0.1
+- **INP (Interaction to Next Paint)** < 200ms
 
----
+## Phase 1: Planning Results
 
-## 🛠️ Implementation Phases
+### 1. Analysis of the current situation
 
-### Phase 1: Environment & Setup (devops-engineer)
+- The app uses Next.js app router.
+- Marketing pages use standard Next.js layouts, but we need to ensure all hero/header images use `<Image priority />` for LCP optimization.
+- The Collection Wizard and Dashboard have interactive elements which may impact INP.
+- Fonts are already optimized using `next/font/google` (`Geist`, `Geist_Mono`, `Inter`, `Manrope`).
+- We need to verify `width`/`height` on all images to prevent CLS.
 
-1. **Dependencies**: Install `@upstash/ratelimit` and `@upstash/redis` in the appropriate workspace context.
-2. **Environment Configuration**: Ensure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are documented as required.
+### 2. Action Plan
 
-### Phase 2: Refactoring (backend-specialist)
+- **Frontend Specialist tasks**:
+  1. Audit `next/image` usage in marketing components (e.g. Hero, features) and add `priority` to LCP candidates.
+  2. Ensure all `<Image>` tags have explicit dimensions or use `fill` with aspect-ratio parent containers.
+  3. Replace any unoptimized third-party scripts with `next/script` (`strategy="lazyOnload"`).
 
-1. **Location**: Edit `apps/web/src/app/api/collection/[slug]/route.ts`.
-2. **Setup Ratelimit**: Initialize the `Ratelimit` using the Upstash Redis client.
-3. **Apply Limits**: Check the IP via `ratelimit.limit(ip)`.
-4. **Error Handling**: Return a `429 Too Many Requests` status cleanly if `success` is false.
-5. **Clean Up**: Remove the old in-memory `rateLimitMap`.
+- **Performance Optimizer tasks**:
+  1. Implement React `<Suspense>` boundaries for heavy client components and widgets to prevent blocking the main thread (improving INP).
+  2. Ensure `next/font` is applied without layout shifts using proper CSS fallback properties if dynamic fonts exist.
 
-### Phase 3: Verification (security-auditor / test-engineer)
+- **DevOps/Test Engineer tasks**:
+  1. Validate build success after the changes.
+  2. Ensure `@vercel/speed-insights/next` is optimally placed within the global layout to track Web Vitals post-deployment.
 
-1. **Unit/Integration Check**: Trigger requests to ensure rate limits kick in at the designated threshold.
+## Next Steps
 
----
-
-## 📝 Next Steps
-
-1. Approve this plan.
-2. Orchestrate implementation agents to carry out the dependency installation and refactoring.
+Upon approval, I will orchestrate the specialized sub-agents (`frontend-specialist`, `performance-optimizer`, `test-engineer`) to implement and verify these optimizations in parallel.

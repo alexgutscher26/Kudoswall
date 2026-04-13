@@ -23,6 +23,10 @@ export const metadata: Metadata = {
     "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
   alternates: {
     canonical: "/",
+    languages: {
+      en: "/",
+      "x-default": "/",
+    },
   },
   openGraph: {
     title: "KudosWall — Collect & Display Customer Testimonials",
