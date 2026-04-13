@@ -70,6 +70,10 @@ export const project = pgTable(
     thankYouMessage: text("thank_you_message"),
     collectionSettingsJson: text("collection_settings_json"),
     active: boolean("active").default(true).notNull(),
+    customDomain: text("custom_domain"),
+    customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
+    customDomainVerificationToken: text("custom_domain_verification_token"),
+    customDomainVerificationError: text("custom_domain_verification_error"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
@@ -80,6 +84,7 @@ export const project = pgTable(
     index("project_workspace_id_idx").on(table.workspaceId),
     index("project_workspace_slug_idx").on(table.workspaceId, table.slug),
     index("project_collection_slug_idx").on(table.collectionSlug),
+    index("project_custom_domain_idx").on(table.customDomain),
   ],
 );
 

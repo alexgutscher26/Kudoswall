@@ -1,9 +1,41 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { db } from "@/lib/server-db";
+import { project } from "@my-better-t-app/db/schema";
+import { eq, isNull, and } from "drizzle-orm";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = new URL(request.url);
+  const host = request.headers.get("host") || "";
   const isEmbedPage = url.pathname.startsWith("/embed/");
+
+  // 1. Detect if this is a custom domain
+  // We exclude the main domain and localhost
+  const mainDomain = "kudoswall.org";
+  const isCustomDomain =
+    host !== mainDomain &&
+    !host.endsWith(`.${mainDomain}`) &&
+    !host.includes("localhost") &&
+    !host.includes("vercel.app") &&
+    !host.includes("pages.dev");
+
+  if (isCustomDomain && url.pathname === "/") {
+    // Look up the project by custom domain
+    const projectData = await db.query.project.findFirst({
+      where: and(
+        eq(project.customDomain, host),
+        eq(project.customDomainVerified, true),
+        isNull(project.deletedAt),
+      ),
+    });
+
+    if (projectData?.collectionSlug) {
+      // Rewrite to the collection page
+      return NextResponse.rewrite(new URL(`/collect/${projectData.collectionSlug}`, request.url));
+    }
+  }
+
+  const isCollectPage = url.pathname.startsWith("/collect/");
 
   const cspHeader = `
     default-src 'self';
@@ -29,7 +61,6 @@ export function proxy(request: NextRequest) {
   const method = request.method;
 
   const isSafeMethod = ["GET", "HEAD", "OPTIONS"].includes(method);
-  const host = request.headers.get("host") || "";
   const protocol = request.nextUrl.protocol;
   const siteUrl = `${protocol}//${host}`;
 
@@ -59,7 +90,9 @@ export function proxy(request: NextRequest) {
   response.headers.set("Content-Security-Policy", cspHeader);
   response.headers.set(
     "Permissions-Policy",
-    "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
+    isCollectPage
+      ? "camera=(self), microphone=(self), geolocation=(), interest-cohort=()"
+      : "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   );
   response.headers.set("X-XSS-Protection", "1; mode=block");
 

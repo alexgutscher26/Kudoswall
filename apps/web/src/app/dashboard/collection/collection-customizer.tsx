@@ -19,6 +19,7 @@ import {
   Lock,
   Quote,
   Camera,
+  Globe,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -30,6 +31,10 @@ interface CollectionCustomizerProps {
     slug: string;
     collectionSlug?: string | null;
     collectionSettingsJson?: string | null;
+    customDomain?: string | null;
+    customDomainVerified?: boolean | null;
+    customDomainVerificationToken?: string | null;
+    customDomainVerificationError?: string | null;
   };
   workspace: {
     id: string;
@@ -205,9 +210,49 @@ export function CollectionCustomizer({
   const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
 
   const [activeTab, setActiveTab] = useState<
-    "branding" | "fields" | "content" | "video" | "share" | "advanced"
+    "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
   >("branding");
   const isPro = isProProp ?? workspace.isPro;
+
+  const [domain, setDomain] = useState(project.customDomain || "");
+  const [isDomainVerified, setIsDomainVerified] = useState(!!project.customDomainVerified);
+  const [verificationError, setVerificationError] = useState(
+    project.customDomainVerificationError || "",
+  );
+
+  const updateDomainMutation = useMutation(
+    trpc.dashboard.updateProjectDomain.mutationOptions({
+      onSuccess: (data) => {
+        toast.success("Domain updated!");
+        setIsDomainVerified(data.verified);
+        setVerificationError(data.verificationError || "");
+        router.refresh();
+      },
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Failed to update domain");
+      },
+    }),
+  );
+
+  const verifyDomainMutation = useMutation(
+    trpc.dashboard.verifyProjectDomain.mutationOptions({
+      onSuccess: (data) => {
+        if (data.verified) {
+          toast.success("Domain verified successfully!");
+        } else {
+          toast.error(
+            "Verification failed: " + (data.verificationError || "Please check your DNS settings"),
+          );
+        }
+        setIsDomainVerified(data.verified);
+        setVerificationError(data.verificationError || "");
+        router.refresh();
+      },
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Verification failed");
+      },
+    }),
+  );
 
   const updateSettings = useMutation(
     trpc.dashboard.updateProjectSettings.mutationOptions({
@@ -320,6 +365,12 @@ export function CollectionCustomizer({
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
           >
             Adv
+          </button>
+          <button
+            onClick={() => setActiveTab("domain")}
+            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "domain" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+          >
+            Domain
           </button>
           <button
             onClick={() => setActiveTab("share")}
@@ -643,6 +694,156 @@ export function CollectionCustomizer({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {activeTab === "domain" && (
+            <div className="space-y-6">
+              <SectionHeader icon={Globe} pro title="Custom Domain" />
+              <p className="text-[11px] leading-relaxed font-medium text-neutral-500">
+                Connect your own domain to your collection page. Use a subdomain like{" "}
+                <code className="text-pink-500">testimonials.yourdomain.com</code>.
+              </p>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Domain Name
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                      disabled={!isPro || updateDomainMutation.isPending}
+                      onChange={(e) => setDomain(e.target.value.toLowerCase().trim())}
+                      placeholder="testimonials.example.com"
+                      type="text"
+                      value={domain}
+                    />
+                    <button
+                      className="rounded-xl bg-neutral-900 px-4 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                      disabled={
+                        !isPro ||
+                        updateDomainMutation.isPending ||
+                        domain === (project.customDomain || "")
+                      }
+                      onClick={() => updateDomainMutation.mutate({ projectId: project.id, domain })}
+                    >
+                      {updateDomainMutation.isPending ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div
+                    className={`rounded-2xl border p-4 transition-all duration-300 ${isDomainVerified ? "border-emerald-100 bg-emerald-50/50" : "border-neutral-100 bg-neutral-50/30"}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {isDomainVerified ? (
+                          <CheckCircle2 className="size-4 text-emerald-500" />
+                        ) : (
+                          <div className="flex size-4 items-center justify-center rounded-full bg-amber-100">
+                            <Sparkles className="size-2 text-amber-500" />
+                          </div>
+                        )}
+                        <span
+                          className={`text-[10px] font-bold ${isDomainVerified ? "text-emerald-700" : "text-neutral-600"}`}
+                        >
+                          {isDomainVerified ? "Verified & Ready" : "Setup Required"}
+                        </span>
+                      </div>
+                      {domain && project.customDomain === domain && (
+                        <button
+                          className="rounded-lg bg-neutral-900 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-95 disabled:opacity-50"
+                          disabled={verifyDomainMutation.isPending}
+                          onClick={() => verifyDomainMutation.mutate({ projectId: project.id })}
+                        >
+                          {verifyDomainMutation.isPending ? "Checking..." : "Verify DNS Now"}
+                        </button>
+                      )}
+                    </div>
+
+                    {!isDomainVerified && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-start gap-2">
+                          <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[8px] font-black text-white">
+                            1
+                          </div>
+                          <p className="text-[10px] font-bold text-neutral-800">
+                            Configure your DNS provider
+                          </p>
+                        </div>
+
+                        <p className="pl-6 text-[10px] leading-normal text-neutral-500">
+                          Add the following CNAME record to point your subdomain to your collection
+                          page.
+                        </p>
+
+                        <div className="ml-6 overflow-hidden rounded-xl border border-neutral-100 bg-white p-0">
+                          <div className="flex items-center justify-between border-b border-neutral-50 px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Type
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-neutral-900">
+                              CNAME
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between border-b border-neutral-50 px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Host
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-pink-500">
+                              {domain ? domain.split(".")[0] : "subdomain"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Target
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-neutral-900">
+                              kudoswall.org
+                            </span>
+                          </div>
+                        </div>
+
+                        {domain && project.customDomain !== domain && (
+                          <div className="flex items-start gap-2 pt-1 pl-6">
+                            <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[8px] font-black text-white">
+                              2
+                            </div>
+                            <p className="text-[10px] font-bold text-neutral-800">
+                              Hit "Save" to start verification
+                            </p>
+                          </div>
+                        )}
+
+                        {verificationError && (
+                          <div className="mt-2 ml-6 rounded-lg border border-rose-100 bg-rose-50 p-2">
+                            <p className="mb-1 text-[9px] font-bold tracking-widest text-rose-600 uppercase">
+                              Last Error
+                            </p>
+                            <p className="text-[9px] font-medium text-rose-500">
+                              {verificationError}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {!isPro && (
+                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4 text-center">
+                  <Lock className="mx-auto mb-2 size-4 text-neutral-300" />
+                  <p className="mb-2 text-[11px] font-bold text-neutral-500">
+                    Upgrade to Pro to use custom domains
+                  </p>
+                  <button className="w-full rounded-xl bg-neutral-900 py-2 text-[11px] font-bold text-white transition-opacity hover:opacity-90">
+                    Upgrade Now
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

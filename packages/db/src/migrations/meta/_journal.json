@@ -50,6 +50,13 @@
       "when": 1776045992899,
       "tag": "0006_special_lord_tyger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776108478352,
+      "tag": "0007_stiff_tattoo",
+      "breakpoints": true
     }
   ]
 }

@@ -625,7 +625,115 @@ export const dashboardRouter = router({
       return { success: true, count: ids.length };
     }),
 
-  // TODO: (Paid Plan) Implement Weekly Digest (Monday 8am)
-  // This should probably be a separate background job (e.g. Upstash QStash)
-  // getWeeklyDigestData: protectedProcedure.query(async ({ ctx }) => { ... }),
+  updateProjectDomain: protectedProcedure
+    .input(z.object({ projectId: z.string(), domain: z.string().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { projectId, domain } = input;
+
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, projectId),
+        with: { workspace: true },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      // Basic domain validation
+      if (domain && !/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}$/i.test(domain)) {
+        throw new Error("Invalid domain format");
+      }
+
+      await db
+        .update(project)
+        .set({
+          customDomain: domain,
+          customDomainVerified: false,
+          customDomainVerificationError: null,
+          customDomainVerificationToken: domain ? crypto.randomUUID() : null,
+        })
+        .where(eq(project.id, projectId));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "project",
+        entityId: projectId,
+        action: "update",
+        diff: { customDomain: domain },
+      });
+
+      return { success: true, verified: false, verificationError: null };
+    }),
+
+  verifyProjectDomain: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { projectId } = input;
+
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, projectId),
+        with: { workspace: true },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      if (!p.customDomain) {
+        throw new Error("No domain configured");
+      }
+
+      try {
+        // Perform CNAME check via Google DNS JSON API
+        // For production, we'd check if CNAME points to kudoswall.org
+        const response = await fetch(
+          `https://dns.google/resolve?name=${p.customDomain}&type=CNAME`,
+        );
+        const data: any = await response.json();
+
+        // Check for CNAME records pointing to our production domain
+        const targetDomain = "kudoswall.org";
+        const hasValidCname = data.Answer?.some(
+          (record: any) =>
+            record.type === 5 &&
+            (record.data === targetDomain ||
+              record.data === `${targetDomain}.` ||
+              record.data.includes("vercel.app") ||
+              record.data.includes("pages.dev")),
+        );
+
+        if (hasValidCname) {
+          await db
+            .update(project)
+            .set({
+              customDomainVerified: true,
+              customDomainVerificationError: null,
+            })
+            .where(eq(project.id, projectId));
+          return { success: true, verified: true, verificationError: null };
+        } else {
+          await db
+            .update(project)
+            .set({
+              customDomainVerified: false,
+              customDomainVerificationError: `CNAME record not found or pointing to wrong target. Expected: ${targetDomain}`,
+            })
+            .where(eq(project.id, projectId));
+          return {
+            success: true,
+            verified: false,
+            verificationError: `CNAME not found. Please point it to ${targetDomain}`,
+          };
+        }
+      } catch (err) {
+        console.error("DNS check failed", err);
+        return {
+          success: false,
+          verified: false,
+          verificationError: "Verification failed. Please try again later.",
+        };
+      }
+    }),
 });

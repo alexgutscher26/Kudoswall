@@ -22,6 +22,7 @@ import {
   Type,
   Video,
   Layers,
+  Tag,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -91,6 +92,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -98,6 +100,8 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   }, []);
   const [rawTestimonial, setRawTestimonial] = useState<Testimonial | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const { data: tags } = useQuery(trpc.tag.list.queryOptions());
 
   // Fetch testimonials with real-time polling
   const { data: qData } = useQuery(
@@ -118,26 +122,18 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     router.push(`/dashboard/testimonials?${params.toString()}`);
   };
 
-  const filteredTestimonials = displayedTestimonials.filter(
-    (t: {
-      status: string;
-      type: string;
-      authorName: string;
-      content: string;
-      authorEmail: string;
-      rating: any;
-    }) => {
-      const matchesTab = activeTab === "all" || t.status === activeTab;
-      const matchesType = typeFilter === "all" || t.type === typeFilter;
-      const matchesSearch =
-        t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
-      const matchesTag = true; // Placeholder for tag filtering
-      return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
-    },
-  );
+  const filteredTestimonials = displayedTestimonials.filter((t: Testimonial) => {
+    const matchesTab = activeTab === "all" || t.status === activeTab;
+    const matchesType = typeFilter === "all" || t.type === typeFilter;
+    const matchesSearch =
+      t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
+    const matchesTag =
+      selectedTagId === null || t.testimonialToTags?.some((tt) => tt.tag.id === selectedTagId);
+    return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
+  });
 
   const handleStatusUpdate = async (id: string, status: "approved" | "archived" | "pending") => {
     startTransition(async () => {
@@ -337,6 +333,67 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
                     className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
                   >
                     Clear Filter
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Tag Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={`relative flex h-[46px] items-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-bold shadow-sm transition-all outline-none ${
+                selectedTagId !== null
+                  ? "border-pink-200 bg-pink-50 text-pink-600"
+                  : "border-neutral-100 bg-white text-neutral-600 hover:bg-neutral-50"
+              } `}
+            >
+              <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
+              Tag
+              {selectedTagId !== null && (
+                <span className="absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white bg-pink-500 shadow-sm" />
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+            >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                  Filter by Tag
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                <DropdownMenuRadioGroup
+                  value={selectedTagId || "all"}
+                  onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
+                >
+                  <DropdownMenuRadioItem
+                    value="all"
+                    className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                  >
+                    All Testimonials
+                  </DropdownMenuRadioItem>
+                  {tags?.map((tag) => (
+                    <DropdownMenuRadioItem
+                      key={tag.id}
+                      value={tag.id}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                    >
+                      <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                      <span>{tag.name}</span>
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+
+              {selectedTagId !== null && (
+                <>
+                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                  <DropdownMenuItem
+                    onClick={() => setSelectedTagId(null)}
+                    className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                  >
+                    Clear Tag Filter
                   </DropdownMenuItem>
                 </>
               )}

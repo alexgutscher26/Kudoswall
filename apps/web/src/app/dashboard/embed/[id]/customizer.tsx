@@ -23,12 +23,13 @@ import {
   Globe,
   Loader2,
   MoreHorizontal,
+  Tag,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Widget from "@/components/widget";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -128,6 +129,9 @@ export default function WidgetCustomizer({
   const [activeTab, setActiveTab] = useState<"layout" | "display" | "filtering" | "branding">(
     "layout",
   );
+
+  const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewTab, setPreviewTab] = useState<"preview" | "code">("preview");
   const [copied, setCopied] = useState(false);
@@ -553,6 +557,56 @@ export default function WidgetCustomizer({
                     ))}
                   </div>
                 </div>
+
+                {tags && tags.length > 0 && (
+                  <div className="space-y-4 border-t border-neutral-50 pt-6">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                        Filter by Tags
+                      </label>
+                      {!isPro && <ProBadge />}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => {
+                        const isSelected = (settings.filterTags || []).includes(tag.id);
+                        return (
+                          <button
+                            key={tag.id}
+                            disabled={!isPro}
+                            onClick={() => {
+                              setSettings((s) => ({
+                                ...s,
+                                filterTags: isSelected
+                                  ? (s.filterTags || []).filter((id) => id !== tag.id)
+                                  : [...(s.filterTags || []), tag.id],
+                              }));
+                            }}
+                            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
+                              isSelected
+                                ? "border-pink-200 bg-pink-50 text-pink-600"
+                                : "border-neutral-100 bg-white text-neutral-500 hover:bg-neutral-50"
+                            } ${!isPro ? "opacity-50" : ""}`}
+                          >
+                            <div
+                              className="size-2 rounded-full"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            {tag.name}
+                            {isSelected && <Check className="ml-0.5 size-3" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {(settings.filterTags || []).length > 0 && (
+                      <button
+                        onClick={() => setSettings((s) => ({ ...s, filterTags: [] }))}
+                        className="text-[11px] font-bold text-pink-500 transition-colors hover:text-pink-600"
+                      >
+                        Clear tags
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

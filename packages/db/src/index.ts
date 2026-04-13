@@ -1,12 +1,16 @@
 import { env } from "@my-better-t-app/env/server";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
+// import ws from "ws"; (removed for edge compatibility)
 
 import * as schema from "./schema";
 
-// Configure Neon to use the ws package for WebSockets in Node.js
-neonConfig.webSocketConstructor = ws;
+// Configure Neon to use the ws package only in Node.js environments
+if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
+  // @ts-ignore - dynamic require for Node environment
+  const ws = require("ws");
+  neonConfig.webSocketConstructor = ws;
+}
 
 /**
  * Singleton database connection for serverless/dev resilience.
