@@ -552,19 +552,19 @@
 
 ### 12.1 Widget Analytics (Fix Priority 🔴)
 
-- [ ] **Fix**: Ensure `trackEvent` tRPC mutation correctly persists to `analytics_event` table
-- [ ] **Fix**: Verify `widgetId` and `eventType` are correctly passed from widget iframe
-- [ ] **Fix**: Verify `eventType` enum matches DB schema (`view`, `click`, `video_play`)
-- [ ] Widget Impression tracking (page load counts per widget)
-- [ ] Video Play Rate & Completion Rate (25%, 50%, 75%, 100% milestones)
-- [ ] Click-through rate (CTR) on Widget CTA buttons
+- [x] **Fix**: Ensure `trackEvent` tRPC mutation correctly persists to `analytics_event` table
+- [x] **Fix**: Verify `widgetId` and `eventType` are correctly passed from widget iframe
+- [x] **Fix**: Verify `eventType` enum matches DB schema (`view`, `click`, `video_play`)
+- [x] Widget Impression tracking (page load counts per widget)
+- [x] Video Play Rate & Completion Rate (25%, 50%, 75%, 100% milestones)
+- [x] Click-through rate (CTR) on Widget CTA buttons
 - [ ] Unique visitor tracking (cookie-less: IP + UA hash for privacy)
 - [ ] Traffic source attribution for widget views (referrer tracking)
 
 ### 12.2 Collection Analytics
 
 - [ ] Collection page view count
-- [ ] Submission funnel: View → Start → Step 2 → Step 3 → Submit
+- [x] Submission funnel: View → Start → Step 2 → Step 3 → Submit
 - [ ] Step-level drop-off rates (Which step loses the most users?)
 - [ ] Device breakdown: Mobile vs Desktop submissions
 - [ ] Geographic distribution of submitters (Heatmap on world map)

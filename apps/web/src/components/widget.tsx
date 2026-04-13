@@ -201,6 +201,39 @@ export default function Widget({ data, testimonials }: WidgetProps) {
               url={t.videoUrl}
               thumbnail={t.authorImage}
               accentColor={settings.accentColor}
+              onPlay={() => {
+                trackEvent.mutate(
+                  {
+                    workspaceId: data.workspaceId,
+                    widgetId: data.id,
+                    eventType: "video_play",
+                  },
+                  {
+                    onError: (err) =>
+                      console.error(
+                        "[KudosWall Analytics] video_play tracking failed:",
+                        err.message,
+                      ),
+                  },
+                );
+              }}
+              onProgress={(milestone) => {
+                trackEvent.mutate(
+                  {
+                    workspaceId: data.workspaceId,
+                    widgetId: data.id,
+                    eventType: "video_progress",
+                    metadataJson: JSON.stringify({ milestone }),
+                  },
+                  {
+                    onError: (err) =>
+                      console.error(
+                        `[KudosWall Analytics] video_progress ${milestone}% failed:`,
+                        err.message,
+                      ),
+                  },
+                );
+              }}
             />
           </div>
         )}
@@ -326,6 +359,14 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                   <a
                     href="https://kudoswall.org"
                     target="_blank"
+                    onClick={() => {
+                      trackEvent.mutate({
+                        workspaceId: data.workspaceId,
+                        widgetId: data.id,
+                        eventType: "click",
+                        metadataJson: JSON.stringify({ action: "click_powered_by" }),
+                      });
+                    }}
                     className="inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold transition-all hover:opacity-80"
                     style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
                   >

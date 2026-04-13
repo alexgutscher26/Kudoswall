@@ -17,7 +17,12 @@ export const testimonialStatusEnum = pgEnum("testimonial_status", [
   "archived",
 ]);
 export const testimonialTypeEnum = pgEnum("testimonial_type", ["text", "video"]);
-export const analyticsEventTypeEnum = pgEnum("analytics_event_type", ["view", "click"]);
+export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
+  "view",
+  "click",
+  "video_play",
+  "video_progress",
+]);
 export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
 
 export const workspace = pgTable(
@@ -164,6 +169,7 @@ export const analyticsEvent = pgTable(
     projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
     widgetId: text("widget_id").references(() => widget.id, { onDelete: "set null" }),
     eventType: analyticsEventTypeEnum("event_type").notNull(),
+    metadataJson: text("metadata_json"), // Store additional event data
     createdAt: timestamp("created_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),
   },

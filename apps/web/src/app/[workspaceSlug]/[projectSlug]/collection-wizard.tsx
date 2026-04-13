@@ -325,19 +325,32 @@ export default function CollectionWizard({
 
   const nextStep = () => {
     setDirection(1);
-    if (step === "rating") {
-      if (mode === "video") return setStep("video");
-      if (mode === "text") return setStep("text");
-      return setStep("choice");
+    const nextStepName = (() => {
+      if (step === "rating") {
+        if (mode === "video") return "video";
+        if (mode === "text") return "text";
+        return "choice";
+      }
+      if (step === "choice") {
+        if (mode === "video") return "video";
+        return "text";
+      }
+      if (step === "text") return "details";
+      if (step === "video") return "details";
+      if (step === "details") return "review";
+      if (step === "review") return "success";
+      return null;
+    })();
+
+    if (nextStepName) {
+      trackEvent.mutate({
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "click",
+        metadataJson: JSON.stringify({ action: "next_step", from: step, to: nextStepName }),
+      });
+      setStep(nextStepName as Step);
     }
-    if (step === "choice") {
-      if (mode === "video") return setStep("video");
-      return setStep("text");
-    }
-    if (step === "text") return setStep("details");
-    if (step === "video") return setStep("details");
-    if (step === "details") return setStep("review");
-    if (step === "review") return setStep("success");
   };
 
   const prevStep = () => {
@@ -658,6 +671,12 @@ export default function CollectionWizard({
                       onClick={() => {
                         setDirection(1);
                         setMode("video");
+                        trackEvent.mutate({
+                          workspaceId: project.workspaceId,
+                          projectId: project.id,
+                          eventType: "click",
+                          metadataJson: JSON.stringify({ action: "choose_mode", mode: "video" }),
+                        });
                         setStep("video");
                       }}
                       className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
@@ -687,6 +706,12 @@ export default function CollectionWizard({
                       onClick={() => {
                         setDirection(1);
                         setMode("text");
+                        trackEvent.mutate({
+                          workspaceId: project.workspaceId,
+                          projectId: project.id,
+                          eventType: "click",
+                          metadataJson: JSON.stringify({ action: "choose_mode", mode: "text" }),
+                        });
                         setStep("text");
                       }}
                       className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"

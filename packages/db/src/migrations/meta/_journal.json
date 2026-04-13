@@ -36,6 +36,20 @@
       "when": 1775976818883,
       "tag": "0004_daily_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776045775591,
+      "tag": "0005_new_morph",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776045992899,
+      "tag": "0006_special_lord_tyger",
+      "breakpoints": true
     }
   ]
 }

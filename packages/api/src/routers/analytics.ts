@@ -26,7 +26,8 @@ export const analyticsRouter = router({
         workspaceId: z.string(),
         projectId: z.string().optional(),
         widgetId: z.string().optional(),
-        eventType: z.enum(["view", "click"]),
+        eventType: z.enum(["view", "click", "video_play", "video_progress"]),
+        metadataJson: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +39,7 @@ export const analyticsRouter = router({
         projectId: input.projectId,
         widgetId: input.widgetId,
         eventType: input.eventType,
+        metadataJson: input.metadataJson,
       });
       return { success: true };
     }),
