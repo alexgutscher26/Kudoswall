@@ -11,6 +11,7 @@ import {
   Video,
   Clock,
   Trash2,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -34,6 +35,15 @@ export default function CollectionList({ projects }: CollectionListProps) {
     trpc.dashboard.deleteProject.mutationOptions({
       onSuccess: () => {
         toast.success("Collection deleted");
+        router.refresh();
+      },
+    }),
+  );
+
+  const duplicateProject = useMutation(
+    trpc.dashboard.duplicateProject.mutationOptions({
+      onSuccess: () => {
+        toast.success("Collection duplicated");
         router.refresh();
       },
     }),
@@ -82,7 +92,19 @@ export default function CollectionList({ projects }: CollectionListProps) {
                 <div className="flex size-10 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-400 transition-colors group-hover:bg-pink-50 group-hover:text-pink-500">
                   <Globe className="size-5" />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="relative z-20 flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      duplicateProject.mutate({ id: p.id });
+                    }}
+                    disabled={duplicateProject.isPending}
+                    className="p-2 text-neutral-300 transition-all hover:bg-neutral-50 hover:text-neutral-600 disabled:opacity-50"
+                    title="Duplicate Collection"
+                  >
+                    <Copy className="size-4" />
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

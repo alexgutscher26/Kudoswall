@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Palette,
@@ -140,6 +141,11 @@ export function CollectionCustomizer({
     "rating",
   );
 
+  const router = useRouter();
+
+  const [projectName, setProjectName] = useState(project.name);
+  const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
+
   const [activeTab, setActiveTab] = useState<
     "branding" | "fields" | "content" | "video" | "share" | "advanced"
   >("branding");
@@ -149,6 +155,7 @@ export function CollectionCustomizer({
     trpc.dashboard.updateProjectSettings.mutationOptions({
       onSuccess: () => {
         toast.success("Settings saved!");
+        router.refresh();
       },
       onError: (e) => {
         toast.error(e instanceof Error ? e.message : "Failed to save settings");
@@ -166,18 +173,20 @@ export function CollectionCustomizer({
     }
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      updateSettings.mutate({ projectId: project.id, settings });
+      updateSettings.mutate({ projectId: project.id, settings, name: projectName, collectionSlug });
     }, 1500);
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
-  }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings, projectName, collectionSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     updateSettings.mutate({
       projectId: project.id,
       settings,
+      name: projectName,
+      collectionSlug,
     });
   };
 
@@ -608,7 +617,7 @@ export function CollectionCustomizer({
                     icon: Quote,
                   },
                 ].map((link) => {
-                  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${project.collectionSlug || project.slug}${link.param}`;
+                  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${collectionSlug}${link.param}`;
                   return (
                     <div
                       key={link.label}
@@ -644,7 +653,40 @@ export function CollectionCustomizer({
 
           {activeTab === "advanced" && (
             <div className="space-y-6">
-              <SectionHeader icon={Command} pro title="Advanced" />
+              <SectionHeader icon={Command} title="General Info" />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Collection Name
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    onChange={(e) => setProjectName(e.target.value)}
+                    type="text"
+                    value={projectName}
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    Only visible to you, used to identify it later.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    URL Slug
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    onChange={(e) =>
+                      setCollectionSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
+                    }
+                    type="text"
+                    value={collectionSlug}
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    The public URL path for your collection page.
+                  </p>
+                </div>
+              </div>
 
               <SectionHeader icon={Star} pro title="Star Rating" />
               <div className="flex items-center justify-between">

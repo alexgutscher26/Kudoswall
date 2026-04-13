@@ -213,7 +213,7 @@
 - [x] Collection page live preview
 - [ ] Collection analytics: Submission rate, completion rate per step, drop-off heatmap
 - [ ] A/B testing for collection form copy (Headline, CTA button text)
-- [ ] Collection form duplication (Clone an existing form)
+- [x] Collection form duplication (Clone an existing form)
 - [ ] Archive / delete old collections
 - [ ] QR code generator per collection for offline use (print on receipts, flyers)
 - [ ] Short URL / vanity URL per collection (`kudoswall.com/c/yourslug`)

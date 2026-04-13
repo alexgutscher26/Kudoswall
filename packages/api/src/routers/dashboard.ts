@@ -212,10 +212,17 @@ export const dashboardRouter = router({
     }),
 
   updateProjectSettings: protectedProcedure
-    .input(z.object({ projectId: z.string(), settings: z.unknown() }))
+    .input(
+      z.object({
+        projectId: z.string(),
+        settings: z.unknown(),
+        name: z.string().optional(),
+        collectionSlug: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { projectId, settings } = input;
+      const { projectId, settings, name, collectionSlug } = input;
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
@@ -232,6 +239,8 @@ export const dashboardRouter = router({
         .update(project)
         .set({
           collectionSettingsJson: JSON.stringify(settings),
+          ...(name ? { name } : {}),
+          ...(collectionSlug ? { collectionSlug } : {}),
         })
         .where(eq(project.id, projectId));
 
@@ -240,7 +249,7 @@ export const dashboardRouter = router({
         entityType: "project",
         entityId: projectId,
         action: "update",
-        diff: { collectionSettingsJson: settings },
+        diff: { collectionSettingsJson: settings, name, collectionSlug },
       });
 
       return { success: true };
@@ -273,6 +282,51 @@ export const dashboardRouter = router({
       });
 
       return { success: true };
+    }),
+
+  duplicateProject: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { id } = input;
+
+      const p = await db.query.project.findFirst({
+        where: eq(project.id, id),
+        with: {
+          workspace: true,
+        },
+      });
+
+      if (!p || p.workspace.ownerId !== session.user.id) {
+        throw new Error("Forbidden");
+      }
+
+      const generateSlug = (name: string) =>
+        name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
+
+      const newName = `${p.name} (Copy)`;
+      const newSlug = generateSlug(newName);
+
+      const newProject = {
+        id: crypto.randomUUID(),
+        workspaceId: p.workspaceId,
+        name: newName,
+        slug: newSlug,
+        collectionSlug: newSlug,
+        collectionSettingsJson: p.collectionSettingsJson,
+      };
+
+      await db.insert(project).values(newProject);
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "project",
+        entityId: newProject.id,
+        action: "create",
+        diff: { duplicatedFrom: id },
+      });
+
+      return { success: true, newProjectId: newProject.id };
     }),
 
   completeOnboardingStep: protectedProcedure
