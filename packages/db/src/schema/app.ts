@@ -70,7 +70,7 @@ export const project = pgTable(
     thankYouMessage: text("thank_you_message"),
     collectionSettingsJson: text("collection_settings_json"),
     active: boolean("active").default(true).notNull(),
-    customDomain: text("custom_domain"),
+    customDomain: text("custom_domain").unique(),
     customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
     customDomainVerificationToken: text("custom_domain_verification_token"),
     customDomainVerificationError: text("custom_domain_verification_error"),

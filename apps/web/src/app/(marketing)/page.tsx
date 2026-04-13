@@ -8,12 +8,12 @@ import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
 import SocialProofSection from "@/components/sections/social-proof-section";
 import { headers } from "next/headers";
-import { getProjectByCustomDomain } from "@/proxy";
+import { getProjectByHost } from "@/proxy";
 import CollectionPageView from "@/components/collection-page-view";
 
 export default async function Home() {
   const host = (await headers()).get("host") || "";
-  const project = await getProjectByCustomDomain(host);
+  const project = await getProjectByHost(host);
 
   if (project) {
     return <CollectionPageView project={project} />;
