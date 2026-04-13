@@ -158,7 +158,7 @@ export default async function EmbedPage({
             // Using * + !important is the only reliable fix inside an iframe
             // where we cannot control the parent stylesheet specificity.
             isCustomFont
-              ? `*, *::before, *::after { font-family: "${fontFamily}", sans-serif !important; }`
+              ? `*, *::before, *::after { font-family: "${fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important; }`
               : "",
           ]
             .filter(Boolean)

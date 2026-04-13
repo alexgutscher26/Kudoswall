@@ -276,7 +276,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     if (f === "serif") return "ui-serif, Georgia, serif";
     if (f === "mono") return "ui-monospace, 'Cascadia Code', monospace";
     // Custom Google Font — the embed page already loaded the @font-face via <link>
-    return `"${f}", sans-serif`;
+    return `"${f}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
   })();
 
   return (

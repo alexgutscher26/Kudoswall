@@ -217,7 +217,7 @@
 - [ ] Archive / delete old collections
 - [ ] QR code generator per collection for offline use (print on receipts, flyers)
 - [ ] Short URL / vanity URL per collection (`kudoswall.com/c/yourslug`)
-- [ ] Embed collection form as an inline modal on your own website
+- [x] Embed collection form as an inline modal on your own website
 - [ ] Collection page password protection (for private review campaigns)
 
 ### 4.3 CRM & Customer Relationship
@@ -240,9 +240,9 @@
 
 ### 4.5 Global Dashboard UX
 
-- [ ] Onboarding checklist widget on the home dashboard ("Your first testimonial in 5 steps")
+- [x] Onboarding checklist widget on the home dashboard ("Your first testimonial in 5 steps")
 - [ ] Global search (Cmd+K): Find testimonials, collections, customers instantly
-- [ ] Dashboard home redesign: Key metrics, recent activity, quick actions
+- [x] Dashboard home redesign: Key metrics, recent activity, quick actions
 - [ ] Collapsible sidebar for more screen real estate
 - [ ] Dark mode for the entire dashboard
 - [ ] Notification center (bell icon) for all async events
@@ -337,7 +337,7 @@
 
 - [x] CSS variable injection into iframe (`--kudos-bg`, `--kudos-font`, etc.)
 - [x] Google Font dynamic loader injected into iframe `<head>`
-- [ ] Font fallback stack for all 35+ fonts (system fonts as fallback)
+- [x] Font fallback stack for all 35+ fonts (system fonts as fallback)
 - [ ] Dark/Light mode variant per widget (override or follow system)
 - [ ] Responsive breakpoints for the widget itself (mobile vs. desktop card size)
 

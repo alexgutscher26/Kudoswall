@@ -777,7 +777,7 @@ export function CollectionCustomizer({
           backgroundColor: settings.backgroundColor,
           fontFamily:
             settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-              ? `"${settings.fontFamily}", sans-serif`
+              ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
               : settings?.fontFamily === "mono"
                 ? "monospace"
                 : settings?.fontFamily === "serif"
