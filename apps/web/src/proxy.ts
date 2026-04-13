@@ -1,63 +1,84 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { db } from "@/lib/server-db";
 import { project } from "@my-better-t-app/db/schema";
 import { eq, isNull, and } from "drizzle-orm";
 
 /**
  * List of subdomains that are reserved for platform use and should not
- * be mapped to a project collection page.
+ * be captured by the custom domain mapping.
  */
 const RESERVED_SUBDOMAINS = ["www", "api", "dashboard", "auth", "admin", "blog", "app"];
 
+function isReservedSubdomain(host: string) {
+  const mainDomain = "kudoswall.org";
+  if (!host.endsWith(`.${mainDomain}`)) return false;
+  const subdomain = host.replace(`.${mainDomain}`, "");
+  return RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase());
+}
+
 /**
- * Checks if a host name should be treated as a routing domain.
- * Excludes the main domain and typical development/staging domains.
+ * Next.js 16 Proxy implementation (replaces middleware)
  */
-export function isCustomDomain(host: string) {
+export async function proxy(request: NextRequest) {
+  const url = new URL(request.url);
+  const host = request.headers.get("host") || "";
+
+  // 1. Detect if this is a custom domain or supported subdomain
   const mainDomain = "kudoswall.org";
   const isMainSite = host === mainDomain || host === `www.${mainDomain}`;
 
-  return (
+  const isSupportedDomain =
     !isMainSite &&
+    !isReservedSubdomain(host) &&
     !host.includes("localhost") &&
     !host.includes("vercel.app") &&
-    !host.includes("pages.dev")
-  );
-}
+    !host.includes("pages.dev");
 
-/**
- * Retrieves the project associated with a host.
- * Supports:
- * 1. Verified custom domains (e.g. testimonials.mybrand.com)
- * 2. Automatic subdomains (e.g. project-slug.kudoswall.org)
- */
-export async function getProjectByHost(host: string) {
-  const mainDomain = "kudoswall.org";
+  if (isSupportedDomain && url.pathname === "/") {
+    // A. Check for exact verified custom domain
+    let projectData = await db.query.project.findFirst({
+      where: and(
+        eq(project.customDomain, host),
+        eq(project.customDomainVerified, true),
+        isNull(project.deletedAt),
+      ),
+    });
 
-  // 1. Check for exact matching custom domain (verified)
-  const customProject = await db.query.project.findFirst({
-    where: and(
-      eq(project.customDomain, host),
-      eq(project.customDomainVerified, true),
-      isNull(project.deletedAt),
-    ),
-  });
-
-  if (customProject) return customProject;
-
-  // 2. Check for subdomain mapping (e.g. threddiq.kudoswall.org)
-  if (host.endsWith(`.${mainDomain}`)) {
-    const subdomain = host.replace(`.${mainDomain}`, "");
-
-    // Skip if it's a reserved subdomain or empty
-    if (!subdomain || RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase())) {
-      return null;
+    // B. Fallback to subdomain check (project-slug.kudoswall.org)
+    if (!projectData && host.endsWith(`.${mainDomain}`)) {
+      const subdomain = host.replace(`.${mainDomain}`, "");
+      projectData = await db.query.project.findFirst({
+        where: and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)),
+      });
     }
 
-    // Lookup by collectionSlug or slug
-    return await db.query.project.findFirst({
-      where: and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)),
-    });
+    if (projectData?.collectionSlug) {
+      // Rewrite to the collection page
+      return NextResponse.rewrite(new URL(`/collect/${projectData.collectionSlug}`, request.url));
+    }
   }
 
-  return null;
+  // Handle other paths or default behavior
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - widget.js (the widget embed script)
+     */
+    {
+      source: "/((?!api|_next/static|_next/image|favicon.ico|widget.js).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
+};
