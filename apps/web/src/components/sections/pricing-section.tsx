@@ -53,9 +53,8 @@ const PLANS: Plan[] = [
       "Remove 'Powered by' badge",
       "Custom domain for collection",
       "CSV export",
-      "Zapier / Make integration",
       "Analytics (views & clicks)",
-      "Priority email support",
+      "Priority email support", // "Zapier / Make integration", will add later
     ],
   },
   {
@@ -72,7 +71,6 @@ const PLANS: Plan[] = [
       "Up to 5 workspaces",
       "Up to 3 team members",
       "White-label collection page",
-      "Dedicated onboarding call",
       "Priority VIP support",
     ],
   },
