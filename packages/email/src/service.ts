@@ -13,7 +13,7 @@ export class EmailService {
   private from: string;
 
   constructor(apiKey: string, from?: string) {
-    this.resend = new Resend(apiKey);
+    this.resend = new Resend(apiKey || "re_dummy_key_for_build");
     this.from = from || "Alex from KudosWall <alex@kudoswall.org>";
   }
 
