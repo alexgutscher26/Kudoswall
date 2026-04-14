@@ -455,7 +455,8 @@ export default function CollectionWizard({
         });
 
         if (!res.ok) {
-          throw new Error("Failed to upload video");
+          const errorData = (await res.json().catch(() => ({}))) as any;
+          throw new Error(errorData.message || errorData.error || "Failed to upload video");
         }
 
         const data = (await res.json()) as { url: string };
@@ -477,8 +478,8 @@ export default function CollectionWizard({
       localStorage.removeItem(DRAFT_KEY);
       fireConfetti();
       setStep("success");
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

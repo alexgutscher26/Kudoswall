@@ -23,17 +23,44 @@ export async function POST(req: NextRequest) {
     const key = `${id}.${ext}`;
     const contentType = req.headers.get("content-type") || "video/webm";
 
-    const data = await req.arrayBuffer();
+    const contentLength = req.headers.get("content-length");
 
-    await env.VIDEOS_BUCKET.put(key, data, {
-      httpMetadata: {
-        contentType,
-      },
-    });
+    if (!req.body) {
+      return NextResponse.json({ error: "No request body" }, { status: 400 });
+    }
+
+    try {
+      const putOptions: any = {
+        httpMetadata: {
+          contentType,
+        },
+      };
+
+      if (contentLength) {
+        putOptions.contentLength = parseInt(contentLength);
+      }
+
+      await env.VIDEOS_BUCKET.put(key, req.body, putOptions);
+    } catch (putError: any) {
+      console.error("R2 Put Error:", putError);
+      return NextResponse.json(
+        {
+          error: "Failed to write to storage",
+          message: putError?.message || "Unknown R2 error",
+        },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ url: `/api/videos/${key}` });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Video upload error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        message: error?.message || "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }
