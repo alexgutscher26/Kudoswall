@@ -23,10 +23,10 @@ export async function POST(req: NextRequest) {
     const key = `${id}.${ext}`;
     const contentType = req.headers.get("content-type") || "video/webm";
 
-    const contentLength = req.headers.get("content-length");
+    const buffer = await req.arrayBuffer();
 
-    if (!req.body) {
-      return NextResponse.json({ error: "No request body" }, { status: 400 });
+    if (buffer.byteLength === 0) {
+      return NextResponse.json({ error: "Request body is empty" }, { status: 400 });
     }
 
     try {
@@ -36,11 +36,7 @@ export async function POST(req: NextRequest) {
         },
       };
 
-      if (contentLength) {
-        putOptions.contentLength = parseInt(contentLength);
-      }
-
-      await env.VIDEOS_BUCKET.put(key, req.body, putOptions);
+      await env.VIDEOS_BUCKET.put(key, buffer, putOptions);
     } catch (putError: any) {
       console.error("R2 Put Error:", putError);
       return NextResponse.json(
