@@ -290,12 +290,10 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
             </div>
           </div>
 
-          <ErrorBoundary name="Collection Wizard">
-            <CollectionWizard
-              project={projectData as any}
-              initialType={t === "v" ? "video" : t === "t" ? "text" : null}
-            />
-          </ErrorBoundary>
+          <CollectionWizard
+            project={projectData as any}
+            initialType={t === "t" || t === "v" ? "text" : null}
+          />
 
           <CollectionFooter
             workspaceName={projectData.workspace.name}

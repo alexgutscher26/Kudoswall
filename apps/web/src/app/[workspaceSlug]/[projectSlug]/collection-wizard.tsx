@@ -218,11 +218,13 @@ export default function CollectionWizard({
   // Slide direction: 1 = forward (enter from right), -1 = backward (enter from left)
   const [direction, setDirection] = useState(1);
 
-  const [mode, setMode] = useState<"text" | "video" | null>(initialType ?? null);
+  const [mode, setMode] = useState<"text" | "video" | null>(
+    initialType === "video" ? "text" : (initialType ?? null),
+  );
   const [step, setStep] = useState<Step>(() => {
     if (settings?.form?.starRating?.enabled === false) {
-      if (initialType) return initialType === "video" ? "video" : "text";
-      return "choice";
+      // Force text even if initialType was video
+      return "text";
     }
     return "rating";
   });
@@ -339,16 +341,10 @@ export default function CollectionWizard({
     setDirection(1);
     const nextStepName = (() => {
       if (step === "rating") {
-        if (mode === "video") return "video";
-        if (mode === "text") return "text";
-        return "choice";
-      }
-      if (step === "choice") {
-        if (mode === "video") return "video";
+        setMode("text");
         return "text";
       }
       if (step === "text") return "details";
-      if (step === "video") return "details";
       if (step === "details") return "review";
       if (step === "review") return "success";
       return null;
@@ -368,12 +364,10 @@ export default function CollectionWizard({
   const prevStep = () => {
     setDirection(-1);
     if (step === "choice") return setStep("rating");
-    if (step === "text" || step === "video") {
-      if (initialType) return setStep("rating");
-      return setStep("choice");
+    if (step === "text") {
+      return setStep("rating");
     }
     if (step === "details") {
-      if (mode === "video") return setStep("video");
       return setStep("text");
     }
     if (step === "review") return setStep("details");
@@ -688,6 +682,8 @@ export default function CollectionWizard({
                   >
                     {t.choiceSubtext}
                   </p>
+                  {/* Choice Step Hidden: Video disabled for now */}
+                  {/*
                   <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                     <button
                       onClick={() => {
@@ -760,6 +756,7 @@ export default function CollectionWizard({
                       </div>
                     </button>
                   </div>
+                  */}
                 </>
               )}
 
@@ -835,7 +832,8 @@ export default function CollectionWizard({
                 </div>
               )}
 
-              {/* ─── VIDEO STEP ─── */}
+              {/* Video Step disabled for now */}
+              {/*
               {step === "video" && (
                 <div className="w-full text-left">
                   <h1
@@ -866,7 +864,6 @@ export default function CollectionWizard({
                     accentColor={project.workspace.branding.accentColor}
                   />
 
-                  {/* ── Skip button: switch to text review instead ── */}
                   <button
                     onClick={() => {
                       setVideoBlob(null);
@@ -884,6 +881,7 @@ export default function CollectionWizard({
                   </button>
                 </div>
               )}
+              */}
 
               {/* ─── DETAILS STEP ─── */}
               {step === "details" && (

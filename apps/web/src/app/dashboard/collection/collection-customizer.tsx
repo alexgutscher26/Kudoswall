@@ -354,12 +354,15 @@ export function CollectionCustomizer({
           >
             Content
           </button>
+          {/* Video tab hidden for now */}
+          {/*
           <button
             onClick={() => setActiveTab("video")}
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "video" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
           >
             Video
           </button>
+          */}
           <button
             onClick={() => setActiveTab("advanced")}
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
@@ -645,6 +648,8 @@ export function CollectionCustomizer({
             </div>
           )}
 
+          {/* Video settings hidden for now */}
+          {/*
           {activeTab === "video" && (
             <div className="space-y-6">
               <SectionHeader icon={Video} pro title="Video Testimonials" />
@@ -696,6 +701,7 @@ export function CollectionCustomizer({
               </div>
             </div>
           )}
+          */}
 
           {activeTab === "domain" && (
             <div className="space-y-6">
@@ -858,23 +864,20 @@ export function CollectionCustomizer({
               <div className="space-y-4">
                 {[
                   {
-                    label: "Smart Choice Link",
-                    desc: "Let customers choose Video or Text",
+                    label: "Direct Collection Link",
+                    desc: "Send customers to leave a text review",
                     param: "",
-                    icon: Sparkles,
+                    icon: Quote,
                   },
+                  /* Video Only Link hidden */
+                  /*
                   {
                     label: "Video Only Link",
                     desc: "Direct to video recorder",
                     param: "?t=v",
                     icon: Video,
                   },
-                  {
-                    label: "Text Only Link",
-                    desc: "Direct to text review form",
-                    param: "?t=t",
-                    icon: Quote,
-                  },
+                  */
                 ].map((link) => {
                   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${collectionSlug}${link.param}`;
                   return (
@@ -1178,9 +1181,9 @@ export function CollectionCustomizer({
           <div className="flex items-center gap-3">
             {[
               { id: "rating", label: "Rating" },
-              { id: "choice", label: "Choice" },
+              /* { id: "choice", label: "Choice" }, */
               { id: "text", label: "Story" },
-              { id: "video", label: "Video" },
+              /* { id: "video", label: "Video" }, */
               { id: "details", label: "Form" },
               { id: "success", label: "Success" },
             ].map((s) => (
@@ -1336,7 +1339,7 @@ function CollectionWizardPreview({
                 </div>
               </div>
               <button
-                onClick={() => setMockStep("choice")}
+                onClick={() => setMockStep("text")}
                 className="rounded-lg bg-[#000000] px-8 py-2.5 text-[11px] font-bold tracking-widest text-white uppercase transition-all hover:opacity-90"
               >
                 Next Step →
@@ -1344,7 +1347,8 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Choice Step */}
+          {/* Choice Step hidden */}
+          {/*
           {mockStep === "choice" && (
             <div className="py-2 text-center">
               <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e]">
@@ -1381,6 +1385,7 @@ function CollectionWizardPreview({
               </div>
             </div>
           )}
+          */}
 
           {/* Text Step */}
           {mockStep === "text" && (
@@ -1402,7 +1407,7 @@ function CollectionWizardPreview({
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-3">
                 <button
-                  onClick={() => setMockStep("choice")}
+                  onClick={() => setMockStep("rating")}
                   className="text-[10px] font-bold tracking-widest text-[#45464d] uppercase"
                 >
                   ← Back
@@ -1417,7 +1422,8 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Video Step */}
+          {/* Video Step hidden */}
+          {/*
           {mockStep === "video" && (
             <div className="text-center">
               <h1 className="mb-1 text-xl font-extrabold text-[#191c1e]">Record your video</h1>
@@ -1448,6 +1454,7 @@ function CollectionWizardPreview({
               </div>
             </div>
           )}
+          */}
 
           {/* Details Step */}
           {mockStep === "details" && (
