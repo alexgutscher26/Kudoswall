@@ -549,7 +549,7 @@ export default function DashboardShell({
     if (urlWorkspaceId && urlWorkspaceId !== activeWorkspaceId) {
       setActiveWorkspaceId(urlWorkspaceId);
     }
-  }, [urlWorkspaceId]);
+  }, [urlWorkspaceId, activeWorkspaceId]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -559,16 +559,31 @@ export default function DashboardShell({
   // Synchronize state with initialData from server
   useEffect(() => {
     if (initialData?.workspace.id && initialData.workspace.id !== activeWorkspaceId) {
-      setActiveWorkspaceId(initialData.workspace.id);
+      // Only override local state if there's no workspaceId in the URL,
+      // or if the URL matches the initialData (meaning navigation finished)
+      if (!urlWorkspaceId || urlWorkspaceId === initialData.workspace.id) {
+        setActiveWorkspaceId(initialData.workspace.id);
+      }
     }
-  }, [initialData?.workspace.id]);
+  }, [initialData?.workspace.id, urlWorkspaceId, activeWorkspaceId]);
 
   // Derived data state (polled content)
   const [polledData, setPolledData] = useState<DashboardData | null>(null);
 
-  // Sync initialData
-  const activeData =
-    activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
+  // Sync initialData vs polledData with protection against stale data
+  const activeData = (() => {
+    // If polledData is for the wrong workspace, ignore it
+    const isPolledDataStale = polledData && polledData.workspace.id !== activeWorkspaceId;
+
+    if (isPolledDataStale) {
+      // If initialData matches current workspace, use it as fallback
+      if (initialData?.workspace.id === activeWorkspaceId) return initialData;
+      return null;
+    }
+
+    // Normal selection logic
+    return activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
+  })();
 
   const completeStep = useMutation({
     ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
@@ -626,9 +641,12 @@ export default function DashboardShell({
             setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
             params.set("workspaceId", id);
-            // When switching workspaces, we often want to go back to the overview
-            // to avoid "Project not found" errors on specific sub-pages
-            router.push(`/dashboard?${params.toString()}` as any);
+            // Clear project-specific params that won't exist in the new workspace
+            params.delete("project");
+
+            // Stay on current page if it's a dashboard page, otherwise go to overview
+            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+            router.push(`${targetPath}?${params.toString()}` as any);
           }}
         />
 
@@ -645,7 +663,10 @@ export default function DashboardShell({
             setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
             params.set("workspaceId", id);
-            router.push(`/dashboard?${params.toString()}` as any);
+            params.delete("project");
+
+            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+            router.push(`${targetPath}?${params.toString()}` as any);
           }}
         />
 
