@@ -7,6 +7,8 @@ interface UpgradePromptEmailProps {
   approvedCount: number;
 }
 
+// TODO: Do this one later when stripe added
+
 export const UpgradePromptEmail = ({ userName, approvedCount }: UpgradePromptEmailProps) => {
   return (
     <BaseLayout previewText="You're crushing it! (And hitting your limit) 🚀">

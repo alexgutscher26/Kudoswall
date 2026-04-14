@@ -5,8 +5,7 @@ import { Redis } from "@upstash/redis";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-
-// TODO: Implement resend
+import { checkAndSendFirstTestimonialEmail } from "@/lib/email-helpers";
 
 import { z } from "zod";
 
@@ -102,8 +101,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
 
     // 4. Rate limit is automatically managed by Upstash on .limit() call.
 
-    // 5. Fire non-blocking email notification (Placeholder for Resend integration)
-    // resend.emails.send(...)
+    // 5. Fire non-blocking email notification
+    void checkAndSendFirstTestimonialEmail(proj.id, {
+      authorName: body.authorName,
+      content: body.content,
+      rating: body.rating,
+    });
 
     return NextResponse.json({
       success: true,

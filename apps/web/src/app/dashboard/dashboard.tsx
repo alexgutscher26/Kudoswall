@@ -546,6 +546,13 @@ export default function DashboardShell({
     initialWorkspaceId || urlWorkspaceId || initialData?.workspace.id || "",
   );
 
+  // Sync state with URL search params
+  useEffect(() => {
+    if (urlWorkspaceId && urlWorkspaceId !== activeWorkspaceId) {
+      setActiveWorkspaceId(urlWorkspaceId);
+    }
+  }, [urlWorkspaceId]);
+
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -618,6 +625,7 @@ export default function DashboardShell({
           onNewCollection={() => setNewCollectionOpen(true)}
           currentWorkspaceId={activeWorkspaceId}
           onWorkspaceChange={(id) => {
+            setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
             params.set("workspaceId", id);
             // When switching workspaces, we often want to go back to the overview
@@ -636,6 +644,7 @@ export default function DashboardShell({
           onNewCollection={() => setNewCollectionOpen(true)}
           currentWorkspaceId={activeWorkspaceId}
           onWorkspaceChange={(id) => {
+            setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
             params.set("workspaceId", id);
             router.push(`/dashboard?${params.toString()}` as any);

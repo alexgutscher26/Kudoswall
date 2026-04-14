@@ -90,6 +90,20 @@ export function createAuth() {
       haveIBeenPwned(),
       lastLoginMethod(),
     ],
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            try {
+              await emailService.sendWelcomeEmail(user.email, user.name || "there");
+              console.log(`[Welcome Email] Sent to ${user.email}`);
+            } catch (error) {
+              console.error(`[Welcome Email] Failed to send to ${user.email}:`, error);
+            }
+          },
+        },
+      },
+    },
   });
 }
 

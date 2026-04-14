@@ -4,6 +4,7 @@ import { db } from "@/lib/server-db";
 import { project, testimonial, workspace } from "@my-better-t-app/db/schema";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { checkAndSendFirstTestimonialEmail } from "@/lib/email-helpers";
 
 export async function getProjectBySlug(workspaceSlug: string, projectSlug: string) {
   const ws = await db.query.workspace.findFirst({
@@ -66,6 +67,13 @@ export async function submitTestimonial(
     videoUrl: data.videoUrl,
     status: "pending",
     type: data.videoUrl ? "video" : "text",
+  });
+
+  // Fire-and-forget email notification
+  void checkAndSendFirstTestimonialEmail(projectId, {
+    authorName: data.authorName,
+    content: data.content,
+    rating: data.rating,
   });
 
   return { success: true };
