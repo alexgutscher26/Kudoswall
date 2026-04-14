@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/lib/collection-i18n";
 import { useState, useMemo, useEffect } from "react";
+import { uploadFiles } from "@/utils/uploadthing";
 import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
@@ -444,23 +445,21 @@ export default function CollectionWizard({
     try {
       let videoUrl: string | undefined;
       if (videoBlob) {
-        // Upload directly to our new upload API streaming endpoint
+        // Upload via UploadThing
         const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
-        const res = await fetch(`/api/upload/video?ext=${extension}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": videoBlob.type,
-          },
-          body: videoBlob,
+        const file = new File([videoBlob], `video.${extension}`, {
+          type: videoBlob.type,
         });
 
-        if (!res.ok) {
-          const errorData = (await res.json().catch(() => ({}))) as any;
-          throw new Error(errorData.message || errorData.error || "Failed to upload video");
+        const uploadRes = await uploadFiles("videoUploader", {
+          files: [file],
+        });
+
+        if (!uploadRes?.[0]?.url) {
+          throw new Error("Failed to upload video to storage");
         }
 
-        const data = (await res.json()) as { url: string };
-        videoUrl = data.url;
+        videoUrl = uploadRes[0].url;
       }
 
       await submitTestimonial(project.id, {
