@@ -3,12 +3,14 @@ import { dashboardRouter } from "./dashboard";
 import { widgetRouter } from "./widget";
 import { tagRouter } from "./tag";
 import { analyticsRouter } from "./analytics";
+import { teamRouter } from "./team";
 
 export const appRouter = router({
   dashboard: dashboardRouter,
   widget: widgetRouter,
   tag: tagRouter,
   analytics: analyticsRouter,
+  team: teamRouter,
   healthCheck: publicProcedure.query(() => {
     return "OK";
   }),

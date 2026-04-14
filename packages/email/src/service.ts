@@ -6,13 +6,15 @@ import { ActivationNudgeEmail } from "../emails/activation-nudge";
 import { UpgradePromptEmail } from "../emails/upgrade-prompt";
 import { WeeklyDigestEmail } from "../emails/weekly-digest";
 import { ReEngagementEmail } from "../emails/re-engagement";
+import { TeamInviteEmail } from "../emails/team-invite";
 
 export class EmailService {
   public resend: Resend;
-  private from = "Alex from KudosWall <alex@kudoswall.org>";
+  private from: string;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, from?: string) {
     this.resend = new Resend(apiKey);
+    this.from = from || "Alex from KudosWall <alex@kudoswall.org>";
   }
 
   async sendWelcomeEmail(to: string, userName: string) {
@@ -89,6 +91,24 @@ export class EmailService {
       to,
       subject: "Is your Wall of Love getting lonely? 🥺",
       react: React.createElement(ReEngagementEmail, { userName }),
+    });
+  }
+
+  async sendInviteEmail(
+    to: string,
+    inviterName: string,
+    workspaceName: string,
+    inviteLink: string,
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: `You've been invited to join ${workspaceName} on KudosWall`,
+      react: React.createElement(TeamInviteEmail, {
+        inviterName,
+        workspaceName,
+        inviteLink,
+      }),
     });
   }
 }

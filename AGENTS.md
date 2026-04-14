@@ -7,6 +7,7 @@ This project follows strict code quality standards to ensure a maintainable, typ
 - **Format code**: `bun run format` (Uses Prettier with Tailwind CSS plugin)
 - **Type check**: `bun run check-types`
 - **Build check**: `bun run build`
+- **DB Push**: `bun run db:push`
 
 Formatting is handled by Prettier. Automated git hooks via Lefthook ensure that all code is formatted and type-checked before being committed or pushed.
 
@@ -18,60 +19,68 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 
 ### Type Safety & Explicitness
 
-- Use explicit types for function parameters and return values when they enhance clarity.
-- Prefer `unknown` over `any` for uncertain types.
-- Leverage `zod` for runtime validation and type inference.
-- Avoid type assertions (`as T`) unless the type cannot be inferred or narrowed.
-- Extract constants with descriptive names instead of using magic numbers/strings.
+- **No `any`**: Use strict typing. Prefer `unknown` over `any` for uncertain types.
+- **Explicit Returns**: Use explicit return types for functions, especially in public APIs/tRPC procedures.
+- **Zod Validation**: Leverage `zod` for all runtime validation (API inputs, DB schemas, Env vars).
+- **Discriminated Unions**: Use discriminated unions for complex state or response types.
+- **Constants**: Extract magic numbers/strings into descriptive constants.
 
-### Modern JavaScript/TypeScript
+### Monorepo Dependency Rules
 
-- Use arrow functions for callbacks and simple functional components.
-- Prefer `for...of` loops or functional methods (`map`, `filter`, `reduce`) over traditional `for` loops.
-- Use optional chaining (`?.`) and nullish coalescing (`??`) for safe property access.
-- Use template literals for all string concatenations.
-- Use `const` by default; only use `let` when reassignment is required.
+- **Workspace Imports**: Use `@my-better-t-app/*` for internal package imports with `workspace:*` versioning.
+- **Unidirectional Flow**: Packages must not import from `apps`. Higher-level packages (like `api`) can import from lower-level ones (`db`, `env`).
+- **Clean Imports**: Avoid deep imports from packages (e.g., import from `@my-better-t-app/ui`, not `@my-better-t-app/ui/src/button`).
 
-### Async & Promises
+### API (tRPC) & Data Fetching
 
-- Always `await` promises in async functions.
-- Handle potential errors with `try-catch` blocks, especially in server actions and API routes.
-- Use `Promise.all` or `Promise.allSettled` for parallel execution of independent promises.
+- **Separation of Concerns**: Define business logic in `packages/api`. The `apps/web` should primarily handle UI and routing.
+- **Procedures**: Use `protectedProcedure` for any action requiring authentication.
+- **Server Components**: Prefer fetching data in Server Components via tRPC callers or direct DB access where appropriate.
+- **React Query**: Use `@tanstack/react-query` hooks for client-side interactivity and mutations.
+
+### Database (Drizzle ORM)
+
+- **Schema Setup**: Define tables in `packages/db/src/schema/app.ts`. Use `snake_case` for database columns and `camelCase` for TypeScript fields.
+- **Relations**: Use Drizzle's `relations` API to define associations between tables.
+- **Efficiency**: Use `db.query` for clean, nested reads. For performance-critical paths, use explicit `.select()` with `.innerJoin()`.
+- **Naming**: Ensure all indexes and constraints are explicitly named.
 
 ### React & JSX (Next.js 16+)
 
-- Use **React Server Components (RSC)** by default. Only use `'use client'` when state or interactivity is required.
-- Maintain clear boundaries between client and server components.
-- Specify all dependencies in hook dependency arrays (React Compiler will handle many of these, but explicit intent is still preferred).
-- Use the `key` prop for elements in iterables (prefer unique IDs over array indices).
-- Utilize semantic HTML and ARIA attributes for accessibility:
-  - Meaningful `alt` text for images.
-  - Correct heading hierarchy (`h1` -> `h2` -> `h3`).
-  - Native elements (`<button>`, `<nav>`) over interactive `<div>`s.
+- **Server-First**: Use **React Server Components (RSC)** by default. Sprinkle `'use client'` only for interactive components.
+- **React Compiler**: The project uses the React Compiler. Trust it for optimizations, but maintain clean dependency arrays in `useMemo`/`useEffect` for clarity.
+- **Action Pattern**: Use Server Actions for data mutations directly from forms.
+- **No Middleware**: For Next.js 16 compatibility and custom domain routing, **use `src/proxy.ts` instead of `middleware.ts`**. This ensures stable edge execution on Cloudflare.
+- **Accessibility**: Use semantic HTML (`<main>`, `<section>`, `<nav>`) and ensure all interactive elements have correct ARIA roles.
 
-### Error Handling
+### Environment Management
 
-- Implementation-specific errors should be thrown as `Error` objects with descriptive messages.
-- Use `toast.error` for user-facing error notifications.
-- Implement error boundaries for critical UI sections.
+- **Centralized Env**: Always import environment variables from `@my-better-t-app/env`.
+- **No `process.env`**: Never use `process.env.KEY` directly in app logic; it bypasses type safety and validation.
 
-### Performance
+### Error Handling & Logging
 
-- Favor server-side data fetching (tRPC/RSC) to reduce client-side bundle size.
-- Use Next.js `<Image />` for optimized asset delivery.
-- Avoid large barrel files (`index.ts`) that re-export everything, as they can impact tree-shaking.
+- **Type-Safe Errors**: Define custom error classes or use a standard result object pattern for expected failures.
+- **User Feedback**: Use `goey-toast` for user-facing notifications.
+- **Audit Trails**: Log critical operations (CRUD) to the `audit_log` table for traceability.
 
 ---
 
 ## Workspace Architecture
 
-- `apps/web`: Next.js 16 application (Dashboard & Marketing).
-- `packages/api`: tRPC router and business logic.
-- `packages/db`: Drizzle ORM schema and database client.
-- `packages/ui`: Shared design system and shadcn/ui primitives.
+- `apps/web`: Primary Next.js 16 application (Dashboard, marketing, collection pages).
+- `packages/api`: tRPC routers, inputs, and business logic.
+- `packages/db`: Drizzle schemas, migrations, and shared client.
+- `packages/ui`: Shadcn/ui based design system and components.
+- `packages/auth`: Better-Auth configuration and server utilities.
+- `packages/env`: Zod-validated environment variable schema.
 
-## Testing & Verification
+---
 
-- Verify that your changes compile and pass type checks before pushing.
-- Run `bun run build` in the relevant app directory OR the root to ensure deployment readiness.
-- Ensure Prettier formatting is applied to maintain a consistent style across the monorepo.
+## Feature Implementation Workflow
+
+1. **Schema**: If the feature needs data, update `packages/db/src/schema/app.ts` and run `bun run db:push`.
+2. **API**: Define relevant tRPC procedures in `packages/api/src/router`.
+3. **UI Components**: Create reusable UI components in `packages/ui` if they don't exist.
+4. **App Logic**: Implement the page/logic in `apps/web` using the API and UI components.
+5. **Types**: Ensure `bun run check-types` passes before committing.

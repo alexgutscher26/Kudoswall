@@ -6,8 +6,9 @@ import {
   widget,
   analyticsEvent,
   user,
+  workspaceMember,
 } from "@my-better-t-app/db/schema";
-import { eq, and, desc, count, sql, gte, inArray, isNull } from "drizzle-orm";
+import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 import { EmailService } from "@my-better-t-app/email";
@@ -48,7 +49,14 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
 
   await db.insert(workspace).values(newWorkspace);
 
-  const emailService = new EmailService(env.RESEND_API_KEY || "");
+  await db.insert(workspaceMember).values({
+    id: crypto.randomUUID(),
+    workspaceId: newWorkspace.id,
+    userId: userId,
+    role: "owner",
+  });
+
+  const emailService = new EmailService(env.RESEND_API_KEY || "", env.EMAIL_FROM);
   const u = await db.query.user.findFirst({ where: eq(user.id, userId) });
   if (u?.email) {
     try {
@@ -70,15 +78,29 @@ export const dashboardRouter = router({
 
       let ws;
       if (workspaceId) {
-        ws = await db.query.workspace.findFirst({
-          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        // Check membership
+        const membership = await db.query.workspaceMember.findFirst({
+          where: and(
+            eq(workspaceMember.workspaceId, workspaceId),
+            eq(workspaceMember.userId, session.user.id),
+            isNull(workspaceMember.deletedAt),
+          ),
+          with: { workspace: true },
         });
+        if (membership) ws = membership.workspace;
       }
 
       if (!ws) {
-        ws = await db.query.workspace.findFirst({
-          where: eq(workspace.ownerId, session.user.id),
+        // Fallback to first available workspace the user is a member of
+        const membership = await db.query.workspaceMember.findFirst({
+          where: and(
+            eq(workspaceMember.userId, session.user.id),
+            isNull(workspaceMember.deletedAt),
+          ),
+          with: { workspace: true },
+          orderBy: desc(workspaceMember.createdAt),
         });
+        if (membership) ws = membership.workspace;
       }
 
       if (!ws) {
@@ -201,10 +223,12 @@ export const dashboardRouter = router({
 
   listWorkspaces: protectedProcedure.query(async ({ ctx }) => {
     const { db, session } = ctx;
-    return db.query.workspace.findMany({
-      where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
-      orderBy: desc(workspace.createdAt),
+    const memberships = await db.query.workspaceMember.findMany({
+      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
+      with: { workspace: true },
+      orderBy: desc(workspaceMember.createdAt),
     });
+    return memberships.map((m) => m.workspace).filter((ws) => !ws.deletedAt);
   }),
 
   createWorkspace: protectedProcedure
@@ -236,6 +260,13 @@ export const dashboardRouter = router({
 
       await db.insert(workspace).values(newWs);
 
+      await db.insert(workspaceMember).values({
+        id: crypto.randomUUID(),
+        workspaceId: newWs.id,
+        userId: session.user.id,
+        role: "owner",
+      });
+
       await recordAuditLog({
         userId: session.user.id,
         entityType: "workspace",
@@ -259,7 +290,17 @@ export const dashboardRouter = router({
         },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p!.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership) {
         throw new Error("Forbidden");
       }
 
@@ -296,13 +337,20 @@ export const dashboardRouter = router({
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
       }
 
       await db
@@ -338,8 +386,18 @@ export const dashboardRouter = router({
         },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
       }
 
       await db.update(project).set({ deletedAt: new Date() }).where(eq(project.id, id));
@@ -367,8 +425,18 @@ export const dashboardRouter = router({
         },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
       }
 
       const generateSlug = (name: string) =>
@@ -407,13 +475,26 @@ export const dashboardRouter = router({
 
       let ws;
       if (workspaceId) {
-        ws = await db.query.workspace.findFirst({
-          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
-        });
+        ws = await db.query.workspaceMember
+          .findFirst({
+            where: and(
+              eq(workspaceMember.workspaceId, workspaceId),
+              eq(workspaceMember.userId, session.user.id),
+              isNull(workspaceMember.deletedAt),
+            ),
+            with: { workspace: true },
+          })
+          .then((m) => m?.workspace);
       } else {
-        ws = await db.query.workspace.findFirst({
-          where: eq(workspace.ownerId, session.user.id),
-        });
+        ws = await db.query.workspaceMember
+          .findFirst({
+            where: and(
+              eq(workspaceMember.userId, session.user.id),
+              isNull(workspaceMember.deletedAt),
+            ),
+            with: { workspace: true },
+          })
+          .then((m) => m?.workspace);
       }
 
       if (!ws) throw new Error("Workspace not found");
@@ -445,11 +526,17 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { id, name, slug, retentionEnabled, retentionDays } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: and(eq(workspace.id, id), eq(workspace.ownerId, session.user.id)),
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, id),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
       });
 
-      if (!ws) throw new Error("Workspace not found");
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
+      }
 
       await db
         .update(workspace)
@@ -478,18 +565,24 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { id } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: and(eq(workspace.id, id), eq(workspace.ownerId, session.user.id)),
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, id),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
       });
 
-      if (!ws) throw new Error("Workspace not found");
+      if (!membership || membership.role !== "owner") {
+        throw new Error("Forbidden: Only owners can delete workspaces.");
+      }
 
       // Don't allow deleting the last active workspace
-      const allWs = await db.query.workspace.findMany({
-        where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
+      const allMemberships = await db.query.workspaceMember.findMany({
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
-      if (allWs.length <= 1) {
+      if (allMemberships.length <= 1) {
         throw new Error("Cannot delete your only workspace.");
       }
 
@@ -511,11 +604,17 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { workspaceId } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
       });
 
-      if (!ws) throw new Error("Workspace not found");
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
+      }
 
       await db
         .update(workspace)
@@ -539,7 +638,7 @@ export const dashboardRouter = router({
   findRespondentData: protectedProcedure
     .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { workspaceId, email } = input;
 
       const [countResult] = await db
@@ -554,7 +653,7 @@ export const dashboardRouter = router({
   exportRespondentData: protectedProcedure
     .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { workspaceId, email } = input;
 
       const results = await db
@@ -588,11 +687,17 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { workspaceId, email } = input;
 
-      const ws = await db.query.workspace.findFirst({
-        where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
       });
 
-      if (!ws) throw new Error("Workspace not found");
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
+      }
 
       // Find all testimonials in this workspace for this email
       const testimonialsToDelete = await db
@@ -636,8 +741,18 @@ export const dashboardRouter = router({
         with: { workspace: true },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
       }
 
       // Basic domain validation
@@ -677,11 +792,21 @@ export const dashboardRouter = router({
         with: { workspace: true },
       });
 
-      if (!p || p.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!p) throw new Error("Project not found");
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, p!.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        throw new Error("Forbidden: Insufficient permissions");
       }
 
-      if (!p.customDomain) {
+      if (!p!.customDomain) {
         throw new Error("No domain configured");
       }
 

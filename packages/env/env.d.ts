@@ -8,6 +8,7 @@ export type CloudflareEnv = typeof server.Env;
 declare global {
   type Env = CloudflareEnv & {
     RESEND_API_KEY?: string;
+    EMAIL_FROM?: string;
     CRON_SECRET?: string;
   };
 }

@@ -25,6 +25,7 @@ export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
   "video_progress",
 ]);
 export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
+export const workspaceRoleEnum = pgEnum("workspace_role", ["owner", "admin", "member"]);
 
 export const workspace = pgTable(
   "workspace",
@@ -53,6 +54,54 @@ export const workspace = pgTable(
     index("workspace_slug_idx").on(table.slug),
     index("workspace_owner_id_idx").on(table.ownerId),
     index("workspace_dpa_accepted_idx").on(table.dpaAcceptedAt),
+  ],
+);
+
+export const workspaceMember = pgTable(
+  "workspace_member",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: workspaceRoleEnum("role").default("member").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => [
+    index("workspace_member_workspace_id_idx").on(table.workspaceId),
+    index("workspace_member_user_id_idx").on(table.userId),
+    index("workspace_member_role_idx").on(table.role),
+  ],
+);
+
+export const workspaceInvitation = pgTable(
+  "workspace_invitation",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: workspaceRoleEnum("role").default("member").notNull(),
+    token: text("token").notNull().unique(),
+    invitedById: text("invited_by_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => [
+    index("workspace_invitation_workspace_id_idx").on(table.workspaceId),
+    index("workspace_invitation_email_idx").on(table.email),
+    index("workspace_invitation_token_idx").on(table.token),
   ],
 );
 
@@ -223,6 +272,30 @@ export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   projects: many(project),
   tags: many(tag),
   widgets: many(widget),
+  members: many(workspaceMember),
+  invitations: many(workspaceInvitation),
+}));
+
+export const workspaceMemberRelations = relations(workspaceMember, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [workspaceMember.workspaceId],
+    references: [workspace.id],
+  }),
+  user: one(user, {
+    fields: [workspaceMember.userId],
+    references: [user.id],
+  }),
+}));
+
+export const workspaceInvitationRelations = relations(workspaceInvitation, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [workspaceInvitation.workspaceId],
+    references: [workspace.id],
+  }),
+  invitedBy: one(user, {
+    fields: [workspaceInvitation.invitedById],
+    references: [user.id],
+  }),
 }));
 
 export const projectRelations = relations(project, ({ one, many }) => ({

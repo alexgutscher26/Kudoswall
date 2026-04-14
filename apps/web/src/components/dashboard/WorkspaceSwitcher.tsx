@@ -2,6 +2,7 @@
 
 import {
   useState,
+  useEffect,
   type JSXElementConstructor,
   type Key,
   type ReactElement,
@@ -33,6 +34,17 @@ export function WorkspaceSwitcher({
 }: WorkspaceSwitcherProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [isModalOpen]);
 
   const { data: workspaces, isLoading } = useQuery(trpc.dashboard.listWorkspaces.queryOptions());
   const createWorkspace = useMutation({

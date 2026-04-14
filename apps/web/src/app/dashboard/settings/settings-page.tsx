@@ -25,6 +25,7 @@ import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
+import TeamTab from "./team-tab";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -437,55 +438,9 @@ export default function SettingsPage() {
             </section>
           </div>
         )}
-
         {/* Team Tab */}
-        {activeTab === "team" && (
-          <div className="space-y-6 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold tracking-tight text-neutral-900">Team Members</h3>
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-50"
-              >
-                <Users className="size-3.5 text-neutral-400" />
-                Invite Member
-              </button>
-            </div>
+        {activeTab === "team" && <TeamTab />}
 
-            <div className="divide-y divide-neutral-50">
-              {[
-                { name: "John Doe", email: "john@acme.com", role: "Owner" },
-                { name: "Jane Smith", email: "jane@acme.com", role: "Editor" },
-                { name: "Mike Ross", email: "mike@acme.com", role: "Viewer" },
-              ].map((member) => (
-                <div key={member.email} className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-full bg-neutral-100 font-bold text-neutral-400">
-                      {member.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="text-[14px] leading-none font-bold text-neutral-800">
-                        {member.name}
-                      </h4>
-                      <p className="mt-1 text-[12px] text-neutral-400">{member.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="rounded-full border border-neutral-100 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-400 uppercase">
-                      {member.role}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-neutral-300 transition-colors hover:text-neutral-500"
-                    >
-                      <ArrowUpRight className="size-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         {activeTab === "compliance" && (
           <div className="space-y-8 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
             <section className="space-y-6">
