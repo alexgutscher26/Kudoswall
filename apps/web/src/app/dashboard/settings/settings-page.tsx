@@ -152,13 +152,14 @@ export default function SettingsPage() {
   };
 
   const handleDelete = () => {
-    if (
-      confirm(
-        "Are you sure you want to delete this workspace? This action cannot be undone and will delete all associated projects and testimonials.",
-      )
-    ) {
-      deleteWorkspace.mutate({ id: activeWorkspaceId });
-    }
+    toast("Delete this workspace?", {
+      description:
+        "This action cannot be undone and will delete all associated projects and testimonials.",
+      action: {
+        label: "Delete Workspace",
+        onClick: () => deleteWorkspace.mutate({ id: activeWorkspaceId }),
+      },
+    });
   };
 
   if (isLoading) {

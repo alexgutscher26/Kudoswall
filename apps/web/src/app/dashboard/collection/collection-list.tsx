@@ -113,13 +113,13 @@ export default function CollectionList({ projects }: CollectionListProps) {
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      if (
-                        confirm(
-                          "Are you sure you want to delete this collection? This will also delete all testimonials within it.",
-                        )
-                      ) {
-                        deleteProject.mutate({ id: p.id });
-                      }
+                      toast(`Delete "${p.name}"?`, {
+                        description: "This will also delete all testimonials within it.",
+                        action: {
+                          label: "Delete",
+                          onClick: () => deleteProject.mutate({ id: p.id }),
+                        },
+                      });
                     }}
                     className="p-2 text-neutral-300 transition-all hover:bg-red-50 hover:text-red-500"
                     title="Delete Collection"

@@ -164,12 +164,17 @@ export default function TeamTab() {
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm(`Remove ${member.name} from workspace?`)) {
-                          removeMutation.mutate({
-                            workspaceId: activeWorkspaceId,
-                            memberId: member.id,
-                          });
-                        }
+                        toast(`Remove ${member.name}?`, {
+                          description: "They will lose access to this workspace.",
+                          action: {
+                            label: "Remove Member",
+                            onClick: () =>
+                              removeMutation.mutate({
+                                workspaceId: activeWorkspaceId,
+                                memberId: member.id,
+                              }),
+                          },
+                        });
                       }}
                       className="rounded-lg p-2 text-neutral-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
                     >
