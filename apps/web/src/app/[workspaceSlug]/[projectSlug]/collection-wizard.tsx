@@ -231,6 +231,7 @@ export default function CollectionWizard({
   const [photo, setPhoto] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
@@ -443,11 +444,22 @@ export default function CollectionWizard({
     try {
       let videoUrl: string | undefined;
       if (videoBlob) {
-        const reader = new FileReader();
-        videoUrl = await new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(videoBlob);
+        // Upload directly to our new upload API streaming endpoint
+        const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
+        const res = await fetch(`/api/upload/video?ext=${extension}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": videoBlob.type,
+          },
+          body: videoBlob,
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to upload video");
+        }
+
+        const data = (await res.json()) as { url: string };
+        videoUrl = data.url;
       }
 
       await submitTestimonial(project.id, {
@@ -843,8 +855,12 @@ export default function CollectionWizard({
                     isPro={project.workspace.isPro}
                     onConfirm={(blob: Blob) => {
                       setVideoBlob(blob);
+                      const url = URL.createObjectURL(blob);
+                      setVideoPreviewUrl(url);
                       nextStep();
                     }}
+                    initialBlob={videoBlob}
+                    initialPreviewUrl={videoPreviewUrl}
                     maxLength={settings?.video?.maxLength ?? 120}
                     prompt={settings?.video?.prompt}
                     accentColor={project.workspace.branding.accentColor}
@@ -854,6 +870,7 @@ export default function CollectionWizard({
                   <button
                     onClick={() => {
                       setVideoBlob(null);
+                      setVideoPreviewUrl(null);
                       setMode("text");
                       setDirection(1);
                       setStep("text");
@@ -1194,12 +1211,24 @@ export default function CollectionWizard({
                           className="absolute -top-2 -left-3 z-0 size-10 rotate-180 opacity-25"
                           style={{ color: "var(--cw-text-muted)" }}
                         />
-                        <p
-                          className="relative z-10 text-sm leading-relaxed wrap-break-word whitespace-pre-wrap italic"
-                          style={{ color: "var(--cw-text-primary)" }}
-                        >
-                          &quot;{content || "Video Testimonial Attached"}&quot;
-                        </p>
+                        {videoPreviewUrl ? (
+                          <div className="relative z-10 my-4 overflow-hidden rounded-xl bg-black shadow-lg">
+                            <video
+                              key={videoPreviewUrl}
+                              src={videoPreviewUrl}
+                              controls
+                              className="aspect-video w-full object-cover"
+                              playsInline
+                            />
+                          </div>
+                        ) : (
+                          <p
+                            className="relative z-10 text-sm leading-relaxed wrap-break-word whitespace-pre-wrap italic"
+                            style={{ color: "var(--cw-text-primary)" }}
+                          >
+                            &quot;{content}&quot;
+                          </p>
+                        )}
                       </div>
                       <div
                         className="mt-4 flex items-center justify-between border-t pt-4"

@@ -9,6 +9,8 @@ interface VideoRecorderProps {
   accentColor?: string;
   maxLength?: number;
   prompt?: string;
+  initialBlob?: Blob | null;
+  initialPreviewUrl?: string | null;
 }
 
 export default function VideoRecorder({
@@ -17,13 +19,15 @@ export default function VideoRecorder({
   accentColor = "#e8527a",
   maxLength = 60,
   prompt,
+  initialBlob,
+  initialPreviewUrl,
 }: VideoRecorderProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(maxLength);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(initialBlob ?? null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl ?? null);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -42,6 +46,9 @@ export default function VideoRecorder({
   // 1. Initialize Stream
   const initStream = async () => {
     try {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
       const constraints: MediaStreamConstraints = {
         video: isMobile
           ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
@@ -54,6 +61,7 @@ export default function VideoRecorder({
         videoRef.current.srcObject = s;
       }
     } catch (err) {
+      console.error("Camera error:", err);
       setError("Camera & Microphone access is required to record video.");
     }
   };
@@ -63,9 +71,19 @@ export default function VideoRecorder({
       initStream();
     }
     return () => {
-      stream?.getTracks().forEach((track) => track.stop());
+      // Don't stop tracks here if we are just transitioning to preview
+      // But we should stop them if the component unmounts entirely
     };
-  }, [isPro, recordedBlob]);
+  }, [recordedBlob]);
+
+  // Handle component unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
 
   // 2. Handle Countdown
   const startRecordingFlow = () => {
@@ -87,7 +105,20 @@ export default function VideoRecorder({
     if (!stream) return;
 
     chunksRef.current = [];
-    const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+    // Choose the best supported MIME type
+    const mimeType =
+      [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+        "video/mp4;codecs=h264,aac",
+        "video/mp4",
+      ].find((type) => MediaRecorder.isTypeSupported(type)) || "";
+
+    console.log("Using MIME type:", mimeType);
+
+    const recorder = new MediaRecorder(stream, { mimeType });
     mediaRecorderRef.current = recorder;
 
     recorder.ondataavailable = (e) => {
@@ -95,13 +126,21 @@ export default function VideoRecorder({
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const recordedType = recorder.mimeType || mimeType || "video/webm";
+      const blob = new Blob(chunksRef.current, { type: recordedType });
       const url = URL.createObjectURL(blob);
       setRecordedBlob(blob);
       setPreviewUrl(url);
+
+      // Stop the stream tracks after recording is done to release the camera
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        setStream(null);
+      }
     };
 
-    recorder.start();
+    // To ensure ondataavailable fires for larger recordings, we can request chunks every 1s
+    recorder.start(1000);
     setRecording(true);
     setTimeLeft(maxLength);
 
@@ -125,6 +164,7 @@ export default function VideoRecorder({
   };
 
   const reset = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setRecordedBlob(null);
     setPreviewUrl(null);
     setTimeLeft(maxLength);
@@ -138,7 +178,14 @@ export default function VideoRecorder({
         <div
           className={`relative w-full overflow-hidden rounded-[24px] border border-neutral-100 bg-black shadow-2xl sm:rounded-[32px] ${isMobile ? "aspect-3/4" : "aspect-video"}`}
         >
-          <video src={previewUrl} controls className="size-full object-cover" playsInline />
+          <video
+            key={previewUrl}
+            src={previewUrl}
+            controls
+            autoPlay
+            className="size-full object-cover"
+            playsInline
+          />
         </div>
         <div className="flex gap-3">
           <button

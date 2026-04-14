@@ -1,38 +1,36 @@
-# Orchestration Plan: Core Web Vitals Optimization
+# Video Collection Implementation Plan
 
-## Task
+## Problem Statement
 
-Optimize Core Web Vitals across the application focusing on:
+The current implementation of video collection in the widget (`collection-wizard.tsx`) encodes the captured video as a base64 Data URL and submits it directly to the Next.js server action `submitTestimonial`. This is broken because:
 
-- **LCP (Largest Contentful Paint)** < 2.5s
-- **CLS (Cumulative Layout Shift)** < 0.1
-- **INP (Interaction to Next Paint)** < 200ms
+1. Videos are too large to be encoded as base64 strings and sent in JSON payloads.
+2. PostgreSQL `text` columns shouldn't be used to store massive base64 video payloads.
+3. This approach crashes the application or hits server payload limits immediately.
 
-## Phase 1: Planning Results
+## Proposed Architecture
 
-### 1. Analysis of the current situation
+We will introduce Cloudflare R2 as our Object Storage provider using our existing Alchemy infrastructure.
 
-- The app uses Next.js app router.
-- Marketing pages use standard Next.js layouts, but we need to ensure all hero/header images use `<Image priority />` for LCP optimization.
-- The Collection Wizard and Dashboard have interactive elements which may impact INP.
-- Fonts are already optimized using `next/font/google` (`Geist`, `Geist_Mono`, `Inter`, `Manrope`).
-- We need to verify `width`/`height` on all images to prevent CLS.
+### Phase 2: Implementation (Required Agents)
 
-### 2. Action Plan
+**1. `database-architect` & `devops-engineer` (Data & Ops)**
 
-- **Frontend Specialist tasks**:
-  1. Audit `next/image` usage in marketing components (e.g. Hero, features) and add `priority` to LCP candidates.
-  2. Ensure all `<Image>` tags have explicit dimensions or use `fill` with aspect-ratio parent containers.
-  3. Replace any unoptimized third-party scripts with `next/script` (`strategy="lazyOnload"`).
+- Add `alchemy.bucket("videos")` to `packages/infra/alchemy.run.ts`.
+- Expose the bucket in the Next.js bindings.
 
-- **Performance Optimizer tasks**:
-  1. Implement React `<Suspense>` boundaries for heavy client components and widgets to prevent blocking the main thread (improving INP).
-  2. Ensure `next/font` is applied without layout shifts using proper CSS fallback properties if dynamic fonts exist.
+**2. `backend-specialist` (Server & API)**
 
-- **DevOps/Test Engineer tasks**:
-  1. Validate build success after the changes.
-  2. Ensure `@vercel/speed-insights/next` is optimally placed within the global layout to track Web Vitals post-deployment.
+- Create a dedicated API route/tRPC endpoint (e.g., `/api/upload/presign`) to generate S3/R2 presigned upload URLs (or handle the upload using `@aws-sdk/client-s3` or Cloudflare Worker bindings).
+- Update `packages/db/src/schema/app.ts` if any tracking fields are needed for video metadata (optional, since `videoUrl` already exists).
 
-## Next Steps
+**3. `frontend-specialist` (UI/UX)**
 
-Upon approval, I will orchestrate the specialized sub-agents (`frontend-specialist`, `performance-optimizer`, `test-engineer`) to implement and verify these optimizations in parallel.
+- Update `collection-wizard.tsx` and `video-recorder.tsx` to handle the upload flow.
+- The flow: Instead of encoding to base64, the client requests a presigned URL, PUTs the video blob to that URL, and then passes the resulting public URL to the `submitTestimonial` action.
+- Enhance loading states to show upload progress.
+
+**4. `test-engineer` (Verification)**
+
+- Run `security_scan.py` to ensure upload URLs are secured and rate-limited.
+- Verify linting and TypeScript checks pass.

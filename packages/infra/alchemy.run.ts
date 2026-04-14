@@ -1,11 +1,13 @@
 import alchemy from "alchemy";
-import { Nextjs } from "alchemy/cloudflare";
+import { Nextjs, R2Bucket } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
 config({ path: "./.env" });
 config({ path: "../../apps/web/.env" });
 
 const app = await alchemy("my-better-t-app");
+
+const videosBucket = await R2Bucket("videos", { devDomain: true });
 
 export const web = await Nextjs("web", {
   cwd: "../../apps/web",
@@ -19,6 +21,7 @@ export const web = await Nextjs("web", {
     GOOGLE_CLIENT_ID: alchemy.secret.env.GOOGLE_CLIENT_ID || "",
     GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET || "",
     RESEND_API_KEY: alchemy.secret.env.RESEND_API_KEY || "",
+    VIDEOS_BUCKET: videosBucket,
   },
   dev: {
     env: {
