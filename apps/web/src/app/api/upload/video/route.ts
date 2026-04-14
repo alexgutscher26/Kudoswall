@@ -11,17 +11,24 @@ export async function POST(req: NextRequest) {
     // During local Node.js development without wrangler/miniflare,
     // the R2 binding may be missing. We check for it.
     if (!env.VIDEOS_BUCKET) {
-      console.warn(
-        "VIDEOS_BUCKET binding is missing. Ensure you are running with proper bindings.",
+      return NextResponse.json(
+        {
+          error: "Storage not configured.",
+          message:
+            "The VIDEOS_BUCKET binding is missing in the production environment. Please ensure the R2 bucket is correctly bound to your Cloudflare Worker.",
+        },
+        { status: 500 },
       );
-      return NextResponse.json({ error: "Storage not configured." }, { status: 500 });
     }
 
     const { searchParams } = new URL(req.url);
     const ext = searchParams.get("ext") || "webm";
     const id = `vid_${nanoid()}`;
     const key = `${id}.${ext}`;
-    const contentType = req.headers.get("content-type") || "video/webm";
+
+    // Simplify content type (e.g., "video/webm;codecs=vp8" -> "video/webm")
+    const rawContentType = req.headers.get("content-type") || "video/webm";
+    const contentType = rawContentType.split(";")[0].trim();
 
     const buffer = await req.arrayBuffer();
 
