@@ -20,10 +20,8 @@ import {
   Zap,
   ArrowRight,
   Save,
-  Globe,
   Loader2,
   MoreHorizontal,
-  Tag,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";

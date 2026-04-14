@@ -28,7 +28,7 @@ export default function CollectionCustomizerLoading() {
         {/* Preview Panel */}
         <div className="lg:col-span-7">
           <div className="sticky top-20 flex min-h-[700px] flex-col items-center rounded-2xl border border-neutral-100 bg-neutral-100 p-8">
-            <div className="relative aspect-[9/16] w-full max-w-[400px] overflow-hidden rounded-[3rem] border-[8px] border-neutral-900 bg-white shadow-2xl">
+            <div className="relative aspect-9/16 w-full max-w-[400px] overflow-hidden rounded-[3rem] border-8 border-neutral-900 bg-white shadow-2xl">
               <div className="space-y-6 p-8">
                 <Skeleton className="mx-auto h-8 w-32" />
                 <Skeleton className="h-40 w-full rounded-2xl" />

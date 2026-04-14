@@ -1,20 +1,10 @@
-import React from "react";
-import {
-  Code2,
-  Terminal,
-  Layers,
-  Box,
-  ChevronRight,
-  Check,
-  Copy,
-  Info,
-  ExternalLink,
-  BookOpen,
-} from "lucide-react";
+import Navbar from "@/components/navbar";
+import { Code2, Terminal, Layers, Box, ChevronRight, Info, BookOpen } from "lucide-react";
 
-export default function DocsPage() {
+export default async function DocsPage() {
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       {/* ─── Hero Section ─────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-neutral-100 bg-neutral-50/50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

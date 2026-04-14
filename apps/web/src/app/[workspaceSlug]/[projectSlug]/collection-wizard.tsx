@@ -478,7 +478,7 @@ export default function CollectionWizard({
 
   if (isCropping && photo) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <ImageCropper
           image={photo}
           onCancel={() => setIsCropping(false)}
@@ -525,7 +525,7 @@ export default function CollectionWizard({
           <div className="mb-3 flex items-end justify-between">
             <div>
               <span
-                className="text-[11px] tracking-[0.1em] uppercase"
+                className="text-[11px] tracking-widest uppercase"
                 style={{ color: "var(--cw-text-secondary)" }}
               >
                 {stepsData.text}
@@ -1195,7 +1195,7 @@ export default function CollectionWizard({
                           style={{ color: "var(--cw-text-muted)" }}
                         />
                         <p
-                          className="relative z-10 text-sm leading-relaxed break-words whitespace-pre-wrap italic"
+                          className="relative z-10 text-sm leading-relaxed wrap-break-word whitespace-pre-wrap italic"
                           style={{ color: "var(--cw-text-primary)" }}
                         >
                           &quot;{content || "Video Testimonial Attached"}&quot;

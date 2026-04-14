@@ -52,7 +52,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 !pt-4 shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
+    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 pt-4! shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
       {/* Decorative Glow */}
       <div className="pointer-events-none absolute top-0 right-0 h-24 w-24 bg-pink-500/5 blur-3xl" />
 
@@ -125,11 +125,11 @@ export default function LoginPage() {
 
               {/* Divider */}
               <div className="relative flex items-center gap-3">
-                <div className="h-[1px] flex-1 bg-neutral-100" />
+                <div className="h-px flex-1 bg-neutral-100" />
                 <span className="text-[9px] font-black tracking-widest whitespace-nowrap text-neutral-300 uppercase">
                   Or email
                 </span>
-                <div className="h-[1px] flex-1 bg-neutral-100" />
+                <div className="h-px flex-1 bg-neutral-100" />
               </div>
 
               {/* Inputs */}

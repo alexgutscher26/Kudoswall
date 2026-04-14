@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { createDb, type Database } from "@my-better-t-app/db";
-import { workspace, project, user } from "@my-better-t-app/db/schema";
+import { createDb } from "@my-better-t-app/db";
+import { workspace } from "@my-better-t-app/db/schema";
 import { env } from "@my-better-t-app/env/server";
-import { and, eq, lt, gt, isNull, sql } from "drizzle-orm";
+import { and, lt, gt, isNull } from "drizzle-orm";
 import { EmailService } from "@my-better-t-app/email";
 
 export const dynamic = "force-dynamic";

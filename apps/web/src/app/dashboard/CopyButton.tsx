@@ -5,10 +5,7 @@ import { gooeyToast as toast } from "goey-toast";
 
 export function CopyButton({ slug, workspaceSlug }: { slug: string; workspaceSlug: string }) {
   const handleCopy = () => {
-    const url =
-      window.location.origin === "http://localhost:3001"
-        ? `http://localhost:3001/${workspaceSlug}/${slug}`
-        : `https://kudoswall.org/${workspaceSlug}/${slug}`;
+    const url = `https://kudoswall.org/${workspaceSlug}/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copied!");
   };

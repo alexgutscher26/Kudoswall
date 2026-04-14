@@ -12,7 +12,7 @@ import {
   Trash2,
   ShieldAlert,
 } from "lucide-react";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
@@ -231,7 +231,7 @@ export default function TeamTab() {
 
       {/* Invite Modal Overlay */}
       {isInviteModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="animate-in fade-in zoom-in w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl duration-200">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-black text-neutral-900">Invite Team Member</h3>

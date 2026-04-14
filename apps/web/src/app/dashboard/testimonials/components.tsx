@@ -13,7 +13,6 @@ import {
   MessageSquareQuote,
   Copy,
   Clock,
-  MoreVertical,
   Trash2,
   ExternalLink,
   ChevronDown,

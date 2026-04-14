@@ -2,7 +2,7 @@ import { db } from "@/lib/server-db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
-import { widget, workspace } from "@my-better-t-app/db/schema";
+import { widget } from "@my-better-t-app/db/schema";
 import { eq } from "drizzle-orm";
 import DashboardShell from "../../dashboard";
 import WidgetCustomizer from "./customizer";

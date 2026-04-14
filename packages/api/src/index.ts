@@ -38,7 +38,7 @@ export const tracingMiddleware = t.middleware(async ({ path, type, next }) => {
 export const ratelimitMiddleware = t.middleware(async ({ ctx, next }) => {
   const ip = ctx.req.headers.get("x-forwarded-for") || "127.0.0.1";
 
-  if (!checkRateLimit(ip)) {
+  if (!(await checkRateLimit(ip))) {
     throw new TRPCError({
       code: "TOO_MANY_REQUESTS",
       message: "Rate limit exceeded. Please try again later.",

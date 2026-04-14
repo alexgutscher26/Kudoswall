@@ -1,8 +1,8 @@
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 import { db } from "./server-db";
-import { testimonial, project, workspace, user } from "@my-better-t-app/db/schema";
-import { eq, count, and } from "drizzle-orm";
+import { testimonial, project } from "@my-better-t-app/db/schema";
+import { eq, count } from "drizzle-orm";
 
 export async function checkAndSendFirstTestimonialEmail(
   projectId: string,

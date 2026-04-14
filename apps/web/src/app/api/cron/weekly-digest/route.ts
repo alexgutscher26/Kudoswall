@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createDb } from "@my-better-t-app/db";
-import { workspace, testimonial, project, analyticsEvent } from "@my-better-t-app/db/schema";
+import { workspace, testimonial, analyticsEvent } from "@my-better-t-app/db/schema";
 import { env } from "@my-better-t-app/env/server";
 import { and, eq, gte, count, isNull, inArray } from "drizzle-orm";
 import { EmailService } from "@my-better-t-app/email";

@@ -1,14 +1,9 @@
 const PRODUCT_LINKS = [
   { label: "Features", href: "#features" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "#" },
-  { label: "Blog", href: "#" },
 ] as const;
 
-const COMPANY_LINKS = [
-  { label: "Twitter / X", href: "https://twitter.com" },
-  { label: "Indie Hackers", href: "https://indiehackers.com" },
-] as const;
+const COMPANY_LINKS = [{ label: "Twitter / X", href: "https://twitter.com" }] as const;
 
 export default function Footer() {
   return (
@@ -103,6 +98,14 @@ export default function Footer() {
                   Terms of service
                 </a>
               </li>
+              <li>
+                <a
+                  href="/dpa"
+                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
+                >
+                  DPA (Data Processing)
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -110,7 +113,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-6 border-t border-neutral-100 pt-8 sm:flex-row">
           <div className="flex flex-col gap-1 text-center sm:text-left">
-            <p className="text-xs font-bold text-neutral-900">Built by Alex Gutscher</p>
+            <p className="text-xs font-bold text-neutral-900">Built by Alex G.</p>
             <p className="max-w-xs text-xs text-neutral-400">
               A solo founder who got tired of ugly testimonial widgets.
             </p>

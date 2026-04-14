@@ -40,7 +40,7 @@ export function CookieConsentBanner({
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed right-6 bottom-6 left-6 z-[100] mx-auto max-w-2xl sm:right-8 sm:left-auto sm:w-[400px]"
+          className="fixed right-6 bottom-6 left-6 z-100 mx-auto max-w-2xl sm:right-8 sm:left-auto sm:w-[400px]"
         >
           <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl md:p-6">
             <div className="flex items-start gap-4">

@@ -96,6 +96,8 @@
         "@opentelemetry/api": "catalog:",
         "@trpc/client": "catalog:",
         "@trpc/server": "catalog:",
+        "@upstash/ratelimit": "^2.0.8",
+        "@upstash/redis": "^1.37.0",
         "date-fns": "^4.1.0",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",

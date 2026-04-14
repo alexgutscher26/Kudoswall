@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -23,10 +22,9 @@ import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
 import { gooeyToast as toast } from "goey-toast";
 import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
 import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
-import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { createProject } from "./actions";
 
 type DashboardData = RouterOutputs["dashboard"]["getData"];

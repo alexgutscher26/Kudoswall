@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { RotateCcw, Lock, Sparkles } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 interface VideoRecorderProps {
   isPro: boolean;

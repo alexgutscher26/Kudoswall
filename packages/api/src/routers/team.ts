@@ -1,6 +1,6 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { workspace, workspaceMember, workspaceInvitation, user } from "@my-better-t-app/db/schema";
-import { eq, and, desc, isNull, gt } from "drizzle-orm";
+import { eq, and, isNull, gt } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";

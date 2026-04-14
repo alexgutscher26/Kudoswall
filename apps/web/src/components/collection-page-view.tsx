@@ -24,11 +24,11 @@ export default function CollectionPageView({ project }: CollectionPageViewProps)
 
   return (
     <div
-      className={`flex min-h-screen flex-col bg-[#f7f9fb] font-[family-name:var(--font-inter)] text-[#191c1e] ${manrope.variable} ${inter.variable}`}
+      className={`flex min-h-screen flex-col bg-[#f7f9fb] font-(family-name:--font-inter) text-[#191c1e] ${manrope.variable} ${inter.variable}`}
     >
       {/* TopAppBar */}
       <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between bg-white/80 px-6 backdrop-blur-xl dark:bg-slate-950/80">
-        <div className="max-w-[80vw] truncate pr-4 font-[family-name:var(--font-manrope)] text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+        <div className="max-w-[80vw] truncate pr-4 font-(family-name:--font-manrope) text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
           {projectName}
         </div>
         <div className="flex shrink-0 items-center gap-4">
