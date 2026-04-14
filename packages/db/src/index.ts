@@ -6,7 +6,10 @@ import { Pool, neonConfig } from "@neondatabase/serverless";
 import * as schema from "./schema";
 
 // Configure Neon to use the ws package only in Node.js environments
-if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
+if (
+  typeof (globalThis as { window?: unknown }).window === "undefined" &&
+  process.env.NEXT_RUNTIME !== "edge"
+) {
   // @ts-ignore - dynamic require for Node environment
   const ws = require("ws");
   neonConfig.webSocketConstructor = ws;

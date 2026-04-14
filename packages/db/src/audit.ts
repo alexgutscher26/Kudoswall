@@ -1,6 +1,6 @@
 import { db } from "./index";
 import { auditLog } from "./schema/app";
-import { isNull, eq, and, SQL } from "drizzle-orm";
+import { isNull, eq } from "drizzle-orm";
 
 export type AuditAction = "create" | "update" | "delete";
 
