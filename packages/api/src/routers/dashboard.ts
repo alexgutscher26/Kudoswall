@@ -24,7 +24,21 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     where: eq(workspace.ownerId, userId),
   });
 
-  if (existing) return existing;
+  if (existing) {
+    // Heal missing membership if needed
+    const m = await db.query.workspaceMember.findFirst({
+      where: and(eq(workspaceMember.workspaceId, existing.id), eq(workspaceMember.userId, userId)),
+    });
+    if (!m) {
+      await db.insert(workspaceMember).values({
+        id: crypto.randomUUID(),
+        workspaceId: existing.id,
+        userId: userId,
+        role: "owner",
+      });
+    }
+    return existing;
+  }
 
   const generateSlug = (name: string) =>
     name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);

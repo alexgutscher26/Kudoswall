@@ -2,7 +2,13 @@
 
 import { db } from "@/lib/server-db";
 import { auth } from "@/lib/auth";
-import { workspace, project, testimonial, widget } from "@my-better-t-app/db/schema";
+import {
+  workspace,
+  project,
+  testimonial,
+  widget,
+  workspaceMember,
+} from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -21,10 +27,25 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     where: eq(workspace.ownerId, userId),
   });
 
-  if (existing) return existing;
+  if (existing) {
+    // Heal missing membership if needed
+    const m = await db.query.workspaceMember.findFirst({
+      where: and(eq(workspaceMember.workspaceId, existing.id), eq(workspaceMember.userId, userId)),
+    });
+    if (!m) {
+      await db.insert(workspaceMember).values({
+        id: crypto.randomUUID(),
+        workspaceId: existing.id,
+        userId: userId,
+        role: "owner",
+      });
+    }
+    return existing;
+  }
 
+  const wsId = crypto.randomUUID();
   const newWorkspace = {
-    id: crypto.randomUUID(),
+    id: wsId,
     name: `${userName}'s Workspace`,
     slug: generateSlug(userName),
     ownerId: userId,
@@ -47,7 +68,26 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     retentionDays: 365,
   };
 
-  await db.insert(workspace).values(newWorkspace);
+  await db.transaction(async (tx) => {
+    await tx.insert(workspace).values(newWorkspace);
+    await tx.insert(workspaceMember).values({
+      id: crypto.randomUUID(),
+      workspaceId: wsId,
+      userId: userId,
+      role: "owner",
+    });
+  });
+
+  const emailService = new EmailService(env.RESEND_API_KEY || "");
+  const u = await db.query.user.findFirst({ where: eq(user.id, userId) });
+  if (u?.email) {
+    try {
+      await emailService.sendWelcomeEmail(u.email, u.name || "there");
+    } catch (err) {
+      console.error("Failed to send welcome email", err);
+    }
+  }
+
   return newWorkspace;
 }
 

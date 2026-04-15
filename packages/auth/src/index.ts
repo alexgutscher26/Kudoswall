@@ -95,10 +95,55 @@ export function createAuth() {
         create: {
           after: async (user) => {
             try {
+              const { workspace, workspaceMember } = await import("@my-better-t-app/db/schema/app");
+              const { eq } = await import("drizzle-orm");
+
+              // Ensure workspace exists
+              const existing = await db.query.workspace.findFirst({
+                where: eq(workspace.ownerId, user.id),
+              });
+
+              if (!existing) {
+                const wsId = crypto.randomUUID();
+                const generateSlug = (name: string) =>
+                  name.toLowerCase().replace(/\s+/g, "-") +
+                  "-" +
+                  Math.random().toString(36).substring(2, 6);
+
+                const newWorkspace = {
+                  id: wsId,
+                  name: `${user.name || "My"}'s Workspace`,
+                  slug: generateSlug(user.name || "user"),
+                  ownerId: user.id,
+                  onboardingStatus: JSON.stringify({
+                    step1: false,
+                    step2: false,
+                    step3: false,
+                    step4: false,
+                    step5: false,
+                  }),
+                  dpaAcceptedAt: null,
+                  dpaAcceptedById: null,
+                  retentionEnabled: false,
+                  retentionDays: 365,
+                };
+
+                await db.transaction(async (tx) => {
+                  await tx.insert(workspace).values(newWorkspace);
+                  await tx.insert(workspaceMember).values({
+                    id: crypto.randomUUID(),
+                    workspaceId: wsId,
+                    userId: user.id,
+                    role: "owner" as const,
+                  });
+                });
+                console.log(`[WORKSPACE] Created for ${user.email}`);
+              }
+
               await emailService.sendWelcomeEmail(user.email, user.name || "there");
               console.log(`[Welcome Email] Sent to ${user.email}`);
             } catch (error) {
-              console.error(`[Welcome Email] Failed to send to ${user.email}:`, error);
+              console.error(`[Signup Hook] Error for ${user.email}:`, error);
             }
           },
         },
