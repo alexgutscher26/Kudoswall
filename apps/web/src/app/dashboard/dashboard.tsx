@@ -463,9 +463,6 @@ function NewCollectionModal({
                     {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
                   </span>
                 </div>
-                <div className="text-[10px] font-medium text-neutral-300">
-                  Local: localhost:3001/{workspaceSlug}/...
-                </div>
               </code>
             </div>
 
