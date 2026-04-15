@@ -66,7 +66,9 @@ interface CollectionSettings {
     prompt?: string;
     maxLength?: number;
   };
+  redirectUrl?: string;
   pageContent?: {
+    subheading?: string;
     thankYou?: {
       headline?: string;
       body?: string;
@@ -470,6 +472,14 @@ export default function CollectionWizard({
       localStorage.removeItem(DRAFT_KEY);
       fireConfetti();
       setStep("success");
+
+      // Handle custom redirect if configured
+      const redirectUrl = settings?.redirectUrl;
+      if (redirectUrl) {
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 2000);
+      }
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -774,7 +784,8 @@ export default function CollectionWizard({
                     className="mb-4 max-w-lg text-sm leading-relaxed"
                     style={{ color: "var(--cw-text-secondary)" }}
                   >
-                    {settings?.video?.prompt ??
+                    {settings?.pageContent?.subheading ||
+                      settings?.video?.prompt ||
                       "What stood out the most? Sharing specific details helps others understand the true value of our service."}
                   </p>
 
@@ -1346,16 +1357,16 @@ export default function CollectionWizard({
 
                   <div className="flex flex-col items-center gap-3">
                     {settings?.pageContent?.thankYou?.cta?.enabled &&
-                      settings.pageContent?.thankYou?.cta?.text && (
+                      settings?.pageContent?.thankYou?.cta?.text && (
                         <a
-                          href={settings.pageContent.thankYou.cta.url}
+                          href={settings?.pageContent?.thankYou?.cta?.url || "#"}
                           className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all hover:opacity-90"
                           style={{
                             backgroundColor: "var(--cw-fg)",
                             color: "var(--cw-fg-inv)",
                           }}
                         >
-                          {settings.pageContent.thankYou.cta.text}
+                          {settings?.pageContent?.thankYou?.cta?.text}
                           <ArrowRight className="size-4" />
                         </a>
                       )}

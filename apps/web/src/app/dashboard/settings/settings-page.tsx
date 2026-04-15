@@ -79,11 +79,26 @@ export default function SettingsPage() {
     },
   });
 
+  const updateProject = useMutation({
+    ...trpc.dashboard.updateProjectSettings.mutationOptions(),
+    onSuccess: () => {
+      toast.success("Collection settings updated!");
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+    },
+    onError: (err) => {
+      toast.error("Failed to update collection: " + err.message);
+    },
+  });
+
   const [workspaceName, setWorkspaceName] = useState("");
   const [slug, setSlug] = useState("");
   const [retentionEnabled, setRetentionEnabled] = useState(false);
   const [retentionDays, setRetentionDays] = useState(365);
   const [searchEmail, setSearchEmail] = useState("");
+
+  const [headline, setHeadline] = useState("");
+  const [subheading, setSubheading] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState("");
 
   const {
     data: searchData,
@@ -139,6 +154,23 @@ export default function SettingsPage() {
       setRetentionEnabled(dashboardData.workspace.retentionEnabled);
       setRetentionDays(dashboardData.workspace.retentionDays || 365);
     }
+
+    if (dashboardData?.projects?.[0]) {
+      const project = dashboardData.projects[0];
+      try {
+        const settings = project.collectionSettingsJson
+          ? JSON.parse(project.collectionSettingsJson)
+          : {};
+        setHeadline(settings.pageContent?.headline || "Help us grow by sharing your story!");
+        setSubheading(
+          settings.pageContent?.subheading ||
+            "How has our product helped you achieve your goals this month?",
+        );
+        setRedirectUrl(settings.redirectUrl || "");
+      } catch (e) {
+        console.error("Failed to parse project settings", e);
+      }
+    }
   }, [dashboardData]);
 
   const handleSave = () => {
@@ -148,6 +180,38 @@ export default function SettingsPage() {
       slug: slug,
       retentionEnabled: retentionEnabled,
       retentionDays: retentionDays,
+    });
+  };
+
+  const handleSaveCollection = () => {
+    if (!dashboardData?.projects?.[0]) {
+      toast.error("No project found to update.");
+      return;
+    }
+
+    const firstProject = dashboardData.projects[0];
+    let existingSettings = {};
+    try {
+      existingSettings = firstProject.collectionSettingsJson
+        ? JSON.parse(firstProject.collectionSettingsJson)
+        : {};
+    } catch (e) {
+      console.error(e);
+    }
+
+    const newSettings = {
+      ...existingSettings,
+      redirectUrl: redirectUrl,
+      pageContent: {
+        ...(existingSettings as any).pageContent,
+        headline,
+        subheading,
+      },
+    };
+
+    updateProject.mutate({
+      projectId: firstProject.id,
+      settings: newSettings,
     });
   };
 
@@ -329,8 +393,10 @@ export default function SettingsPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Help us grow by sharing your story!"
-                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium outline-none"
+                    value={headline}
+                    onChange={(e) => setHeadline(e.target.value)}
+                    placeholder="Help us grow by sharing your story!"
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium outline-none focus:border-pink-500"
                   />
                 </div>
                 <div className="space-y-2">
@@ -339,8 +405,10 @@ export default function SettingsPage() {
                   </label>
                   <textarea
                     rows={3}
-                    defaultValue="How has our product helped you achieve your goals this month?"
-                    className="w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium outline-none"
+                    value={subheading}
+                    onChange={(e) => setSubheading(e.target.value)}
+                    placeholder="How has our product helped you achieve your goals this month?"
+                    className="w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium outline-none focus:border-pink-500"
                   />
                 </div>
               </div>
@@ -357,8 +425,10 @@ export default function SettingsPage() {
                     <Link className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-neutral-300" />
                     <input
                       type="url"
+                      value={redirectUrl}
+                      onChange={(e) => setRedirectUrl(e.target.value)}
                       placeholder="https://yourwebsite.com/welcome"
-                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 py-2.5 pr-4 pl-11 text-[14px] font-medium outline-none"
+                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 py-2.5 pr-4 pl-11 text-[14px] font-medium outline-none focus:border-pink-500"
                     />
                   </div>
                 </div>
@@ -368,11 +438,13 @@ export default function SettingsPage() {
             <div className="flex justify-end pt-6">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                onClick={handleSaveCollection}
+                disabled={updateProject.isPending}
+                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                 style={{ backgroundColor: "#171717" }}
               >
                 <Save className="size-4" />
-                Save Changes
+                {updateProject.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
