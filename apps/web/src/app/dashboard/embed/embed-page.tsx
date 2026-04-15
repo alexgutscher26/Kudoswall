@@ -151,7 +151,7 @@ export default function EmbedPage() {
   const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
 
   const embedCode = `<script src="${typeof window !== "undefined" ? window.location.origin : "https://kudoswall.org"}/widget.js" 
-  data-id="5475dd90-24ad-49b3-99a1-609c939ae199" 
+  data-id="88f80210-7c57-4b9b-bb8f-d5e18804320f" 
   async
 ></script>`;
 
