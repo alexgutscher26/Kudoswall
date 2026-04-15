@@ -15,12 +15,14 @@ export default function WidgetLoader({ widgetId }: WidgetLoaderProps) {
     const timer = setTimeout(() => {
       if (containerRef.current && !containerRef.current.querySelector("script")) {
         const script = document.createElement("script");
-        script.src = "/widget.js";
+        script.src = "https://kudoswall.org/widget.js";
         script.setAttribute("data-id", widgetId);
         script.async = true;
+        // Optimization: Ensure it doesn't try to initialize multiple times
+        script.setAttribute("data-autostart", "true");
         containerRef.current.appendChild(script);
       }
-    }, 100);
+    }, 50);
 
     return () => clearTimeout(timer);
   }, [widgetId]);
