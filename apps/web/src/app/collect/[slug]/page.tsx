@@ -219,20 +219,6 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
           }}
         />
       )}
-      {/* Dark mode: server-rendered CSS media query — zero JS, zero flash.
-          Skipped entirely when the project owner has set an explicit background color. */}
-      {!hasExplicitBg && (
-        <style>{`
-          @media (prefers-color-scheme: dark) {
-            .collect-main  { background-color: #0e0e10 !important; }
-            .collect-heading { color: #fafafa !important; }
-            .collect-subheading { color: #71717a !important; }
-            .collect-dot {
-              background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px) !important;
-            }
-          }
-        `}</style>
-      )}
       <main
         className="collect-main relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
         style={{

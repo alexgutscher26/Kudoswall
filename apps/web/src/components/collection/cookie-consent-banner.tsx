@@ -20,10 +20,14 @@ export function CookieConsentBanner({
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    console.log("🍪 Cookie Banner State:", { enabled });
     if (!enabled) return;
 
-    setShow(true);
+    const consent = localStorage.getItem("kudoswall_cookie_consent");
+    if (!consent) {
+      // Show with a slight delay for better UX
+      const timer = setTimeout(() => setShow(true), 1200);
+      return () => clearTimeout(timer);
+    }
   }, [enabled]);
 
   const handleAccept = () => {

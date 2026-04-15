@@ -208,9 +208,8 @@ export default function CollectionWizard({
     }
   }, [project.collectionSettingsJson]);
 
-  // Dark mode is disabled when the project owner has set an explicit background color
-  const hasExplicitBackground = Boolean(settings?.backgroundColor);
-  const isDark = useDarkMode(!hasExplicitBackground);
+  // Force light mode for now as per user request (will avoid following system theme)
+  const isDark = false;
 
   // i18n — auto-detected from navigator.language
   const { t, dir } = useLocale();
