@@ -12,12 +12,27 @@ export const ourFileRouter = {
     },
   })
     .middleware(async () => {
-      // Testimonial uploads are public, but we can restrict if needed.
-      // For now, allow public uploads for the collection wizard.
       return {};
     })
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.url };
+    }),
+
+  logoUploader: f({
+    image: {
+      maxFileSize: "2MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      if (!session) throw new Error("Unauthorized");
+      return { userId: session.user.id };
+    })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete for file:", file.url);
+      console.log("Logo upload complete for user:", metadata.userId, file.url);
       return { url: file.url };
     }),
 } satisfies FileRouter;

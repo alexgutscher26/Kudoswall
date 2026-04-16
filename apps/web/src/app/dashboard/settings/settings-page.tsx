@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Settings,
   Globe,
@@ -26,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 import TeamTab from "./team-tab";
+import { UploadButton } from "@/utils/uploadthing";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -94,6 +96,7 @@ export default function SettingsPage() {
   const [slug, setSlug] = useState("");
   const [retentionEnabled, setRetentionEnabled] = useState(false);
   const [retentionDays, setRetentionDays] = useState(365);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [searchEmail, setSearchEmail] = useState("");
 
   const [headline, setHeadline] = useState("");
@@ -153,6 +156,7 @@ export default function SettingsPage() {
       setSlug(dashboardData.workspace.slug);
       setRetentionEnabled(dashboardData.workspace.retentionEnabled);
       setRetentionDays(dashboardData.workspace.retentionDays || 365);
+      setLogoUrl(dashboardData.workspace.logoUrl);
     }
 
     if (dashboardData?.projects?.[0]) {
@@ -178,6 +182,7 @@ export default function SettingsPage() {
       id: activeWorkspaceId,
       name: workspaceName,
       slug: slug,
+      logoUrl: logoUrl,
       retentionEnabled: retentionEnabled,
       retentionDays: retentionDays,
     });
@@ -285,12 +290,38 @@ export default function SettingsPage() {
 
               {/* Logo Upload */}
               <div className="flex items-center gap-6">
-                <div className="group flex size-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50 transition-all hover:border-pink-300">
-                  <Upload className="size-5 text-neutral-300 group-hover:text-pink-400" />
+                <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50 shadow-inner">
+                  {logoUrl ? (
+                    <Image alt="Logo" className="object-contain" fill sizes="80px" src={logoUrl} />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Upload className="size-5 text-neutral-300" />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-[13px] font-bold text-neutral-800">Workspace Logo</h4>
-                  <p className="mt-0.5 text-[11px] text-neutral-400">JPG, PNG or SVG. Max 2MB.</p>
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-[13px] font-bold text-neutral-800">Workspace Logo</h4>
+                    <p className="mt-0.5 text-[11px] text-neutral-400">JPG, PNG or SVG. Max 2MB.</p>
+                  </div>
+                  <UploadButton
+                    appearance={{
+                      button:
+                        "ut-uploading:cursor-not-allowed rounded-xl bg-pink-500 px-4 py-2 text-[12px] font-bold text-white shadow-lg shadow-pink-500/20 transition-all hover:bg-pink-600 after:bg-pink-600 focus-within:ring-pink-500/20 active:scale-95",
+                      allowedContent: "hidden",
+                    }}
+                    endpoint="logoUploader"
+                    onClientUploadComplete={(res) => {
+                      if (res?.[0]) {
+                        setLogoUrl(res[0].url);
+                        toast.success("Logo uploaded!");
+                        // auto save or just wait for manual save
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      toast.error(`Upload failed: ${error.message}`);
+                    }}
+                  />
                 </div>
               </div>
 

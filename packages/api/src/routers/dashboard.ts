@@ -57,6 +57,9 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     }),
     dpaAcceptedAt: null,
     dpaAcceptedById: null,
+    logoUrl: null,
+    brandingJson: null,
+    isPro: false,
     retentionEnabled: false,
     retentionDays: 365,
   };
@@ -268,6 +271,9 @@ export const dashboardRouter = router({
         }),
         dpaAcceptedAt: null,
         dpaAcceptedById: null,
+        logoUrl: null,
+        brandingJson: null,
+        isPro: false,
         retentionEnabled: false,
         retentionDays: 365,
       };
@@ -532,13 +538,14 @@ export const dashboardRouter = router({
         id: z.string(),
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
+        logoUrl: z.string().nullable().optional(),
         retentionEnabled: z.boolean().optional(),
         retentionDays: z.number().int().min(1).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { id, name, slug, retentionEnabled, retentionDays } = input;
+      const { id, name, slug, logoUrl, retentionEnabled, retentionDays } = input;
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
@@ -557,6 +564,7 @@ export const dashboardRouter = router({
         .set({
           ...(name ? { name } : {}),
           ...(slug ? { slug } : {}),
+          ...(logoUrl !== undefined ? { logoUrl } : {}),
           ...(retentionEnabled !== undefined ? { retentionEnabled } : {}),
           ...(retentionDays !== undefined ? { retentionDays } : {}),
         })
@@ -567,7 +575,7 @@ export const dashboardRouter = router({
         entityType: "workspace",
         entityId: id,
         action: "update",
-        diff: { name, slug, retentionEnabled, retentionDays },
+        diff: { name, slug, logoUrl, retentionEnabled, retentionDays },
       });
 
       return { success: true };
