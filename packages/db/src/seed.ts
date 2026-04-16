@@ -30,7 +30,8 @@ async function seed() {
       name: "Test Workspace",
       slug: "test-workspace",
       ownerId: userId,
-      onboardingStatus: "completed",
+      onboardingStatus: JSON.stringify({ completed: true }),
+      plan: "free" as const,
     });
 
     await db.insert(project).values({

@@ -39,10 +39,10 @@ interface CollectionCustomizerProps {
   workspace: {
     id: string;
     name: string;
-    isPro: boolean;
+    plan: "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
     logoUrl?: string | null;
   };
-  isPro?: boolean;
+  isPro: boolean;
 }
 
 export type CollectionSettings = {
@@ -212,7 +212,7 @@ export function CollectionCustomizer({
   const [activeTab, setActiveTab] = useState<
     "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
   >("branding");
-  const isPro = isProProp ?? workspace.isPro;
+  const isPro = isProProp;
 
   const [domain, setDomain] = useState(project.customDomain || "");
   const [isDomainVerified, setIsDomainVerified] = useState(!!project.customDomainVerified);
@@ -1230,7 +1230,7 @@ export function CollectionCustomizer({
             <CollectionWizardPreview
               settings={settings}
               projectName={project.name}
-              workspaceIsPro={workspace.isPro}
+              workspaceIsPro={isPro}
               activeTab={activeTab}
               mockStep={mockStep}
               setMockStep={setMockStep}

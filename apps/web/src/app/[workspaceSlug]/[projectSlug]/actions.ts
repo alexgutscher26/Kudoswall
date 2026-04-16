@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/server-db";
 import { project, testimonial, workspace } from "@my-better-t-app/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
 
@@ -22,8 +22,21 @@ export async function getProjectBySlug(workspaceSlug: string, projectSlug: strin
 
   if (!result) return null;
 
+  // Get current usage for permissions
+  const counts = await db
+    .select({ count: count() })
+    .from(testimonial)
+    .where(eq(testimonial.projectId, result.id));
+
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: result.workspace.plan,
+    testimonialsCount: counts[0]?.count ?? 0,
+  });
+
   return {
     ...result,
+    permissions,
     workspace: {
       ...result.workspace,
       branding: result.workspace.brandingJson

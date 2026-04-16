@@ -60,7 +60,8 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     logoUrl: null,
     brandingJson: null,
     notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
-    isPro: false,
+    plan: "free" as const,
+    subscriptionStatus: null,
     retentionEnabled: false,
     retentionDays: 365,
     createdAt: new Date(),
@@ -233,8 +234,17 @@ export const dashboardRouter = router({
         where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
+      // Permissions
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        projectsCount: projects.length,
+        testimonialsCount: testimonialsCount,
+      });
+
       return {
         workspace: ws,
+        permissions,
         projects,
         recentTestimonials,
         onboarding,
@@ -284,7 +294,8 @@ export const dashboardRouter = router({
         logoUrl: null,
         brandingJson: null,
         notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
-        isPro: false,
+        plan: "free" as const,
+        subscriptionStatus: null,
         retentionEnabled: false,
         retentionDays: 365,
         createdAt: new Date(),

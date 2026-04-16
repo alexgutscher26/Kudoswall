@@ -116,7 +116,7 @@ async function TestimonialsContentWrapper({
         key={activeProjectId}
         initialTestimonials={data.testimonials}
         project={data.project}
-        projects={dashData.projects.map((p) => ({ id: p.id, name: p.name }))}
+        projects={dashData.projects.map((p: any) => ({ id: p.id, name: p.name }))}
       />
     </DashboardShell>
   );

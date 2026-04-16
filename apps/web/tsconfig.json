@@ -24,7 +24,8 @@
       "@/*": ["./src/*"],
       "@my-better-t-app/ui/*": ["../../packages/ui/src/*"],
       "@my-better-t-app/db": ["../../packages/db/src/index.ts"],
-      "@my-better-t-app/db/*": ["../../packages/db/src/*"]
+      "@my-better-t-app/db/*": ["../../packages/db/src/*"],
+      "@my-better-t-app/api/*": ["../../packages/api/src/*"]
     },
     "types": ["@cloudflare/workers-types"]
   },

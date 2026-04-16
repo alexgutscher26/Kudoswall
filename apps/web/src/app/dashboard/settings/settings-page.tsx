@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   Settings,
   Globe,
   CreditCard,
   Users,
   Save,
-  Upload,
   Link,
   Zap,
   Trash2,
@@ -28,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 import TeamTab from "./team-tab";
-import { UploadButton } from "@/utils/uploadthing";
+import type { Plan } from "@my-better-t-app/api/config/plans";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,6 +148,26 @@ export default function SettingsPage() {
     },
     onError: (err) => {
       toast.error("Failed to delete respondent data: " + err.message);
+    },
+  });
+
+  const createCheckout = useMutation({
+    ...trpc.billing.createCheckoutSession.mutationOptions(),
+    onSuccess: ({ url }) => {
+      if (url) window.location.href = url;
+    },
+    onError: (err) => {
+      toast.error("Failed to start checkout: " + err.message);
+    },
+  });
+
+  const createPortal = useMutation({
+    ...trpc.billing.createPortalSession.mutationOptions(),
+    onSuccess: ({ url }) => {
+      if (url) window.location.href = url;
+    },
+    onError: (err) => {
+      toast.error("Failed to open billing portal: " + err.message);
     },
   });
 
@@ -523,66 +541,181 @@ export default function SettingsPage() {
         )}
 
         {/* Billing Tab */}
-        {activeTab === "billing" && (
-          <div className="space-y-8 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
-            <section className="space-y-6">
-              <h3 className="text-lg font-bold tracking-tight text-neutral-900">Active Plan</h3>
+        {activeTab === "billing" &&
+          (() => {
+            const { PLANS } = require("@my-better-t-app/api/config/plans");
+            const planConfig = PLANS[dashboardData?.workspace?.plan || "free"];
+            const isPaid = dashboardData?.workspace?.plan !== "free";
 
-              <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-3xl bg-neutral-900 p-6 text-white sm:flex-row">
-                <div className="absolute top-[-20%] right-[-10%] size-64 rounded-full bg-pink-500/20 blur-[100px]" />
-                <div className="absolute bottom-[-10%] left-[-5%] size-48 rounded-full bg-blue-500/10 blur-[80px]" />
+            return (
+              <div className="space-y-8 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
+                <section className="space-y-6">
+                  <h3 className="text-lg font-bold tracking-tight text-neutral-900">Active Plan</h3>
 
-                <div className="z-10 flex-1">
-                  <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-pink-500/30 bg-pink-500/20 px-2.5 py-1 text-[10px] font-bold tracking-widest text-pink-300 uppercase">
-                    <Zap className="size-3" /> Premium Plan
+                  <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-3xl bg-neutral-900 p-6 text-white sm:flex-row">
+                    <div className="absolute top-[-20%] right-[-10%] size-64 rounded-full bg-pink-500/20 blur-[100px]" />
+                    <div className="absolute bottom-[-10%] left-[-5%] size-48 rounded-full bg-blue-500/10 blur-[80px]" />
+
+                    <div className="z-10 flex-1">
+                      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-pink-500/30 bg-pink-500/20 px-2.5 py-1 text-[10px] font-bold tracking-widest text-pink-300 uppercase">
+                        <Zap className="size-3" /> {planConfig.name}
+                      </div>
+                      {isPaid ? (
+                        <h4 className="text-3xl font-bold tracking-tight">
+                          {planConfig.priceLabel}
+                          <span className="text-lg font-medium text-neutral-400"></span>
+                        </h4>
+                      ) : (
+                        <h4 className="text-3xl font-bold tracking-tight">Free Forever</h4>
+                      )}
+                      <p className="mt-2 text-[13px] text-neutral-400">
+                        Status:{" "}
+                        <strong className="capitalize">
+                          {dashboardData?.workspace?.subscriptionStatus || "active"}
+                        </strong>
+                      </p>
+                    </div>
+
+                    <div className="z-10 flex w-full flex-col gap-2 sm:w-auto">
+                      {isPaid ? (
+                        <button
+                          type="button"
+                          onClick={() => createPortal.mutate({ workspaceId: activeWorkspaceId })}
+                          disabled={createPortal.isPending}
+                          className="rounded-full bg-white px-6 py-2.5 text-[13px] font-bold text-neutral-900 shadow-sm transition-all hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          {createPortal.isPending ? "Connecting..." : "Manage Subscription"}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("billing")}
+                          className="rounded-full bg-pink-600 px-6 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-pink-500/20 transition-all hover:bg-pink-700 active:scale-[0.98]"
+                        >
+                          Select a Plan
+                        </button>
+                      )}
+                      {isPaid && (
+                        <button
+                          type="button"
+                          onClick={() => createPortal.mutate({ workspaceId: activeWorkspaceId })}
+                          disabled={createPortal.isPending}
+                          className="rounded-full border border-neutral-700 bg-neutral-800 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-700 disabled:opacity-50"
+                        >
+                          View Invoices
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <h4 className="text-3xl font-bold tracking-tight">
-                    $29<span className="text-lg font-medium text-neutral-400">/mo</span>
-                  </h4>
-                  <p className="mt-2 text-[13px] text-neutral-400">
-                    Next billing date: <strong>April 28, 2026</strong>
-                  </p>
-                </div>
 
-                <div className="z-10 flex w-full flex-col gap-2 sm:w-auto">
-                  <button
-                    type="button"
-                    className="rounded-full bg-white px-6 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-100"
-                  >
-                    Manage Subscription
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-full border border-neutral-700 bg-neutral-800 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-700"
-                  >
-                    View Invoices
-                  </button>
-                </div>
-              </div>
+                  {!isPaid && (
+                    <div className="mt-12 space-y-6">
+                      <h4 className="text-center text-sm font-bold tracking-widest text-neutral-400 uppercase">
+                        Upgrade to unlock more
+                      </h4>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        {["plan_1", "plan_2", "plan_3"].map((pid) => {
+                          const p = PLANS[pid as Plan];
+                          return (
+                            <div
+                              key={pid}
+                              className="group relative flex flex-col rounded-3xl border border-neutral-100 bg-white p-6 transition-all hover:border-pink-200 hover:shadow-xl"
+                            >
+                              <div className="mb-4">
+                                <h5 className="text-[13px] font-bold text-neutral-900">{p.name}</h5>
+                                <div className="mt-2 flex items-baseline gap-1">
+                                  <span className="text-2xl font-bold text-neutral-900">
+                                    {p.priceLabel.split("/")[0]}
+                                  </span>
+                                  <span className="text-[11px] font-bold text-neutral-400">
+                                    /{p.priceLabel.split("/")[1] || "mo"}
+                                  </span>
+                                </div>
+                              </div>
+                              <ul className="mb-8 flex-1 space-y-3">
+                                <li className="flex items-center gap-2 text-[12px] text-neutral-600">
+                                  <Check className="size-3.5 text-emerald-500" />
+                                  {p.limits.maxTestimonials} Testimonials
+                                </li>
+                                <li className="flex items-center gap-2 text-[12px] text-neutral-600">
+                                  <Check className="size-3.5 text-emerald-500" />
+                                  {p.limits.maxProjects} Projects
+                                </li>
+                                {p.features.video && (
+                                  <li className="flex items-center gap-2 text-[12px] text-neutral-600">
+                                    <Check className="size-3.5 text-emerald-500" />
+                                    Video Testimonials
+                                  </li>
+                                )}
+                                {p.features.customDomain && (
+                                  <li className="flex items-center gap-2 text-[12px] text-neutral-600">
+                                    <Check className="size-3.5 text-emerald-500" />
+                                    Custom Domains
+                                  </li>
+                                )}
+                              </ul>
+                              <button
+                                type="button"
+                                disabled={createCheckout.isPending || !p.stripePriceId}
+                                onClick={() =>
+                                  createCheckout.mutate({
+                                    workspaceId: activeWorkspaceId,
+                                    priceId: p.stripePriceId!,
+                                  })
+                                }
+                                className="w-full rounded-full bg-neutral-50 py-2 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white"
+                              >
+                                {createCheckout.isPending ? "..." : "Select Plan"}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                {[
-                  { label: "Testimonials", value: "∞" },
-                  { label: "Workspaces", value: "1 / 3" },
-                  { label: "Uploads", value: "Unlimited" },
-                  { label: "Team", value: "3 Members" },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-neutral-100 bg-white p-4"
-                  >
-                    <p className="mb-1.5 text-[10px] leading-none font-bold tracking-widest text-neutral-400 uppercase">
-                      {stat.label}
-                    </p>
-                    <p className="text-[18px] leading-none font-bold text-neutral-900">
-                      {stat.value}
-                    </p>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {[
+                      {
+                        label: "Testimonials",
+                        value:
+                          planConfig.limits.maxTestimonials === Infinity
+                            ? "∞"
+                            : planConfig.limits.maxTestimonials,
+                      },
+                      {
+                        label: "Projects",
+                        value:
+                          planConfig.limits.maxProjects === Infinity
+                            ? "∞"
+                            : planConfig.limits.maxProjects,
+                      },
+                      {
+                        label: "Video",
+                        value: planConfig.features.video ? "Available" : "Limited",
+                      },
+                      {
+                        label: "Team",
+                        value: planConfig.features.memberInvites ? "Available" : "No",
+                      },
+                    ].map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="rounded-2xl border border-neutral-100 bg-white p-4"
+                      >
+                        <p className="mb-1.5 text-[10px] leading-none font-bold tracking-widest text-neutral-400 uppercase">
+                          {stat.label}
+                        </p>
+                        <p className="text-[18px] leading-none font-bold text-neutral-900">
+                          {stat.value}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </section>
               </div>
-            </section>
-          </div>
-        )}
+            );
+          })()}
         {/* Team Tab */}
         {activeTab === "team" && <TeamTab />}
 
@@ -621,7 +754,7 @@ export default function SettingsPage() {
                       Review <ExternalLink className="size-3.5" />
                     </a>
 
-                    {!dashboardData?.workspace.dpaAcceptedAt ? (
+                    {!dashboardData?.workspace?.dpaAcceptedAt ? (
                       <button
                         onClick={() => acceptDpa.mutate({ workspaceId: activeWorkspaceId })}
                         disabled={acceptDpa.isPending}
@@ -633,7 +766,7 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-[12px] font-bold text-emerald-600">
                         <Check className="size-3.5" /> Signed on{" "}
                         {new Date(
-                          dashboardData?.workspace.dpaAcceptedAt as string,
+                          dashboardData?.workspace?.dpaAcceptedAt as string,
                         ).toLocaleDateString()}
                       </div>
                     )}

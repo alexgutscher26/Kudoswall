@@ -59,7 +59,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         name: w.name,
         settings,
         workspaceName: w.workspace.name,
-        isPro: w.workspace.isPro,
+        isPro: w.workspace.plan !== "free",
       },
       testimonials: testimonials.map((t) => ({
         id: t.id,

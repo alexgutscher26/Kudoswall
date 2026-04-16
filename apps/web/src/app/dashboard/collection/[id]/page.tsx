@@ -81,7 +81,7 @@ async function CollectionDetailContentWrapper({
         <CollectionCustomizer
           project={p}
           workspace={p.workspace}
-          isPro={true} // TODO: Update based on workspace status later
+          isPro={p.workspace.plan !== "free"}
         />
       </div>
     </DashboardShell>

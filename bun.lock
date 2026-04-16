@@ -73,6 +73,7 @@
         "react": "catalog:",
         "react-dom": "catalog:",
         "react-easy-crop": "^5.5.7",
+        "stripe": "^22.0.1",
         "uploadthing": "^7.7.4",
         "zod": "catalog:",
       },
@@ -106,6 +107,7 @@
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "next": "catalog:",
+        "stripe": "^22.0.1",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -2006,6 +2008,8 @@
     "strip-bom": ["strip-bom@3.0.0", "", {}, "sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA=="],
 
     "strip-final-newline": ["strip-final-newline@4.0.0", "", {}, "sha512-aulFJcD6YK8V1G7iRB5tigAP4TsHBZZrOV8pjV++zdUwmeV8uzbY7yn6h9MswN62adStNZFuCIx4haBnRuMDaw=="],
+
+    "stripe": ["stripe@22.0.1", "", { "peerDependencies": { "@types/node": ">=18" }, "optionalPeers": ["@types/node"] }, "sha512-Yw764pZ6s8Xu4CtUZdD5uWOkw6gc9xzO9OKylCuj1gMhMDLbyGbDtaPNNSFE4mB6njYSHESYIVbF1iIzUfAl2g=="],
 
     "strnum": ["strnum@2.2.2", "", {}, "sha512-DnR90I+jtXNSTXWdwrEy9FakW7UX+qUZg28gj5fk2vxxl7uS/3bpI4fjFYVmdK9etptYBPNkpahuQnEwhwECqA=="],
 

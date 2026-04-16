@@ -2,6 +2,7 @@ import LTDCard from "./ltd-card";
 import PricingGrid from "./pricing-grid";
 
 interface Plan {
+  id: "free" | "plan_1" | "plan_2" | "plan_3";
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;
@@ -17,6 +18,7 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
+    id: "free",
     name: "Free",
     monthlyPrice: "Free",
     yearlyPrice: "Free",
@@ -34,6 +36,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
+    id: "plan_1",
     name: "Pro",
     monthlyPrice: "$29",
     yearlyPrice: "$290",
@@ -54,10 +57,11 @@ const PLANS: Plan[] = [
       "Custom domain for collection",
       "CSV export",
       "Analytics (views & clicks)",
-      "Priority email support", // "Zapier / Make integration", will add later
+      "Priority email support",
     ],
   },
   {
+    id: "plan_2",
     name: "Agency",
     monthlyPrice: "$79",
     yearlyPrice: "$790",

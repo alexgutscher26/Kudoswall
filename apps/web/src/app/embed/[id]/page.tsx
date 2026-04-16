@@ -47,7 +47,9 @@ export default async function EmbedPage({
   };
 
   // Allow query param overrides if Pro
-  if (w.workspace.isPro) {
+  const isPro = w.workspace.plan !== "free" && w.workspace.plan !== null;
+
+  if (isPro) {
     if (sParams.theme) settings.theme = sParams.theme as any;
     if (sParams.layout) settings.layout = sParams.layout as any;
 
@@ -99,7 +101,7 @@ export default async function EmbedPage({
     id: w.id,
     name: w.name,
     settings,
-    isPro: w.workspace.isPro,
+    isPro,
     workspaceId: w.workspaceId,
   };
 
@@ -108,7 +110,7 @@ export default async function EmbedPage({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: w.workspace.name,
-    logo: w.workspace.isPro ? w.workspace.logoUrl : undefined,
+    logo: isPro ? w.workspace.logoUrl : undefined,
     aggregateRating:
       testimonialsList.length > 0
         ? {

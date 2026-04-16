@@ -14,6 +14,7 @@ export const user = pgTable("user", {
     .notNull(),
   lastLoginMethod: text("last_login_method"),
   deletedAt: timestamp("deleted_at"),
+  plan: text("plan").default("free").notNull(),
 });
 
 export const session = pgTable(

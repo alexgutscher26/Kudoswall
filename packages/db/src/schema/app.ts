@@ -26,6 +26,17 @@ export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
 ]);
 export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
 export const workspaceRoleEnum = pgEnum("workspace_role", ["owner", "admin", "member"]);
+export const planEnum = pgEnum("plan", ["free", "plan_1", "plan_2", "plan_3", "ltd"]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "trialing",
+  "past_due",
+  "canceled",
+  "incomplete",
+  "incomplete_expired",
+  "paused",
+  "unpaid",
+]);
 
 export const workspace = pgTable(
   "workspace",
@@ -37,7 +48,10 @@ export const workspace = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     logoUrl: text("logo_url"),
-    isPro: boolean("is_pro").default(false).notNull(),
+    plan: planEnum("plan").default("free").notNull(),
+    stripeCustomerId: text("stripe_customer_id").unique(),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    subscriptionStatus: subscriptionStatusEnum("subscription_status"),
     brandingJson: text("branding_json"),
     notificationSettingsJson: text("notification_settings_json"),
     onboardingStatus: text("onboarding_status"),
@@ -48,7 +62,8 @@ export const workspace = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
-      .notNull(),
+      .notNull()
+      .defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
   (table) => [
@@ -127,7 +142,8 @@ export const project = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
-      .notNull(),
+      .notNull()
+      .defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
   (table) => [

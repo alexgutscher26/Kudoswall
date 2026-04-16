@@ -860,7 +860,7 @@ export default function CollectionWizard({
                   </p>
 
                   <VideoRecorder
-                    isPro={project.workspace.isPro}
+                    isPro={project.permissions?.video}
                     onConfirm={(blob: Blob) => {
                       setVideoBlob(blob);
                       const url = URL.createObjectURL(blob);

@@ -126,6 +126,8 @@ export function createAuth() {
                   dpaAcceptedById: null,
                   retentionEnabled: false,
                   retentionDays: 365,
+                  plan: "free" as const,
+                  subscriptionStatus: null,
                 };
 
                 await db.transaction(async (tx) => {
