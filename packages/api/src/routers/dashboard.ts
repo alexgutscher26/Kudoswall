@@ -59,9 +59,13 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     dpaAcceptedById: null,
     logoUrl: null,
     brandingJson: null,
+    notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
     isPro: false,
     retentionEnabled: false,
     retentionDays: 365,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
   };
 
   await db.insert(workspace).values(newWorkspace);
@@ -224,11 +228,17 @@ export const dashboardRouter = router({
       const conversionRate =
         totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
 
+      // Get workspace count for this user
+      const allMemberships = await db.query.workspaceMember.findMany({
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
+      });
+
       return {
         workspace: ws,
         projects,
         recentTestimonials,
         onboarding,
+        workspaceCount: allMemberships.length,
         stats: {
           testimonials: testimonialsCount,
           pending: Number(pendingCount?.value || 0),
@@ -273,9 +283,13 @@ export const dashboardRouter = router({
         dpaAcceptedById: null,
         logoUrl: null,
         brandingJson: null,
+        notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
         isPro: false,
         retentionEnabled: false,
         retentionDays: 365,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
       };
 
       await db.insert(workspace).values(newWs);
@@ -539,13 +553,15 @@ export const dashboardRouter = router({
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
         logoUrl: z.string().nullable().optional(),
+        notificationSettingsJson: z.string().optional(),
         retentionEnabled: z.boolean().optional(),
         retentionDays: z.number().int().min(1).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { id, name, slug, logoUrl, retentionEnabled, retentionDays } = input;
+      const { id, name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
+        input;
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
@@ -565,6 +581,7 @@ export const dashboardRouter = router({
           ...(name ? { name } : {}),
           ...(slug ? { slug } : {}),
           ...(logoUrl !== undefined ? { logoUrl } : {}),
+          ...(notificationSettingsJson !== undefined ? { notificationSettingsJson } : {}),
           ...(retentionEnabled !== undefined ? { retentionEnabled } : {}),
           ...(retentionDays !== undefined ? { retentionDays } : {}),
         })

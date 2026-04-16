@@ -13,6 +13,7 @@ import {
   Zap,
   Trash2,
   Shield,
+  AlertTriangle,
   FileText,
   Lock,
   Database,
@@ -97,6 +98,8 @@ export default function SettingsPage() {
   const [retentionEnabled, setRetentionEnabled] = useState(false);
   const [retentionDays, setRetentionDays] = useState(365);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [instantAlerts, setInstantAlerts] = useState(true);
+  const [dailySummary, setDailySummary] = useState(false);
   const [searchEmail, setSearchEmail] = useState("");
 
   const [headline, setHeadline] = useState("");
@@ -157,6 +160,16 @@ export default function SettingsPage() {
       setRetentionEnabled(dashboardData.workspace.retentionEnabled);
       setRetentionDays(dashboardData.workspace.retentionDays || 365);
       setLogoUrl(dashboardData.workspace.logoUrl);
+
+      if (dashboardData.workspace.notificationSettingsJson) {
+        try {
+          const notifications = JSON.parse(dashboardData.workspace.notificationSettingsJson);
+          setInstantAlerts(notifications.instantAlerts !== false); // default to true
+          setDailySummary(notifications.dailySummary === true);
+        } catch (e) {
+          console.error("Failed to parse notification settings", e);
+        }
+      }
     }
 
     if (dashboardData?.projects?.[0]) {
@@ -183,6 +196,7 @@ export default function SettingsPage() {
       name: workspaceName,
       slug: slug,
       logoUrl: logoUrl,
+      notificationSettingsJson: JSON.stringify({ instantAlerts, dailySummary }),
       retentionEnabled: retentionEnabled,
       retentionDays: retentionDays,
     });
@@ -265,16 +279,28 @@ export default function SettingsPage() {
           </button>
         ))}
 
-        <div className="mt-6 border-t border-neutral-100 pt-6">
+        <div className="mt-6 space-y-3 border-t border-neutral-100 pt-6">
           <button
             type="button"
             onClick={handleDelete}
-            disabled={deleteWorkspace.isPending}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-bold text-rose-500 transition-all hover:bg-rose-50 disabled:opacity-50"
+            disabled={deleteWorkspace.isPending || (dashboardData?.workspaceCount ?? 0) <= 1}
+            className="group flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-bold text-rose-500 transition-all hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-4 transition-transform group-hover:scale-110" />
             {deleteWorkspace.isPending ? "Deleting..." : "Delete Workspace"}
           </button>
+
+          {(dashboardData?.workspaceCount ?? 0) <= 1 && (
+            <div className="mx-2 flex gap-3 rounded-2xl border border-amber-100/50 bg-amber-50/30 p-4 text-[11px] text-amber-700/80">
+              <AlertTriangle className="size-4 shrink-0 text-amber-500" />
+              <div className="space-y-1">
+                <p className="font-bold text-amber-900/80">Last Workspace</p>
+                <p className="leading-relaxed">
+                  You must have at least one workspace. Create a new one before deleting this one.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -364,12 +390,18 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 {[
                   {
+                    id: "dailySummary",
                     label: "Daily Summary",
                     desc: "Receive a digest of your new testimonials every 24h.",
+                    enabled: dailySummary,
+                    setEnabled: setDailySummary,
                   },
                   {
+                    id: "instantAlerts",
                     label: "Instant Alerts",
                     desc: "A notification email for every new submission.",
+                    enabled: instantAlerts,
+                    setEnabled: setInstantAlerts,
                   },
                 ].map((pref) => (
                   <div
@@ -382,9 +414,16 @@ export default function SettingsPage() {
                     </div>
                     <button
                       type="button"
-                      className="relative flex h-5 w-10 items-center rounded-full bg-emerald-500 px-1"
+                      onClick={() => pref.setEnabled(!pref.enabled)}
+                      className={`relative flex h-5 w-10 items-center rounded-full px-1 transition-all ${
+                        pref.enabled ? "bg-emerald-500" : "bg-neutral-200"
+                      }`}
                     >
-                      <div className="size-3.5 translate-x-4.5 rounded-full bg-white" />
+                      <div
+                        className={`size-3.5 rounded-full bg-white shadow-sm transition-all ${
+                          pref.enabled ? "translate-x-4.5" : "translate-x-0"
+                        }`}
+                      />
                     </button>
                   </div>
                 ))}

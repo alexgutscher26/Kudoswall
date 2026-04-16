@@ -39,6 +39,7 @@ export const workspace = pgTable(
     logoUrl: text("logo_url"),
     isPro: boolean("is_pro").default(false).notNull(),
     brandingJson: text("branding_json"),
+    notificationSettingsJson: text("notification_settings_json"),
     onboardingStatus: text("onboarding_status"),
     dpaAcceptedAt: timestamp("dpa_accepted_at"),
     dpaAcceptedById: text("dpa_accepted_by_id").references(() => user.id),

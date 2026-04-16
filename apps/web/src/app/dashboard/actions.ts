@@ -66,6 +66,7 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     dpaAcceptedById: null,
     retentionEnabled: false,
     retentionDays: 365,
+    notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
   };
 
   await db.transaction(async (tx) => {
@@ -241,6 +242,10 @@ export async function getDashboardData(workspaceId?: string) {
   const conversionRate =
     totalViews > 0 ? ((testimonialsCount / totalViews) * 100).toFixed(1) + "%" : "—";
 
+  const allMemberships = await db.query.workspaceMember.findMany({
+    where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
+  });
+
   return {
     workspace: {
       ...ws,
@@ -271,6 +276,7 @@ export async function getDashboardData(workspaceId?: string) {
       },
     })),
     onboarding,
+    workspaceCount: allMemberships.length,
     stats: {
       testimonials: testimonialsCount,
       pending: Number(pendingCount?.value || 0),
