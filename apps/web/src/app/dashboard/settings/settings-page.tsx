@@ -314,7 +314,8 @@ export default function SettingsPage() {
                 Workspace Identity
               </h3>
 
-              {/* Logo Upload */}
+              {/* Logo Upload - Hidden for now but functionality preserved in code */}
+              {/* 
               <div className="flex items-center gap-6">
                 <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50 shadow-inner">
                   {logoUrl ? (
@@ -350,6 +351,7 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+              */}
 
               {/* Name & Slug */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
