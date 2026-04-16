@@ -28,7 +28,11 @@ export const ourFileRouter = {
       const session = await auth.api.getSession({
         headers: await headers(),
       });
-      if (!session) throw new Error("Unauthorized");
+      console.log("[UPLOADTHING_MIDDLEWARE] Session found:", !!session);
+      if (!session) {
+        console.error("[UPLOADTHING_MIDDLEWARE] Unauthorized - No session");
+        throw new Error("Unauthorized");
+      }
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
