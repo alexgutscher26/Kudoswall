@@ -12,6 +12,7 @@ export interface PlanConfig {
   limits: {
     maxProjects: number;
     maxTestimonials: number;
+    maxTeamMembers: number;
   };
   features: {
     video: boolean;
@@ -21,6 +22,7 @@ export interface PlanConfig {
     memberInvites: boolean;
     csvExport: boolean;
     analytics: boolean;
+    premiumWidgets: boolean;
   };
   displayFeatures: string[];
 }
@@ -33,6 +35,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     limits: {
       maxProjects: 1,
       maxTestimonials: 5,
+      maxTeamMembers: 1,
     },
     features: {
       video: false,
@@ -42,6 +45,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       memberInvites: false,
       csvExport: false,
       analytics: false,
+      premiumWidgets: false,
     },
     displayFeatures: [
       "Up to 5 testimonials",
@@ -60,6 +64,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     limits: {
       maxProjects: 1,
       maxTestimonials: Infinity,
+      maxTeamMembers: 1,
     },
     features: {
       video: false, // Set to true when video recording is ready
@@ -69,6 +74,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       memberInvites: true,
       csvExport: true,
       analytics: true,
+      premiumWidgets: true,
     },
     displayFeatures: [
       "Unlimited testimonials",
@@ -91,6 +97,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     limits: {
       maxProjects: 5,
       maxTestimonials: Infinity,
+      maxTeamMembers: 3,
     },
     features: {
       video: false, // Set to true when video recording is ready
@@ -100,6 +107,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       memberInvites: true,
       csvExport: true,
       analytics: true,
+      premiumWidgets: true,
     },
     displayFeatures: [
       "Everything in Pro",
@@ -117,6 +125,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     limits: {
       maxProjects: 5,
       maxTestimonials: Infinity,
+      maxTeamMembers: 3,
     },
     features: {
       video: false, // Set to true when video recording is ready
@@ -126,6 +135,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       memberInvites: true,
       csvExport: true,
       analytics: true,
+      premiumWidgets: true,
     },
     displayFeatures: ["Everything in Agency", "Lifetime access", "No monthly fees"],
   },

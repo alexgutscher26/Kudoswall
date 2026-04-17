@@ -182,6 +182,26 @@ export const widgetRouter = router({
         throw new Error("Forbidden");
       }
 
+      const { getPlanConfig } = await import("../config/plans");
+      const planConfig = getPlanConfig(w.workspace.plan);
+
+      // Enforce Layout restrictions
+      if (
+        (input.settings.layout === "masonry" || input.settings.layout === "carousel") &&
+        !planConfig.features.premiumWidgets
+      ) {
+        throw new Error(
+          `The ${input.settings.layout} layout is a premium feature. Please upgrade to Pro.`,
+        );
+      }
+
+      // Enforce Branding restrictions
+      if (input.settings.hideBadge && !planConfig.features.whiteLabel) {
+        throw new Error(
+          "Removing the KudosWall badge is a premium feature. Please upgrade to Pro.",
+        );
+      }
+
       await db
         .update(widget)
         .set({

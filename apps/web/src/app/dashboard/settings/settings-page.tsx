@@ -45,6 +45,8 @@ export default function SettingsPage() {
     }),
   });
 
+  const workspace = dashboardData?.workspace;
+
   const updateWorkspace = useMutation({
     ...trpc.dashboard.updateWorkspace.mutationOptions(),
     onSuccess: () => {
@@ -508,17 +510,25 @@ export default function SettingsPage() {
               <h3 className="text-lg font-bold tracking-tight text-neutral-900">Post-Submission</h3>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  <label className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                     Custom Redirect URL
+                    {workspace?.plan === "free" && <Lock className="size-3" />}
                   </label>
                   <div className="relative">
                     <Link className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-neutral-300" />
                     <input
                       type="url"
+                      disabled={workspace?.plan === "free"}
                       value={redirectUrl}
                       onChange={(e) => setRedirectUrl(e.target.value)}
-                      placeholder="https://yourwebsite.com/welcome"
-                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 py-2.5 pr-4 pl-11 text-[14px] font-medium outline-none focus:border-pink-500"
+                      placeholder={
+                        workspace?.plan === "free"
+                          ? "Available on Pro plans"
+                          : "https://yourwebsite.com/welcome"
+                      }
+                      className={`w-full rounded-xl border border-neutral-100 bg-neutral-50 py-2.5 pr-4 pl-11 text-[14px] font-medium transition-all outline-none focus:border-pink-500 ${
+                        workspace?.plan === "free" ? "cursor-not-allowed opacity-60" : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -661,11 +671,13 @@ export default function SettingsPage() {
                             </ul>
                             <button
                               type="button"
-                              disabled={isCurrent || createCheckout.isPending || !p.stripePriceId}
+                              disabled={
+                                isCurrent || createCheckout.isPending || !p.stripePriceIdMonthly
+                              }
                               onClick={() =>
                                 createCheckout.mutate({
                                   workspaceId: activeWorkspaceId,
-                                  priceId: p.stripePriceId!,
+                                  priceId: p.stripePriceIdMonthly!,
                                 })
                               }
                               className={`w-full rounded-2xl py-3.5 text-[13px] font-black transition-all active:scale-[0.98] ${

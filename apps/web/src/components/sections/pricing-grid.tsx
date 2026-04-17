@@ -68,7 +68,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
     const priceId =
       plan.id === "ltd"
-        ? planConfig?.stripePriceIdMonthly
+        ? planConfig?.stripePriceIdLifetime
         : billingCycle === "monthly"
           ? planConfig?.stripePriceIdMonthly
           : planConfig?.stripePriceIdYearly;

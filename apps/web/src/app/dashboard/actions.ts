@@ -114,6 +114,28 @@ export async function createProject(formData: FormData, workspaceId?: string) {
 
   const slug = generateSlug(name);
 
+  // Check project limits
+  const projectsCount = await db
+    .select({ value: count() })
+    .from(project)
+    .where(and(eq(project.workspaceId, wsId as string), isNull(project.deletedAt)));
+
+  const ws = await db.query.workspace.findFirst({
+    where: eq(workspace.id, wsId as string),
+  });
+
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: ws?.plan || "free",
+    projectsCount: projectsCount[0]?.value || 0,
+  });
+
+  if (!permissions.canAddProject) {
+    throw new Error(
+      `You have reached the project limit for your ${permissions.name} plan. Please upgrade.`,
+    );
+  }
+
   await db.insert(project).values({
     id: crypto.randomUUID(),
     workspaceId: wsId as string,

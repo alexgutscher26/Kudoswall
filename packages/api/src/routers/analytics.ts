@@ -73,6 +73,15 @@ export const analyticsRouter = router({
 
       if (!ws) throw new Error("No workspace found");
 
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
+
       const daysNum =
         input.timeframe === "30d"
           ? 30
@@ -228,6 +237,15 @@ export const analyticsRouter = router({
 
       if (!ws) throw new Error("No workspace found");
 
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
+
       let daysNum = 7;
       if (input.timeframe === "30d") daysNum = 30;
       if (input.timeframe === "90d") daysNum = 90;
@@ -292,6 +310,15 @@ export const analyticsRouter = router({
       }
 
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
 
       const widgets = await db.query.widget.findMany({
         where: eq(widget.workspaceId, ws.id),
@@ -437,6 +464,15 @@ export const analyticsRouter = router({
       }
 
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
 
       const top = await db.query.testimonial.findMany({
         where: and(

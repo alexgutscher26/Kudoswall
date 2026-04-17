@@ -66,6 +66,31 @@ export async function submitTestimonial(
 ) {
   const id = `tst_${nanoid()}`;
 
+  // Check testimonial limits
+  const p = await db.query.project.findFirst({
+    where: eq(project.id, projectId),
+    with: { workspace: true },
+  });
+
+  if (!p) throw new Error("Project not found");
+
+  const counts = await db
+    .select({ count: count() })
+    .from(testimonial)
+    .where(eq(testimonial.projectId, projectId));
+
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: p.workspace.plan,
+    testimonialsCount: counts[0]?.count ?? 0,
+  });
+
+  if (!permissions.canAddTestimonial) {
+    throw new Error(
+      `This project has reached its testimonial limit for the current plan. Please contact the owner.`,
+    );
+  }
+
   await db.insert(testimonial).values({
     id,
     projectId,

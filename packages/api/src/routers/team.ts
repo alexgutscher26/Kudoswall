@@ -1,6 +1,6 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { workspace, workspaceMember, workspaceInvitation, user } from "@my-better-t-app/db/schema";
-import { eq, and, isNull, gt } from "drizzle-orm";
+import { eq, and, isNull, gt, count } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
@@ -113,6 +113,32 @@ export const teamRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Member invitations are not available on your current plan. Please upgrade.",
+        });
+      }
+
+      // Check member limit
+      const currentMembers = await db
+        .select({ count: count() })
+        .from(workspaceMember)
+        .where(
+          and(eq(workspaceMember.workspaceId, workspaceId), isNull(workspaceMember.deletedAt)),
+        );
+
+      const pendingInvites = await db
+        .select({ count: count() })
+        .from(workspaceInvitation)
+        .where(
+          and(
+            eq(workspaceInvitation.workspaceId, workspaceId),
+            isNull(workspaceInvitation.deletedAt),
+          ),
+        );
+
+      const totalSlots = (currentMembers[0]?.count || 0) + (pendingInvites[0]?.count || 0);
+      if (totalSlots >= planConfig.limits.maxTeamMembers) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `You have reached the limit of ${planConfig.limits.maxTeamMembers} team members for your ${planConfig.name} plan.`,
         });
       }
 
