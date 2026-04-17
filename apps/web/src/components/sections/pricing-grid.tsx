@@ -219,7 +219,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
           ))}
         </div>
         <p className="text-center text-sm font-black text-neutral-800">
-          100% Satisfaction Guarantee. 14-day full refund policy on all paid plans.
+          100% Satisfaction Guarantee. 7-day full refund policy on all paid plans.
         </p>
       </div>
     </>
