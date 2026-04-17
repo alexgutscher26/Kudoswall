@@ -361,6 +361,15 @@ export const analyticsRouter = router({
 
       if (!ws) throw new Error("No workspace found");
 
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+      });
+
+      if (!permissions.features.csvExport) {
+        throw new Error("CSV Export is not available on your plan.");
+      }
+
       const widgets = await db.query.widget.findMany({
         where: eq(widget.workspaceId, ws.id),
       });

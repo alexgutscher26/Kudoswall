@@ -12,6 +12,8 @@ interface OverviewProps {
 }
 
 export default function Overview({ data, workspaceId }: OverviewProps) {
+  const isFree = data.workspace.plan === "free" || !data.workspace.plan;
+
   const stats = [
     {
       label: "Testimonials",
@@ -36,6 +38,7 @@ export default function Overview({ data, workspaceId }: OverviewProps) {
       icon: Globe,
       accent: "#0ea5e9",
       bg: "#f0f9ff",
+      locked: isFree,
     },
     {
       label: "Conversion Rate",
@@ -44,6 +47,7 @@ export default function Overview({ data, workspaceId }: OverviewProps) {
       icon: BarChart2,
       accent: "#16a34a",
       bg: "#f0fdf4",
+      locked: isFree,
     },
   ];
 

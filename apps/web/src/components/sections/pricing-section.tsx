@@ -2,7 +2,7 @@ import LTDCard from "./ltd-card";
 import PricingGrid from "./pricing-grid";
 
 interface Plan {
-  id: "free" | "plan_1" | "plan_2" | "plan_3";
+  id: "free" | "plan_1" | "plan_2" | "ltd";
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;

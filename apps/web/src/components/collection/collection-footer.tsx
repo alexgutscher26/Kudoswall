@@ -10,6 +10,7 @@ interface CollectionFooterProps {
   privacyText: string;
   privacyUrl?: string;
   hasInternalPrivacy?: boolean;
+  isPro?: boolean;
 }
 
 export function CollectionFooter({
@@ -20,22 +21,25 @@ export function CollectionFooter({
   privacyText,
   privacyUrl,
   hasInternalPrivacy,
+  isPro,
 }: CollectionFooterProps) {
   return (
     <footer className="mt-12 py-8 text-center">
       <div className="flex flex-col items-center justify-center gap-4">
-        <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
-          <span>Powered by</span>
-          <a
-            href="https://kudoswall.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neutral-900 transition-opacity hover:opacity-70"
-            style={{ fontFamily: "'Georgia', serif" }}
-          >
-            KudosWall
-          </a>
-        </div>
+        {!isPro && (
+          <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+            <span>Powered by</span>
+            <a
+              href="https://kudoswall.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neutral-900 transition-opacity hover:opacity-70"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              KudosWall
+            </a>
+          </div>
+        )}
 
         {showPrivacy && (
           <div className="flex items-center gap-4">

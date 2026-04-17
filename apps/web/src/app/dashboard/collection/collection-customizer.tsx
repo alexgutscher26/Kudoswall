@@ -39,7 +39,7 @@ interface CollectionCustomizerProps {
   workspace: {
     id: string;
     name: string;
-    plan: "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
+    plan: "free" | "plan_1" | "plan_2" | "ltd";
     logoUrl?: string | null;
   };
   isPro: boolean;
@@ -601,7 +601,8 @@ export function CollectionCustomizer({
                     Thank You Message
                   </label>
                   <textarea
-                    className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!isPro}
                     onChange={(e) => setNestedSetting("pageContent.thankYou.body", e.target.value)}
                     value={settings.pageContent.thankYou.body}
                   />

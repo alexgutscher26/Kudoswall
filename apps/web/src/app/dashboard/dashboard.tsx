@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Lock,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
@@ -37,7 +38,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
   { href: "/dashboard/collection", icon: Globe, label: "Collection Page" },
-  { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
+  { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics", feature: "analytics" },
   { href: "/dashboard/embed", icon: Code2, label: "Embed Widget" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ] as const;
@@ -70,6 +71,7 @@ function NavContent({
   onNewCollection,
   currentWorkspaceId,
   onWorkspaceChange,
+  plan,
 }: {
   pathname: string;
   onNavClick?: () => void;
@@ -79,7 +81,13 @@ function NavContent({
   onNewCollection: () => void;
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
+  const isFeatureLocked = (feature?: string) => {
+    if (!feature) return false;
+    if (feature === "analytics" && (!plan || plan === "free")) return true;
+    return false;
+  };
   return (
     <>
       {/* Workspace Switcher */}
@@ -92,11 +100,28 @@ function NavContent({
 
       {/* Nav links */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {NAV_ITEMS.map((item) => {
+          const { href, icon: Icon, label } = item;
           const isActive = pathname === href;
+          const isLocked = isFeatureLocked((item as any).feature);
+
           const linkHref = currentWorkspaceId
             ? (`${href}?workspaceId=${currentWorkspaceId}` as Route)
             : (href as Route);
+
+          if (isLocked) {
+            return (
+              <div
+                key={href}
+                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-300 opacity-60"
+                title={`${label} is a Pro feature`}
+              >
+                <Icon className="size-4 shrink-0" />
+                {label}
+                <Lock className="ml-auto size-3 text-neutral-300" />
+              </div>
+            );
+          }
 
           return (
             <Link
@@ -171,7 +196,6 @@ function NavContent({
 }
 
 // ─── Desktop sidebar (hidden on mobile) ──────────────────────────────────────
-
 function DesktopSidebar({
   userName,
   userEmail,
@@ -179,6 +203,7 @@ function DesktopSidebar({
   onNewCollection,
   currentWorkspaceId,
   onWorkspaceChange,
+  plan,
 }: {
   userName: string;
   userEmail: string;
@@ -186,6 +211,7 @@ function DesktopSidebar({
   onNewCollection: () => void;
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
   const pathname = usePathname();
   return (
@@ -204,13 +230,13 @@ function DesktopSidebar({
         onNewCollection={onNewCollection}
         currentWorkspaceId={currentWorkspaceId}
         onWorkspaceChange={onWorkspaceChange}
+        plan={plan}
       />
     </aside>
   );
 }
 
 // ─── Mobile drawer ────────────────────────────────────────────────────────────
-
 function MobileDrawer({
   open,
   onClose,
@@ -220,6 +246,7 @@ function MobileDrawer({
   onNewCollection,
   currentWorkspaceId,
   onWorkspaceChange,
+  plan,
 }: {
   open: boolean;
   onClose: () => void;
@@ -229,6 +256,7 @@ function MobileDrawer({
   onNewCollection: () => void;
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
   const pathname = usePathname();
 
@@ -268,6 +296,7 @@ function MobileDrawer({
           onNewCollection={onNewCollection}
           currentWorkspaceId={currentWorkspaceId}
           onWorkspaceChange={onWorkspaceChange}
+          plan={plan}
         />
       </div>
     </>
@@ -634,6 +663,7 @@ export default function DashboardShell({
           onSignOut={handleSignOut}
           onNewCollection={() => setNewCollectionOpen(true)}
           currentWorkspaceId={activeWorkspaceId}
+          plan={activeData?.workspace.plan}
           onWorkspaceChange={(id) => {
             setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
@@ -656,6 +686,7 @@ export default function DashboardShell({
           onSignOut={handleSignOut}
           onNewCollection={() => setNewCollectionOpen(true)}
           currentWorkspaceId={activeWorkspaceId}
+          plan={activeData?.workspace.plan}
           onWorkspaceChange={(id) => {
             setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());

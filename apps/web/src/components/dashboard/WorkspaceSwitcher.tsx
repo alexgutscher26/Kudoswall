@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type ReactPortal,
 } from "react";
-import { ChevronDown, Plus, Building2, Check, Loader2, X, ChevronRight } from "lucide-react";
+import { ChevronDown, Building2, Check, Loader2, Plus, X, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +47,7 @@ export function WorkspaceSwitcher({
   }, [isModalOpen]);
 
   const { data: workspaces, isLoading } = useQuery(trpc.dashboard.listWorkspaces.queryOptions());
+
   const createWorkspace = useMutation({
     ...trpc.dashboard.createWorkspace.mutationOptions(),
     onSuccess: (newWs) => {
@@ -60,6 +61,11 @@ export function WorkspaceSwitcher({
       toast.error(err.message || "Failed to create workspace");
     },
   });
+
+  const canCreateMoreWorkspaces =
+    !workspaces ||
+    workspaces.length === 0 ||
+    workspaces.some((ws) => ws.plan === "plan_2" || ws.plan === "ltd");
 
   const activeWorkspace = (workspaces as any)?.find((ws: any) => ws.id === currentWorkspaceId);
 
@@ -111,18 +117,21 @@ export function WorkspaceSwitcher({
               ))}
             </div>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator className="my-1" />
-          <DropdownMenuItem
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-            className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-neutral-600 hover:bg-neutral-50"
-          >
-            <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-neutral-100">
-              <Plus className="size-3" />
-            </div>
-            <span>Create Workspace</span>
-          </DropdownMenuItem>
+
+          {canCreateMoreWorkspaces && (
+            <>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem
+                onClick={() => setIsModalOpen(true)}
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-neutral-600 hover:bg-neutral-50"
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-neutral-100">
+                  <Plus className="size-3" />
+                </div>
+                <span>Create Workspace</span>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

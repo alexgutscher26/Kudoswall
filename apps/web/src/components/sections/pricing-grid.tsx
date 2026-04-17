@@ -10,7 +10,7 @@ import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 interface Plan {
-  id: "free" | "plan_1" | "plan_2" | "plan_3";
+  id: "free" | "plan_1" | "plan_2" | "ltd";
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;
@@ -51,7 +51,9 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
   const handleAction = async (plan: Plan) => {
     if (!session) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + "#pricing")}`);
+      router.push(
+        `/login?redirect=${encodeURIComponent(window.location.pathname + "#pricing")}` as any,
+      );
       return;
     }
 

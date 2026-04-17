@@ -219,9 +219,10 @@ export default function CollectionWizard({
   // Slide direction: 1 = forward (enter from right), -1 = backward (enter from left)
   const [direction, setDirection] = useState(1);
 
-  const [mode, setMode] = useState<"text" | "video" | null>(
-    initialType === "video" ? "text" : (initialType ?? null),
-  );
+  const [mode, setMode] = useState<"text" | "video" | null>(() => {
+    if (initialType === "video" && project.workspace.isPro) return "video";
+    return initialType ?? null;
+  });
   const [step, setStep] = useState<Step>(() => {
     if (settings?.form?.starRating?.enabled === false) {
       // Force text even if initialType was video
@@ -342,6 +343,9 @@ export default function CollectionWizard({
     setDirection(1);
     const nextStepName = (() => {
       if (step === "rating") {
+        if (project.workspace.isPro) {
+          return "choice";
+        }
         setMode("text");
         return "text";
       }
@@ -691,8 +695,6 @@ export default function CollectionWizard({
                   >
                     {t.choiceSubtext}
                   </p>
-                  {/* Choice Step Hidden: Video disabled for now */}
-                  {/*
                   <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                     <button
                       onClick={() => {
@@ -765,7 +767,6 @@ export default function CollectionWizard({
                       </div>
                     </button>
                   </div>
-                  */}
                 </>
               )}
 

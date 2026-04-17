@@ -9,6 +9,7 @@ import {
   Clock,
   BarChart2,
   Plus,
+  Lock,
 } from "lucide-react";
 import type { RouterOutputs } from "@/utils/trpc";
 import { CopyButton } from "./CopyButton";
@@ -24,6 +25,7 @@ export function StatCard({
   icon: Icon,
   accent,
   bg,
+  locked,
 }: {
   label: string;
   value: string;
@@ -31,23 +33,35 @@ export function StatCard({
   icon: any;
   accent: string;
   bg: string;
+  locked?: boolean;
 }) {
   return (
     <div
-      className="rounded-2xl border border-neutral-100 p-4 transition-shadow hover:shadow-md sm:p-5"
+      className={`relative rounded-2xl border border-neutral-100 p-4 transition-shadow sm:p-5 ${
+        locked ? "group opacity-80 grayscale-[0.2]" : "hover:shadow-md"
+      }`}
       style={{ backgroundColor: bg }}
     >
-      <div
-        className="mb-3 inline-flex size-9 items-center justify-center rounded-xl"
-        style={{ backgroundColor: `${accent}20` }}
-      >
-        <Icon className="size-4" style={{ color: accent }} />
+      <div className="mb-3 flex items-center justify-between">
+        <div
+          className="inline-flex size-9 items-center justify-center rounded-xl"
+          style={{ backgroundColor: `${accent}20` }}
+        >
+          <Icon className="size-4" style={{ color: accent }} />
+        </div>
+        {locked && (
+          <div className="rounded-full bg-white/80 p-1 shadow-sm backdrop-blur-sm">
+            <Lock className="size-3 text-neutral-500" />
+          </div>
+        )}
       </div>
       <p className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900 sm:text-3xl">
-        {value}
+        {locked ? "Locked" : value}
       </p>
       <p className="text-[13px] font-medium text-neutral-700">{label}</p>
-      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">{sub}</p>
+      <p className="mt-0.5 hidden text-[12px] text-neutral-400 sm:block">
+        {locked ? "Pro feature" : sub}
+      </p>
     </div>
   );
 }

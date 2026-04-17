@@ -274,6 +274,20 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const { name } = input;
 
+      // Allow multiple workspaces only for Agency (plan_2) or Lifetime (ltd) plans.
+      // Otherwise, restrict to 1 active workspace.
+      const ownedWorkspaces = await db.query.workspace.findMany({
+        where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
+      });
+
+      const hasAgencyPlan = ownedWorkspaces.some((ws) => ws.plan === "plan_2" || ws.plan === "ltd");
+
+      if (ownedWorkspaces.length >= 1 && !hasAgencyPlan) {
+        throw new Error(
+          "You already have a workspace. Upgrade to the Agency plan to create more workspaces.",
+        );
+      }
+
       const generateSlug = (n: string) =>
         n.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
 

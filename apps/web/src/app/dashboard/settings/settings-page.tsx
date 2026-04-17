@@ -608,71 +608,79 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {!isPaid && (
-                    <div className="mt-12 space-y-6">
-                      <h4 className="text-center text-sm font-bold tracking-widest text-neutral-400 uppercase">
-                        Upgrade to unlock more
-                      </h4>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        {["plan_1", "plan_2", "plan_3"].map((pid) => {
-                          const p = PLANS[pid as Plan];
-                          return (
-                            <div
-                              key={pid}
-                              className="group relative flex flex-col rounded-3xl border border-neutral-100 bg-white p-6 transition-all hover:border-pink-200 hover:shadow-xl"
-                            >
-                              <div className="mb-4">
-                                <h5 className="text-[13px] font-bold text-neutral-900">{p.name}</h5>
-                                <div className="mt-2 flex items-baseline gap-1">
-                                  <span className="text-2xl font-bold text-neutral-900">
-                                    {p.priceLabel.split("/")[0]}
-                                  </span>
-                                  <span className="text-[11px] font-bold text-neutral-400">
-                                    /{p.priceLabel.split("/")[1] || "mo"}
-                                  </span>
-                                </div>
+                  <div className="mt-12 space-y-8">
+                    <h4 className="text-center text-sm font-bold tracking-widest text-neutral-400 uppercase">
+                      Available Plans
+                    </h4>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      {["plan_1", "plan_2"].map((pid) => {
+                        const p = PLANS[pid as Plan];
+                        const isCurrent = dashboardData?.workspace?.plan === pid;
+                        return (
+                          <div
+                            key={pid}
+                            className={`group relative flex flex-col rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-2xl ${
+                              isCurrent
+                                ? "border-pink-500 bg-neutral-50/50 shadow-lg"
+                                : "border-neutral-100 bg-white hover:border-pink-100"
+                            }`}
+                          >
+                            {isCurrent && (
+                              <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-pink-500 px-3 py-1 text-[10px] font-black tracking-widest text-white uppercase shadow-lg">
+                                <Check className="size-3" /> Current Plan
                               </div>
-                              <ul className="mb-8 flex-1 space-y-3">
-                                <li className="flex items-center gap-2 text-[12px] text-neutral-600">
-                                  <Check className="size-3.5 text-emerald-500" />
-                                  {p.limits.maxTestimonials} Testimonials
-                                </li>
-                                <li className="flex items-center gap-2 text-[12px] text-neutral-600">
-                                  <Check className="size-3.5 text-emerald-500" />
-                                  {p.limits.maxProjects} Projects
-                                </li>
-                                {p.features.video && (
-                                  <li className="flex items-center gap-2 text-[12px] text-neutral-600">
-                                    <Check className="size-3.5 text-emerald-500" />
-                                    Video Testimonials
-                                  </li>
-                                )}
-                                {p.features.customDomain && (
-                                  <li className="flex items-center gap-2 text-[12px] text-neutral-600">
-                                    <Check className="size-3.5 text-emerald-500" />
-                                    Custom Domains
-                                  </li>
-                                )}
-                              </ul>
-                              <button
-                                type="button"
-                                disabled={createCheckout.isPending || !p.stripePriceId}
-                                onClick={() =>
-                                  createCheckout.mutate({
-                                    workspaceId: activeWorkspaceId,
-                                    priceId: p.stripePriceId!,
-                                  })
-                                }
-                                className="w-full rounded-full bg-neutral-50 py-2 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white"
-                              >
-                                {createCheckout.isPending ? "..." : "Select Plan"}
-                              </button>
+                            )}
+
+                            <div className="mb-6">
+                              <h5 className="text-[14px] font-black text-neutral-900">{p.name}</h5>
+                              <div className="mt-2 flex items-baseline gap-1">
+                                <span className="text-4xl font-black tracking-tighter text-neutral-900">
+                                  {p.priceLabel.split("/")[0]}
+                                </span>
+                                <span className="text-[12px] font-bold text-neutral-400">
+                                  /{p.priceLabel.split("/")[1] || "mo"}
+                                </span>
+                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <ul className="mb-10 flex-1 space-y-4">
+                              {p.displayFeatures.map((feature: string) => (
+                                <li
+                                  key={feature}
+                                  className="flex items-center gap-3 text-[13px] font-bold text-neutral-600"
+                                >
+                                  <div className="flex size-5 items-center justify-center rounded-full bg-emerald-100/50">
+                                    <Check className="size-3.5 text-emerald-600" />
+                                  </div>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              type="button"
+                              disabled={isCurrent || createCheckout.isPending || !p.stripePriceId}
+                              onClick={() =>
+                                createCheckout.mutate({
+                                  workspaceId: activeWorkspaceId,
+                                  priceId: p.stripePriceId!,
+                                })
+                              }
+                              className={`w-full rounded-2xl py-3.5 text-[13px] font-black transition-all active:scale-[0.98] ${
+                                isCurrent
+                                  ? "bg-neutral-100 text-neutral-400"
+                                  : "bg-neutral-900 text-white shadow-lg hover:bg-neutral-800"
+                              }`}
+                            >
+                              {createCheckout.isPending
+                                ? "Starting..."
+                                : isCurrent
+                                  ? "Active Plan"
+                                  : "Select Plan"}
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     {[

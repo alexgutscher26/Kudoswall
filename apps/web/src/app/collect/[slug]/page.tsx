@@ -149,12 +149,18 @@ async function getProjectByCollectionSlug(slug: string) {
     },
   };
 
-  // Enhance with branding logic
+  // Enhance with branding logic and permissions
+  const plan = result.workspace.plan;
+  const isPro = plan !== "free" && plan !== null;
+  const isAgency = plan === "plan_2" || plan === "ltd";
+
   return {
     ...result,
     settings,
     workspace: {
       ...result.workspace,
+      isPro,
+      isAgency,
       branding: result.workspace.brandingJson
         ? JSON.parse(result.workspace.brandingJson)
         : {
@@ -289,6 +295,7 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
             privacyText={settings?.compliance?.footerPrivacyText || "Privacy Policy"}
             privacyUrl={settings?.privacyPolicyUrl}
             hasInternalPrivacy={!!settings?.compliance?.privacyPolicyContent}
+            isPro={projectData.workspace.isPro}
           />
         </div>
       </main>

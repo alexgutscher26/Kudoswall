@@ -24,7 +24,7 @@ export default function InvitePage() {
       setStatus("success");
       toast.success("Successfully joined the workspace!");
       setTimeout(() => {
-        router.push(`/dashboard?workspaceId=${data.workspaceId}`);
+        router.push(`/dashboard?workspaceId=${data.workspaceId}` as any);
       }, 2000);
     },
     onError: (err) => {

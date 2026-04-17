@@ -221,7 +221,19 @@ export default function AnalyticsPage() {
     trpc.analytics.getTopTestimonials.queryOptions({ workspaceId: activeWorkspaceId }),
   );
 
+  const { data: dashData } = useQuery(
+    trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+  );
+  const permissions = dashData?.permissions;
+
   const handleExport = async () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your analytics.",
+      });
+      return;
+    }
+
     setIsExporting(true);
     try {
       const data = await trpcClient.analytics.getExportData.query({

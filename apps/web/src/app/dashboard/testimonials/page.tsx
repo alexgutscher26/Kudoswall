@@ -117,6 +117,7 @@ async function TestimonialsContentWrapper({
         initialTestimonials={data.testimonials}
         project={data.project}
         projects={dashData.projects.map((p: any) => ({ id: p.id, name: p.name }))}
+        permissions={dashData.permissions}
       />
     </DashboardShell>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import {
   Star,
@@ -74,6 +74,7 @@ interface InboxProps {
     id: string;
     name: string;
   }[];
+  permissions: any;
 }
 
 const TABS = [
@@ -83,8 +84,14 @@ const TABS = [
   { id: "all", label: "All", icon: MessageSquareQuote },
 ] as const;
 
-export function TestimonialInbox({ initialTestimonials, project, projects }: InboxProps) {
+export function TestimonialInbox({
+  initialTestimonials,
+  project,
+  projects,
+  permissions,
+}: InboxProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">(
     "pending",
@@ -119,7 +126,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const handleProjectSwitch = (projectId: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("project", projectId);
-    router.push(`/dashboard/testimonials?${params.toString()}`);
+    router.push(`/dashboard/testimonials?${params.toString()}` as any);
   };
 
   const filteredTestimonials = displayedTestimonials.filter((t: Testimonial) => {
@@ -180,6 +187,13 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   };
 
   const handleExport = () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your testimonials.",
+      });
+      return;
+    }
+
     if (filteredTestimonials.length === 0) {
       toast.error("No testimonials to export");
       return;
@@ -281,7 +295,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               </DropdownMenuGroup>
               <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
               <DropdownMenuItem
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("new", "project");
+                  router.push(`${pathname}?${params.toString()}` as any);
+                }}
                 className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
               >
                 <Plus className="size-3.5" />
