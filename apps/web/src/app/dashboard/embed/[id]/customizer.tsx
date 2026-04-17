@@ -27,7 +27,6 @@ import {
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
 import { useRouter } from "next/navigation";
-import type { Route } from "next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Widget from "@/components/widget";
 
@@ -779,7 +778,7 @@ export default function WidgetCustomizer({
             appear on.
           </p>
           <Link
-            href={"/dashboard/settings" as Route}
+            href={"/dashboard/settings"}
             className="mt-4 flex items-center gap-1.5 text-[11px] font-bold text-pink-400 transition-colors hover:text-pink-300"
           >
             Upgrade to PRO <ArrowRight className="size-3" />
@@ -923,7 +922,7 @@ export default function WidgetCustomizer({
                   You can override some settings via data-attributes without coming back here.
                 </p>
                 <Link
-                  href={"/docs" as Route}
+                  href={"/docs"}
                   className="inline-flex items-center gap-2 text-[14px] font-bold text-neutral-900 transition-colors hover:text-pink-500"
                 >
                   View Documentation{" "}
