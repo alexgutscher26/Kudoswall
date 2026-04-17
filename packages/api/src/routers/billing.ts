@@ -1,11 +1,24 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../index";
+import { protectedProcedure, publicProcedure, router } from "../index";
 import { stripe } from "../lib/stripe";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, count as dCount } from "drizzle-orm";
 import { workspace, workspaceMember } from "@my-better-t-app/db/schema";
 import { TRPCError } from "@trpc/server";
+import { PLANS } from "../config/plans";
 
 export const billingRouter = router({
+  getLTDCount: publicProcedure.query(async ({ ctx }) => {
+    // Simple count of workspaces with LTD plan
+    const res = await ctx.db
+      .select({ count: dCount() })
+      .from(workspace)
+      .where(eq(workspace.plan, "ltd"));
+
+    const count = res[0]?.count || 0;
+
+    return { count: Number(count) };
+  }),
+
   createCheckoutSession: protectedProcedure
     .input(
       z.object({
@@ -15,6 +28,12 @@ export const billingRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { workspaceId, priceId } = input;
+
+      const plan = Object.values(PLANS).find(
+        (p) => p.stripePriceIdMonthly === priceId || p.stripePriceIdYearly === priceId,
+      );
+
+      const isLTD = plan?.id === "ltd";
 
       // Verify workspace ownership
       const ws = await ctx.db.query.workspace.findFirst({
@@ -51,20 +70,32 @@ export const billingRouter = router({
             quantity: 1,
           },
         ],
-        subscription_data: {
-          trial_period_days: 7,
-          metadata: {
-            workspaceId,
-            userId: ctx.session.user.id,
-          },
-        },
-        mode: "subscription",
+        mode: isLTD ? "payment" : "subscription",
+        subscription_data: isLTD
+          ? undefined
+          : {
+              trial_period_days: 7,
+              metadata: {
+                workspaceId,
+                userId: ctx.session.user.id,
+              },
+            },
         allow_promotion_codes: true,
         success_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}`,
+        payment_intent_data: isLTD
+          ? {
+              metadata: {
+                workspaceId,
+                userId: ctx.session.user.id,
+                planId: "ltd",
+              },
+            }
+          : undefined,
         metadata: {
           workspaceId,
           userId: ctx.session.user.id,
+          planId: isLTD ? "ltd" : (plan?.id ?? "free"),
         },
       });
 

@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ExternalLink,
   MessageSquare,
-  Video,
   Clock,
   Trash2,
   Copy,
@@ -162,11 +161,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
               <div className="flex items-center gap-4 border-t border-neutral-50 pt-5">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
                   <MessageSquare className="size-3" />
-                  Text
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  <Video className="size-3" />
-                  Video
+                  Text Reviews
                 </div>
                 <div className="ml-auto translate-x-2 text-[11px] font-bold text-pink-500 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
                   Customize <ChevronRight className="inline size-3" />
@@ -199,8 +194,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
           </div>
           <h2 className="text-xl font-bold text-neutral-900">Start Collecting Social Proof</h2>
           <p className="mx-auto mt-2 max-w-[320px] text-[13px] leading-relaxed text-neutral-500">
-            Create your first collection link to start getting video and text testimonials from your
-            customers.
+            Create your first collection link to start getting written reviews from your customers.
           </p>
           <button
             onClick={onCreateClick}

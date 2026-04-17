@@ -33,21 +33,20 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       console.log("💳 Processing checkout.session.completed...");
 
-      if (!session.subscription) {
-        console.warn("⚠️ Checkout session completed without a subscription ID.");
-        return new NextResponse(null, { status: 200 });
-      }
-
       const { getPriceToPlan } = await import("@my-better-t-app/api/config/plans");
       const priceToPlan = getPriceToPlan();
 
-      // Retrieve the subscription to get the price ID
-      const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-      const priceId = subscription.items.data[0]?.price.id;
-      const plan = priceId ? priceToPlan[priceId] : undefined;
+      let plan = session.metadata?.planId;
+
+      // If it's a subscription, retrieve it to get the price ID
+      if (session.subscription) {
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+        const priceId = subscription.items.data[0]?.price.id;
+        plan = priceId ? priceToPlan[priceId] : plan;
+      }
 
       const workspaceId = session.metadata?.workspaceId;
-      console.log(`🔍 Metadata:`, { workspaceId, priceId, plan });
+      console.log(`🔍 Metadata:`, { workspaceId, plan });
 
       if (!workspaceId) {
         console.error("❌ No workspaceId found in checkout session metadata");
@@ -59,8 +58,8 @@ export async function POST(req: Request) {
           .update(workspace)
           .set({
             stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: session.subscription as string,
-            subscriptionStatus: subscription.status as any,
+            stripeSubscriptionId: session.subscription || null,
+            subscriptionStatus: session.subscription ? "active" : "active", // LTD is active forever
             plan: plan || "free",
           })
           .where(eq(workspace.id, workspaceId));

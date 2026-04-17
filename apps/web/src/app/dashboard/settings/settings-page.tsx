@@ -700,7 +700,7 @@ export default function SettingsPage() {
                       },
                       {
                         label: "Video",
-                        value: planConfig.features.video ? "Available" : "Limited",
+                        value: "Coming Soon", // planConfig.features.video ? "Available" : "Limited",
                       },
                       {
                         label: "Team",

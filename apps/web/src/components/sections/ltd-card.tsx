@@ -1,22 +1,91 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Timer, Crown, Users, Sparkles, Zap } from "lucide-react";
+import { Timer, Crown, Users, Sparkles, Zap, Loader2 } from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
+import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/utils/trpc";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { gooeyToast as toast } from "goey-toast";
 
 export default function LTDCard() {
-  const [seatsRemaining, setSeatsRemaining] = useState(487);
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
+
+  // Fetch real count of LTD workspaces
+  const { data: ltdCountData } = useQuery({
+    ...trpc.billing.getLTDCount.queryOptions(),
+    refetchInterval: 30000, // Refresh every 30s
+  });
+
+  // Calculate real seats remaining (out of 500)
+  const realSeatsRemaining = ltdCountData ? Math.max(8, 500 - ltdCountData.count) : 487;
+  const [displaySeats, setDisplaySeats] = useState(realSeatsRemaining);
 
   useEffect(() => {
+    if (ltdCountData) {
+      setDisplaySeats(realSeatsRemaining);
+    }
+  }, [ltdCountData, realSeatsRemaining]);
+
+  // FOMO decrement logic (client-side only for effect)
+  useEffect(() => {
     const interval = setInterval(() => {
-      setSeatsRemaining((prev) => {
+      setDisplaySeats((prev) => {
         if (prev <= 8) return prev;
-        if (Math.random() > 0.85) return prev - 1;
+        if (Math.random() > 0.9) return prev - 1;
         return prev;
       });
-    }, 8000);
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  // Get user's first workspace to start checkout
+  const { data: dashboardData } = useQuery({
+    ...trpc.dashboard.getData.queryOptions(),
+    enabled: !!session,
+  });
+
+  const createCheckout = useMutation({
+    ...trpc.billing.createCheckoutSession.mutationOptions(),
+    onSuccess: ({ url }: { url: string | null }) => {
+      if (url) window.location.href = url;
+    },
+    onError: (err: any) => {
+      toast.error("Failed to start checkout: " + err.message);
+    },
+  });
+
+  const handleClaim = async () => {
+    if (!session) {
+      router.push(
+        `/login?redirect=${encodeURIComponent(window.location.pathname + "#pricing")}` as any,
+      );
+      return;
+    }
+
+    // Use shared config helpers
+    const { PLANS } = require("@my-better-t-app/api/config/plans");
+    const planConfig = PLANS["ltd"];
+
+    if (!planConfig?.stripePriceIdMonthly) {
+      toast.error("Lifetime billing not configured yet.");
+      return;
+    }
+
+    const workspace = dashboardData?.workspace;
+    if (!workspace || !("id" in workspace)) {
+      toast.error("No workspace found. Please create one first.");
+      router.push("/dashboard");
+      return;
+    }
+
+    createCheckout.mutate({
+      workspaceId: workspace.id as string,
+      priceId: planConfig.stripePriceIdMonthly,
+    });
+  };
 
   return (
     <div className="group relative mx-auto mb-14 w-full max-w-5xl">
@@ -37,7 +106,7 @@ export default function LTDCard() {
             </div>
             <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider text-white/50 uppercase">
               <Users className="size-3" />
-              <span>Only {seatsRemaining} seats remaining</span>
+              <span>Only {displaySeats} seats remaining</span>
             </div>
           </div>
 
@@ -57,7 +126,7 @@ export default function LTDCard() {
           <div className="grid grid-cols-1 gap-x-8 gap-y-4 pt-2 sm:grid-cols-2">
             {[
               "Everything in Agency",
-              "Unlimited video testimonials",
+              "Unlimited testimonials", // Video reviews coming soon
               "Lifetime software updates",
               "100% White-labeling",
               "Founders Direct support",
@@ -98,24 +167,27 @@ export default function LTDCard() {
             <div className="flex justify-between text-[11px] font-black tracking-widest text-[#e8527a] uppercase">
               <span className="flex animate-pulse items-center gap-1.5">
                 <Timer className="size-3.5" />
-                Urgent: {seatsRemaining} Left
+                Urgent: {displaySeats} Left
               </span>
               <span>Nearly Full</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 shadow-inner">
               <div
                 className="h-full bg-linear-to-r from-[#e8527a] to-[#bf3fbe] shadow-[0_0_10px_rgba(232,82,122,0.3)] transition-all duration-1000"
-                style={{ width: `${(seatsRemaining / 500) * 100}%` }}
+                style={{ width: `${(displaySeats / 500) * 100}%` }}
               />
             </div>
           </div>
 
-          <a href="/login" className="group/btn w-full">
-            <Button className="h-16 w-full rounded-[1.25rem] bg-[#171717] text-lg font-black text-white shadow-xl shadow-neutral-200 transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
-              Claim Lifetime Access
-              <Zap className="ml-2 size-5 fill-white transition-transform group-hover:scale-125" />
-            </Button>
-          </a>
+          <Button
+            onClick={handleClaim}
+            disabled={createCheckout.isPending}
+            className="h-16 w-full rounded-[1.25rem] bg-[#171717] text-lg font-black text-white shadow-xl shadow-neutral-200 transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]"
+          >
+            {createCheckout.isPending ? <Loader2 className="mr-2 size-5 animate-spin" /> : null}
+            Claim Lifetime Access
+            <Zap className="ml-2 size-5 fill-white transition-transform group-hover:scale-125" />
+          </Button>
           <p className="text-[11px] font-medium text-neutral-400">Secure Checkout via Stripe</p>
         </div>
       </div>

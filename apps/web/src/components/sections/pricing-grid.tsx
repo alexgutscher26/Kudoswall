@@ -6,8 +6,8 @@ import { Button } from "@my-better-t-app/ui/components/button";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/navigation";
-import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { gooeyToast as toast } from "goey-toast";
 
 interface Plan {
   id: "free" | "plan_1" | "plan_2" | "ltd";
@@ -66,7 +66,14 @@ export default function PricingGrid({ plans }: PricingGridProps) {
     const { PLANS } = require("@my-better-t-app/api/config/plans");
     const planConfig = PLANS[plan.id];
 
-    if (!planConfig?.stripePriceId) {
+    const priceId =
+      plan.id === "ltd"
+        ? planConfig?.stripePriceIdMonthly
+        : billingCycle === "monthly"
+          ? planConfig?.stripePriceIdMonthly
+          : planConfig?.stripePriceIdYearly;
+
+    if (!priceId) {
       toast.error("Billing not configured for this plan yet.");
       return;
     }
@@ -80,7 +87,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
     createCheckout.mutate({
       workspaceId,
-      priceId: planConfig.stripePriceId,
+      priceId,
     });
   };
 
@@ -174,7 +181,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
             <Button
               onClick={() => handleAction(plan)}
-              disabled={createCheckout.isPending && createCheckout.variables?.priceId === plan.id}
+              disabled={createCheckout.isPending}
               className="h-14 w-full rounded-2xl text-sm font-black shadow-lg transition-transform group-hover:shadow-pink-500/10 active:scale-95"
               style={
                 plan.highlight
@@ -182,9 +189,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
                   : { backgroundColor: "#171717", color: "#ffffff" }
               }
             >
-              {createCheckout.isPending && createCheckout.variables?.priceId !== plan.id ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : null}
+              {createCheckout.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
               {plan.cta}
             </Button>
 

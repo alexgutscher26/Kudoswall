@@ -17,7 +17,7 @@ const WIDGET_TESTIMONIALS = [
     avatarColor: "#7c3aed",
     rating: 5,
     text: "Changed my business completely. I recommend it to everyone.",
-    type: "video",
+    type: "text",
   },
   {
     name: "Tom B.",

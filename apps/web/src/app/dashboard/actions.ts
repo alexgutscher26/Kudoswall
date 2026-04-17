@@ -441,10 +441,16 @@ export async function updateTestimonialStatus(
       }
     }
 
-    // TODO: (Paid Plan) 5th Testimonial Upgrade Prompt
-    // if (approvedCount === 5) {
-    //   await emailService.sendUpgradePrompt(u.email, u.name || "there");
-    // }
+    // (Paid Plan) 5th Testimonial Upgrade Prompt
+    if (t.project.workspace.plan === "free" && approvedCount === 5) {
+      const u = await db.query.user.findFirst({
+        where: eq(user.id, t.project.workspace.ownerId),
+      });
+      if (u?.email) {
+        const emailService = new EmailService(env.RESEND_API_KEY || "");
+        await emailService.sendUpgradePrompt(u.email, u.name || "there", approvedCount);
+      }
+    }
   }
 
   revalidatePath("/dashboard");

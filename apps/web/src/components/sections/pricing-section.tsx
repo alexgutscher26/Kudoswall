@@ -49,7 +49,7 @@ const PLANS: Plan[] = [
     features: [
       "Unlimited testimonials",
       "1 Workspace",
-      "Video + text reviews",
+      "Text testimonials", // Video + text reviews (coming soon)
       "All 3 widget layouts",
       "Filter testimonials by tag",
       "Custom branding & colors",

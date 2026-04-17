@@ -343,9 +343,10 @@ export default function CollectionWizard({
     setDirection(1);
     const nextStepName = (() => {
       if (step === "rating") {
-        if (project.workspace.isPro) {
-          return "choice";
-        }
+        /* Video feature is disabled for now */
+        // if (project.workspace.isPro) {
+        //   return "choice";
+        // }
         setMode("text");
         return "text";
       }

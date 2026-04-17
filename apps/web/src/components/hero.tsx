@@ -13,7 +13,7 @@ import { Button } from "@my-better-t-app/ui/components/button";
 
 const CATEGORY_CHIPS = [
   { icon: Star, label: "Collect reviews" },
-  { icon: Image, label: "Video testimonials" },
+  { icon: Image, label: "Photo reviews" },
   { icon: MessageSquareQuote, label: "Text quotes" },
   { icon: BarChart2, label: "Analytics" },
   { icon: Palette, label: "Custom widget" },
@@ -69,7 +69,7 @@ export default function Hero() {
 
         {/* Sub-headline */}
         <p className="-mt-2 max-w-2xl px-2 text-base text-neutral-500 sm:text-lg md:text-xl">
-          Collect video & text testimonials in one link. Embed anywhere in 5 minutes.
+          Collect text testimonials in one link. Embed anywhere in 5 minutes.
         </p>
 
         {/* CTA Buttons */}

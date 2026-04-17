@@ -9,12 +9,12 @@ const FAQS: FAQItem[] = [
   {
     question: "How does KudosWall work?",
     answer:
-      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, record a video or type a text testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
+      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, share a photo or type a written testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
   },
   {
     question: "Do my customers need to create an account to leave a review?",
     answer:
-      "No. We believe in zero friction. Your customers can leave a high-quality video or text testimonial directly from their browser without ever signing up or downloading an app.",
+      "No. We believe in zero friction. Your customers can leave a high-quality text testimonial with a photo directly from their browser without ever signing up or downloading an app.",
   },
   {
     question: "Can I customize the look of the testimonial widget?",

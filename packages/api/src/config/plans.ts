@@ -6,7 +6,8 @@ export interface PlanConfig {
   id: Plan;
   name: string;
   priceLabel: string;
-  stripePriceId?: string;
+  stripePriceIdMonthly?: string;
+  stripePriceIdYearly?: string;
   limits: {
     maxProjects: number;
     maxTestimonials: number;
@@ -52,13 +53,15 @@ export const PLANS: Record<Plan, PlanConfig> = {
     id: "plan_1",
     name: "Pro",
     priceLabel: "$29/mo",
-    stripePriceId: env.STRIPE_PLAN_1_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID,
+    stripePriceIdMonthly: env.STRIPE_PLAN_1_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID,
+    stripePriceIdYearly:
+      env.STRIPE_PLAN_1_YEARLY_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID,
     limits: {
       maxProjects: 1,
       maxTestimonials: Infinity,
     },
     features: {
-      video: true,
+      video: false, // Set to true when video recording is ready
       customDomain: true,
       whiteLabel: true,
       prioritySupport: false,
@@ -69,7 +72,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     displayFeatures: [
       "Unlimited testimonials",
       "1 Project",
-      "Video + text reviews",
+      "Text testimonials", // Removed Video mention
       "All 3 widget layouts",
       "Custom branding & colors",
       "Remove 'Powered by' badge",
@@ -81,13 +84,15 @@ export const PLANS: Record<Plan, PlanConfig> = {
     id: "plan_2",
     name: "Agency",
     priceLabel: "$79/mo",
-    stripePriceId: env.STRIPE_PLAN_2_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID,
+    stripePriceIdMonthly: env.STRIPE_PLAN_2_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID,
+    stripePriceIdYearly:
+      env.STRIPE_PLAN_2_YEARLY_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID,
     limits: {
       maxProjects: 5,
       maxTestimonials: Infinity,
     },
     features: {
-      video: true,
+      video: false, // Set to true when video recording is ready
       customDomain: true,
       whiteLabel: true,
       prioritySupport: true,
@@ -107,12 +112,13 @@ export const PLANS: Record<Plan, PlanConfig> = {
     id: "ltd",
     name: "Lifetime",
     priceLabel: "$199 once",
+    stripePriceIdMonthly: env.STRIPE_PLAN_3_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_3_PRICE_ID,
     limits: {
       maxProjects: 5,
       maxTestimonials: Infinity,
     },
     features: {
-      video: true,
+      video: false, // Set to true when video recording is ready
       customDomain: true,
       whiteLabel: true,
       prioritySupport: true,
@@ -127,8 +133,11 @@ export const PLANS: Record<Plan, PlanConfig> = {
 export const getPriceToPlan = (): Record<string, Plan> => {
   return Object.values(PLANS).reduce(
     (acc, plan) => {
-      if (plan.stripePriceId) {
-        acc[plan.stripePriceId] = plan.id;
+      if (plan.stripePriceIdMonthly) {
+        acc[plan.stripePriceIdMonthly] = plan.id;
+      }
+      if (plan.stripePriceIdYearly) {
+        acc[plan.stripePriceIdYearly] = plan.id;
       }
       return acc;
     },

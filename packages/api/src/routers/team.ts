@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
+import { getPlanConfig } from "../config/plans";
 
 export const teamRouter = router({
   getMembers: protectedProcedure
@@ -40,6 +41,15 @@ export const teamRouter = router({
         ),
       });
 
+      const ws = await db.query.workspace.findFirst({
+        where: eq(workspace.id, workspaceId),
+        columns: {
+          plan: true,
+        },
+      });
+
+      const planConfig = getPlanConfig(ws?.plan);
+
       return {
         members: members.map((m) => ({
           id: m.id,
@@ -57,6 +67,8 @@ export const teamRouter = router({
           expiresAt: i.expiresAt,
           createdAt: i.createdAt,
         })),
+        plan: ws?.plan || "free",
+        memberInvitesEnabled: planConfig.features.memberInvites,
       };
     }),
 
@@ -84,6 +96,23 @@ export const teamRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only owners and admins can invite members",
+        });
+      }
+
+      // Check plan restrictions
+      const ws = await db.query.workspace.findFirst({
+        where: eq(workspace.id, workspaceId),
+        columns: {
+          plan: true,
+          name: true,
+        },
+      });
+
+      const planConfig = getPlanConfig(ws?.plan);
+      if (!planConfig.features.memberInvites) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Member invitations are not available on your current plan. Please upgrade.",
         });
       }
 
@@ -115,11 +144,7 @@ export const teamRouter = router({
         expiresAt,
       });
 
-      // Fetch workspace info for the email
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.id, workspaceId),
-      });
-
+      // Fetch workspace info for the email (already fetched above)
       if (ws) {
         const emailService = new EmailService(env.RESEND_API_KEY || "", env.EMAIL_FROM);
         const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kudoswall.org").replace(

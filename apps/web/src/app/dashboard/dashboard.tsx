@@ -357,19 +357,6 @@ function TopBar({
           </div>
         </div>
       </div>
-
-      <div className="flex items-center gap-2">
-        {/* Upgrade pill */}
-        <button
-          type="button"
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] sm:px-4 sm:text-[13px]"
-          style={{ backgroundColor: "#171717" }}
-        >
-          <span className="hidden sm:inline">Upgrade Plan</span>
-          <span className="sm:hidden">Upgrade</span>
-          <span className="hidden sm:inline">→</span>
-        </button>
-      </div>
     </header>
   );
 }
@@ -551,7 +538,7 @@ export default function DashboardShell({
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
-  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Video" | "Text">("All");
+  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {

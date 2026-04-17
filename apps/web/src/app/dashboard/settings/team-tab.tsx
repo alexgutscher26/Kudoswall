@@ -11,6 +11,7 @@ import {
   Clock,
   Trash2,
   ShieldAlert,
+  Lock,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -107,14 +108,40 @@ export default function TeamTab() {
           </div>
           <button
             type="button"
+            disabled={!data?.memberInvitesEnabled}
             onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             style={{ backgroundColor: "#171717" }}
+            title={!data?.memberInvitesEnabled ? "Upgrade to Pro to invite members" : ""}
           >
-            <Plus className="size-3.5" />
+            {!data?.memberInvitesEnabled ? (
+              <Lock className="size-3.5" />
+            ) : (
+              <Plus className="size-3.5" />
+            )}
             Invite Member
           </button>
         </div>
+
+        {!data?.memberInvitesEnabled && (
+          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-pink-100 bg-pink-50/50 p-4">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-500/10 text-pink-600">
+              <Lock className="size-4" />
+            </div>
+            <div>
+              <p className="text-[13px] font-bold text-pink-900">Feature Locked</p>
+              <p className="text-[12px] text-pink-700">
+                Member invitations are only available on Pro and Agency plans.
+              </p>
+            </div>
+            <button
+              onClick={() => (window.location.href = "/dashboard/billing")}
+              className="ml-auto rounded-lg bg-pink-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-pink-700"
+            >
+              Upgrade
+            </button>
+          </div>
+        )}
 
         <div className="mt-8 divide-y divide-neutral-50">
           {members.map((member) => (
