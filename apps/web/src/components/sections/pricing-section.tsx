@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LTDCard from "./ltd-card";
 import PricingGrid from "./pricing-grid";
 
@@ -116,7 +117,13 @@ export default function PricingSection() {
         </div>
 
         {/* Lifetime Deal Section */}
-        <LTDCard />
+        <Suspense
+          fallback={
+            <div className="mb-14 h-[400px] w-full animate-pulse rounded-[2.2rem] bg-neutral-100" />
+          }
+        >
+          <LTDCard />
+        </Suspense>
 
         {/* Pricing Grid (includes Billing Switcher) */}
         <PricingGrid plans={PLANS} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Github, Chrome, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
@@ -10,7 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
 
-export default function SignupPage() {
+function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -196,5 +196,13 @@ export default function SignupPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }

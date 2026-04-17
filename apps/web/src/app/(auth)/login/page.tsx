@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Github,
   Chrome,
@@ -22,7 +22,7 @@ import { gooeyToast as toast } from "goey-toast";
 
 type AuthTab = "standard" | "magic-link";
 
-export default function LoginPage() {
+function LoginForm() {
   const [tab, setTab] = useState<AuthTab>("standard");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -264,6 +264,14 @@ export default function LoginPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
 
