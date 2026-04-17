@@ -4,10 +4,10 @@ Implement a "5 Steps to Your First Testimonial" onboarding checklist to guide ne
 
 ## 🏁 Goals
 
-- [ ] **Onboarding State Persistence**: Store onboarding progress in the database per workspace.
-- [ ] **Premium UI**: Match the existing "Premium Segmented Progress Bar" aesthetic.
-- [ ] **Automatic Progression**: Trigger step completion based on user actions (e.g., creating a project).
-- [ ] **Dashboard Integration**: Display the checklist prominently for new workspaces until completion.
+- [x] **Onboarding State Persistence**: Store onboarding progress in the database per workspace.
+- [x] **Premium UI**: Match the existing "Premium Segmented Progress Bar" aesthetic.
+- [x] **Automatic Progression**: Trigger step completion based on user actions (e.g., creating a project).
+- [x] **Dashboard Integration**: Display the checklist prominently for new workspaces until completion.
 
 ## 🛠️ Implementation Phases
 

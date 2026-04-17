@@ -22,9 +22,9 @@
 - [ ] **Re-engagement Email**: Implement background task for 14d inactivity.
 - [ ] **Paid Plan TODOs**:
   - [ ] Upgrade prompt (5th testimonial).
-  - [ ] Trial expiring.
-  - [ ] Weekly digest (Pro).
-  - [ ] Cancellation (Stripe integration needed).
+  - [x] Trial expiring.
+  - [x] Weekly digest (Pro).
+  - [x] Cancellation (Stripe integration needed).
 
 ## Phase 4: Fix Analytics
 

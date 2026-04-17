@@ -30,7 +30,10 @@ export const billingRouter = router({
       const { workspaceId, priceId } = input;
 
       const plan = Object.values(PLANS).find(
-        (p) => p.stripePriceIdMonthly === priceId || p.stripePriceIdYearly === priceId,
+        (p) =>
+          p.stripePriceIdMonthly === priceId ||
+          p.stripePriceIdYearly === priceId ||
+          p.stripePriceIdLifetime === priceId,
       );
 
       const isLTD = plan?.id === "ltd";
@@ -71,6 +74,8 @@ export const billingRouter = router({
           },
         ],
         mode: isLTD ? "payment" : "subscription",
+        customer_creation: isLTD ? "always" : undefined,
+        client_reference_id: workspaceId,
         subscription_data: isLTD
           ? undefined
           : {
@@ -85,6 +90,7 @@ export const billingRouter = router({
         cancel_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}`,
         payment_intent_data: isLTD
           ? {
+              setup_future_usage: "on_session",
               metadata: {
                 workspaceId,
                 userId: ctx.session.user.id,

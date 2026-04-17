@@ -7,6 +7,8 @@ import { UpgradePromptEmail } from "../emails/upgrade-prompt";
 import { WeeklyDigestEmail } from "../emails/weekly-digest";
 import { ReEngagementEmail } from "../emails/re-engagement";
 import { TeamInviteEmail } from "../emails/team-invite";
+import { TrialExpiringEmail } from "../emails/trial-expiring";
+import { CancellationEmail } from "../emails/cancellation";
 
 export class EmailService {
   public resend: Resend;
@@ -109,6 +111,24 @@ export class EmailService {
         workspaceName,
         inviteLink,
       }),
+    });
+  }
+
+  async sendTrialExpiringEmail(to: string, userName: string, expiryDate: string) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Your Pro trial is ending soon! ⏳",
+      react: React.createElement(TrialExpiringEmail, { userName, expiryDate }),
+    });
+  }
+
+  async sendCancellationEmail(to: string, userName: string) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Your KudosWall subscription has been canceled",
+      react: React.createElement(CancellationEmail, { userName }),
     });
   }
 }

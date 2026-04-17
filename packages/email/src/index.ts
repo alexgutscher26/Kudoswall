@@ -5,3 +5,5 @@ export * from "../emails/activation-nudge";
 export * from "../emails/upgrade-prompt";
 export * from "../emails/weekly-digest";
 export * from "../emails/re-engagement";
+export * from "../emails/trial-expiring";
+export * from "../emails/cancellation";

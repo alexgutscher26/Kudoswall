@@ -6,6 +6,7 @@ import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
 
@@ -14,6 +15,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
   const handleSignup = async () => {
     if (!name || !email || !password) return toast.error("Please fill in all fields");
@@ -23,7 +26,7 @@ export default function SignupPage() {
         email,
         password,
         name,
-        callbackURL: "/",
+        callbackURL: redirect,
       });
       toast.success("Account created! Welcome to KudosWall.");
     } catch (e: any) {
@@ -36,7 +39,7 @@ export default function SignupPage() {
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
     try {
-      await authClient.signIn.social({ provider, callbackURL: "/" });
+      await authClient.signIn.social({ provider, callbackURL: redirect });
     } catch (e: any) {
       toast.error(e.message || "Social signup failed");
     } finally {

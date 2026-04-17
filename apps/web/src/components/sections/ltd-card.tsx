@@ -5,44 +5,51 @@ import { Timer, Crown, Users, Sparkles, Zap, Loader2 } from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
 
 export default function LTDCard() {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: isSessionLoading } = authClient.useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Fetch real count of LTD workspaces
-  const { data: ltdCountData } = useQuery({
+  const { data: ltdCountData, isLoading } = useQuery({
     ...trpc.billing.getLTDCount.queryOptions(),
     refetchInterval: 30000, // Refresh every 30s
   });
 
-  // Calculate real seats remaining (out of 500)
-  const realSeatsRemaining = ltdCountData ? Math.max(8, 500 - ltdCountData.count) : 487;
-  const [displaySeats, setDisplaySeats] = useState(realSeatsRemaining);
+  // Start with 500 if loading, then calculate based on real data
+  const realSeatsRemaining = ltdCountData ? Math.max(5, 500 - ltdCountData.count) : 500;
+  const [displaySeats, setDisplaySeats] = useState(500);
 
   useEffect(() => {
     if (ltdCountData) {
       setDisplaySeats(realSeatsRemaining);
     }
-  }, [ltdCountData, realSeatsRemaining]);
+  }, [ltdCountData?.count, realSeatsRemaining]);
 
-  // FOMO decrement logic (client-side only for effect)
+  // FOMO decrement logic (only runs if we have some baseline count, for effect)
   useEffect(() => {
+    if (isLoading) return;
+
     const interval = setInterval(() => {
       setDisplaySeats((prev) => {
-        if (prev <= 8) return prev;
-        if (Math.random() > 0.9) return prev - 1;
+        // Slow down or stop decrement if we're near the real count or at 500
+        if (ltdCountData?.count === 0 && prev <= 498) return prev;
+        if (prev <= 5) return prev;
+
+        // Randomly decrement to show "activity" if we're below 500
+        if (Math.random() > 0.95) return prev - 1;
         return prev;
       });
-    }, 15000);
+    }, 45000); // Slower interval (45s instead of 15s)
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoading, ltdCountData?.count]);
 
   // Get user's first workspace to start checkout
-  const { data: dashboardData } = useQuery({
+  const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({
     ...trpc.dashboard.getData.queryOptions(),
     enabled: !!session,
   });
@@ -58,24 +65,30 @@ export default function LTDCard() {
   });
 
   const handleClaim = async () => {
+    if (isSessionLoading) return;
+
     if (!session) {
       router.push(
-        `/login?redirect=${encodeURIComponent(window.location.pathname + "#pricing")}` as any,
+        `/login?redirect=${encodeURIComponent(window.location.pathname + "?claimLTD=true#pricing")}` as any,
       );
       return;
     }
 
-    // Use shared config helpers
-    const { PLANS } = require("@my-better-t-app/api/config/plans");
-    const planConfig = PLANS["ltd"];
+    const { env } = require("@my-better-t-app/env/web");
+    const ltdPriceId = env.NEXT_PUBLIC_STRIPE_LTD_PRICE_ID;
 
-    if (!planConfig?.stripePriceIdMonthly) {
+    if (!ltdPriceId) {
       toast.error("Lifetime billing not configured yet.");
       return;
     }
 
     const workspace = dashboardData?.workspace;
     if (!workspace || !("id" in workspace)) {
+      // If data is still loading, wait
+      if (isDashboardLoading) {
+        toast("Preparing checkout...", { duration: 2000 });
+        return;
+      }
       toast.error("No workspace found. Please create one first.");
       router.push("/dashboard");
       return;
@@ -83,9 +96,25 @@ export default function LTDCard() {
 
     createCheckout.mutate({
       workspaceId: workspace.id as string,
-      priceId: planConfig.stripePriceIdMonthly,
+      priceId: ltdPriceId,
     });
   };
+
+  // Auto-trigger if returning from login with intent
+  useEffect(() => {
+    if (
+      session &&
+      searchParams.get("claimLTD") === "true" &&
+      dashboardData?.workspace &&
+      !createCheckout.isPending &&
+      !createCheckout.isSuccess
+    ) {
+      handleClaim();
+      // Clean up the URL
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [session, searchParams, dashboardData?.workspace]);
 
   return (
     <div className="group relative mx-auto mb-14 w-full max-w-5xl">

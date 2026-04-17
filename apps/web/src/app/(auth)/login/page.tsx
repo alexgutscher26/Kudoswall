@@ -16,6 +16,7 @@ import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
 
@@ -26,11 +27,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
     try {
-      await authClient.signIn.social({ provider, callbackURL: "/" });
+      await authClient.signIn.social({ provider, callbackURL: redirect });
     } catch (e: any) {
       toast.error(e.message || "Failed to sign in");
     } finally {
@@ -42,7 +45,7 @@ export default function LoginPage() {
     if (!email || !password) return toast.error("Enter both email and password");
     setLoading(true);
     try {
-      await authClient.signIn.email({ email, password, callbackURL: "/" });
+      await authClient.signIn.email({ email, password, callbackURL: redirect });
       toast.success("Welcome back!");
     } catch (e: any) {
       toast.error(e.message || "Invalid credentials");
@@ -223,7 +226,7 @@ export default function LoginPage() {
                   onClick={async () => {
                     setLoading(true);
                     try {
-                      await authClient.signIn.magicLink({ email, callbackURL: "/verify-otp" });
+                      await authClient.signIn.magicLink({ email, callbackURL: redirect });
                       toast.success("Check your email!");
                     } catch (e: any) {
                       toast.error(e.message);

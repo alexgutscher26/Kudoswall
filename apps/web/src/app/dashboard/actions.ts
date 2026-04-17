@@ -288,6 +288,7 @@ export async function getDashboardData(workspaceId?: string) {
         dpaAcceptedById: ws.dpaAcceptedById,
         retentionEnabled: ws.retentionEnabled,
         retentionDays: ws.retentionDays,
+        trialEndsAt: ws.trialEndsAt?.toISOString() || null,
       },
       projects: projects.map((p) => ({
         ...p,
@@ -368,6 +369,7 @@ export async function getProjectTestimonials(projectId: string) {
         createdAt: p.workspace.createdAt.toISOString(),
         updatedAt: p.workspace.updatedAt.toISOString(),
         deletedAt: p.workspace.deletedAt?.toISOString() || null,
+        trialEndsAt: p.workspace.trialEndsAt?.toISOString() || null,
         dpaAcceptedAt: p.workspace.dpaAcceptedAt?.toISOString() || null,
         dpaAcceptedById: p.workspace.dpaAcceptedById,
         retentionEnabled: p.workspace.retentionEnabled,

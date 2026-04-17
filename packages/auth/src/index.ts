@@ -36,8 +36,8 @@ export function createAuth() {
     },
     rateLimit: {
       enabled: true,
-      window: 60, // 1 minute
-      max: 100, // Increased from 10 to handle dashboard polling and parallel queries
+      window: 10, // 10 seconds
+      max: 500, // Very high limit for development
     },
 
     emailAndPassword: {

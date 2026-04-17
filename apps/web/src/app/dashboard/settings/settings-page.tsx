@@ -584,7 +584,11 @@ export default function SettingsPage() {
                           disabled={createPortal.isPending}
                           className="rounded-full bg-white px-6 py-2.5 text-[13px] font-bold text-neutral-900 shadow-sm transition-all hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
                         >
-                          {createPortal.isPending ? "Connecting..." : "Manage Subscription"}
+                          {createPortal.isPending
+                            ? "Connecting..."
+                            : dashboardData?.workspace?.plan === "ltd"
+                              ? "Manage Billing"
+                              : "Manage Subscription"}
                         </button>
                       ) : (
                         <button
@@ -595,7 +599,7 @@ export default function SettingsPage() {
                           Select a Plan
                         </button>
                       )}
-                      {isPaid && (
+                      {isPaid && dashboardData?.workspace?.plan !== "ltd" && (
                         <button
                           type="button"
                           onClick={() => createPortal.mutate({ workspaceId: activeWorkspaceId })}

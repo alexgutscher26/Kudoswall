@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const activeWorkspaces = await db.query.workspace.findMany({
-      where: isNull(workspace.deletedAt),
+      where: and(isNull(workspace.deletedAt), inArray(workspace.plan, ["plan_1", "plan_2", "ltd"])),
       with: {
         owner: true,
         projects: true,

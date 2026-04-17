@@ -8,6 +8,7 @@ export interface PlanConfig {
   priceLabel: string;
   stripePriceIdMonthly?: string;
   stripePriceIdYearly?: string;
+  stripePriceIdLifetime?: string;
   limits: {
     maxProjects: number;
     maxTestimonials: number;
@@ -112,7 +113,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     id: "ltd",
     name: "Lifetime",
     priceLabel: "$199 once",
-    stripePriceIdMonthly: env.STRIPE_PLAN_3_PRICE_ID || env.NEXT_PUBLIC_STRIPE_PLAN_3_PRICE_ID,
+    stripePriceIdLifetime: env.STRIPE_LTD_PRICE_ID || env.NEXT_PUBLIC_STRIPE_LTD_PRICE_ID,
     limits: {
       maxProjects: 5,
       maxTestimonials: Infinity,
@@ -138,6 +139,9 @@ export const getPriceToPlan = (): Record<string, Plan> => {
       }
       if (plan.stripePriceIdYearly) {
         acc[plan.stripePriceIdYearly] = plan.id;
+      }
+      if (plan.stripePriceIdLifetime) {
+        acc[plan.stripePriceIdLifetime] = plan.id;
       }
       return acc;
     },
