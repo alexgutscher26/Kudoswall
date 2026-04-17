@@ -72,7 +72,7 @@ async function WidgetDetailContentWrapper({
           widgetId={w.id}
           workspaceId={w.workspaceId}
           initialSettings={settings}
-          isPro={true} // TODO: Hardcoded to true for testing Pro features change later
+          isPro={w.workspace.plan !== "free"}
         />
       </div>
     </DashboardShell>

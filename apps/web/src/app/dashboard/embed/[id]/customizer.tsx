@@ -22,6 +22,7 @@ import {
   Save,
   Loader2,
   MoreHorizontal,
+  Lock,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -289,7 +290,7 @@ export default function WidgetCustomizer({
                   </div>
                 </div>
 
-                {settings.layout === "carousel" && (
+                {settings.layout === "carousel" && isPro && (
                   <div className="space-y-6 border-t border-neutral-50 pt-6">
                     {/* Toggles */}
                     <div className="space-y-4">
@@ -343,6 +344,18 @@ export default function WidgetCustomizer({
                         ))}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {settings.layout === "carousel" && !isPro && (
+                  <div className="mt-6 rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-center">
+                    <Zap className="mx-auto mb-2 size-5 text-pink-500" />
+                    <p className="text-[12px] font-bold text-pink-600">
+                      Carousel Layout is a Pro Feature
+                    </p>
+                    <p className="mt-1 text-[10px] text-pink-400">
+                      Upgrade to customize carousel settings
+                    </p>
                   </div>
                 )}
 
@@ -488,19 +501,64 @@ export default function WidgetCustomizer({
                     <span className="text-[11px] font-bold text-neutral-400 uppercase">
                       Card Rounding
                     </span>
-                    <span className="text-[11px] font-bold text-neutral-900 capitalize">
-                      {settings.cardBorderRadius}
-                    </span>
                   </div>
                   <div className="flex gap-2">
                     {["none", "small", "large", "pill"].map((v) => (
                       <button
                         key={v}
-                        disabled={!isPro && v !== "large"}
+                        disabled={!isPro && v !== "small"}
                         onClick={() => setSettings((s) => ({ ...s, cardBorderRadius: v as any }))}
-                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.cardBorderRadius === v ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v !== "large" ? "opacity-50" : ""}`}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.cardBorderRadius === v ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro && v !== "small" ? "opacity-30" : ""}`}
                       >
                         {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Shadow */}
+                <div className="space-y-3 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                      Card Shadow
+                    </span>
+                    {!isPro && <Zap className="size-3 text-pink-400" />}
+                  </div>
+                  <div className="flex gap-2">
+                    {["none", "subtle", "medium"].map((v) => (
+                      <button
+                        key={v}
+                        disabled={!isPro}
+                        onClick={() => setSettings((s) => ({ ...s, cardShadow: v as any }))}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.cardShadow === v ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro ? "opacity-30" : ""}`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text Truncation */}
+                <div className="space-y-3 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                      Text Limit
+                    </span>
+                    {!isPro && <Zap className="size-3 text-pink-400" />}
+                  </div>
+                  <div className="flex gap-2">
+                    {[
+                      { id: "off", label: "None" },
+                      { id: 150, label: "150ch" },
+                      { id: 250, label: "250ch" },
+                    ].map((v) => (
+                      <button
+                        key={v.id}
+                        disabled={!isPro}
+                        onClick={() => setSettings((s) => ({ ...s, truncateText: v.id as any }))}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.truncateText === v.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro ? "opacity-30" : ""}`}
+                      >
+                        {v.label}
                       </button>
                     ))}
                   </div>
@@ -610,23 +668,64 @@ export default function WidgetCustomizer({
 
             {activeTab === "branding" && (
               <div className="space-y-8">
+                {/* Accent Color */}
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Accent Color
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Accent Color
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
                   <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={settings.accentColor}
-                      onChange={(e) => setSettings((s) => ({ ...s, accentColor: e.target.value }))}
-                      className="size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm"
-                    />
+                    <div className="relative">
+                      <input
+                        type="color"
+                        disabled={!isPro}
+                        value={settings.accentColor}
+                        onChange={(e) =>
+                          setSettings((s) => ({ ...s, accentColor: e.target.value }))
+                        }
+                        className={`size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm ${!isPro ? "cursor-not-allowed opacity-50" : ""}`}
+                      />
+                      {!isPro && <Lock className="absolute inset-0 m-auto size-3 text-white" />}
+                    </div>
                     <code className="text-[12px] font-bold text-neutral-400 uppercase">
                       {settings.accentColor}
                     </code>
                   </div>
                 </div>
 
+                {/* Font Family */}
+                <div className="space-y-4 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Font Family
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "sans", label: "Sans" },
+                      { id: "serif", label: "Serif" },
+                      { id: "Outfit", label: "Outfit" },
+                      { id: "Playfair Display", label: "Elegant" },
+                    ].map((f) => (
+                      <button
+                        key={f.id}
+                        disabled={!isPro && f.id !== "sans"}
+                        onClick={() => setSettings((s) => ({ ...s, fontFamily: f.id }))}
+                        className={`flex items-center justify-between rounded-xl border px-3 py-2 transition-all ${settings.fontFamily === f.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && f.id !== "sans" ? "opacity-30" : ""}`}
+                      >
+                        <span className="text-[12px] font-bold" style={{ fontFamily: f.id }}>
+                          {f.label}
+                        </span>
+                        {settings.fontFamily === f.id && <Check className="size-3" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* White Label */}
                 <div className="space-y-4 border-t border-neutral-50 pt-6">
                   <div className="flex items-center justify-between">
                     <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
