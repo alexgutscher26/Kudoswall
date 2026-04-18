@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@my-better-t-app/ui/components/button";
+import Link from "next/link";
 import { Check, X, Quote } from "lucide-react";
 
 interface ComparisonPoint {
@@ -52,15 +53,19 @@ export default function VsPageTemplate({
             {heroDescription}
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              className="shadow-primary/20 h-14 px-8 text-lg font-semibold shadow-xl"
-            >
-              Get Started for Free
-            </Button>
-            <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-semibold">
-              Live Demo
-            </Button>
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="shadow-primary/20 h-14 px-8 text-lg font-semibold shadow-xl"
+              >
+                Get Started for Free
+              </Button>
+            </Link>
+            <Link href="/#features">
+              <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-semibold">
+                Live Demo
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -166,12 +171,14 @@ export default function VsPageTemplate({
             <p className="text-muted-foreground mb-10 text-lg md:text-xl">
               Join hundreds of high-growth founders who moved to KudosWall for better social proof.
             </p>
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground h-16 rounded-full px-10 text-xl font-bold"
-            >
-              Start Your 14-Day Free Trial
-            </Button>
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground h-16 rounded-full px-10 text-xl font-bold"
+              >
+                Start Your 7-Day Free Trial
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

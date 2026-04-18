@@ -26,28 +26,40 @@ const LI = ({ children }: { children: React.ReactNode }) => (
 
 export const SENJA_COMPARISON = {
   points: [
-    { feature: "Primary Setup", competitor: "15-30 mins", kudoswall: "5 mins (Guaranteed)" },
-    { feature: "Submission Flow", competitor: "Complex Form", kudoswall: "Multi-step Wizard" },
     {
-      feature: "Identity Verification",
-      competitor: "Social Links",
-      kudoswall: "LinkedIn/Google Verified",
+      feature: "Time-to-Embed",
+      competitor: "15-20 mins (Complex)",
+      kudoswall: "5 mins (Guaranteed)",
     },
     {
-      feature: "Asset Management",
-      competitor: "Video+Text Hub",
-      kudoswall: "Text-Focus (High Fidelity)",
+      feature: "Multi-Project Pricing",
+      competitor: "+$10/mo per project",
+      kudoswall: "Included in Agency",
     },
     {
-      feature: "Display Engine",
-      competitor: "Standard Iframes",
-      kudoswall: "Edge-Rendered Resizers",
+      feature: "UI Customization",
+      competitor: "Unified (Rigid)",
+      kudoswall: "Separate Page/Widget Design",
     },
-    { feature: "Price", competitor: "$29/mo (Starter)", kudoswall: "LTD & Generous FREE" },
     {
-      feature: "UI Complexity",
-      competitor: "High (Steep Curve)",
-      kudoswall: "Low (Solo-founder focus)",
+      feature: "Growth Penalties",
+      competitor: "$5/mo per extra seat",
+      kudoswall: "Generous Team Quotas",
+    },
+    {
+      feature: "Submission Experience",
+      competitor: "Dense Forms",
+      kudoswall: "Minimal Friction Flow",
+    },
+    {
+      feature: "Performance",
+      competitor: "Standard iFrames",
+      kudoswall: "Zero Layout Shift / Edge",
+    },
+    {
+      feature: "Support",
+      competitor: "Standard Email",
+      kudoswall: "Priority Solo-Founder Support",
     },
   ],
   testimonials: [
@@ -55,90 +67,99 @@ export const SENJA_COMPARISON = {
       name: "Marcus Aurelius",
       role: "Founder at Meditations SaaS",
       content:
-        "I spent 3 hours trying to configure my first Senja form. I switched to KudosWall and had a live 'Wall of Love' in exactly 4 minutes. The simplicity is a feature, not a compromise.",
+        "I spent hours fighting Senja's menus. I switched to KudosWall and had a live 'Wall of Love' in exactly 4 minutes. The simplicity is a feature, not a compromise.",
     },
     {
       name: "Sarah Chen",
       role: "Head of Marketing at GrowthFlow",
       content:
-        "Senja is great if you have a team of 4 managing testimonials. For a solo founder like me, KudosWall is the only tool that doesn't feel like a part-time job to maintain.",
+        "Senja is great for giant teams. For a solo founder, KudosWall is the only tool that doesn't feel like a part-time job to maintain.",
     },
   ],
   content: (
     <>
       <section className="mb-12">
-        <H2>Why Simplicity Wins: KudosWall vs Senja in 2026</H2>
+        <H2>KudosWall vs Senja: Why Simplicity Wins in 2026</H2>
         <P>
-          In the evolving landscape of SaaS, we've reached a point of "feature fatigue."{" "}
-          <strong>Senja</strong> is a powerful platform, arguably the most feature-rich in the
-          market. But for many founders, that power comes with a cost: complexity.
+          Senja has grown into a powerful platform—arguably the most feature-heavy in the market.
+          But for many founders, that power has created a new problem: **Complexity Creep.**
         </P>
         <P>
-          KudosWall was built on a different philosophy:{" "}
-          <strong>Turn happy customers into your best sales tool in under 5 minutes.</strong> We
-          don't try to be a video editing suite or a complex CRM. We focus on the core: collecting
-          high-quality text testimonials and displaying them beautifully.
+          KudosWall was built to solve a single pain point: **Getting your social proof live without
+          reading a manual.** While competitors add "spin-the-wheel" games and complex CRM features,
+          we focused on making the fastest, best-looking testimonial engine for indie hackers and
+          course creators.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>The 5-Minute Setup Promise</H3>
+        <H3>1. Bypassing the "Complexity Creep"</H3>
         <P>
-          While Senja requires you to navigate dozens of nested menus to create your first
-          collection form, KudosWall uses a <strong>Multi-step submission wizard</strong> that is
-          already implemented and ready to go. Our users go from "zero" to "embedded" in the time it
-          takes to brew a cup of coffee.
+          In 2026, Senja is no longer "5 minutes to first embed." Between deep platform imports, AI
+          sizzle reels, and sentiment analysis, the dashboard has become dense.
         </P>
+        <P>
+          KudosWall takes a **Minimalist First** approach. Our collection forms are designed to be
+          friction-free for your customers, and our dashboard is built for founders who want to
+          spend their time building their product, not managing their testimonials.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>2. No Growth Penalties</H3>
+        <P>
+          One of Senja's most frustrating vulnerabilities is the "Growth Penalty." Want to manage a
+          second project? That's an extra $10/month. Need to add a virtual assistant to help with
+          moderation? That's $5/month per seat.
+        </P>
+        <P>
+          At KudosWall, we believe in scaling with you, not taxing your growth. Our Agency plan
+          includes **up to 5 workspaces** and team members out of the box, with zero hidden per-seat
+          fees.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>3. Superior UI Customization (Separate Page vs. Widget)</H3>
+        <P>
+          Most testimonial tools, including Senja, treat the collection form and the display widget
+          as a "Unified UI." This often means your collection page is just a mirror of your widget's
+          styling, leading to rigid design constraints.
+        </P>
+        <P>
+          KudosWall treats the **Collection Page** and the **Display Widget** as two distinct design
+          surfaces. You can have a high-conversion, branded landing page for collecting testimonials
+          that feels completely different from the subtle, minimalist widget on your site.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H4>The Technical Edge</H4>
         <UL>
           <LI>
-            <strong>Simple Link Sharing:</strong> No complex dashboard setup required to start
-            collecting.
+            <strong>Zero Layout Shift:</strong> Our widgets use advanced CSS-first rendering to
+            ensure your page doesn't "jump" as the testimonials load.
           </LI>
           <LI>
-            <strong>Instant Previews:</strong> See exactly how your widget looks as you tweak
-            colors.
+            <strong>Edge Optimized:</strong> Testimonial assets are served from the global edge,
+            ensuring sub-100ms loading times anywhere in the world.
           </LI>
           <LI>
-            <strong>Zero Code Embeds:</strong> A single script tag that just works.
+            <strong>Solo-Founder Focus:</strong> Every feature is built to save you time, not create
+            more work.
           </LI>
         </UL>
       </section>
 
-      <section className="mb-12">
-        <H3>A Better Submission Experience</H3>
+      <section className="mb-24">
+        <H3>The Final Verdict</H3>
         <P>
-          We've implemented a **multi-step submission engine** (Rating → Text → Photo) that reduces
-          friction. Instead of a long, daunting form, customers are guided through a sleek flow.
-          This has led to a significant increase in completion rates compared to traditional
-          single-page forms.
+          **Choose Senja if:** You have a marketing team of 5+ and need deep CRM integrations or
+          AI-generated video sizzle reels.
         </P>
         <P>
-          Furthermore, we include **in-browser photo cropping** so your customers' profile pictures
-          always look professional on your wall. These "small" details in our implementation make a
-          massive difference in the final social proof you display.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>Technical Edge: Sub-100ms Rendering</H3>
-        <P>
-          Because we use a lean tech stack (Next.js 16, Tailwind v4, and Cloudflare Pages),
-          KudosWall widgets are significantly lighter than Senja's. Our **Edge-rendered widget API**
-          ensures that your Wall of Love loads almost instantly, protecting your site's Core Web
-          Vitals.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>Final Verdict</H3>
-        <P>
-          <strong>Choose Senja if:</strong> You need a massive hub to manage 30+ platform imports
-          and a dedicated video suite.
-        </P>
-        <P>
-          <strong>Choose KudosWall if:</strong> You are a founder who values simplicity, speed, and
-          clean design. We offer a text-focused experience that is simply faster to set up and more
-          elegant to display.
+          **Choose KudosWall if:** You are a solo founder or course creator who wants **world-class
+          branding, 5-minute setup, and predictable pricing** without the growth penalties.
         </P>
       </section>
     </>

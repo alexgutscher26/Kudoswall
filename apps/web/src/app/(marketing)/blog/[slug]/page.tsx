@@ -263,12 +263,14 @@ export default async function BlogPostPage({ params }: { params: Params }) {
             Join 1,000+ founders who switched to KudosWall for better branding and automated
             collection.
           </p>
-          <Button
-            size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold"
-          >
-            Start Your Free Trial
-          </Button>
+          <Link href="/login">
+            <Button
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold"
+            >
+              Start Your Free Trial
+            </Button>
+          </Link>
         </div>
       </div>
       <Footer />
