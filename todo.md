@@ -30,6 +30,44 @@
 21. [📣 Marketing & Content Engine](#21-marketing--content-engine)
 22. [🧪 Testing & Quality Assurance](#22-testing--quality-assurance)
 23. [🌠 Future V2 (Moonshots)](#23-future-v2-moonshots)
+24. [🎯 2026 Competitive Intelligence & Positioning](#24-2026-competitive-intelligence--positioning)
+
+---
+
+## 🎯 24. 2026 Competitive Intelligence & Positioning
+
+### 24.1 Market Scan: Senja (The Platform)
+
+- **Position**: $29/mo Starter tier (Price parity with KudosWall Pro).
+- **Core Strengths**:
+  - **Defensibility**: 30+ platform imports (Shopify, G2, Yelp, etc.).
+  - **Engagement**: "Spin the Wheel" reward system for double collection rates.
+  - **AI**: Auto-transcription, Sentiment Analysis, and Video Sizzle Reels.
+- **Vulnerabilities**:
+  - **Complexity Creep**: No longer "5 mins to first embed."
+  - **Growth Penalty**: $10/mo per extra project, $5/mo per extra seat.
+  - **Unified UI**: Form and widget treated as one; less page/widget customization than KudosWall.
+
+### 24.2 Market Scan: Testimonial.to (The Frictionless Choice)
+
+- **Position**: $20/mo Starter (Text only), $50/mo Premium (Video).
+- **Core Strengths**:
+  - **Low Friction**: Best-in-category collection flow (no login/account).
+  - **SEO**: Structured data (Rich Results) – though locked behind $80/mo tier.
+- **Vulnerabilities**:
+  - **Manual Bottleneck**: No automated email/SMS sequences; collection is always manual.
+  - **Video Tax**: Video testimonials are expensive ($50/mo+).
+  - **Limited UX**: Few display options beyond the "Wall of Love."
+
+### 24.3 Our Revised Positioning
+
+- **The Angle**: Simplicity + Professional Branding + Automation.
+- **Winning Formula**:
+  - **Simplicity**: Live widget in < 8 minutes (beat Senja's complexity).
+  - **Branding**: Visually superior, separate page/widget customization (differentiator vs Senja).
+  - **Automation**: Month 3 Roadmap: Automated testimonial request campaigns (beats Testimonial.to's manual bottleneck).
+- **Key SEO Targets**:
+  - [x] Build `kudoswall.org/vs/senja` and `kudoswall.org/vs/testimonial-to` comparison pages early.
 
 ---
 
@@ -225,11 +263,11 @@
 - [ ] Customer profile view: All testimonials from one person in one timeline
 - [ ] Direct email outreach to customers from the dashboard (via Resend)
 - [ ] "Request update" flow: Ask a customer to re-record or improve their review
-- [ ] Automated reward system: Send discount codes to submitters via Resend
+- [ ] Automated reward system: Send discount codes or "Spin the Wheel" freebies to submitters
 - [ ] Follow-up email sequences for customers who viewed the form but didn't submit
 - [ ] Customer satisfaction score (CSAT) aggregation per account
 
-### 4.4 Testimonial Request Campaigns
+### 4.4 Testimonial Request Campaigns (The "Month 3" Automation Differentiator)
 
 - [ ] Bulk import customer emails (CSV upload)
 - [ ] One-click campaign: Send request emails to an entire customer list
@@ -360,7 +398,7 @@
 
 - [ ] **Free**: 1 collection, 25 testimonials, 1 widget, KudosWall branding
 - [ ] **Starter** ($19/mo): 3 collections, 200 testimonials, 3 widgets, no branding
-- [ ] **Pro** ($49/mo): Unlimited collections, 1000 testimonials, all layouts, AI features
+- [ ] **Pro** ($29/mo): **Competitive Match** - Unlimited collections, 1000 testimonials, all layouts, AI features
 - [ ] **Business** ($99/mo): Video suite, team members (5 seats), custom domain
 - [ ] **Enterprise** (custom): SSO, SCIM, SLA, dedicated support, data residency
 
@@ -434,12 +472,7 @@
 
 - [ ] Google Business Reviews importer (OAuth integration)
 - [ ] Trustpilot connector (API key)
-- [ ] G2 Crowd connector
-- [ ] Capterra import
-- [ ] AppSumo reviews import tool
-- [ ] ProductHunt reviews import tool
-- [ ] Yelp importer
-- [ ] Import from CSV / JSON (universal fallback)
+- [ ] Import from 30+ platforms (Shopify, G2, Yelp, Trustpilot, CSV, etc.)
 - [ ] X/Twitter "Mention to Import" — monitor your @handle and import praise tweets
 - [ ] LinkedIn recommendation importer
 - [ ] App Store & Google Play review importer
@@ -653,6 +686,7 @@
 - [ ] Export as traditional landscape (16:9) for YouTube / website
 - [ ] 1-Click share to LinkedIn, X (Twitter), and Instagram Stories
 - [ ] Video "Wall of Fame" page: Public gallery of video testimonials
+- [ ] Video Sizzle Reels: AI-powered remix of video testimonials into social ads/posts
 - [ ] Video embed code (just the video, without the full wall)
 
 ### 14.3 Video Processing Pipeline
@@ -748,7 +782,7 @@
 
 - [ ] AI Case Study generator: Testimonial → Professional case study page
 - [ ] Public "Wall of Love" directory: SEO-indexed showcase for opted-in brands
-- [ ] Blog / Changelog built with MDX (Next.js static rendering)
+- [x] Blog / Changelog built with MDX (Next.js static rendering)
 - [ ] Customer spotlight pages: Full brand story with embedded wall
 - [ ] "Best review of the week" automated social post (AI-generated)
 
@@ -764,6 +798,7 @@
 - [ ] Freemium funnel: New user → first testimonial in < 5 minutes
 - [ ] In-app upgrade prompts at the exact moment value is felt (after 3rd testimonial)
 - [ ] Shareable "My Reviews" public profile page per user (SEO + virality)
+- [ ] Build `/vs/senja` and `/vs/testimonial-to` comparison pages (Target "Senja alternative")
 - [ ] Product Hunt launch prep: Hunter outreach, teaser assets, Golden Kitty strategy
 
 ---

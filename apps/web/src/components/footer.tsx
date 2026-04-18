@@ -1,14 +1,36 @@
+import Link from "next/link";
+
 const PRODUCT_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Blog", href: "/blog" },
 ] as const;
 
-const COMPANY_LINKS = [{ label: "Twitter / X", href: "https://twitter.com" }] as const;
+const ALTERNATIVES_LINKS = [
+  { label: "vs Senja", href: "/vs/senja" },
+  { label: "vs Testimonial.to", href: "/vs/testimonial-to" },
+  { label: "Affordable Senja Alternatives", href: "/blog/affordable-senja-alternative" },
+  { slug: "kudoswall-vs-senja", label: "KudosWall vs Senja", href: "/blog/kudoswall-vs-senja" },
+] as const;
+
+const PLATFORM_LINKS = [
+  { label: "For Teachable Creators", href: "/blog/best-testimonial-tools-teachable" },
+  { label: "For Kajabi Creators", href: "/blog/best-testimonial-tools-kajabi" },
+  { label: "For Gumroad Sellers", href: "/blog/best-testimonial-tools-gumroad" },
+  { label: "For Course Creators", href: "/blog/testimonial-to-alternative-course-creators" },
+] as const;
+
+const RESOURCES_LINKS = [
+  { label: "Free Testimonial Widgets", href: "/blog/free-testimonial-widget-comparison" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "DPA (Data Processing)", href: "/dpa" },
+] as const;
 
 export default function Footer() {
   return (
     <footer
-      className="relative overflow-hidden border-t border-neutral-200 px-4 py-14"
+      className="relative overflow-hidden border-t border-neutral-200 px-4 py-16"
       style={{ backgroundColor: "#ffffff" }}
     >
       {/* Dot-grid texture */}
@@ -20,107 +42,121 @@ export default function Footer() {
           backgroundSize: "20px 20px",
         }}
       />
-      <div className="relative mx-auto max-w-5xl">
-        <div className="mb-12 grid grid-cols-2 gap-10 md:grid-cols-4">
+      <div className="relative mx-auto max-w-6xl">
+        <div className="mb-16 grid grid-cols-2 gap-10 md:grid-cols-5">
           {/* Brand */}
-          <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
-            <a
+          <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
+            <Link
               href="/"
-              className="text-xl font-bold text-neutral-900"
+              className="text-2xl font-bold text-neutral-900"
               style={{ fontFamily: "'Georgia', serif" }}
             >
               KudosWall
-            </a>
+            </Link>
             <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
-              The easiest way to collect and display beautiful customer testimonials.
+              Transform happy customers into your best sales tool in under 5 minutes.
             </p>
           </div>
 
           {/* Product */}
           <div>
-            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
+            <p className="mb-5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
               Product
             </p>
-            <ul className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-3">
               {PRODUCT_LINKS.map(({ label, href }) => (
                 <li key={label}>
-                  <a
+                  <Link
                     href={href}
-                    className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
                   >
                     {label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Connect */}
+          {/* Alternatives */}
           <div>
-            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-              Connect
+            <p className="mb-5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+              Alternatives
             </p>
-            <ul className="flex flex-col gap-2.5">
-              {COMPANY_LINKS.map(({ label, href }) => (
+            <ul className="flex flex-col gap-3">
+              {ALTERNATIVES_LINKS.map(({ label, href }) => (
                 <li key={label}>
-                  <a
+                  <Link
                     href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
                   >
                     {label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Platforms */}
           <div>
-            <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-              Legal
+            <p className="mb-5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+              Use Cases
             </p>
-            <ul className="flex flex-col gap-2.5">
-              <li>
-                <a
-                  href="/privacy"
-                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
-                >
-                  Privacy policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/terms"
-                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
-                >
-                  Terms of service
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/dpa"
-                  className="text-sm text-neutral-600 transition-colors hover:text-neutral-900"
-                >
-                  DPA (Data Processing)
-                </a>
-              </li>
+            <ul className="flex flex-col gap-3">
+              {PLATFORM_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal / Resources */}
+          <div>
+            <p className="mb-5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+              Resources
+            </p>
+            <ul className="flex flex-col gap-3">
+              {RESOURCES_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col items-center justify-between gap-6 border-t border-neutral-100 pt-8 sm:flex-row">
-          <div className="flex flex-col gap-1 text-center sm:text-left">
-            <p className="text-xs font-bold text-neutral-900">Built by Alex G.</p>
-            <p className="max-w-xs text-xs text-neutral-400">
-              A solo founder who got tired of ugly testimonial widgets.
+        <div className="flex flex-col items-center justify-between gap-8 border-t border-neutral-100 pt-10 sm:flex-row">
+          <div className="flex items-center gap-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-bold text-white">
+              AG
+            </div>
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-neutral-900">Crafted by Alex G.</p>
+              <p className="text-[10px] text-neutral-400">Solo Founder • Software Engineer</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link
+              href="https://twitter.com"
+              className="text-xs text-neutral-400 transition-colors hover:text-neutral-900"
+            >
+              Twitter
+            </Link>
+            <p className="text-[10px] font-medium text-neutral-300">
+              © {new Date().getFullYear()} KudosWall. All rights reserved.
             </p>
           </div>
-          <p className="text-xs text-neutral-400">
-            © {new Date().getFullYear()} KudosWall. All rights reserved.
-          </p>
         </div>
       </div>
     </footer>
