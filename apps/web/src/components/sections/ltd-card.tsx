@@ -9,7 +9,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
 
-export default function LTDCard() {
+interface LTDCardProps {
+  ltdPriceId?: string;
+}
+
+export default function LTDCard({ ltdPriceId }: LTDCardProps) {
   const { data: session, isPending: isSessionLoading } = authClient.useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -73,9 +77,6 @@ export default function LTDCard() {
       );
       return;
     }
-
-    const { env } = require("@my-better-t-app/env/web");
-    const ltdPriceId = env.NEXT_PUBLIC_STRIPE_LTD_PRICE_ID;
 
     if (!ltdPriceId) {
       toast.error("Lifetime billing not configured yet.");

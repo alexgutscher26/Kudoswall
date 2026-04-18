@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import LTDCard from "./ltd-card";
 import PricingGrid from "./pricing-grid";
+import { PLANS as CONFIG_PLANS } from "@my-better-t-app/api/config/plans";
 
 interface Plan {
   id: "free" | "plan_1" | "plan_2" | "ltd";
@@ -15,9 +16,12 @@ interface Plan {
   features: string[];
   badge?: string;
   isComingSoon?: boolean;
+  stripePriceIdMonthly?: string;
+  stripePriceIdYearly?: string;
+  stripePriceIdLifetime?: string;
 }
 
-const PLANS: Plan[] = [
+const UI_PLANS: Plan[] = [
   {
     id: "free",
     name: "Free",
@@ -81,6 +85,16 @@ const PLANS: Plan[] = [
   },
 ];
 
+const PLANS = UI_PLANS.map((plan) => {
+  const config = CONFIG_PLANS[plan.id as keyof typeof CONFIG_PLANS];
+  return {
+    ...plan,
+    stripePriceIdMonthly: config?.stripePriceIdMonthly,
+    stripePriceIdYearly: config?.stripePriceIdYearly,
+    stripePriceIdLifetime: config?.stripePriceIdLifetime,
+  };
+});
+
 export default function PricingSection() {
   return (
     <section
@@ -122,7 +136,7 @@ export default function PricingSection() {
             <div className="mb-14 h-[400px] w-full animate-pulse rounded-[2.2rem] bg-neutral-100" />
           }
         >
-          <LTDCard />
+          <LTDCard ltdPriceId={CONFIG_PLANS.ltd.stripePriceIdLifetime} />
         </Suspense>
 
         {/* Pricing Grid (includes Billing Switcher) */}

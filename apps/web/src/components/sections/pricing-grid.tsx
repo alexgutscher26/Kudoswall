@@ -22,6 +22,9 @@ interface Plan {
   features: string[];
   badge?: string;
   isComingSoon?: boolean;
+  stripePriceIdMonthly?: string;
+  stripePriceIdYearly?: string;
+  stripePriceIdLifetime?: string;
 }
 
 interface PricingGridProps {
@@ -62,16 +65,12 @@ export default function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
-    // Getting the stripePriceId from the config (via require inside the handler to avoid env issues)
-    const { PLANS } = require("@my-better-t-app/api/config/plans");
-    const planConfig = PLANS[plan.id];
-
     const priceId =
       plan.id === "ltd"
-        ? planConfig?.stripePriceIdLifetime
+        ? plan.stripePriceIdLifetime
         : billingCycle === "monthly"
-          ? planConfig?.stripePriceIdMonthly
-          : planConfig?.stripePriceIdYearly;
+          ? plan.stripePriceIdMonthly
+          : plan.stripePriceIdYearly;
 
     if (!priceId) {
       toast.error("Billing not configured for this plan yet.");
