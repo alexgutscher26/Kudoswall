@@ -10,7 +10,9 @@ import { Card } from "@my-better-t-app/ui/components/card";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
 
-export default function ResetPasswordPage() {
+import { Suspense } from "react";
+
+function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -152,5 +154,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPassword />
+    </Suspense>
   );
 }
