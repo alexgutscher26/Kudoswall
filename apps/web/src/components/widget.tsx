@@ -39,6 +39,8 @@ interface WidgetProps {
       locale?: string;
       maxWidth?: number | null;
       fontFamily?: string;
+      customFontUrl?: string;
+      customFontName?: string;
       headerTitle?: string;
       headerRating?: number;
       headerReviewCount?: number;
@@ -305,6 +307,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   // Resolve fontFamily to a valid CSS font-family stack
   const resolvedFontFamily = (() => {
     const f = settings.fontFamily;
+    if (f === "custom" && settings.customFontUrl) return "'CustomFont', sans-serif";
     if (!f || f === "sans") return undefined;
     if (f === "serif") return "ui-serif, Georgia, serif";
     if (f === "mono") return "ui-monospace, 'Cascadia Code', monospace";

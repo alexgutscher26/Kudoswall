@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
+import { UploadButton } from "@/utils/uploadthing";
+import { Type } from "lucide-react";
 
 interface CollectionCustomizerProps {
   project: {
@@ -52,6 +54,8 @@ export type CollectionSettings = {
   accentColor: string;
   backgroundColor: string;
   fontFamily: string;
+  customFontUrl?: string;
+  customFontName?: string;
   form: {
     fields: {
       fullName: { enabled: boolean; required: boolean; label: string; placeholder: string };
@@ -464,7 +468,49 @@ export function CollectionCustomizer({
                       <option value="Jost">Jost</option>
                       <option value="Fraunces">Fraunces</option>
                     </optgroup>
+                    <optgroup label="Custom Branding">
+                      <option value="custom">Custom Font (.woff2)</option>
+                    </optgroup>
                   </select>
+
+                  {settings.fontFamily === "custom" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 mt-2 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-3 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold tracking-tighter text-neutral-400 uppercase">
+                          Upload .woff2
+                        </span>
+                        {settings.customFontUrl && (
+                          <span className="text-[10px] font-bold text-emerald-500">Ready</span>
+                        )}
+                      </div>
+                      <UploadButton
+                        endpoint="fontUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res?.[0]) {
+                            setNestedSetting("customFontUrl", res[0].url);
+                            setNestedSetting("customFontName", res[0].name.replace(".woff2", ""));
+                            toast.success("Font uploaded!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Error: ${error.message}`);
+                        }}
+                        appearance={{
+                          button:
+                            "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                          allowedContent: "hidden",
+                        }}
+                      />
+                      {settings.customFontName && (
+                        <div className="flex items-center gap-2 truncate overflow-hidden rounded-lg border border-neutral-100 bg-white px-2 py-1.5">
+                          <Type className="size-3 shrink-0 text-neutral-400" />
+                          <span className="truncate text-[10px] font-bold text-neutral-600">
+                            {settings.customFontName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1150,27 +1196,48 @@ export function CollectionCustomizer({
         style={{
           backgroundColor: settings.backgroundColor,
           fontFamily:
-            settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-              ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
-              : settings?.fontFamily === "mono"
-                ? "monospace"
-                : settings?.fontFamily === "serif"
-                  ? "serif"
-                  : "var(--font-sans), sans-serif",
+            settings?.fontFamily === "custom" && settings.customFontUrl
+              ? "'CustomFont', sans-serif"
+              : settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+                ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+                : settings?.fontFamily === "mono"
+                  ? "monospace"
+                  : settings?.fontFamily === "serif"
+                    ? "serif"
+                    : "var(--font-sans), sans-serif",
         }}
       >
-        {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+        {settings?.fontFamily === "custom" && settings.customFontUrl && (
           <style
             dangerouslySetInnerHTML={{
               __html: `
-                @import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');
+                @font-face {
+                  font-family: 'CustomFont';
+                  src: url('${settings.customFontUrl}') format('woff2');
+                  font-weight: 300 900;
+                  font-style: normal;
+                  font-display: swap;
+                }
                 #collection-preview-area, #collection-preview-area * {
-                  font-family: inherit !important;
+                  font-family: 'CustomFont', system-ui, sans-serif !important;
                 }
               `,
             }}
           />
         )}
+        {settings?.fontFamily &&
+          !["sans", "serif", "mono", "custom"].includes(settings.fontFamily) && (
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                @import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');
+                #collection-preview-area, #collection-preview-area * {
+                  font-family: inherit !important;
+                }
+              `,
+              }}
+            />
+          )}
         <div className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-neutral-200 bg-white/80 px-5 py-1.5 shadow-sm backdrop-blur-md">
           <div className="mr-1 flex items-center gap-2 border-r border-neutral-100 pr-3">
             <Eye className="size-3.5 text-pink-500" />

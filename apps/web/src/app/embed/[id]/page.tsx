@@ -34,8 +34,12 @@ export default async function EmbedPage({
 
   // Derive font link server-side so it's in the HTML before React hydrates (no FOUF)
   const fontFamily = settings.fontFamily as string | undefined;
-  const isCustomFont = Boolean(fontFamily && !["sans", "serif", "mono"].includes(fontFamily));
-  const fontHref = isCustomFont
+  const isGoogleFont = Boolean(
+    fontFamily && !["sans", "serif", "mono", "custom"].includes(fontFamily),
+  );
+  const isCustomFont = fontFamily === "custom" && settings.customFontUrl;
+
+  const fontHref = isGoogleFont
     ? `https://fonts.googleapis.com/css2?family=${(fontFamily as string).replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`
     : null;
 
@@ -156,12 +160,20 @@ export default async function EmbedPage({
         dangerouslySetInnerHTML={{
           __html: [
             "html, body { background: transparent !important; }",
-            // Override Tailwind's font-sans (applied via class on many elements).
-            // Using * + !important is the only reliable fix inside an iframe
-            // where we cannot control the parent stylesheet specificity.
             isCustomFont
-              ? `*, *::before, *::after { font-family: "${fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important; }`
-              : "",
+              ? `
+                @font-face {
+                  font-family: 'CustomFont';
+                  src: url('${settings.customFontUrl}') format('woff2');
+                  font-weight: 300 900;
+                  font-style: normal;
+                  font-display: swap;
+                }
+                *, *::before, *::after { font-family: 'CustomFont', system-ui, sans-serif !important; }
+              `
+              : isGoogleFont
+                ? `*, *::before, *::after { font-family: "${fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important; }`
+                : "",
           ]
             .filter(Boolean)
             .join("\n"),

@@ -46,6 +46,9 @@ const widgetSettingsSchema = z.object({
   // Advanced
   locale: z.string().default("en"),
   animation: z.enum(["fade", "none"]).default("fade"),
+  fontFamily: z.string().default("sans"),
+  customFontUrl: z.string().optional(),
+  customFontName: z.string().optional(),
   headerTitle: z.string().optional(),
   headerRating: z.number().optional(),
   headerReviewCount: z.number().optional(),

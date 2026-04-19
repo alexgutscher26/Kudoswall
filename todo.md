@@ -170,7 +170,7 @@
 - [x] Custom primary color / accent color applied to CTA buttons
 - [x] Custom "Thank You" page with configurable CTA button
 - [x] 35+ Google Fonts selectable and dynamically loaded
-- [ ] Upload custom `.woff2` font file for 100% brand match
+- [x] Upload custom `.woff2` font file for 100% brand match
 - [ ] Full custom CSS override textarea for advanced users
 - [ ] Branded Favicon for collection page tab
 - [ ] Custom domain for collection page (`reviews.yourbrand.com`)
@@ -924,7 +924,7 @@
 - [ ] Load test collection submission endpoint (1000 concurrent submitters)
 - [ ] Load test widget API endpoint (10,000 req/sec)
 - [ ] Measure and budget widget first-paint time per layout
-- [ ] Lighthouse CI on every PR for marketing pages
+- [x] Lighthouse CI on every PR for marketing pages
 
 ### 22.4 Accessibility Testing
 

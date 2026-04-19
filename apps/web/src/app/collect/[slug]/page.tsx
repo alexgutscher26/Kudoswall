@@ -218,25 +218,43 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   return (
     <>
       <JsonLd data={jsonLd} />
-      {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+      {settings?.fontFamily === "custom" && settings.customFontUrl && (
         <style
           dangerouslySetInnerHTML={{
-            __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');`,
+            __html: `
+              @font-face {
+                font-family: 'CustomFont';
+                src: url('${settings.customFontUrl}') format('woff2');
+                font-weight: 300 900;
+                font-style: normal;
+                font-display: swap;
+              }
+            `,
           }}
         />
       )}
+      {settings?.fontFamily &&
+        !["sans", "serif", "mono", "custom"].includes(settings.fontFamily) && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');`,
+            }}
+          />
+        )}
       <main
         className="collect-main relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
         style={{
           backgroundColor,
           fontFamily:
-            settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
-              ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
-              : settings?.fontFamily === "mono"
-                ? "monospace"
-                : settings?.fontFamily === "serif"
-                  ? "serif"
-                  : "var(--font-sans), sans-serif",
+            settings?.fontFamily === "custom" && settings.customFontUrl
+              ? "'CustomFont', sans-serif"
+              : settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+                ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+                : settings?.fontFamily === "mono"
+                  ? "monospace"
+                  : settings?.fontFamily === "serif"
+                    ? "serif"
+                    : "var(--font-sans), sans-serif",
         }}
       >
         {/* Background patterns */}

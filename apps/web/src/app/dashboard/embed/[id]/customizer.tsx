@@ -21,11 +21,13 @@ import {
   ArrowRight,
   Save,
   Loader2,
+  Type,
   MoreHorizontal,
   Lock,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
+import { UploadButton } from "@/utils/uploadthing";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Widget from "@/components/widget";
@@ -68,6 +70,8 @@ export interface WidgetSettings {
   locale: string;
   animation: "fade" | "none";
   fontFamily: string;
+  customFontUrl?: string;
+  customFontName?: string;
 
   // Header
   headerTitle: string;
@@ -163,11 +167,32 @@ export default function WidgetCustomizer({
     setOrigin(window.location.origin);
   }, []);
 
-  // Dynamically load the Google Font in the customizer preview whenever fontFamily changes.
-  // Uses an idempotent link-injection pattern so rapid font switches don't pile up requests.
+  // Dynamically load the Google Font or Custom Font in the customizer preview whenever fontFamily changes.
   useEffect(() => {
-    const { fontFamily } = settings;
-    if (!fontFamily || ["sans", "serif", "mono"].includes(fontFamily)) return;
+    const { fontFamily, customFontUrl } = settings;
+    if (!fontFamily) return;
+
+    if (fontFamily === "custom" && customFontUrl) {
+      const linkId = "kudos-custom-font";
+      let style = document.getElementById(linkId) as HTMLStyleElement;
+      if (!style) {
+        style = document.createElement("style");
+        style.id = linkId;
+        document.head.appendChild(style);
+      }
+      style.innerHTML = `
+        @font-face {
+          font-family: 'CustomFont';
+          src: url('${customFontUrl}') format('woff2');
+          font-weight: 300 900;
+          font-style: normal;
+          font-display: swap;
+        }
+      `;
+      return;
+    }
+
+    if (["sans", "serif", "mono"].includes(fontFamily)) return;
     const linkId = `kudos-preview-font-${fontFamily.replace(/\s+/g, "-")}`.toLowerCase();
     if (document.getElementById(linkId)) return; // already injected
     const link = document.createElement("link");
@@ -175,7 +200,7 @@ export default function WidgetCustomizer({
     link.rel = "stylesheet";
     link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
     document.head.appendChild(link);
-  }, [settings.fontFamily]);
+  }, [settings.fontFamily, settings.customFontUrl]);
 
   const embedCode = `<script src="${origin || "https://kudoswall.org"}/widget.js" 
   data-id="${widgetId}" 
@@ -708,6 +733,7 @@ export default function WidgetCustomizer({
                       { id: "serif", label: "Serif" },
                       { id: "Outfit", label: "Outfit" },
                       { id: "Playfair Display", label: "Elegant" },
+                      { id: "custom", label: "Custom Font" },
                     ].map((f) => (
                       <button
                         key={f.id}
@@ -722,6 +748,48 @@ export default function WidgetCustomizer({
                       </button>
                     ))}
                   </div>
+
+                  {settings.fontFamily === "custom" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 mt-2 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-3 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold tracking-tighter text-neutral-400 uppercase">
+                          Upload .woff2
+                        </span>
+                        {settings.customFontUrl && (
+                          <span className="text-[10px] font-bold text-emerald-500">Ready</span>
+                        )}
+                      </div>
+                      <UploadButton
+                        endpoint="fontUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res?.[0]) {
+                            setSettings((s) => ({
+                              ...s,
+                              customFontUrl: res[0].url,
+                              customFontName: res[0].name.replace(".woff2", ""),
+                            }));
+                            toast.success("Font uploaded!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Error: ${error.message}`);
+                        }}
+                        appearance={{
+                          button:
+                            "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                          allowedContent: "hidden",
+                        }}
+                      />
+                      {settings.customFontName && (
+                        <div className="flex items-center gap-2 truncate overflow-hidden rounded-lg border border-neutral-100 bg-white px-2 py-1.5">
+                          <Type className="size-3 shrink-0 text-neutral-400" />
+                          <span className="truncate text-[10px] font-bold text-neutral-600">
+                            {settings.customFontName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* White Label */}
