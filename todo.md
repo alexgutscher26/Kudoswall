@@ -173,9 +173,9 @@
 - [x] Upload custom `.woff2` font file for 100% brand match
 - [ ] Full custom CSS override textarea for advanced users
 - [ ] Branded Favicon for collection page tab
-- [ ] Custom domain for collection page (`reviews.yourbrand.com`)
+- [x] Custom domain for collection page (`reviews.yourbrand.com`)
 - [ ] Custom email "From" name for submission confirmation emails
-- [ ] Remove "Powered by KudosWall" badge (paid plan)
+- [x] Remove "Powered by KudosWall" badge (paid plan)
 - [ ] Custom background (solid color, gradient, or image upload)
 - [ ] Animated gradient background option for high-end feel
 
