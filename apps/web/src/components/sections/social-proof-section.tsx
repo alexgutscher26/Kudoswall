@@ -33,7 +33,7 @@ export default function SocialProofSection() {
 
         {/* The Widget Area */}
         <div className="relative mx-auto max-w-5xl">
-          <WidgetLoader widgetId="88f80210-7c57-4b9b-bb8f-d5e18804320f" />
+          <WidgetLoader widgetId="b219c7ea-dd8d-46f4-866e-faef05a48e8d" />
         </div>
       </div>
     </section>
