@@ -19,6 +19,7 @@ import { Card } from "@my-better-t-app/ui/components/card";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
+import Link from "next/link";
 
 type AuthTab = "standard" | "magic-link";
 
@@ -161,12 +162,12 @@ function LoginForm() {
                     >
                       Password
                     </Label>
-                    <a
-                      href="#"
+                    <Link
+                      href="/forgot-password"
                       className="text-[9px] font-black text-pink-500 uppercase hover:text-pink-600"
                     >
                       Forgot?
-                    </a>
+                    </Link>
                   </div>
                   <div className="relative">
                     <Input

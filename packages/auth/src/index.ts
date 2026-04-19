@@ -42,6 +42,15 @@ export function createAuth() {
 
     emailAndPassword: {
       enabled: true,
+      sendResetPassword: async ({ user, url }) => {
+        await emailService.resend.emails.send({
+          from: "Alex from KudosWall <alex@kudoswall.org>",
+          to: user.email,
+          subject: "Reset your KudosWall password",
+          html: `<p>Click <a href="${url}">here</a> to reset your KudosWall password.</p>`,
+        });
+        console.log(`[Reset Password] Link sent to ${user.email}`);
+      },
     },
 
     socialProviders: {

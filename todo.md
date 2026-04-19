@@ -34,43 +34,6 @@
 
 ---
 
-## 🎯 24. 2026 Competitive Intelligence & Positioning
-
-### 24.1 Market Scan: Senja (The Platform)
-
-- **Position**: $29/mo Starter tier (Price parity with KudosWall Pro).
-- **Core Strengths**:
-  - **Defensibility**: 30+ platform imports (Shopify, G2, Yelp, etc.).
-  - **Engagement**: "Spin the Wheel" reward system for double collection rates.
-  - **AI**: Auto-transcription, Sentiment Analysis, and Video Sizzle Reels.
-- **Vulnerabilities**:
-  - **Complexity Creep**: No longer "5 mins to first embed."
-  - **Growth Penalty**: $10/mo per extra project, $5/mo per extra seat.
-  - **Unified UI**: Form and widget treated as one; less page/widget customization than KudosWall.
-
-### 24.2 Market Scan: Testimonial.to (The Frictionless Choice)
-
-- **Position**: $20/mo Starter (Text only), $50/mo Premium (Video).
-- **Core Strengths**:
-  - **Low Friction**: Best-in-category collection flow (no login/account).
-  - **SEO**: Structured data (Rich Results) – though locked behind $80/mo tier.
-- **Vulnerabilities**:
-  - **Manual Bottleneck**: No automated email/SMS sequences; collection is always manual.
-  - **Video Tax**: Video testimonials are expensive ($50/mo+).
-  - **Limited UX**: Few display options beyond the "Wall of Love."
-
-### 24.3 Our Revised Positioning
-
-- **The Angle**: Simplicity + Professional Branding + Automation.
-- **Winning Formula**:
-  - **Simplicity**: Live widget in < 8 minutes (beat Senja's complexity).
-  - **Branding**: Visually superior, separate page/widget customization (differentiator vs Senja).
-  - **Automation**: Month 3 Roadmap: Automated testimonial request campaigns (beats Testimonial.to's manual bottleneck).
-- **Key SEO Targets**:
-  - [x] Build `kudoswall.org/vs/senja` and `kudoswall.org/vs/testimonial-to` comparison pages early.
-
----
-
 ## 🏛️ 1. Core Foundation & Infrastructure
 
 ### 1.1 Project & Tooling Setup
