@@ -113,17 +113,17 @@
 
 ### 2.3 Multi-tenancy Architecture
 
-- [ ] Workspace-based architecture with unique URL slugs
-- [ ] Workspace switcher UI in the top navigation bar
+- [x] Workspace-based architecture with unique URL slugs
+- [x] Workspace switcher UI in the top navigation bar
 - [ ] Row-level security (RLS) / tenant isolation at the ORM layer
-- [ ] Custom subdomain per workspace (`customer.kudoswall.com`)
+- [x] Custom subdomain per workspace (`customer.kudoswall.com`)
 - [ ] Workspace-level settings page (name, logo, timezone, language)
 - [ ] Organization-wide billing: One subscription covers all workspaces
 
 ### 2.4 Team Collaboration & RBAC
 
 - [ ] Invite team members via email link or auto-capture company domain
-- [ ] Granular role system: Owner, Admin, Editor, Moderator, Viewer
+- [x] Granular role system: Owner, Admin, Editor, Moderator, Viewer
 - [ ] Custom permission sets per role (e.g., can-approve, can-delete)
 - [ ] Activity feed: See what teammates are working on in real-time
 - [ ] In-app commenting system for team discussions on specific testimonials
@@ -941,7 +941,6 @@
 - [ ] **AI Interviewer**: AI video avatar asks smart follow-up questions to customers live
 - [ ] **Interactive Storybook**: TikTok-style swipeable Stories for web testimonials
 - [ ] **Social Proof Live Feed**: Real-time toast popups ("Alex from Seattle just left a 5★ review")
-- [ ] **Testimonial NFTs**: Mint top testimonials as digital collector items for brand advocates
 - [ ] **Testimonial Marketplace**: Allow brands to discover and feature industry testimonials from a curated pool
 - [ ] **Sentiment Trend Alerts**: "Your satisfaction score dropped 12% this month — here's why"
 - [ ] **AI Brand Voice Trainer**: Learn your brand's tone and rewrite testimonials to match
@@ -966,12 +965,11 @@
 
 ### 🟠 High (This Month)
 
-- [ ] Implement Stripe Checkout for billing / plan gating
+- [x] Implement Stripe Checkout for billing / plan gating
 - [ ] Add "Read more / Read less" to long text testimonials in widgets
 - [ ] Build Bento Grid layout for widgets
 - [ ] Add filter bar to the testimonial inbox (by rating, type, tag)
 - [ ] Write Playwright E2E tests for the core submission flow
-- [ ] Implement 2FA (TOTP) for user accounts
 
 ### 🟡 Medium (Next Quarter)
 

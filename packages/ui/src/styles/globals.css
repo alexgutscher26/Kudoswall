@@ -129,4 +129,12 @@
   html {
     @apply font-sans;
   }
+
+  /* Hide sidebar and remove margin when modal is open */
+  body[data-modal-open="true"] .dashboard-sidebar {
+    display: none !important;
+  }
+  body[data-modal-open="true"] .dashboard-content {
+    margin-left: 0 !important;
+  }
 }

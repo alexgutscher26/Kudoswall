@@ -538,6 +538,20 @@ export default function DashboardShell({
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+  const [isBodyModalOpen, setIsBodyModalOpen] = useState(false);
+
+  // Sync with body attribute (for modals in children like WidgetList)
+  useEffect(() => {
+    const check = () => {
+      setIsBodyModalOpen(document.body.getAttribute("data-modal-open") === "true");
+    };
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-modal-open"] });
+    check(); // Initial
+    return () => observer.disconnect();
+  }, []);
+
+  const anyModalOpen = isBodyModalOpen || newCollectionOpen;
   const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
@@ -644,25 +658,27 @@ export default function DashboardShell({
 
       <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
         {/* Desktop sidebar */}
-        <DesktopSidebar
-          userName={userName}
-          userEmail={userEmail}
-          onSignOut={handleSignOut}
-          onNewCollection={() => setNewCollectionOpen(true)}
-          currentWorkspaceId={activeWorkspaceId}
-          plan={activeData?.workspace.plan}
-          onWorkspaceChange={(id) => {
-            setActiveWorkspaceId(id);
-            const params = new URLSearchParams(searchParams.toString());
-            params.set("workspaceId", id);
-            // Clear project-specific params that won't exist in the new workspace
-            params.delete("project");
+        {!anyModalOpen && (
+          <DesktopSidebar
+            userName={userName}
+            userEmail={userEmail}
+            onSignOut={handleSignOut}
+            onNewCollection={() => setNewCollectionOpen(true)}
+            currentWorkspaceId={activeWorkspaceId}
+            plan={activeData?.workspace.plan}
+            onWorkspaceChange={(id) => {
+              setActiveWorkspaceId(id);
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("workspaceId", id);
+              // Clear project-specific params that won't exist in the new workspace
+              params.delete("project");
 
-            // Stay on current page if it's a dashboard page, otherwise go to overview
-            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
-            router.push(`${targetPath}?${params.toString()}` as any);
-          }}
-        />
+              // Stay on current page if it's a dashboard page, otherwise go to overview
+              const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+              router.push(`${targetPath}?${params.toString()}` as any);
+            }}
+          />
+        )}
 
         {/* Mobile drawer */}
         <MobileDrawer
@@ -693,8 +709,10 @@ export default function DashboardShell({
           workspaceSlug={activeData?.workspace.slug || "loading"}
         />
 
-        {/* Main content — offset only on lg+ */}
-        <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
+        {/* Main content — offset only on lg+ and when sidebar is visible */}
+        <div
+          className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden ${anyModalOpen ? "" : "lg:ml-60"}`}
+        >
           <DotGrid opacity={0.08} />
 
           {/* Soft central glow */}
