@@ -622,8 +622,8 @@
 
 - [ ] Integrate Snyk or GitHub Advanced Security for dependency scanning
 - [ ] Weekly automated `npm audit` report to team Slack channel
-- [ ] Security.txt file at `/.well-known/security.txt`
-- [ ] Responsible disclosure policy and bug bounty program page
+- [x] Security.txt file at `/.well-known/security.txt`
+- [x] Responsible disclosure policy
 
 ---
 

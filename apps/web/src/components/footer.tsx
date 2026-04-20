@@ -25,6 +25,7 @@ const RESOURCES_LINKS = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
   { label: "DPA (Data Processing)", href: "/dpa" },
+  { label: "Security", href: "/security/responsible-disclosure" },
 ] as const;
 
 export default function Footer() {

@@ -211,6 +211,12 @@ export default function PrivacyPage() {
             >
               DPA
             </Link>
+            <Link
+              href="/security/responsible-disclosure"
+              className="text-[13px] font-bold text-neutral-400 transition-colors hover:text-neutral-900"
+            >
+              Security
+            </Link>
           </div>
         </div>
       </footer>
