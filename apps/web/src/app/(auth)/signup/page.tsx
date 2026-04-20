@@ -21,30 +21,25 @@ function SignupForm() {
   const handleSignup = async () => {
     if (!name || !email || !password) return toast.error("Please fill in all fields");
     setLoading(true);
-    try {
-      await authClient.signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: redirect,
-      });
+    const { error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+      callbackURL: redirect,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message ?? "Failed to create account");
+    } else {
       toast.success("Account created! Welcome to KudosWall.");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to create account");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
-    try {
-      await authClient.signIn.social({ provider, callbackURL: redirect });
-    } catch (e: any) {
-      toast.error(e.message || "Social signup failed");
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await authClient.signIn.social({ provider, callbackURL: redirect });
+    setLoading(false);
+    if (error) toast.error(error.message ?? "Social signup failed");
   };
 
   return (

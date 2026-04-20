@@ -538,20 +538,9 @@ export default function DashboardShell({
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
-  const [isBodyModalOpen, setIsBodyModalOpen] = useState(false);
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false);
 
-  // Sync with body attribute (for modals in children like WidgetList)
-  useEffect(() => {
-    const check = () => {
-      setIsBodyModalOpen(document.body.getAttribute("data-modal-open") === "true");
-    };
-    const observer = new MutationObserver(check);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["data-modal-open"] });
-    check(); // Initial
-    return () => observer.disconnect();
-  }, []);
-
-  const anyModalOpen = isBodyModalOpen || newCollectionOpen;
+  const anyModalOpen = isChildModalOpen || newCollectionOpen;
   const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
@@ -646,6 +635,8 @@ export default function DashboardShell({
     <WorkspaceProvider
       activeWorkspaceId={activeWorkspaceId}
       setActiveWorkspaceId={setActiveWorkspaceId}
+      isModalOpen={isChildModalOpen}
+      setIsModalOpen={setIsChildModalOpen}
     >
       {/* Live Data Poller (Client Only) */}
       {isMounted && (

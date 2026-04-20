@@ -33,25 +33,20 @@ function LoginForm() {
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
-    try {
-      await authClient.signIn.social({ provider, callbackURL: redirect });
-    } catch (e: any) {
-      toast.error(e.message || "Failed to sign in");
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await authClient.signIn.social({ provider, callbackURL: redirect });
+    setLoading(false);
+    if (error) toast.error(error.message ?? "Failed to sign in");
   };
 
   const handlePasswordLogin = async () => {
     if (!email || !password) return toast.error("Enter both email and password");
     setLoading(true);
-    try {
-      await authClient.signIn.email({ email, password, callbackURL: redirect });
+    const { error } = await authClient.signIn.email({ email, password, callbackURL: redirect });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message ?? "Invalid credentials");
+    } else {
       toast.success("Welcome back!");
-    } catch (e: any) {
-      toast.error(e.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -226,14 +221,13 @@ function LoginForm() {
                   className="h-12 w-full rounded-xl bg-[#e8527a] text-xs font-black tracking-widest text-white uppercase shadow-lg shadow-pink-500/10 transition-all hover:bg-[#d44169] active:scale-[0.98]"
                   onClick={async () => {
                     setLoading(true);
-                    try {
-                      await authClient.signIn.magicLink({ email, callbackURL: redirect });
-                      toast.success("Check your email!");
-                    } catch (e: any) {
-                      toast.error(e.message);
-                    } finally {
-                      setLoading(false);
-                    }
+                    const { error } = await authClient.signIn.magicLink({
+                      email,
+                      callbackURL: redirect,
+                    });
+                    setLoading(false);
+                    if (error) toast.error(error.message ?? "Failed to send magic link");
+                    else toast.success("Check your email!");
                   }}
                   disabled={loading}
                 >

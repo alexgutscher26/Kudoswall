@@ -197,7 +197,7 @@
 - [x] Tag assignment to testimonials
 - [x] Tag persistence across API queries (testimonialToTags relation included)
 - [ ] Real-time inbox (WebSocket or SSE) — new submissions appear instantly
-- [ ] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
+- [x] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
 - [ ] Search bar: Filter by customer name, email, company, or keyword
 - [ ] Advanced filter panel: By rating (1-5), by type (Text/Video), by tag, by language, by date range
 - [ ] Bulk actions: Approve all, Reject all, Tag selected, Export selected, Delete selected
@@ -348,22 +348,22 @@
 
 ### 7.1 Subscription Foundation
 
-- [ ] Stripe Checkout integration for plan onboarding
-- [ ] Monthly vs. Yearly billing cycle toggle with savings badge ("Save 20%")
+- [x] Stripe Checkout integration for plan onboarding
+- [x] Monthly vs. Yearly billing cycle toggle with savings badge ("Save 20%")
 - [ ] Automated proration for mid-cycle plan upgrades/downgrades
-- [ ] Self-serve Billing Portal: Update card, cancel subscription, download invoices
-- [ ] Plan comparison table on the pricing page
-- [ ] Feature gating: Upsell modal when user hits a plan limit
+- [x] Self-serve Billing Portal: Update card, cancel subscription, download invoices
+- [x] Plan comparison table on the pricing page
+- [x] Feature gating: Upsell modal when user hits a plan limit
 - [ ] Dunning flow: Retry failed payments, pause account, send recovery emails
 - [ ] Grace period: 7-day window on payment failure before access revoked
 
 ### 7.2 Plan Tiers (Proposed)
 
-- [ ] **Free**: 1 collection, 25 testimonials, 1 widget, KudosWall branding
-- [ ] **Starter** ($19/mo): 3 collections, 200 testimonials, 3 widgets, no branding
-- [ ] **Pro** ($29/mo): **Competitive Match** - Unlimited collections, 1000 testimonials, all layouts, AI features
-- [ ] **Business** ($99/mo): Video suite, team members (5 seats), custom domain
-- [ ] **Enterprise** (custom): SSO, SCIM, SLA, dedicated support, data residency
+- [x] **Free**: 1 collection, 25 testimonials, 1 widget, KudosWall branding
+- [x] **Starter** ($19/mo): 3 collections, 200 testimonials, 3 widgets, no branding
+- [x] **Pro** ($29/mo): **Competitive Match** - Unlimited collections, 1000 testimonials, all layouts, AI features
+- [x] **Business** ($99/mo): Video suite, team members (5 seats), custom domain
+- [x] **Enterprise** (custom): SSO, SCIM, SLA, dedicated support, data residency
 
 ### 7.3 Usage-Based Billing
 
@@ -375,8 +375,8 @@
 
 ### 7.4 Growth & Retention Features
 
-- [ ] 14-day free trial (no credit card required)
-- [ ] Coupon code management system in Stripe + admin panel
+- [x] 7-day free trial
+- [x] Coupon code management system in Stripe + admin panel
 - [ ] Trial expiration drip emails: 7 days left, 3 days left, 1 day left, expired
 - [ ] "Cancel" page with retention offer (1-month discount or pause option)
 - [ ] Plan pause option (keep data, lose access, $5/mo hold fee)
@@ -491,7 +491,6 @@
 - [ ] IP Whitelisting for dashboard access
 - [ ] SSO enforcement (Block non-SSO logins for Enterprise)
 - [x] Contractual DPA (Data Processing Agreement) self-service flow
-- [ ] Dedicated support manager + private Slack channel for Enterprise
 
 ### 10.3 Enterprise Branding & Customization
 
@@ -625,7 +624,6 @@
 - [ ] Weekly automated `npm audit` report to team Slack channel
 - [ ] Security.txt file at `/.well-known/security.txt`
 - [ ] Responsible disclosure policy and bug bounty program page
-- [ ] Penetration test (Annual) by external security firm
 
 ---
 

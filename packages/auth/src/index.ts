@@ -42,6 +42,8 @@ export function createAuth() {
 
     emailAndPassword: {
       enabled: true,
+      requireEmailVerification: false,
+      autoSignIn: true,
       sendResetPassword: async ({ user, url }) => {
         await emailService.resend.emails.send({
           from: "Alex from KudosWall <alex@kudoswall.org>",
