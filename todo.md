@@ -60,7 +60,7 @@
 - [x] Database connection pooling via PgBouncer or Prisma Accelerate
 - [x] Database partitioning strategy for 10M+ testimonials by `createdAt`
 - [x] Add `updatedBy` / `createdBy` foreign key columns to all tables
-- [ ] Implement database health check endpoint (`/api/health/db`)
+- [x] Implement database health check endpoint (`/api/health/db`)
 - [x] Add composite indexes for common query patterns (e.g., `workspaceId + state`)
 
 ### 1.3 Storage & Asset Pipeline
