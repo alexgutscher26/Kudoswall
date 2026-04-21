@@ -136,6 +136,7 @@ cd apps/web && bun run deploy
 - **Database Point-in-Time Recovery (PITR)**: [Strategy Documentation](docs/database-pitr-strategy.md) - Procedures for database restoration and disaster recovery.
 - **Automated Daily Backups**: [Backup Guide](docs/database-backups.md) - Daily off-site snapshots with automated restore testing.
 - **Connection Pooling**: [Pooling Guide](docs/database-pooling.md) - Efficient connection management via Neon's built-in PgBouncer.
+- **Table Partitioning**: [Partitioning Strategy](docs/database-partitioning.md) - Scaling the testimonial table for 10M+ rows.
 
 ## License
 
