@@ -756,10 +756,10 @@
 
 ### 17.4 Product-Led Growth
 
-- [ ] Freemium funnel: New user → first testimonial in < 5 minutes
+- [x] Freemium funnel: New user → first testimonial in < 5 minutes
 - [ ] In-app upgrade prompts at the exact moment value is felt (after 3rd testimonial)
 - [ ] Shareable "My Reviews" public profile page per user (SEO + virality)
-- [ ] Build `/vs/senja` and `/vs/testimonial-to` comparison pages (Target "Senja alternative")
+- [x] Build `/vs/senja` and `/vs/testimonial-to` comparison pages (Target "Senja alternative")
 - [ ] Product Hunt launch prep: Hunter outreach, teaser assets, Golden Kitty strategy
 
 ---
@@ -778,7 +778,7 @@
 
 - [ ] Knowledge Base (Mintlify or Notion-powered) synced to in-app help search
 - [ ] Video tutorial library (Loom recordings for every major feature)
-- [ ] Step-by-step guides: "Collect your first video testimonial"
+- [x] Step-by-step guides: "Collect your first video testimonial"
 - [ ] API documentation site (Stripe-quality, openapi spec + interactive try-it)
 
 ### 18.3 Onboarding & Activation
@@ -874,7 +874,7 @@
 
 - [x] Landing page / Hero section
 - [x] Feature sections with animations
-- [ ] Pricing page with plan comparison table
+- [x] Pricing page with plan comparison table
 - [ ] Customer success stories / Case studies
 - [ ] Integration directory page (Zapier, Shopify, etc.)
 - [ ] "Testimonial wall" on the KudosWall marketing site itself
@@ -891,7 +891,7 @@
 
 ### 21.3 Email Marketing
 
-- [ ] Welcome email sequence (New account)
+- [x] Welcome email sequence (New account)
 - [ ] Feature announcement emails to existing users
 - [ ] Monthly newsletter for SaaS social proof insights
 - [ ] Re-engagement campaign for inactive users (>30 days no login)
@@ -908,7 +908,7 @@
 - [ ] Unit tests for utility functions (date formatting, slug generation)
 - [ ] Coverage target: >80% for `packages/api` and `packages/db`
 
-### 22.2 End-to-End Tests (Playwright)
+### 22.2 End-to-End Tests (Plaaywright)
 
 - [ ] E2E: Full testimonial submission flow (Text + Video)
 - [ ] E2E: Owner approves testimonial and sees it appear in widget
