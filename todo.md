@@ -54,9 +54,9 @@
 - [x] Relational integrity: `testimonialToTags` join table
 - [x] Implement soft-deletes (`deletedAt` column) across all tables
 - [x] Audit-logging table for every DB mutation (actor, timestamp, diff)
-- [ ] Set up automated daily database backups with restore testing
+- [x] Set up automated daily database backups with restore testing
 - [x] Implement read-replicas for high-traffic widget queries
-- [ ] Point-in-time recovery (PITR) strategy documentation
+- [x] Point-in-time recovery (PITR) strategy documentation
 - [ ] Database connection pooling via PgBouncer or Prisma Accelerate
 - [ ] Database partitioning strategy for 10M+ testimonials by `createdAt`
 - [x] Add `updatedBy` / `createdBy` foreign key columns to all tables

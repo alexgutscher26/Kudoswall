@@ -1,0 +1,87 @@
+name: 🗳️ Database Backup & Restore Test
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+  workflow_dispatch: # Enable manual trigger
+
+jobs:
+  backup-and-test:
+    name: Backup and Verify Restore
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres-test:
+        image: postgres:16
+        env:
+          POSTGRES_DB: kudoswall_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Install PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: 💾 Create Backup (pg_dump)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pg_dump "$DATABASE_URL" -Fc > backup.dump
+          echo "Backup created: backup.dump"
+
+      - name: 🧪 Test Restore on Local Postgres
+        env:
+          PGPASSWORD: test_password
+        run: |
+          # Wait for postgres-test service to be ready (handled by service health check, but being explicit)
+          until pg_isready -h localhost -p 5432 -U test_user; do
+            echo "Waiting for test database..."
+            sleep 2
+          done
+
+          # Restore the dump
+          pg_restore -h localhost -p 5432 -U test_user -d kudoswall_test backup.dump
+          
+          # Run verification query
+          echo "Verifying restore..."
+          COLUMNS=$(psql -h localhost -p 5432 -U test_user -d kudoswall_test -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';")
+          echo "Number of tables restored: $COLUMNS"
+          
+          if [ "$COLUMNS" -eq "0" ]; then
+            echo "❌ Restore verification failed: No tables found!"
+            exit 1
+          fi
+          
+          echo "✅ Restore verification passed."
+
+      - name: ☁️ Upload Backup to Cloudflare R2
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.R2_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_S3_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_REGION: 'auto'
+          SOURCE_DIR: '.'
+          DEST_DIR: 'backups/${{ github.run_id }}'
+          # Only sync the .dump file
+          SOURCE_FILE: 'backup.dump'
+
+      - name: 🔔 Notify on Failure
+        if: failure()
+        run: |
+          echo "Database backup or restore test failed! Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"

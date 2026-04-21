@@ -131,6 +131,11 @@ The application is optimized for deployment on Cloudflare via **Alchemy**:
 cd apps/web && bun run deploy
 ```
 
+## Reliability & Business Continuity
+
+- **Database Point-in-Time Recovery (PITR)**: [Strategy Documentation](docs/database-pitr-strategy.md) - Procedures for database restoration and disaster recovery.
+- **Automated Daily Backups**: [Backup Guide](docs/database-backups.md) - Daily off-site snapshots with automated restore testing.
+
 ## License
 
 This project is licensed under the MIT License.
