@@ -172,7 +172,7 @@
 - [x] 35+ Google Fonts selectable and dynamically loaded
 - [x] Upload custom `.woff2` font file for 100% brand match
 - [ ] Full custom CSS override textarea for advanced users
-- [ ] Branded Favicon for collection page tab
+- [x] Branded Favicon for collection page tab
 - [x] Custom domain for collection page (`reviews.yourbrand.com`)
 - [ ] Custom email "From" name for submission confirmation emails
 - [x] Remove "Powered by KudosWall" badge (paid plan)

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@my-better-t-app/auth";
 import { Button } from "@my-better-t-app/ui/components/button";
+import { Logo } from "@my-better-t-app/ui/components/logo";
 import MobileMenu from "./mobile-menu";
 
 const NAV_LINKS = [
@@ -41,10 +42,9 @@ export default async function Navbar() {
         {/* Center: Logo */}
         <Link
           href="/"
-          className="absolute left-1/2 -translate-x-1/2 text-xl font-bold tracking-tight text-neutral-900 select-none"
-          style={{ fontFamily: "'Georgia', serif" }}
+          className="absolute left-1/2 -translate-x-1/2 select-none"
         >
-          KudosWall
+          <Logo showText size={28} />
         </Link>
 
         {/* Right: Auth actions */}
