@@ -1,8 +1,8 @@
+import { getDb } from "@my-better-t-app/db";
 import { auth } from "@my-better-t-app/auth";
-import { createDb } from "@my-better-t-app/db";
 import type { NextRequest } from "next/server";
 
-const db = createDb();
+const { db, dbRead } = getDb();
 
 export async function createContext(req: NextRequest) {
   const session = await auth.api.getSession({
@@ -10,6 +10,7 @@ export async function createContext(req: NextRequest) {
   });
   return {
     db,
+    dbRead,
     auth: null,
     session,
     req,

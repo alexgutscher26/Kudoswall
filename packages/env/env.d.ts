@@ -10,6 +10,8 @@ declare global {
     RESEND_API_KEY?: string;
     EMAIL_FROM?: string;
     CRON_SECRET?: string;
+    DATABASE_URL?: string;
+    DATABASE_READ_URL?: string;
     UPSTASH_REDIS_REST_URL?: string;
     UPSTASH_REDIS_REST_TOKEN?: string;
     UPLOADTHING_TOKEN?: string;

@@ -258,9 +258,9 @@ export const widgetRouter = router({
   getPublicData: publicProcedure
     .input(z.object({ widgetId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { dbRead } = ctx;
 
-      const w = await db.query.widget.findFirst({
+      const w = await dbRead.query.widget.findFirst({
         where: eq(widget.id, input.widgetId),
         with: {
           workspace: true,
@@ -273,7 +273,7 @@ export const widgetRouter = router({
 
       // Fetch testimonials based on workspace and filters
       // For now, we fetch from all projects in the workspace
-      const projects = await db.query.project.findMany({
+      const projects = await dbRead.query.project.findMany({
         where: eq(project.workspaceId, w.workspaceId),
       });
 
@@ -282,7 +282,7 @@ export const widgetRouter = router({
       const projectIds = projects.map((p) => p.id);
 
       // Base query for approved testimonials
-      const testimonials = await db.query.testimonial.findMany({
+      const testimonials = await dbRead.query.testimonial.findMany({
         where: and(
           inArray(testimonial.projectId, projectIds),
           eq(testimonial.status, "approved"),
@@ -293,7 +293,7 @@ export const widgetRouter = router({
             : undefined,
           settings.filterTags && settings.filterTags.length > 0
             ? exists(
-                db
+                dbRead
                   .select({ id: testimonialToTag.tagId })
                   .from(testimonialToTag)
                   .innerJoin(tag, eq(tag.id, testimonialToTag.tagId))

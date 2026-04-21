@@ -55,13 +55,13 @@
 - [x] Implement soft-deletes (`deletedAt` column) across all tables
 - [x] Audit-logging table for every DB mutation (actor, timestamp, diff)
 - [ ] Set up automated daily database backups with restore testing
-- [ ] Implement read-replicas for high-traffic widget queries
+- [x] Implement read-replicas for high-traffic widget queries
 - [ ] Point-in-time recovery (PITR) strategy documentation
 - [ ] Database connection pooling via PgBouncer or Prisma Accelerate
 - [ ] Database partitioning strategy for 10M+ testimonials by `createdAt`
-- [ ] Add `updatedBy` / `createdBy` foreign key columns to all tables
+- [x] Add `updatedBy` / `createdBy` foreign key columns to all tables
 - [ ] Implement database health check endpoint (`/api/health/db`)
-- [ ] Add composite indexes for common query patterns (e.g., `workspaceId + state`)
+- [x] Add composite indexes for common query patterns (e.g., `workspaceId + state`)
 
 ### 1.3 Storage & Asset Pipeline
 

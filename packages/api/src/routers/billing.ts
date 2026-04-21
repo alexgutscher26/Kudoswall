@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { stripe } from "../lib/stripe";
-import { eq, and, sql, count as dCount } from "drizzle-orm";
+import { eq, and, count as dCount } from "drizzle-orm";
 import { workspace, workspaceMember } from "@my-better-t-app/db/schema";
 import { TRPCError } from "@trpc/server";
 import { PLANS } from "../config/plans";
@@ -9,7 +9,7 @@ import { PLANS } from "../config/plans";
 export const billingRouter = router({
   getLTDCount: publicProcedure.query(async ({ ctx }) => {
     // Simple count of workspaces with LTD plan
-    const res = await ctx.db
+    const res = await ctx.dbRead
       .select({ count: dCount() })
       .from(workspace)
       .where(eq(workspace.plan, "ltd"));
