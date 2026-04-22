@@ -88,6 +88,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/docs",
+        destination: "https://kudoswall.mintlify.app",
+      }
+    ];
+  },
 };
 
 export default nextConfig;

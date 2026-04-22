@@ -21,8 +21,14 @@ function isReservedSubdomain(host: string) {
  * Next.js 16 Proxy implementation (replaces middleware)
  */
 export async function proxy(request: NextRequest) {
-  const url = new URL(request.url);
   const host = request.headers.get("host") || "";
+  const url = new URL(request.url);
+
+  // 0. Handle documentation proxy (Mintlify)
+  if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
+    const mintlifyUrl = new URL(url.pathname, "https://kudoswall.mintlify.dev");
+    return NextResponse.rewrite(mintlifyUrl);
+  }
 
   // 1. Detect if this is a custom domain or supported subdomain
   const mainDomain = "kudoswall.org";

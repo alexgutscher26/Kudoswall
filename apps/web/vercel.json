@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "https://kudoswall.mintlify.app"
+    }
+  ]
+}
