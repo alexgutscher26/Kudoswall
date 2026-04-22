@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@my-better-t-app/auth";
+import { authLite as auth } from "@my-better-t-app/auth/lite";
 import { getEnvAsync } from "@my-better-t-app/env/server";
-import { getDb } from "@my-better-t-app/db";
-import { workspaceMember, workspace } from "@my-better-t-app/db/schema";
+import { dbLite as db } from "@my-better-t-app/db/lite";
+import { workspaceMember, workspace } from "@my-better-t-app/db/schema/app";
 import { eq, and, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { getPlanConfig } from "@my-better-t-app/api/config/plans";
@@ -113,17 +113,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // ── Resolve workspace & plan ───────────────────────────────────────────────
-    const { db } = getDb();
-    const membership = await db.query.workspaceMember.findFirst({
-      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      with: { workspace: true },
-    });
+    const results = await db
+      .select({
+        id: workspace.id,
+        plan: workspace.plan,
+      })
+      .from(workspaceMember)
+      .innerJoin(workspace, eq(workspaceMember.workspaceId, workspace.id))
+      .where(and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)))
+      .limit(1);
 
-    if (!membership) {
+    const ws = results[0];
+
+    if (!ws) {
       return NextResponse.json({ error: "No workspace found" }, { status: 403 });
     }
 
-    const ws = membership.workspace as typeof workspace.$inferSelect;
     const planConfig = getPlanConfig(ws.plan);
 
     // ── Read & validate body ───────────────────────────────────────────────────

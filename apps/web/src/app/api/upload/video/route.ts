@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@my-better-t-app/auth";
+import { authLite as auth } from "@my-better-t-app/auth/lite";
 import { getEnvAsync } from "@my-better-t-app/env/server";
-import { getDb } from "@my-better-t-app/db";
+import { dbLite as db } from "@my-better-t-app/db/lite";
 import {
   workspaceMember,
   workspace,
@@ -87,23 +87,40 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       uploaderId = session.user.id;
     }
 
-    const { db } = getDb();
-
     if (projectId) {
-      const p = await db.query.project.findFirst({
-        where: eq(project.id, projectId),
-        with: { workspace: true },
-      });
+      const results = await db
+        .select({
+          id: project.id,
+          workspace: {
+            id: workspace.id,
+            plan: workspace.plan,
+          },
+        })
+        .from(project)
+        .innerJoin(workspace, eq(project.workspaceId, workspace.id))
+        .where(eq(project.id, projectId))
+        .limit(1);
+
+      const p = results[0];
       if (!p) {
         return NextResponse.json({ error: "Project not found" }, { status: 404 });
       }
       wsId = p.workspace.id;
       plan = p.workspace.plan;
     } else if (uploaderId) {
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(eq(workspaceMember.userId, uploaderId), isNull(workspaceMember.deletedAt)),
-        with: { workspace: true },
-      });
+      const results = await db
+        .select({
+          workspace: {
+            id: workspace.id,
+            plan: workspace.plan,
+          },
+        })
+        .from(workspaceMember)
+        .innerJoin(workspace, eq(workspaceMember.workspaceId, workspace.id))
+        .where(and(eq(workspaceMember.userId, uploaderId), isNull(workspaceMember.deletedAt)))
+        .limit(1);
+
+      const membership = results[0];
       if (!membership) {
         return NextResponse.json({ error: "No workspace found" }, { status: 403 });
       }
