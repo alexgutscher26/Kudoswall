@@ -16,6 +16,12 @@ export function getWorkspacePermissions(workspace: {
 
   return {
     ...config,
+    features: {
+      ...config.features,
+      // Respect master toggle - if disabled globally, it's false for everyone
+      // Otherwise, it follows the plan config (which we've also updated)
+      video: config.features.video,
+    },
     isPro,
     canAddProject: (workspace.projectsCount ?? 0) < config.limits.maxProjects,
     canAddTestimonial: (workspace.testimonialsCount ?? 0) < config.limits.maxTestimonials,

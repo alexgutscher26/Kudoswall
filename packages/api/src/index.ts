@@ -54,6 +54,7 @@ export const csrfMiddleware = t.middleware(async ({ ctx, next, type }) => {
     const cookieToken = ctx.req.cookies.get("csrf-token")?.value;
 
     if (!csrfToken || csrfToken !== cookieToken) {
+      console.log("[CSRF_FAILURE] Header:", csrfToken, "Cookie:", cookieToken);
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "CSRF token validation failed",

@@ -17,7 +17,7 @@ export async function GET() {
     // Basic ping query to ensure connectivity and responsiveness
     // We use a simple select 1 to minimize overhead
     await db.execute(sql`SELECT 1`);
-    
+
     const latency = Date.now() - start;
 
     return NextResponse.json({
@@ -36,7 +36,7 @@ export async function GET() {
         error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
-      { status: 503 }
+      { status: 503 },
     );
   }
 }

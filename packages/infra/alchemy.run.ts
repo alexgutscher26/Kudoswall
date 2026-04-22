@@ -8,6 +8,7 @@ config({ path: "../../apps/web/.env" });
 const app = await alchemy("my-better-t-app");
 
 const videosBucket = await R2Bucket("videos", { devDomain: true });
+const imagesBucket = await R2Bucket("images", { devDomain: true });
 
 export const web = await Nextjs("web", {
   cwd: "../../apps/web",
@@ -22,6 +23,8 @@ export const web = await Nextjs("web", {
     GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET || "",
     RESEND_API_KEY: alchemy.secret.env.RESEND_API_KEY || "",
     VIDEOS_BUCKET: videosBucket,
+    IMAGES_BUCKET: imagesBucket,
+    R2_SIGNING_SECRET: alchemy.secret.env.R2_SIGNING_SECRET || "",
   },
   dev: {
     env: {

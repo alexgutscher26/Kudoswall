@@ -46,7 +46,7 @@ export function createDb() {
 }
 
 /**
- * Helper to get both read and write clients. 
+ * Helper to get both read and write clients.
  * Use this in contexts like tRPC where you want to expose both.
  */
 export function getDb() {

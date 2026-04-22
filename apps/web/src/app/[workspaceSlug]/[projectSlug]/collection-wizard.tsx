@@ -41,6 +41,11 @@ interface CollectionWizardProps {
         font: string;
       };
     };
+    permissions?: {
+      features: {
+        video: boolean;
+      };
+    };
   };
 }
 
@@ -220,7 +225,7 @@ export default function CollectionWizard({
   const [direction, setDirection] = useState(1);
 
   const [mode, setMode] = useState<"text" | "video" | null>(() => {
-    if (initialType === "video" && project.workspace.isPro) return "video";
+    if (initialType === "video" && project.permissions?.features?.video) return "video";
     return initialType ?? null;
   });
   const [step, setStep] = useState<Step>(() => {
@@ -343,14 +348,14 @@ export default function CollectionWizard({
     setDirection(1);
     const nextStepName = (() => {
       if (step === "rating") {
-        /* Video feature is disabled for now */
-        // if (project.workspace.isPro) {
-        //   return "choice";
-        // }
+        if (project.permissions?.features?.video) {
+          return "choice";
+        }
         setMode("text");
         return "text";
       }
       if (step === "text") return "details";
+      if (step === "video") return "details";
       if (step === "details") return "review";
       if (step === "review") return "success";
       return null;
@@ -371,10 +376,14 @@ export default function CollectionWizard({
     setDirection(-1);
     if (step === "choice") return setStep("rating");
     if (step === "text") {
+      if (project.permissions?.features?.video) return setStep("choice");
       return setStep("rating");
     }
+    if (step === "video") {
+      return setStep("choice");
+    }
     if (step === "details") {
-      return setStep("text");
+      return setStep(mode === "video" ? "video" : "text");
     }
     if (step === "review") return setStep("details");
   };
@@ -447,19 +456,23 @@ export default function CollectionWizard({
       if (videoBlob) {
         // Upload via UploadThing
         const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
-        const file = new File([videoBlob], `video.${extension}`, {
-          type: videoBlob.type,
+
+        const response = await fetch(`/api/upload/video?projectId=${project.id}&ext=${extension}`, {
+          method: "POST",
+          body: videoBlob,
         });
 
-        const uploadRes = await uploadFiles("videoUploader", {
-          files: [file],
-        });
-
-        if (!uploadRes?.[0]?.url) {
-          throw new Error("Failed to upload video to storage");
+        if (!response.ok) {
+          const errBody = (await response.json().catch(() => ({}))) as Record<string, string>;
+          throw new Error(errBody.message || "Failed to upload video to storage");
         }
 
-        videoUrl = uploadRes[0].url;
+        const data = (await response.json()) as { key?: string };
+        if (!data.key) {
+          throw new Error("Failed to retrieve uploaded video URL");
+        }
+
+        videoUrl = `/api/videos/${data.key}`;
       }
 
       await submitTestimonial(project.id, {
@@ -696,42 +709,46 @@ export default function CollectionWizard({
                   >
                     {t.choiceSubtext}
                   </p>
-                  <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
-                    <button
-                      onClick={() => {
-                        setDirection(1);
-                        setMode("video");
-                        trackEvent.mutate({
-                          workspaceId: project.workspaceId,
-                          projectId: project.id,
-                          eventType: "click",
-                          metadataJson: JSON.stringify({ action: "choose_mode", mode: "video" }),
-                        });
-                        setStep("video");
-                      }}
-                      className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
-                    >
-                      <div
-                        className="flex size-12 items-center justify-center rounded-2xl"
-                        style={{ backgroundColor: "var(--cw-surface)" }}
+                  <div
+                    className={`mb-8 grid w-full grid-cols-1 gap-4 ${project.permissions?.features?.video ? "sm:grid-cols-2" : ""}`}
+                  >
+                    {project.permissions?.features?.video && (
+                      <button
+                        onClick={() => {
+                          setDirection(1);
+                          setMode("video");
+                          trackEvent.mutate({
+                            workspaceId: project.workspaceId,
+                            projectId: project.id,
+                            eventType: "click",
+                            metadataJson: JSON.stringify({ action: "choose_mode", mode: "video" }),
+                          });
+                          setStep("video");
+                        }}
+                        className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
                       >
-                        <VideoIcon className="size-6" style={{ color: "var(--cw-fg)" }} />
-                      </div>
-                      <div>
-                        <h3
-                          className="text-base font-bold"
-                          style={{ color: "var(--cw-text-primary)" }}
+                        <div
+                          className="flex size-12 items-center justify-center rounded-2xl"
+                          style={{ backgroundColor: "var(--cw-surface)" }}
                         >
-                          {t.choiceVideo}
-                        </h3>
-                        <p
-                          className="text-[11px] font-medium"
-                          style={{ color: "var(--cw-text-muted)" }}
-                        >
-                          {t.choiceVideoSub}
-                        </p>
-                      </div>
-                    </button>
+                          <VideoIcon className="size-6" style={{ color: "var(--cw-fg)" }} />
+                        </div>
+                        <div>
+                          <h3
+                            className="text-base font-bold"
+                            style={{ color: "var(--cw-text-primary)" }}
+                          >
+                            {t.choiceVideo}
+                          </h3>
+                          <p
+                            className="text-[11px] font-medium"
+                            style={{ color: "var(--cw-text-muted)" }}
+                          >
+                            {t.choiceVideoSub}
+                          </p>
+                        </div>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setDirection(1);
@@ -844,8 +861,7 @@ export default function CollectionWizard({
                 </div>
               )}
 
-              {/* Video Step disabled for now */}
-              {/*
+              {/* ─── VIDEO STEP ─── */}
               {step === "video" && (
                 <div className="w-full text-left">
                   <h1
@@ -862,7 +878,7 @@ export default function CollectionWizard({
                   </p>
 
                   <VideoRecorder
-                    isPro={project.permissions?.video}
+                    isPro={project.permissions?.features?.video ?? false}
                     onConfirm={(blob: Blob) => {
                       setVideoBlob(blob);
                       const url = URL.createObjectURL(blob);
@@ -893,7 +909,6 @@ export default function CollectionWizard({
                   </button>
                 </div>
               )}
-              */}
 
               {/* ─── DETAILS STEP ─── */}
               {step === "details" && (

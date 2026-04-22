@@ -82,6 +82,7 @@ async function CollectionDetailContentWrapper({
           project={p}
           workspace={p.workspace}
           isPro={p.workspace.plan !== "free"}
+          permissions={data.permissions}
         />
       </div>
     </DashboardShell>

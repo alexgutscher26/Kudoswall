@@ -37,6 +37,19 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "paused",
   "unpaid",
 ]);
+export const videoProcessingStatusEnum = pgEnum("video_processing_status", [
+  "pending",
+  "processing",
+  "done",
+  "failed",
+]);
+export const virusScanStatusEnum = pgEnum("virus_scan_status", [
+  "pending",
+  "clean",
+  "infected",
+  "error",
+  "skipped", // When no API key is configured
+]);
 
 export const workspace = pgTable(
   "workspace",
@@ -99,7 +112,11 @@ export const workspaceMember = pgTable(
     index("workspace_member_workspace_id_idx").on(table.workspaceId),
     index("workspace_member_user_id_idx").on(table.userId),
     index("workspace_member_role_idx").on(table.role),
-    index("workspace_member_workspace_user_role_idx").on(table.workspaceId, table.userId, table.role),
+    index("workspace_member_workspace_user_role_idx").on(
+      table.workspaceId,
+      table.userId,
+      table.role,
+    ),
   ],
 );
 
@@ -182,6 +199,11 @@ export const testimonial = pgTable(
     status: testimonialStatusEnum("status").default("pending").notNull(),
     type: testimonialTypeEnum("type").default("text").notNull(),
     videoUrl: text("video_url"),
+    /** JSON: { "360p": "key", "720p": "key", "1080p": "key" } — populated after transcoding */
+    videoTranscodesJson: text("video_transcodes_json"),
+    videoProcessingStatus: videoProcessingStatusEnum("video_processing_status").default("pending"),
+    virusScanStatus: virusScanStatusEnum("virus_scan_status").default("pending"),
+    virusScanHash: text("virus_scan_hash"), // SHA-256 of the uploaded file for audit trail
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
@@ -199,6 +221,38 @@ export const testimonial = pgTable(
       table.status,
       table.createdAt,
     ),
+  ],
+);
+
+/**
+ * Tracks async video transcoding jobs.
+ * One row per video upload; status progresses: pending → processing → done | failed.
+ */
+export const videoTranscodingJob = pgTable(
+  "video_transcoding_job",
+  {
+    id: text("id").primaryKey(),
+    testimonialId: text("testimonial_id")
+      .notNull()
+      .references(() => testimonial.id, { onDelete: "cascade" }),
+    /** R2 key of the original uploaded video */
+    sourceKey: text("source_key").notNull(),
+    status: videoProcessingStatusEnum("status").default("pending").notNull(),
+    /** JSON: { "360p": "key", "720p": "key", "1080p": "key" } */
+    outputKeysJson: text("output_keys_json"),
+    error: text("error"),
+    attempts: integer("attempts").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull()
+      .defaultNow(),
+    processedAt: timestamp("processed_at"),
+  },
+  (table) => [
+    index("transcoding_job_testimonial_id_idx").on(table.testimonialId),
+    index("transcoding_job_status_idx").on(table.status),
+    index("transcoding_job_status_created_at_idx").on(table.status, table.createdAt),
   ],
 );
 

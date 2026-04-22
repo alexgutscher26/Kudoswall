@@ -154,9 +154,16 @@ async function getProjectByCollectionSlug(slug: string) {
   const isPro = plan !== "free" && plan !== null;
   const isAgency = plan === "plan_2" || plan === "ltd";
 
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: result.workspace.plan,
+    testimonialsCount: result.testimonials.length,
+  });
+
   return {
     ...result,
     settings,
+    permissions,
     workspace: {
       ...result.workspace,
       isPro,
@@ -302,7 +309,7 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
 
           <CollectionWizard
             project={projectData as any}
-            initialType={t === "t" || t === "v" ? "text" : null}
+            initialType={t === "v" ? "video" : t === "t" ? "text" : null}
           />
 
           <CollectionFooter

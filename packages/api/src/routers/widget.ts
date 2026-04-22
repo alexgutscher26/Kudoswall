@@ -34,6 +34,7 @@ const widgetSettingsSchema = z.object({
   filterTags: z.array(z.string()).optional(),
   filterMinRating: z.number().optional(),
   filterType: z.enum(["all", "text", "video"]).optional(),
+  filterProjectIds: z.array(z.string()).optional(),
   pinnedIds: z.array(z.string()).optional(),
   excludedIds: z.array(z.string()).optional(),
 
@@ -282,9 +283,15 @@ export const widgetRouter = router({
       const projectIds = projects.map((p) => p.id);
 
       // Base query for approved testimonials
+      // Filter by project (either all in workspace, or specific selected projects)
+      const targetProjectIds =
+        settings.filterProjectIds && settings.filterProjectIds.length > 0
+          ? settings.filterProjectIds
+          : projectIds;
+
       const testimonials = await dbRead.query.testimonial.findMany({
         where: and(
-          inArray(testimonial.projectId, projectIds),
+          inArray(testimonial.projectId, targetProjectIds),
           eq(testimonial.status, "approved"),
           isNull(testimonial.deletedAt),
           settings.filterMinRating ? gte(testimonial.rating, settings.filterMinRating) : undefined,

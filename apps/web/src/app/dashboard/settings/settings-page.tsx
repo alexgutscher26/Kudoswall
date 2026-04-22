@@ -18,7 +18,10 @@ import {
   Check,
   ExternalLink,
   Download,
+  Upload,
 } from "lucide-react";
+import Image from "next/image";
+import { UploadButton } from "@/utils/uploadthing";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -334,8 +337,6 @@ export default function SettingsPage() {
                 Workspace Identity
               </h3>
 
-              {/* Logo Upload - Hidden for now but functionality preserved in code */}
-              {/* 
               <div className="flex items-center gap-6">
                 <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50 shadow-inner">
                   {logoUrl ? (
@@ -371,7 +372,6 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
-              */}
 
               {/* Name & Slug */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -716,7 +716,7 @@ export default function SettingsPage() {
                       },
                       {
                         label: "Video",
-                        value: "Coming Soon", // planConfig.features.video ? "Available" : "Limited",
+                        value: planConfig.features.video ? "Available" : "No",
                       },
                       {
                         label: "Team",

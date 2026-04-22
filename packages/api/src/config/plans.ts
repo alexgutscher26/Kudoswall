@@ -1,5 +1,18 @@
 import { env } from "@my-better-t-app/env/server";
 
+const IS_VIDEO_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_VIDEO === "true" ||
+  process.env.NEXT_PUBLIC_ENABLE_VIDEO === "1" ||
+  String(env.NEXT_PUBLIC_ENABLE_VIDEO).toLowerCase() === "true" ||
+  String(process.env.NEXT_PUBLIC_ENABLE_VIDEO).toLowerCase() === "true";
+
+console.log(
+  "[PLANS_CONFIG] IS_VIDEO_ENABLED:",
+  IS_VIDEO_ENABLED,
+  "Env:",
+  process.env.NEXT_PUBLIC_ENABLE_VIDEO,
+);
+
 export type Plan = "free" | "plan_1" | "plan_2" | "ltd";
 
 export interface PlanConfig {
@@ -13,6 +26,10 @@ export interface PlanConfig {
     maxProjects: number;
     maxTestimonials: number;
     maxTeamMembers: number;
+    /** Max video upload size in MB. 0 means video uploads are not allowed. */
+    maxVideoSizeMb: number;
+    /** Max image upload size in MB. */
+    maxImageSizeMb: number;
   };
   features: {
     video: boolean;
@@ -36,6 +53,8 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 1,
       maxTestimonials: 5,
       maxTeamMembers: 1,
+      maxVideoSizeMb: 0, // Video disabled on free plan
+      maxImageSizeMb: 5,
     },
     features: {
       video: false,
@@ -65,9 +84,11 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 1,
       maxTestimonials: Infinity,
       maxTeamMembers: 1,
+      maxVideoSizeMb: 100,
+      maxImageSizeMb: 10,
     },
     features: {
-      video: false, // Set to true when video recording is ready
+      video: IS_VIDEO_ENABLED, // Respect master toggle
       customDomain: true,
       whiteLabel: true,
       prioritySupport: false,
@@ -79,7 +100,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     displayFeatures: [
       "Unlimited testimonials",
       "1 Project",
-      "Text testimonials", // Removed Video mention
+      "Text & Video testimonials",
       "All 3 widget layouts",
       "Custom branding & colors",
       "Remove 'Powered by' badge",
@@ -98,9 +119,11 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 5,
       maxTestimonials: Infinity,
       maxTeamMembers: 3,
+      maxVideoSizeMb: 250,
+      maxImageSizeMb: 20,
     },
     features: {
-      video: false, // Set to true when video recording is ready
+      video: IS_VIDEO_ENABLED, // Respect master toggle
       customDomain: true,
       whiteLabel: true,
       prioritySupport: true,
@@ -126,9 +149,11 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 5,
       maxTestimonials: Infinity,
       maxTeamMembers: 3,
+      maxVideoSizeMb: 250,
+      maxImageSizeMb: 20,
     },
     features: {
-      video: false, // Set to true when video recording is ready
+      video: IS_VIDEO_ENABLED, // Respect master toggle
       customDomain: true,
       whiteLabel: true,
       prioritySupport: true,

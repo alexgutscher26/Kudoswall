@@ -122,12 +122,14 @@ export default function VideoRecorder({
     mediaRecorderRef.current = recorder;
 
     recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
+      if (e.data && e.data.size > 0) {
+        chunksRef.current.push(e.data);
+      }
     };
 
     recorder.onstop = () => {
-      const recordedType = recorder.mimeType || mimeType || "video/webm";
-      const blob = new Blob(chunksRef.current, { type: recordedType });
+      const type = chunksRef.current[0]?.type || mimeType || "video/webm";
+      const blob = new Blob(chunksRef.current, { type });
       const url = URL.createObjectURL(blob);
       setRecordedBlob(blob);
       setPreviewUrl(url);
@@ -139,8 +141,9 @@ export default function VideoRecorder({
       }
     };
 
-    // To ensure ondataavailable fires for larger recordings, we can request chunks every 1s
-    recorder.start(1000);
+    // Do NOT pass a timeslice (e.g. 1000).
+    // Timeslicing can cause corrupt webm blobs in chromium without proper EBML headers for each chunk.
+    recorder.start();
     setRecording(true);
     setTimeLeft(maxLength);
 

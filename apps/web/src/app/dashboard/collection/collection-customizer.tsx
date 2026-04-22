@@ -45,6 +45,11 @@ interface CollectionCustomizerProps {
     logoUrl?: string | null;
   };
   isPro: boolean;
+  permissions?: {
+    features: {
+      video: boolean;
+    };
+  };
 }
 
 export type CollectionSettings = {
@@ -154,8 +159,12 @@ const DEFAULT_SETTINGS: CollectionSettings = {
 export function CollectionCustomizer({
   project,
   workspace,
-  isPro: isProProp,
+  isPro,
+  permissions,
 }: CollectionCustomizerProps) {
+  const router = useRouter();
+  const videoEnabled = permissions?.features?.video ?? isPro;
+
   const [settings, setSettings] = useState<CollectionSettings>(() => {
     try {
       const parsed = project.collectionSettingsJson
@@ -208,15 +217,12 @@ export function CollectionCustomizer({
     "rating",
   );
 
-  const router = useRouter();
-
   const [projectName, setProjectName] = useState(project.name);
   const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
 
   const [activeTab, setActiveTab] = useState<
     "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
   >("branding");
-  const isPro = isProProp;
 
   const [domain, setDomain] = useState(project.customDomain || "");
   const [isDomainVerified, setIsDomainVerified] = useState(!!project.customDomainVerified);
@@ -358,15 +364,14 @@ export function CollectionCustomizer({
           >
             Content
           </button>
-          {/* Video tab hidden for now */}
-          {/*
-          <button
-            onClick={() => setActiveTab("video")}
-            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "video" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
-          >
-            Video
-          </button>
-          */}
+          {videoEnabled && (
+            <button
+              onClick={() => setActiveTab("video")}
+              className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "video" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+            >
+              Video
+            </button>
+          )}
           <button
             onClick={() => setActiveTab("advanced")}
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
@@ -695,8 +700,6 @@ export function CollectionCustomizer({
             </div>
           )}
 
-          {/* Video settings hidden for now */}
-          {/*
           {activeTab === "video" && (
             <div className="space-y-6">
               <SectionHeader icon={Video} pro title="Video Testimonials" />
@@ -748,7 +751,6 @@ export function CollectionCustomizer({
               </div>
             </div>
           )}
-          */}
 
           {activeTab === "domain" && (
             <div className="space-y-6">
@@ -916,15 +918,12 @@ export function CollectionCustomizer({
                     param: "",
                     icon: Quote,
                   },
-                  /* Video Only Link hidden */
-                  /*
                   {
                     label: "Video Only Link",
                     desc: "Direct to video recorder",
                     param: "?t=v",
                     icon: Video,
                   },
-                  */
                 ].map((link) => {
                   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${collectionSlug}${link.param}`;
                   return (
@@ -1249,9 +1248,9 @@ export function CollectionCustomizer({
           <div className="flex items-center gap-3">
             {[
               { id: "rating", label: "Rating" },
-              /* { id: "choice", label: "Choice" }, */
+              { id: "choice", label: "Choice" },
               { id: "text", label: "Story" },
-              /* { id: "video", label: "Video" }, */
+              ...(isPro ? [{ id: "video", label: "Video" }] : []),
               { id: "details", label: "Form" },
               { id: "success", label: "Success" },
             ].map((s) => (
@@ -1415,8 +1414,6 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Choice Step hidden */}
-          {/*
           {mockStep === "choice" && (
             <div className="py-2 text-center">
               <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e]">
@@ -1425,19 +1422,23 @@ function CollectionWizardPreview({
               <p className="mb-6 text-sm text-[#45464d]">
                 Choose the format that works best for you.
               </p>
-              <div className="mb-6 grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setMockStep("video")}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[#f2f4f6]">
-                    <Video className="size-5 text-[#000000]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#191c1e]">Video</h3>
-                    <p className="text-[10px] text-[#76777d]">Quick & Personal</p>
-                  </div>
-                </button>
+              <div
+                className={`mb-6 grid w-full gap-3 ${workspaceIsPro ? "grid-cols-2" : "grid-cols-1"}`}
+              >
+                {workspaceIsPro && (
+                  <button
+                    onClick={() => setMockStep("video")}
+                    className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-[#f2f4f6]">
+                      <Video className="size-5 text-[#000000]" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-[#191c1e]">Video</h3>
+                      <p className="text-[10px] text-[#76777d]">Quick & Personal</p>
+                    </div>
+                  </button>
+                )}
                 <button
                   onClick={() => setMockStep("text")}
                   className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
@@ -1453,7 +1454,6 @@ function CollectionWizardPreview({
               </div>
             </div>
           )}
-          */}
 
           {/* Text Step */}
           {mockStep === "text" && (
@@ -1490,8 +1490,6 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Video Step hidden */}
-          {/*
           {mockStep === "video" && (
             <div className="text-center">
               <h1 className="mb-1 text-xl font-extrabold text-[#191c1e]">Record your video</h1>
@@ -1522,7 +1520,6 @@ function CollectionWizardPreview({
               </div>
             </div>
           )}
-          */}
 
           {/* Details Step */}
           {mockStep === "details" && (

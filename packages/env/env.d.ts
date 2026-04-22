@@ -28,6 +28,12 @@ declare global {
     NEXT_PUBLIC_STRIPE_LTD_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID?: string;
+    NEXT_PUBLIC_ENABLE_VIDEO?: string;
+    /** Secret for signing private R2 asset URLs (HMAC-SHA256). Must be set in production. */
+    R2_SIGNING_SECRET?: string;
+    /** R2 bucket for public images (avatars, logos). Separate from VIDEOS_BUCKET. */
+    IMAGES_BUCKET?: R2Bucket;
+    VIRUSTOTAL_API_KEY?: string;
   };
 }
 

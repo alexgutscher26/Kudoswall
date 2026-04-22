@@ -65,15 +65,15 @@
 
 ### 1.3 Storage & Asset Pipeline
 
-- [ ] Configure Cloudflare R2 for video & image storage
-- [ ] Implement signed URL generation for all private asset access
-- [ ] Build image optimization pipeline (Sharp on upload → WebP + AVIF)
-- [ ] Auto-generate multiple video resolutions (360p, 720p, 1080p) via FFmpeg
-- [ ] Add CDN distribution layer for all user-uploaded static assets
-- [ ] Implement R2 lifecycle policies (archive videos > 12 months to cold storage)
-- [ ] Set up virus/malware scanning on file upload (ClamAV or similar)
-- [ ] Enforce file type validation server-side (MIME sniffing, not extension)
-- [ ] Add maximum file size enforcement per plan tier
+- [x] Configure Cloudflare R2 for video & image storage
+- [x] Implement signed URL generation for all private asset access
+- [x] Build image optimization pipeline (Sharp on upload → WebP + AVIF)
+- [x] Auto-generate multiple video resolutions (360p, 720p, 1080p) via FFmpeg
+- [x] Add CDN distribution layer for all user-uploaded static assets
+- [x] Implement R2 lifecycle policies (archive videos > 12 months to cold storage)
+- [x] Set up virus/malware scanning on file upload (ClamAV or similar)
+- [x] Enforce file type validation server-side (MIME sniffing, not extension)
+- [x] Add maximum file size enforcement per plan tier
 
 ### 1.4 Edge & Caching Strategy
 
@@ -602,7 +602,7 @@
 - [x] CORS configuration for widget API
 - [x] Configure `Strict-Transport-Security` (HSTS) with preload
 - [x] Configure `X-Content-Type-Options: nosniff`
-- [x] Configure `X-Frame-Options: SAMEORIGIN` (except for widget iframe)
+- [x] Configure `Content-Security-Policy: frame-ancestors 'self' https://rankinpublic.xyz` (replaces `X-Frame-Options`)
 - [x] Configure `Referrer-Policy: strict-origin-when-cross-origin`
 - [x] Configure `Permissions-Policy` (disable camera/mic by default)
 - [ ] Rate limiting on all public-facing API endpoints (Upstash Redis)

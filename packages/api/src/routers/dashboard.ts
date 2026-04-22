@@ -13,6 +13,7 @@ import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
+import { generateSignedUrl } from "../lib/signed-url";
 
 import type { Database } from "@my-better-t-app/db";
 
@@ -924,5 +925,50 @@ export const dashboardRouter = router({
           verificationError: "Verification failed. Please try again later.",
         };
       }
+    }),
+
+  /**
+   * Generates a short-lived signed URL for a private video asset stored in R2.
+   * Validates workspace ownership of the testimonial before issuing the token.
+   */
+  getVideoSignedUrl: protectedProcedure
+    .input(z.object({ testimonialId: z.string() }))
+    .query(async ({ ctx, input }): Promise<{ signedUrl: string }> => {
+      const { db, session } = ctx;
+      const { testimonialId } = input;
+
+      // Resolve the testimonial and verify workspace ownership
+      const t = await db.query.testimonial.findFirst({
+        where: eq(testimonial.id, testimonialId),
+        with: { project: { with: { workspace: true } } },
+      });
+
+      if (!t || !t.videoUrl) {
+        throw new Error("Testimonial not found or has no video");
+      }
+
+      const membership = await db.query.workspaceMember.findFirst({
+        where: and(
+          eq(workspaceMember.workspaceId, t.project.workspaceId),
+          eq(workspaceMember.userId, session.user.id),
+          isNull(workspaceMember.deletedAt),
+        ),
+      });
+
+      if (!membership) {
+        throw new Error("Forbidden: You do not have access to this workspace");
+      }
+
+      const secret = env.R2_SIGNING_SECRET;
+      if (!secret) {
+        throw new Error("Storage signing is not configured");
+      }
+
+      // Extract the R2 key from the stored videoUrl (e.g. "/api/videos/vid_abc.webm" → "vid_abc.webm")
+      const videoKey = t.videoUrl.replace(/^\/api\/videos\//, "");
+
+      const signedUrl = await generateSignedUrl(videoKey, secret, 3600);
+
+      return { signedUrl };
     }),
 });

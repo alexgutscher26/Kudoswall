@@ -40,10 +40,7 @@ export default async function Navbar() {
         </div>
 
         {/* Center: Logo */}
-        <Link
-          href="/"
-          className="absolute left-1/2 -translate-x-1/2 select-none"
-        >
+        <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none">
           <Logo showText size={28} />
         </Link>
 

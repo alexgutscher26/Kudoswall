@@ -1,12 +1,14 @@
 "use server";
 
 import { db } from "@/lib/server-db";
-import { project, testimonial, workspace } from "@my-better-t-app/db/schema";
+import { project, testimonial, workspace, videoTranscodingJob } from "@my-better-t-app/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getProjectBySlug(workspaceSlug: string, projectSlug: string) {
+  noStore();
   const ws = await db.query.workspace.findFirst({
     where: eq(workspace.slug, workspaceSlug),
   });
@@ -33,6 +35,10 @@ export async function getProjectBySlug(workspaceSlug: string, projectSlug: strin
     plan: result.workspace.plan,
     testimonialsCount: counts[0]?.count ?? 0,
   });
+
+  console.log(
+    `[Collection Action] Project: ${projectSlug}, Plan: ${result.workspace.plan}, Video Enbled: ${permissions.features.video}`,
+  );
 
   return {
     ...result,
@@ -106,6 +112,16 @@ export async function submitTestimonial(
     status: "pending",
     type: data.videoUrl ? "video" : "text",
   });
+
+  if (data.videoUrl && data.videoUrl.startsWith("/api/videos/")) {
+    const key = data.videoUrl.replace("/api/videos/", "");
+    await db.insert(videoTranscodingJob).values({
+      id: `vtj_${nanoid()}`,
+      testimonialId: id,
+      sourceKey: key,
+      status: "pending",
+    });
+  }
 
   // Fire-and-forget email notification
   void notifyOwnerNewTestimonial(projectId, {
