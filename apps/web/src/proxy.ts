@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { db } from "@/lib/server-db";
-import { project } from "@my-better-t-app/db/schema";
+import { dbLite as db } from "@my-better-t-app/db/lite";
+import { project } from "@my-better-t-app/db/schema/app";
 import { eq, isNull, and } from "drizzle-orm";
 
 /**
@@ -26,7 +26,9 @@ export async function proxy(request: NextRequest) {
 
   // 0. Handle documentation proxy (Mintlify)
   if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
-    const mintlifyUrl = new URL(url.pathname, "https://kudoswall.mintlify.dev");
+    // Strip /docs from the path so Mintlify receives / or /subpage
+    const targetPath = url.pathname.replace(/^\/docs/, "") || "/";
+    const mintlifyUrl = new URL(targetPath, "https://kudoswall.mintlify.app");
     return NextResponse.rewrite(mintlifyUrl);
   }
 
@@ -43,20 +45,29 @@ export async function proxy(request: NextRequest) {
 
   if (isSupportedDomain && url.pathname === "/") {
     // A. Check for exact verified custom domain
-    let projectData = await db.query.project.findFirst({
-      where: and(
-        eq(project.customDomain, host),
-        eq(project.customDomainVerified, true),
-        isNull(project.deletedAt),
-      ),
-    });
+    const results = await db
+      .select()
+      .from(project)
+      .where(
+        and(
+          eq(project.customDomain, host),
+          eq(project.customDomainVerified, true),
+          isNull(project.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    let projectData = results[0];
 
     // B. Fallback to subdomain check (project-slug.kudoswall.org)
     if (!projectData && host.endsWith(`.${mainDomain}`)) {
       const subdomain = host.replace(`.${mainDomain}`, "");
-      projectData = await db.query.project.findFirst({
-        where: and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)),
-      });
+      const resultsSub = await db
+        .select()
+        .from(project)
+        .where(and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)))
+        .limit(1);
+      projectData = resultsSub[0];
     }
 
     if (projectData?.collectionSlug) {
@@ -68,3 +79,9 @@ export async function proxy(request: NextRequest) {
   // Handle other paths or default behavior
   return NextResponse.next();
 }
+
+export default proxy;
+
+export const config = {
+  matcher: ["/((?!api|_next|static|favicon.ico|robots.txt|sitemap.xml).*)"],
+};
