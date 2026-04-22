@@ -8,7 +8,7 @@ import {
   testimonial,
   videoTranscodingJob,
   project,
-} from "@my-better-t-app/db/schema";
+} from "@my-better-t-app/db/schema/app";
 import { eq, and, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { getPlanConfig } from "@my-better-t-app/api/config/plans";

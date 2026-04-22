@@ -8,11 +8,13 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { lastLoginMethod } from "better-auth/plugins";
-import { EmailService } from "@my-better-t-app/email";
+// import { EmailService } from "@my-better-t-app/email"; // Moved to dynamic imports to save Edge bundle size
+
 
 export function createAuth() {
   const db = createDb();
-  const emailService = new EmailService(env.RESEND_API_KEY || "");
+  // const emailService = new EmailService(env.RESEND_API_KEY || ""); // Moved to dynamic imports
+
 
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -44,7 +46,9 @@ export function createAuth() {
       enabled: true,
       requireEmailVerification: false,
       autoSignIn: true,
-      sendResetPassword: async ({ user, url }) => {
+        sendResetPassword: async ({ user, url }) => {
+        const { EmailService } = await import("@my-better-t-app/email");
+        const emailService = new EmailService(env.RESEND_API_KEY || "");
         await emailService.resend.emails.send({
           from: "Alex from KudosWall <alex@kudoswall.org>",
           to: user.email,
@@ -78,6 +82,8 @@ export function createAuth() {
       nextCookies(),
       magicLink({
         sendMagicLink: async ({ email, url }) => {
+          const { EmailService } = await import("@my-better-t-app/email");
+          const emailService = new EmailService(env.RESEND_API_KEY || "");
           await emailService.resend.emails.send({
             from: "Alex from KudosWall <alex@kudoswall.org>",
             to: email,
@@ -89,6 +95,8 @@ export function createAuth() {
       }),
       emailOTP({
         sendVerificationOTP: async ({ email, otp, type }) => {
+          const { EmailService } = await import("@my-better-t-app/email");
+          const emailService = new EmailService(env.RESEND_API_KEY || "");
           await emailService.resend.emails.send({
             from: "Alex from KudosWall <alex@kudoswall.org>",
             to: email,
@@ -153,6 +161,8 @@ export function createAuth() {
                 console.log(`[WORKSPACE] Created for ${user.email}`);
               }
 
+              const { EmailService } = await import("@my-better-t-app/email");
+              const emailService = new EmailService(env.RESEND_API_KEY || "");
               await emailService.sendWelcomeEmail(user.email, user.name || "there");
               console.log(`[Welcome Email] Sent to ${user.email}`);
             } catch (error) {
