@@ -10,11 +10,9 @@ import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { lastLoginMethod } from "better-auth/plugins";
 // import { EmailService } from "@my-better-t-app/email"; // Moved to dynamic imports to save Edge bundle size
 
-
 export function createAuth() {
   const db = createDb();
   // const emailService = new EmailService(env.RESEND_API_KEY || ""); // Moved to dynamic imports
-
 
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -46,7 +44,7 @@ export function createAuth() {
       enabled: true,
       requireEmailVerification: false,
       autoSignIn: true,
-        sendResetPassword: async ({ user, url }) => {
+      sendResetPassword: async ({ user, url }) => {
         const { EmailService } = await import("@my-better-t-app/email");
         const emailService = new EmailService(env.RESEND_API_KEY || "");
         await emailService.resend.emails.send({
