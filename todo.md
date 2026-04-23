@@ -120,7 +120,7 @@
 
 ### 2.4 Team Collaboration & RBAC
 
-- [ ] Invite team members via email link or auto-capture company domain
+- [x] Invite team members via email link or auto-capture company domain
 - [x] Granular role system: Owner, Admin, Editor, Moderator, Viewer
 - [ ] Custom permission sets per role (e.g., can-approve, can-delete)
 - [ ] Activity feed: See what teammates are working on in real-time
