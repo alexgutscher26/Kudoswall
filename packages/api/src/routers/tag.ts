@@ -52,7 +52,7 @@ export const tagRouter = router({
         throw new Error("Forbidden or not found");
       }
 
-      await db.update(tag).set({ deletedAt: new Date().toISOString() }).where(eq(tag.id, input.id));
+      await db.update(tag).set({ deletedAt: new Date() }).where(eq(tag.id, input.id));
 
       await recordAuditLog({
         userId: session.user.id,

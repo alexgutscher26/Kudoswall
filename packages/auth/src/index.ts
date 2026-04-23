@@ -132,11 +132,30 @@ export function createAuth() {
                   "-" +
                   Math.random().toString(36).substring(2, 6);
 
+                // Create Stripe customer
+                let stripeCustomerId: string | null = null;
+                try {
+                  const { stripe } = await import("@my-better-t-app/stripe");
+                  const customer = await stripe.customers.create({
+                    email: user.email,
+                    name: user.name || undefined,
+                    metadata: {
+                      userId: user.id,
+                      workspaceId: wsId,
+                    },
+                  });
+                  stripeCustomerId = customer.id;
+                  console.log(`[STRIPE] Created customer ${stripeCustomerId} for ${user.email}`);
+                } catch (stripeError) {
+                  console.error("[STRIPE] Error creating customer:", stripeError);
+                }
+
                 const newWorkspace = {
                   id: wsId,
                   name: `${user.name || "My"}'s Workspace`,
                   slug: generateSlug(user.name || "user"),
                   ownerId: user.id,
+                  stripeCustomerId,
                   onboardingStatus: JSON.stringify({
                     step1: false,
                     step2: false,
@@ -161,7 +180,7 @@ export function createAuth() {
                     role: "owner" as const,
                   });
                 });
-                console.log(`[WORKSPACE] Created for ${user.email}`);
+                console.log(`[WORKSPACE] Created for ${user.email} with Stripe ID: ${stripeCustomerId}`);
               }
 
               const { EmailService } = await import("@my-better-t-app/email");

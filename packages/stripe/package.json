@@ -1,0 +1,17 @@
+{
+  "name": "@my-better-t-app/stripe",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@my-better-t-app/env": "workspace:*",
+    "stripe": "catalog:"
+  },
+  "devDependencies": {
+    "@my-better-t-app/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

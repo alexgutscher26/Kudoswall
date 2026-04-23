@@ -964,7 +964,7 @@
 - [x] Implement Stripe Checkout for billing / plan gating
 - [ ] Add "Read more / Read less" to long text testimonials in widgets
 - [ ] Build Bento Grid layout for widgets
-- [ ] Add filter bar to the testimonial inbox (by rating, type, tag)
+- [x] Add filter bar to the testimonial inbox (by rating, type, tag)
 - [ ] Write Playwright E2E tests for the core submission flow
 
 ### 🟡 Medium (Next Quarter)

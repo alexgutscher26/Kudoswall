@@ -76,7 +76,7 @@
         "react": "catalog:",
         "react-dom": "catalog:",
         "react-easy-crop": "^5.5.7",
-        "stripe": "^22.0.1",
+        "stripe": "catalog:",
         "uploadthing": "^7.7.4",
         "zod": "catalog:",
       },
@@ -101,6 +101,7 @@
         "@my-better-t-app/db": "workspace:*",
         "@my-better-t-app/email": "workspace:*",
         "@my-better-t-app/env": "workspace:*",
+        "@my-better-t-app/stripe": "workspace:*",
         "@opentelemetry/api": "catalog:",
         "@trpc/client": "catalog:",
         "@trpc/server": "catalog:",
@@ -110,7 +111,6 @@
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "next": "catalog:",
-        "stripe": "^22.0.1",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -124,6 +124,7 @@
         "@my-better-t-app/db": "workspace:*",
         "@my-better-t-app/email": "workspace:*",
         "@my-better-t-app/env": "workspace:*",
+        "@my-better-t-app/stripe": "workspace:*",
         "better-auth": "catalog:",
         "dotenv": "catalog:",
         "zod": "catalog:",
@@ -204,6 +205,17 @@
         "typescript": "^5",
       },
     },
+    "packages/stripe": {
+      "name": "@my-better-t-app/stripe",
+      "dependencies": {
+        "@my-better-t-app/env": "workspace:*",
+        "stripe": "catalog:",
+      },
+      "devDependencies": {
+        "@my-better-t-app/config": "workspace:*",
+        "typescript": "^5",
+      },
+    },
     "packages/ui": {
       "name": "@my-better-t-app/ui",
       "version": "0.0.0",
@@ -254,6 +266,7 @@
     "next-themes": "^0.4.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "stripe": "^22.0.1",
     "tailwindcss": "^4.1.18",
     "zod": "^4.1.13",
   },
@@ -701,6 +714,8 @@
     "@my-better-t-app/env": ["@my-better-t-app/env@workspace:packages/env"],
 
     "@my-better-t-app/infra": ["@my-better-t-app/infra@workspace:packages/infra"],
+
+    "@my-better-t-app/stripe": ["@my-better-t-app/stripe@workspace:packages/stripe"],
 
     "@my-better-t-app/ui": ["@my-better-t-app/ui@workspace:packages/ui"],
 

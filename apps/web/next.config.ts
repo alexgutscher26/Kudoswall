@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     "@my-better-t-app/db",
     "@my-better-t-app/auth",
     "@my-better-t-app/env",
+    "@my-better-t-app/stripe",
   ],
   images: {
     formats: ["image/webp", "image/avif"],

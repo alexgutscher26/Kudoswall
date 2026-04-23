@@ -116,15 +116,46 @@ export const billingRouter = router({
   createPortalSession: workspaceProcedure.mutation(async ({ ctx }) => {
     const { db, session, workspaceId, req } = ctx;
 
-    const ws = await db.query.workspace.findFirst({
+    let ws = await db.query.workspace.findFirst({
       where: eq(workspace.id, workspaceId),
     });
 
-    if (!ws || !ws.stripeCustomerId) {
+    if (!ws) {
       throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "No stripe customer found for this workspace",
+        code: "NOT_FOUND",
+        message: "Workspace not found",
       });
+    }
+
+    let stripeCustomerId = ws.stripeCustomerId;
+
+    // If missing, create it on the fly
+    if (!stripeCustomerId) {
+      try {
+        console.log(`[Stripe] Creating missing customer for workspace: ${workspaceId}`);
+        const customer = await stripe.customers.create({
+          email: session.user.email,
+          name: session.user.name || undefined,
+          metadata: {
+            workspaceId,
+            userId: session.user.id,
+          },
+        });
+        stripeCustomerId = customer.id;
+
+        await db
+          .update(workspace)
+          .set({ stripeCustomerId })
+          .where(eq(workspace.id, workspaceId));
+
+        console.log(`[Stripe] Created customer ${stripeCustomerId} for workspace ${workspaceId}`);
+      } catch (err) {
+        console.error("❌ Failed to create Stripe customer:", err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to initialize billing. Please contact support.",
+        });
+      }
     }
 
     const membership = await db.query.workspaceMember.findFirst({
@@ -138,7 +169,6 @@ export const billingRouter = router({
       });
     }
 
-    const stripeCustomerId = ws.stripeCustomerId;
     if (!stripeCustomerId?.startsWith("cus_")) {
       console.error(`❌ Invalid Stripe Customer ID: ${stripeCustomerId}`);
       throw new TRPCError({
@@ -151,9 +181,7 @@ export const billingRouter = router({
       const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
       console.log(`[StripePortal] Creating session for workspace: ${workspaceId}, customer: ${stripeCustomerId}, origin: ${origin}`);
       
-      if (!stripe.getApiKey()) {
-        throw new Error("Stripe API key is missing or not configured correctly.");
-      }
+
 
       const stripeSession = await stripe.billingPortal.sessions.create({
         customer: stripeCustomerId,
