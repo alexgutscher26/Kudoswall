@@ -614,8 +614,8 @@ export default function DashboardShell({
   const completeStep = useMutation({
     ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
     onSuccess: () => {
-      // Use imported global queryClient instead of useQueryClient() to be SSR-safe
-      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+      // Correctly invalidate the specific workspace query to trigger a refresh
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }));
     },
   });
 
@@ -627,7 +627,7 @@ export default function DashboardShell({
       toast.success("Collection link copied!", {
         description: url,
       });
-      completeStep.mutate({ step: "step3" });
+      completeStep.mutate({ step: "step3", workspaceId: activeWorkspaceId });
     } else {
       setNewCollectionOpen(true);
     }
@@ -647,6 +647,8 @@ export default function DashboardShell({
       setActiveWorkspaceId={setActiveWorkspaceId}
       isModalOpen={isChildModalOpen}
       setIsModalOpen={setIsChildModalOpen}
+      onShareLink={handleCopyCollectionLink}
+      data={activeData}
     >
       {/* Live Data Poller (Client Only) */}
       {isMounted && (

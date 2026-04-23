@@ -1,12 +1,17 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
+import type { RouterOutputs } from "@/utils/trpc";
+
+type DashboardData = RouterOutputs["dashboard"]["getData"];
 
 interface WorkspaceContextType {
   activeWorkspaceId: string;
   setActiveWorkspaceId: (id: string) => void;
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  onShareLink?: () => void;
+  data?: DashboardData | null;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -17,16 +22,27 @@ export function WorkspaceProvider({
   setActiveWorkspaceId,
   isModalOpen,
   setIsModalOpen,
+  onShareLink,
+  data,
 }: {
   children: ReactNode;
   activeWorkspaceId: string;
   setActiveWorkspaceId: (id: string) => void;
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  onShareLink?: () => void;
+  data?: DashboardData | null;
 }) {
   return (
     <WorkspaceContext.Provider
-      value={{ activeWorkspaceId, setActiveWorkspaceId, isModalOpen, setIsModalOpen }}
+      value={{
+        activeWorkspaceId,
+        setActiveWorkspaceId,
+        isModalOpen,
+        setIsModalOpen,
+        onShareLink,
+        data,
+      }}
     >
       {children}
     </WorkspaceContext.Provider>

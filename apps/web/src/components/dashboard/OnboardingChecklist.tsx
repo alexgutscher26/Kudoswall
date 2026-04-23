@@ -3,6 +3,8 @@
 import { CheckCircle2, ChevronRight, Gift } from "lucide-react";
 import { Progress } from "@my-better-t-app/ui/components/progress";
 import { motion, AnimatePresence } from "framer-motion";
+import { useWorkspace } from "./WorkspaceContext";
+import { useRouter } from "next/navigation";
 
 interface OnboardingStatus {
   step1: boolean;
@@ -22,42 +24,63 @@ const STEPS = [
     key: "step1",
     label: "Create your first Space",
     desc: "Set up a dedicated wall for your testimonials",
+    href: "/dashboard",
   },
   {
     key: "step2",
     label: "Customize your Page",
     desc: "Add your logo and branding to the collection form",
+    href: "/dashboard/collection",
   },
   {
     key: "step3",
     label: "Share your Link",
     desc: "Send your unique link to customers via email or social",
+    action: "share",
   },
   {
     key: "step4",
     label: "Approve a Testimonial",
     desc: "Review and approve your first customer submission",
+    href: "/dashboard/testimonials",
   },
   {
     key: "step5",
     label: "Embed on Website",
     desc: "Copy the embed code and drop it into your site",
+    href: "/dashboard/embed",
   },
 ] as const;
 
-export function OnboardingChecklist({ status, accentColor = "#e8527a" }: OnboardingChecklistProps) {
+export function OnboardingChecklist({
+  status: initialStatus,
+  accentColor = "#e8527a",
+}: OnboardingChecklistProps) {
+  const { onShareLink, activeWorkspaceId, data } = useWorkspace();
+  const router = useRouter();
+
+  const status = data?.onboarding || initialStatus;
   const doneCount = Object.values(status).filter(Boolean).length;
   const totalCount = STEPS.length;
   const percentage = Math.round((doneCount / totalCount) * 100);
   const isComplete = doneCount === totalCount;
 
+  const handleStepClick = (step: (typeof STEPS)[number]) => {
+    if (status[step.key as keyof OnboardingStatus]) return;
+
+    if ("action" in step && step.action === "share") {
+      onShareLink?.();
+    } else if ("href" in step) {
+      const url = activeWorkspaceId ? `${step.href}?workspaceId=${activeWorkspaceId}` : step.href;
+      router.push(url);
+    }
+  };
+
   return (
     <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-center justify-between border-b border-neutral-50 px-6 py-5">
         <div>
-          <h3 className="text-[15px] font-bold tracking-tight text-neutral-900">
-            Onboarding Guide
-          </h3>
+          <h3 className="text-[15px] font-bold tracking-tight text-neutral-900">Onboarding Guide</h3>
           <p className="mt-0.5 text-[12px] font-medium text-neutral-400">
             {doneCount} of {totalCount} steps completed
           </p>
@@ -81,7 +104,8 @@ export function OnboardingChecklist({ status, accentColor = "#e8527a" }: Onboard
             return (
               <motion.li
                 key={step.key}
-                className="group flex items-start gap-4"
+                onClick={() => handleStepClick(step)}
+                className={`group flex items-start gap-4 ${isDone ? "opacity-60" : "cursor-pointer"}`}
                 initial={false}
                 animate={{ opacity: isDone ? 0.6 : 1 }}
               >
@@ -91,23 +115,29 @@ export function OnboardingChecklist({ status, accentColor = "#e8527a" }: Onboard
                       <CheckCircle2 className="size-3.5" />
                     </div>
                   ) : (
-                    <div className="flex size-5 items-center justify-center rounded-full border-2 border-neutral-200 text-[10px] font-bold text-neutral-400 group-hover:border-neutral-300">
+                    <div className="flex size-5 items-center justify-center rounded-full border-2 border-neutral-200 text-[10px] font-bold text-neutral-400 group-hover:border-neutral-300 group-hover:bg-neutral-50 group-hover:text-neutral-600 transition-all">
                       {index + 1}
                     </div>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`text-[13px] leading-none font-semibold ${isDone ? "text-neutral-400 line-through" : "text-neutral-800"}`}
+                    className={`text-[13px] leading-none font-semibold transition-colors ${
+                      isDone
+                        ? "text-neutral-400 line-through"
+                        : "text-neutral-800 group-hover:text-neutral-900"
+                    }`}
                   >
                     {step.label}
                   </p>
                   {!isDone && (
-                    <p className="mt-1 text-[11px] leading-relaxed text-neutral-500">{step.desc}</p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-neutral-500 group-hover:text-neutral-600 transition-colors">
+                      {step.desc}
+                    </p>
                   )}
                 </div>
                 {!isDone && (
-                  <ChevronRight className="size-4 text-neutral-300 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="size-4 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-neutral-400" />
                 )}
               </motion.li>
             );
