@@ -85,6 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     const id = `tst_${nanoid()}`;
     await db.insert(testimonial).values({
       id,
+      workspaceId: proj.workspaceId,
       projectId: proj.id,
       rating: body.rating,
       content: body.content,

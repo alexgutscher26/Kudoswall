@@ -113,9 +113,9 @@
 
 - [x] Workspace-based architecture with unique URL slugs
 - [x] Workspace switcher UI in the top navigation bar
-- [ ] Row-level security (RLS) / tenant isolation at the ORM layer
+- [x] **Row-Level Security (RLS)**: Implement tenant isolation at the ORM layer to ensure data security between different workspaces.
 - [x] Custom subdomain per workspace (`customer.kudoswall.com`)
-- [ ] Workspace-level settings page (name, logo, timezone, language)
+- [ ] Workspace-level settings page (name, timezone, language)
 - [ ] Organization-wide billing: One subscription covers all workspaces
 
 ### 2.4 Team Collaboration & RBAC

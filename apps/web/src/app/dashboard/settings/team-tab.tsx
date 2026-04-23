@@ -36,9 +36,7 @@ export default function TeamTab() {
   }, [isInviteModalOpen]);
 
   const { data, isLoading, refetch } = useQuery({
-    ...trpc.team.getMembers.queryOptions({
-      workspaceId: activeWorkspaceId,
-    }),
+    ...trpc.team.getMembers.queryOptions(),
   });
 
   const inviteMutation = useMutation({
@@ -178,7 +176,6 @@ export default function TeamTab() {
                       value={member.role}
                       onChange={(e) =>
                         updateRoleMutation.mutate({
-                          workspaceId: activeWorkspaceId,
                           memberId: member.id,
                           role: e.target.value as "admin" | "member",
                         })
@@ -197,7 +194,6 @@ export default function TeamTab() {
                             label: "Remove Member",
                             onClick: () =>
                               removeMutation.mutate({
-                                workspaceId: activeWorkspaceId,
                                 memberId: member.id,
                               }),
                           },
@@ -245,10 +241,9 @@ export default function TeamTab() {
                   <button
                     type="button"
                     onClick={() =>
-                      revokeMutation.mutate({
-                        workspaceId: activeWorkspaceId,
-                        invitationId: invite.id,
-                      })
+                        revokeMutation.mutate({
+                          invitationId: invite.id,
+                        })
                     }
                     className="rounded-lg p-2 text-neutral-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
                   >
@@ -335,7 +330,6 @@ export default function TeamTab() {
                   type="button"
                   onClick={() =>
                     inviteMutation.mutate({
-                      workspaceId: activeWorkspaceId,
                       email: inviteEmail,
                       role: inviteRole,
                     })

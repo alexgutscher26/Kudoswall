@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, router } from "../index";
+import { publicProcedure, router, workspaceProcedure } from "../index";
 import { workspace, workspaceMember, workspaceInvitation, user } from "@my-better-t-app/db/schema";
 import { eq, and, isNull, gt, count } from "drizzle-orm";
 import { z } from "zod";
@@ -9,87 +9,65 @@ import { env } from "@my-better-t-app/env/server";
 import { getPlanConfig } from "../config/plans";
 
 export const teamRouter = router({
-  getMembers: protectedProcedure
-    .input(z.object({ workspaceId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { workspaceId } = input;
+  getMembers: workspaceProcedure.query(async ({ ctx }) => {
+    const { db, workspaceId } = ctx;
 
-      // First verify user is a member/owner
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-        ),
-      });
+    const members = await db.query.workspaceMember.findMany({
+      where: isNull(workspaceMember.deletedAt),
+      with: {
+        user: true,
+      },
+    });
 
-      if (!membership) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Not a member of this workspace" });
-      }
+    const invitations = await db.query.workspaceInvitation.findMany({
+      where: isNull(workspaceInvitation.deletedAt),
+    });
 
-      const members = await db.query.workspaceMember.findMany({
-        where: and(eq(workspaceMember.workspaceId, workspaceId), isNull(workspaceMember.deletedAt)),
-        with: {
-          user: true,
-        },
-      });
+    const ws = await db.query.workspace.findFirst({
+      where: eq(workspace.id, workspaceId),
+      columns: {
+        plan: true,
+      },
+    });
 
-      const invitations = await db.query.workspaceInvitation.findMany({
-        where: and(
-          eq(workspaceInvitation.workspaceId, workspaceId),
-          isNull(workspaceInvitation.deletedAt),
-        ),
-      });
+    const planConfig = getPlanConfig(ws?.plan);
 
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.id, workspaceId),
-        columns: {
-          plan: true,
-        },
-      });
+    return {
+      members: members.map((m) => ({
+        id: m.id,
+        userId: m.userId,
+        name: m.user.name,
+        email: m.user.email,
+        image: m.user.image,
+        role: m.role,
+        createdAt: m.createdAt,
+      })),
+      invitations: invitations.map((i) => ({
+        id: i.id,
+        email: i.email,
+        role: i.role,
+        expiresAt: i.expiresAt,
+        createdAt: i.createdAt,
+      })),
+      plan: ws?.plan || "free",
+      memberInvitesEnabled: planConfig.features.memberInvites,
+    };
+  }),
 
-      const planConfig = getPlanConfig(ws?.plan);
-
-      return {
-        members: members.map((m) => ({
-          id: m.id,
-          userId: m.userId,
-          name: m.user.name,
-          email: m.user.email,
-          image: m.user.image,
-          role: m.role,
-          createdAt: m.createdAt,
-        })),
-        invitations: invitations.map((i) => ({
-          id: i.id,
-          email: i.email,
-          role: i.role,
-          expiresAt: i.expiresAt,
-          createdAt: i.createdAt,
-        })),
-        plan: ws?.plan || "free",
-        memberInvitesEnabled: planConfig.features.memberInvites,
-      };
-    }),
-
-  inviteMember: protectedProcedure
+  inviteMember: workspaceProcedure
     .input(
       z.object({
-        workspaceId: z.string(),
         email: z.string().email(),
         role: z.enum(["admin", "member"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { workspaceId, email, role } = input;
+      const { db, session, workspaceId } = ctx;
+      const { email, role } = input;
 
       // Verify inviter is owner or admin
       const inviter = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-        ),
+        where: eq(workspaceMember.userId, session.user.id),
       });
 
       if (!inviter || (inviter.role !== "owner" && inviter.role !== "admin")) {
@@ -120,19 +98,12 @@ export const teamRouter = router({
       const currentMembers = await db
         .select({ count: count() })
         .from(workspaceMember)
-        .where(
-          and(eq(workspaceMember.workspaceId, workspaceId), isNull(workspaceMember.deletedAt)),
-        );
+        .where(isNull(workspaceMember.deletedAt));
 
       const pendingInvites = await db
         .select({ count: count() })
         .from(workspaceInvitation)
-        .where(
-          and(
-            eq(workspaceInvitation.workspaceId, workspaceId),
-            isNull(workspaceInvitation.deletedAt),
-          ),
-        );
+        .where(isNull(workspaceInvitation.deletedAt));
 
       const totalSlots = (currentMembers[0]?.count || 0) + (pendingInvites[0]?.count || 0);
       if (totalSlots >= planConfig.limits.maxTeamMembers) {
@@ -146,10 +117,7 @@ export const teamRouter = router({
       const targetUser = await db.query.user.findFirst({ where: eq(user.email, email) });
       if (targetUser) {
         const existingMember = await db.query.workspaceMember.findFirst({
-          where: and(
-            eq(workspaceMember.workspaceId, workspaceId),
-            eq(workspaceMember.userId, targetUser.id),
-          ),
+          where: eq(workspaceMember.userId, targetUser.id),
         });
         if (existingMember) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "User is already a member" });
@@ -170,7 +138,7 @@ export const teamRouter = router({
         expiresAt,
       });
 
-      // Fetch workspace info for the email (already fetched above)
+      // Send email
       if (ws) {
         const emailService = new EmailService(env.RESEND_API_KEY || "", env.EMAIL_FROM);
         const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kudoswall.org").replace(
@@ -186,27 +154,22 @@ export const teamRouter = router({
             ws.name,
             inviteLink,
           );
-          console.log(`[INVITE] Email sent to ${email}`);
         } catch (error) {
           console.error("Failed to send invitation email details:", error);
-          // We don't throw here to ensure the invitation is still recorded in DB
         }
       }
 
       return { success: true };
     }),
 
-  removeMember: protectedProcedure
-    .input(z.object({ workspaceId: z.string(), memberId: z.string() }))
+  removeMember: workspaceProcedure
+    .input(z.object({ memberId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { workspaceId, memberId } = input;
+      const { memberId } = input;
 
       const actor = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-        ),
+        where: eq(workspaceMember.userId, session.user.id),
       });
 
       if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
@@ -221,7 +184,6 @@ export const teamRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Member not found" });
       }
 
-      // Prevent removing owners (unless done by another owner?) - let's stick to only owner removing others
       if (target.role === "owner" && actor.role !== "owner") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Cannot remove an owner" });
       }
@@ -238,23 +200,19 @@ export const teamRouter = router({
       return { success: true };
     }),
 
-  updateMemberRole: protectedProcedure
+  updateMemberRole: workspaceProcedure
     .input(
       z.object({
-        workspaceId: z.string(),
         memberId: z.string(),
         role: z.enum(["admin", "member"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { workspaceId, memberId, role } = input;
+      const { memberId, role } = input;
 
       const actor = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-        ),
+        where: eq(workspaceMember.userId, session.user.id),
       });
 
       if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
@@ -266,17 +224,14 @@ export const teamRouter = router({
       return { success: true };
     }),
 
-  revokeInvitation: protectedProcedure
-    .input(z.object({ workspaceId: z.string(), invitationId: z.string() }))
+  revokeInvitation: workspaceProcedure
+    .input(z.object({ invitationId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { workspaceId, invitationId } = input;
+      const { invitationId } = input;
 
       const actor = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-        ),
+        where: eq(workspaceMember.userId, session.user.id),
       });
 
       if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
@@ -320,12 +275,10 @@ export const teamRouter = router({
       });
 
       if (existing) {
-        // Just delete invitation and return success if they are already there
         await db.delete(workspaceInvitation).where(eq(workspaceInvitation.id, invitation.id));
         return { success: true, workspaceId: invitation.workspaceId };
       }
 
-      // Create membership
       await db.insert(workspaceMember).values({
         id: crypto.randomUUID(),
         workspaceId: invitation.workspaceId,
@@ -333,7 +286,6 @@ export const teamRouter = router({
         role: invitation.role,
       });
 
-      // Delete invitation
       await db.delete(workspaceInvitation).where(eq(workspaceInvitation.id, invitation.id));
 
       return { success: true, workspaceId: invitation.workspaceId };

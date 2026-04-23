@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { protectedProcedure, publicProcedure, router } from "../index";
+import { publicProcedure, router, workspaceProcedure } from "../index";
 import { stripe } from "../lib/stripe";
-import { eq, and, count as dCount } from "drizzle-orm";
+import { eq, count as dCount } from "drizzle-orm";
 import { workspace, workspaceMember } from "@my-better-t-app/db/schema";
 import { TRPCError } from "@trpc/server";
 import { PLANS } from "../config/plans";
@@ -19,15 +19,15 @@ export const billingRouter = router({
     return { count: Number(count) };
   }),
 
-  createCheckoutSession: protectedProcedure
+  createCheckoutSession: workspaceProcedure
     .input(
       z.object({
-        workspaceId: z.string(),
         priceId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { workspaceId, priceId } = input;
+      const { db, session, workspaceId, req } = ctx;
+      const { priceId } = input;
 
       const plan = Object.values(PLANS).find(
         (p) =>
@@ -38,8 +38,7 @@ export const billingRouter = router({
 
       const isLTD = plan?.id === "ltd";
 
-      // Verify workspace ownership
-      const ws = await ctx.db.query.workspace.findFirst({
+      const ws = await db.query.workspace.findFirst({
         where: eq(workspace.id, workspaceId),
       });
 
@@ -50,11 +49,8 @@ export const billingRouter = router({
         });
       }
 
-      const membership = await ctx.db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, ctx.session.user.id),
-        ),
+      const membership = await db.query.workspaceMember.findFirst({
+        where: eq(workspaceMember.userId, session.user.id),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -64,9 +60,9 @@ export const billingRouter = router({
         });
       }
 
-      const session = await stripe.checkout.sessions.create({
+      const stripeSession = await stripe.checkout.sessions.create({
         customer: ws.stripeCustomerId || undefined,
-        customer_email: ws.stripeCustomerId ? undefined : ctx.session.user.email,
+        customer_email: ws.stripeCustomerId ? undefined : session.user.email,
         line_items: [
           {
             price: priceId,
@@ -82,71 +78,62 @@ export const billingRouter = router({
               trial_period_days: 7,
               metadata: {
                 workspaceId,
-                userId: ctx.session.user.id,
+                userId: session.user.id,
               },
             },
         allow_promotion_codes: true,
-        success_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}`,
+        success_url: `${req.headers.get("origin")}/dashboard/settings?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.get("origin")}/dashboard/settings`,
         payment_intent_data: isLTD
           ? {
               setup_future_usage: "on_session",
               metadata: {
                 workspaceId,
-                userId: ctx.session.user.id,
+                userId: session.user.id,
                 planId: "ltd",
               },
             }
           : undefined,
         metadata: {
           workspaceId,
-          userId: ctx.session.user.id,
+          userId: session.user.id,
           planId: isLTD ? "ltd" : (plan?.id ?? "free"),
         },
       });
 
-      return { url: session.url };
+      return { url: stripeSession.url };
     }),
 
-  createPortalSession: protectedProcedure
-    .input(
-      z.object({
-        workspaceId: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { workspaceId } = input;
+  createPortalSession: workspaceProcedure.mutation(async ({ ctx }) => {
+    const { db, session, workspaceId, req } = ctx;
 
-      const ws = await ctx.db.query.workspace.findFirst({
-        where: eq(workspace.id, workspaceId),
+    const ws = await db.query.workspace.findFirst({
+      where: eq(workspace.id, workspaceId),
+    });
+
+    if (!ws || !ws.stripeCustomerId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No stripe customer found for this workspace",
       });
+    }
 
-      if (!ws || !ws.stripeCustomerId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "No stripe customer found for this workspace",
-        });
-      }
+    const membership = await db.query.workspaceMember.findFirst({
+      where: eq(workspaceMember.userId, session.user.id),
+    });
 
-      const membership = await ctx.db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, ctx.session.user.id),
-        ),
+    if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You do not have permission to manage billing for this workspace",
       });
+    }
 
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to manage billing for this workspace",
-        });
-      }
+    const stripeSession = await stripe.billingPortal.sessions.create({
+      customer: ws.stripeCustomerId,
+      return_url: `${req.headers.get("origin")}/dashboard/settings`,
+    });
 
-      const session = await stripe.billingPortal.sessions.create({
-        customer: ws.stripeCustomerId,
-        return_url: `${ctx.req.headers.get("origin")}/dashboard/settings?workspaceId=${workspaceId}`,
-      });
-
-      return { url: session.url };
-    }),
+    return { url: stripeSession.url };
+  }),
 });

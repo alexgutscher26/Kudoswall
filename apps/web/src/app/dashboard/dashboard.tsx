@@ -60,6 +60,12 @@ function DotGrid({ opacity = 0.08 }: { opacity?: number }) {
   );
 }
 
+function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
 // ─── Nav content (shared between sidebar + mobile drawer) ─────────────────────
 
 function NavContent({
@@ -564,6 +570,9 @@ export default function DashboardShell({
   useEffect(() => {
     if (urlWorkspaceId && urlWorkspaceId !== activeWorkspaceId) {
       setActiveWorkspaceId(urlWorkspaceId);
+      setCookie("workspace-id", urlWorkspaceId);
+    } else if (activeWorkspaceId) {
+      setCookie("workspace-id", activeWorkspaceId);
     }
   }, [urlWorkspaceId, activeWorkspaceId]);
 
@@ -579,6 +588,7 @@ export default function DashboardShell({
       // or if the URL matches the initialData (meaning navigation finished)
       if (!urlWorkspaceId || urlWorkspaceId === initialData.workspace.id) {
         setActiveWorkspaceId(initialData.workspace.id);
+        setCookie("workspace-id", initialData.workspace.id);
       }
     }
   }, [initialData?.workspace.id, urlWorkspaceId, activeWorkspaceId]);

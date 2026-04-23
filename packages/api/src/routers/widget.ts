@@ -1,7 +1,6 @@
-import { protectedProcedure, router, publicProcedure } from "../index";
+import { workspaceProcedure, router, publicProcedure } from "../index";
 import {
   widget,
-  workspace,
   project,
   testimonial,
   testimonialToTag,
@@ -58,70 +57,34 @@ const widgetSettingsSchema = z.object({
 });
 
 export const widgetRouter = router({
-  list: protectedProcedure
-    .input(z.object({ workspaceId: z.string().optional() }).optional())
-    .query(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const workspaceId = input?.workspaceId;
-
-      let ws;
-      if (workspaceId) {
-        ws = await db.query.workspace.findFirst({
-          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
-        });
-      }
-
-      if (!ws) {
-        ws = await db.query.workspace.findFirst({
-          where: eq(workspace.ownerId, session.user.id),
-        });
-      }
-
-      if (!ws) return [];
+  list: workspaceProcedure
+    .query(async ({ ctx }) => {
+      const { db } = ctx;
 
       return db.query.widget.findMany({
-        where: and(eq(widget.workspaceId, ws.id), isNull(widget.deletedAt)),
+        where: isNull(widget.deletedAt),
         orderBy: desc(widget.createdAt),
       });
     }),
 
-  getById: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
-    const { db, session } = ctx;
+  getById: workspaceProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+    const { db } = ctx;
 
     const w = await db.query.widget.findFirst({
       where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
-      with: {
-        workspace: true,
-      },
     });
 
-    if (!w || w.workspace.ownerId !== session.user.id) {
+    if (!w) {
       throw new Error("Not found or forbidden");
     }
 
     return w;
   }),
 
-  create: protectedProcedure
-    .input(z.object({ name: z.string(), workspaceId: z.string().optional() }))
+  create: workspaceProcedure
+    .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { workspaceId } = input;
-
-      let ws;
-      if (workspaceId) {
-        ws = await db.query.workspace.findFirst({
-          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
-        });
-      }
-
-      if (!ws) {
-        ws = await db.query.workspace.findFirst({
-          where: eq(workspace.ownerId, session.user.id),
-        });
-      }
-
-      if (!ws) throw new Error("Workspace not found");
+      const { db, session, workspaceId } = ctx;
 
       const id = crypto.randomUUID();
       const defaultSettings = {
@@ -148,13 +111,14 @@ export const widgetRouter = router({
 
       await db.insert(widget).values({
         id,
-        workspaceId: ws.id,
+        workspaceId,
         name: input.name,
         settingsJson: JSON.stringify(defaultSettings),
       });
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId,
         entityType: "widget",
         entityId: id,
         action: "create",
@@ -164,7 +128,7 @@ export const widgetRouter = router({
       return { id };
     }),
 
-  update: protectedProcedure
+  update: workspaceProcedure
     .input(
       z.object({
         id: z.string(),
@@ -173,7 +137,7 @@ export const widgetRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, session, workspaceId } = ctx;
 
       const w = await db.query.widget.findFirst({
         where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
@@ -182,8 +146,8 @@ export const widgetRouter = router({
         },
       });
 
-      if (!w || w.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!w) {
+        throw new Error("Forbidden or not found");
       }
 
       const { getPlanConfig } = await import("../config/plans");
@@ -216,6 +180,7 @@ export const widgetRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId,
         entityType: "widget",
         entityId: input.id,
         action: "update",
@@ -225,26 +190,24 @@ export const widgetRouter = router({
       return { success: true };
     }),
 
-  delete: protectedProcedure
+  delete: workspaceProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, session, workspaceId } = ctx;
 
       const w = await db.query.widget.findFirst({
         where: eq(widget.id, input.id),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!w || w.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!w) {
+        throw new Error("Forbidden or not found");
       }
 
       await db.update(widget).set({ deletedAt: new Date() }).where(eq(widget.id, input.id));
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId,
         entityType: "widget",
         entityId: input.id,
         action: "delete",

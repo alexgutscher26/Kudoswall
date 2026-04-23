@@ -100,7 +100,6 @@ export default function SettingsPage() {
   const [slug, setSlug] = useState("");
   const [retentionEnabled, setRetentionEnabled] = useState(false);
   const [retentionDays, setRetentionDays] = useState(365);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [instantAlerts, setInstantAlerts] = useState(true);
   const [dailySummary, setDailySummary] = useState(false);
   const [searchEmail, setSearchEmail] = useState("");
@@ -115,7 +114,6 @@ export default function SettingsPage() {
     isFetching: isSearching,
   } = useQuery({
     ...trpc.dashboard.findRespondentData.queryOptions({
-      workspaceId: activeWorkspaceId,
       email: searchEmail,
     }),
     enabled: false,
@@ -123,7 +121,6 @@ export default function SettingsPage() {
 
   const { refetch: exportRespondent, isFetching: isExporting } = useQuery({
     ...trpc.dashboard.exportRespondentData.queryOptions({
-      workspaceId: activeWorkspaceId,
       email: searchEmail,
     }),
     enabled: false,
@@ -182,7 +179,6 @@ export default function SettingsPage() {
       setSlug(dashboardData.workspace.slug);
       setRetentionEnabled(dashboardData.workspace.retentionEnabled);
       setRetentionDays(dashboardData.workspace.retentionDays || 365);
-      setLogoUrl(dashboardData.workspace.logoUrl);
 
       if (dashboardData.workspace.notificationSettingsJson) {
         try {
@@ -215,10 +211,8 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     updateWorkspace.mutate({
-      id: activeWorkspaceId,
       name: workspaceName,
       slug: slug,
-      logoUrl: logoUrl,
       notificationSettingsJson: JSON.stringify({ instantAlerts, dailySummary }),
       retentionEnabled: retentionEnabled,
       retentionDays: retentionDays,
@@ -263,7 +257,7 @@ export default function SettingsPage() {
         "This action cannot be undone and will delete all associated projects and testimonials.",
       action: {
         label: "Delete Workspace",
-        onClick: () => deleteWorkspace.mutate({ id: activeWorkspaceId }),
+        onClick: () => deleteWorkspace.mutate(),
       },
     });
   };
@@ -337,41 +331,6 @@ export default function SettingsPage() {
                 Workspace Identity
               </h3>
 
-              <div className="flex items-center gap-6">
-                <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50 shadow-inner">
-                  {logoUrl ? (
-                    <Image alt="Logo" className="object-contain" fill sizes="80px" src={logoUrl} />
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <Upload className="size-5 text-neutral-300" />
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="text-[13px] font-bold text-neutral-800">Workspace Logo</h4>
-                    <p className="mt-0.5 text-[11px] text-neutral-400">JPG, PNG or SVG. Max 2MB.</p>
-                  </div>
-                  <UploadButton
-                    appearance={{
-                      button:
-                        "ut-uploading:cursor-not-allowed rounded-xl bg-pink-500 px-4 py-2 text-[12px] font-bold text-white shadow-lg shadow-pink-500/20 transition-all hover:bg-pink-600 after:bg-pink-600 focus-within:ring-pink-500/20 active:scale-95",
-                      allowedContent: "hidden",
-                    }}
-                    endpoint="logoUploader"
-                    onClientUploadComplete={(res) => {
-                      if (res?.[0]) {
-                        setLogoUrl(res[0].url);
-                        toast.success("Logo uploaded!");
-                        // auto save or just wait for manual save
-                      }
-                    }}
-                    onUploadError={(error: Error) => {
-                      toast.error(`Upload failed: ${error.message}`);
-                    }}
-                  />
-                </div>
-              </div>
 
               {/* Name & Slug */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -590,7 +549,7 @@ export default function SettingsPage() {
                       {isPaid ? (
                         <button
                           type="button"
-                          onClick={() => createPortal.mutate({ workspaceId: activeWorkspaceId })}
+                          onClick={() => createPortal.mutate()}
                           disabled={createPortal.isPending}
                           className="rounded-full bg-white px-6 py-2.5 text-[13px] font-bold text-neutral-900 shadow-sm transition-all hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
                         >
@@ -612,7 +571,7 @@ export default function SettingsPage() {
                       {isPaid && dashboardData?.workspace?.plan !== "ltd" && (
                         <button
                           type="button"
-                          onClick={() => createPortal.mutate({ workspaceId: activeWorkspaceId })}
+                          onClick={() => createPortal.mutate()}
                           disabled={createPortal.isPending}
                           className="rounded-full border border-neutral-700 bg-neutral-800 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-700 disabled:opacity-50"
                         >
@@ -676,7 +635,6 @@ export default function SettingsPage() {
                               }
                               onClick={() =>
                                 createCheckout.mutate({
-                                  workspaceId: activeWorkspaceId,
                                   priceId: p.stripePriceIdMonthly!,
                                 })
                               }
@@ -780,7 +738,7 @@ export default function SettingsPage() {
 
                     {!dashboardData?.workspace?.dpaAcceptedAt ? (
                       <button
-                        onClick={() => acceptDpa.mutate({ workspaceId: activeWorkspaceId })}
+                        onClick={() => acceptDpa.mutate()}
                         disabled={acceptDpa.isPending}
                         className="rounded-full bg-pink-600 px-6 py-2 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-pink-700 disabled:opacity-50"
                       >
@@ -855,7 +813,6 @@ export default function SettingsPage() {
                             label: "Delete All",
                             onClick: () =>
                               deleteRespondent.mutate({
-                                workspaceId: activeWorkspaceId,
                                 email: searchEmail,
                               }),
                           },

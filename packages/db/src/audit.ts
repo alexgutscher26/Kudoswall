@@ -6,6 +6,7 @@ export type AuditAction = "create" | "update" | "delete";
 
 interface AuditContext {
   userId: string;
+  workspaceId?: string;
   entityType: string;
   entityId: string;
   action: AuditAction;
@@ -20,6 +21,7 @@ export async function recordAuditLog(ctx: AuditContext) {
 
   await database.insert(auditLog).values({
     id: crypto.randomUUID(),
+    workspaceId: ctx.workspaceId,
     actorId: ctx.userId,
     entityType: ctx.entityType,
     entityId: ctx.entityId,
@@ -40,6 +42,7 @@ export function notDeleted(table: { deletedAt: any }) {
  */
 export async function performSoftDelete(params: {
   userId: string;
+  workspaceId?: string;
   table: any;
   entityId: string;
   entityType: string;
@@ -55,6 +58,7 @@ export async function performSoftDelete(params: {
   // Log the action
   await recordAuditLog({
     userId: params.userId,
+    workspaceId: params.workspaceId,
     entityType: params.entityType,
     entityId: params.entityId,
     action: "delete",

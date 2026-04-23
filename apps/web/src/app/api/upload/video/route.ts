@@ -233,6 +233,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         await tx.insert(videoTranscodingJob).values({
           id: `vtj_${nanoid()}`,
+          workspaceId: wsId,
           testimonialId,
           sourceKey: key,
           status: "pending",

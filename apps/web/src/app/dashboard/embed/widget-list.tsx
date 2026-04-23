@@ -44,7 +44,7 @@ export default function WidgetList() {
     data: widgets,
     isLoading,
     refetch,
-  } = useQuery(trpc.widget.list.queryOptions({ workspaceId: activeWorkspaceId }));
+  } = useQuery(trpc.widget.list.queryOptions());
 
   const createWidget = useMutation(
     trpc.widget.create.mutationOptions({
@@ -70,7 +70,7 @@ export default function WidgetList() {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWidgetName.trim()) return;
-    createWidget.mutate({ name: newWidgetName, workspaceId: activeWorkspaceId });
+    createWidget.mutate({ name: newWidgetName });
   };
 
   const filteredWidgets = widgets?.filter((w) =>

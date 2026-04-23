@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "../index";
+import { protectedProcedure, router, workspaceProcedure } from "../index";
 import {
   workspace,
   project,
@@ -329,6 +329,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: newWs.id,
         entityType: "workspace",
         entityId: newWs.id,
         action: "create",
@@ -337,32 +338,17 @@ export const dashboardRouter = router({
       return newWs;
     }),
 
-  getProjectTestimonials: protectedProcedure
+  getProjectTestimonials: workspaceProcedure
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { projectId } = input;
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!p) throw new Error("Project not found");
-
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, p!.workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
-      });
-
-      if (!membership) {
-        throw new Error("Forbidden");
-      }
+      if (!p) throw new Error("Project not found or forbidden");
 
       const testimonials = await db.query.testimonial.findMany({
         where: eq(testimonial.projectId, projectId),
@@ -382,7 +368,7 @@ export const dashboardRouter = router({
       };
     }),
 
-  updateProjectSettings: protectedProcedure
+  updateProjectSettings: workspaceProcedure
     .input(
       z.object({
         projectId: z.string(),
@@ -399,11 +385,11 @@ export const dashboardRouter = router({
         where: eq(project.id, projectId),
       });
 
-      if (!p) throw new Error("Project not found");
+      if (!p) throw new Error("Project not found or forbidden");
 
+      // Check role via workspace member (still need to check role within the workspace)
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, p.workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -424,6 +410,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: ctx.workspaceId,
         entityType: "project",
         entityId: projectId,
         action: "update",
@@ -433,7 +420,7 @@ export const dashboardRouter = router({
       return { success: true };
     }),
 
-  deleteProject: protectedProcedure
+  deleteProject: workspaceProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
@@ -441,16 +428,12 @@ export const dashboardRouter = router({
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, id),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!p) throw new Error("Project not found");
+      if (!p) throw new Error("Project not found or forbidden");
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, p.workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -464,6 +447,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: ctx.workspaceId,
         entityType: "project",
         entityId: id,
         action: "delete",
@@ -472,7 +456,7 @@ export const dashboardRouter = router({
       return { success: true };
     }),
 
-  duplicateProject: protectedProcedure
+  duplicateProject: workspaceProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
@@ -480,16 +464,12 @@ export const dashboardRouter = router({
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, id),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!p) throw new Error("Project not found");
+      if (!p) throw new Error("Project not found or forbidden");
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, p.workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -507,17 +487,18 @@ export const dashboardRouter = router({
 
       const newProject = {
         id: crypto.randomUUID(),
-        workspaceId: p.workspaceId,
+        workspaceId: ctx.workspaceId,
         name: newName,
         slug: newSlug,
         collectionSlug: newSlug,
         collectionSettingsJson: p.collectionSettingsJson,
       };
 
-      await db.insert(project).values(newProject);
+      await (db as any).insert(project).values([newProject]);
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: ctx.workspaceId,
         entityType: "project",
         entityId: newProject.id,
         action: "create",
@@ -572,10 +553,9 @@ export const dashboardRouter = router({
       return { success: true };
     }),
 
-  updateWorkspace: protectedProcedure
+  updateWorkspace: workspaceProcedure
     .input(
       z.object({
-        id: z.string(),
         name: z.string().min(1).optional(),
         slug: z.string().min(1).optional(),
         logoUrl: z.string().nullable().optional(),
@@ -586,12 +566,12 @@ export const dashboardRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { id, name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
+      const { name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
         input;
 
+      // Ensure user is admin/owner of the current workspace
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, id),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -600,6 +580,8 @@ export const dashboardRouter = router({
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
         throw new Error("Forbidden: Insufficient permissions");
       }
+
+      const { workspaceId } = ctx;
 
       await db
         .update(workspace)
@@ -611,12 +593,13 @@ export const dashboardRouter = router({
           ...(retentionEnabled !== undefined ? { retentionEnabled } : {}),
           ...(retentionDays !== undefined ? { retentionDays } : {}),
         })
-        .where(eq(workspace.id, id));
+        .where(eq(workspace.id, workspaceId));
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: workspaceId,
         entityType: "workspace",
-        entityId: id,
+        entityId: workspaceId,
         action: "update",
         diff: { name, slug, logoUrl, retentionEnabled, retentionDays },
       });
@@ -624,15 +607,12 @@ export const dashboardRouter = router({
       return { success: true };
     }),
 
-  deleteWorkspace: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+  deleteWorkspace: workspaceProcedure
+    .mutation(async ({ ctx }) => {
       const { db, session } = ctx;
-      const { id } = input;
-
+      
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, id),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -641,6 +621,8 @@ export const dashboardRouter = router({
       if (!membership || membership.role !== "owner") {
         throw new Error("Forbidden: Only owners can delete workspaces.");
       }
+
+      const workspaceId = membership.workspaceId;
 
       // Don't allow deleting the last active workspace
       const allMemberships = await db.query.workspaceMember.findMany({
@@ -651,31 +633,28 @@ export const dashboardRouter = router({
         throw new Error("Cannot delete your only workspace.");
       }
 
-      await db.update(workspace).set({ deletedAt: new Date() }).where(eq(workspace.id, id));
+      await db.update(workspace).set({ deletedAt: new Date() }).where(eq(workspace.id, workspaceId));
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: workspaceId,
         entityType: "workspace",
-        entityId: id,
+        entityId: workspaceId,
         action: "delete",
       });
 
       return { success: true };
     }),
 
-  acceptDpa: protectedProcedure
-    .input(z.object({ workspaceId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { workspaceId } = input;
+  acceptDpa: workspaceProcedure.mutation(async ({ ctx }) => {
+    const { db, session, workspaceId } = ctx;
 
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
-      });
+    const membership = await db.query.workspaceMember.findFirst({
+      where: and(
+        eq(workspaceMember.userId, session.user.id),
+        isNull(workspaceMember.deletedAt),
+      ),
+    });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
         throw new Error("Forbidden: Insufficient permissions");
@@ -691,6 +670,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: workspaceId,
         entityType: "workspace",
         entityId: workspaceId,
         action: "update",
@@ -700,11 +680,11 @@ export const dashboardRouter = router({
       return { success: true };
     }),
 
-  findRespondentData: protectedProcedure
-    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+  findRespondentData: workspaceProcedure
+    .input(z.object({ email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
-      const { workspaceId, email } = input;
+      const { db, workspaceId } = ctx;
+      const { email } = input;
 
       const [countResult] = await db
         .select({ value: count() })
@@ -715,11 +695,11 @@ export const dashboardRouter = router({
       return { count: Number(countResult?.value || 0) };
     }),
 
-  exportRespondentData: protectedProcedure
-    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+  exportRespondentData: workspaceProcedure
+    .input(z.object({ email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
-      const { workspaceId, email } = input;
+      const { db, workspaceId } = ctx;
+      const { email } = input;
 
       const results = await db
         .select({
@@ -746,15 +726,14 @@ export const dashboardRouter = router({
       };
     }),
 
-  deleteRespondentData: protectedProcedure
-    .input(z.object({ workspaceId: z.string(), email: z.string().email() }))
+  deleteRespondentData: workspaceProcedure
+    .input(z.object({ email: z.string().email() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { workspaceId, email } = input;
+      const { db, session, workspaceId } = ctx;
+      const { email } = input;
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -782,6 +761,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId: workspaceId,
         entityType: "workspace",
         entityId: workspaceId,
         action: "delete",
@@ -795,22 +775,20 @@ export const dashboardRouter = router({
       return { success: true, count: ids.length };
     }),
 
-  updateProjectDomain: protectedProcedure
+  updateProjectDomain: workspaceProcedure
     .input(z.object({ projectId: z.string(), domain: z.string().nullable() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, session, workspaceId } = ctx;
       const { projectId, domain } = input;
 
       const p = await db.query.project.findFirst({
-        where: eq(project.id, projectId),
-        with: { workspace: true },
+        where: and(eq(project.id, projectId), eq(project.workspaceId, workspaceId)),
       });
 
       if (!p) throw new Error("Project not found");
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, p.workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -837,6 +815,7 @@ export const dashboardRouter = router({
 
       await recordAuditLog({
         userId: session.user.id,
+        workspaceId,
         entityType: "project",
         entityId: projectId,
         action: "update",
@@ -846,22 +825,20 @@ export const dashboardRouter = router({
       return { success: true, verified: false, verificationError: null };
     }),
 
-  verifyProjectDomain: protectedProcedure
+  verifyProjectDomain: workspaceProcedure
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, session, workspaceId } = ctx;
       const { projectId } = input;
 
       const p = await db.query.project.findFirst({
-        where: eq(project.id, projectId),
-        with: { workspace: true },
+        where: and(eq(project.id, projectId), eq(project.workspaceId, workspaceId)),
       });
 
       if (!p) throw new Error("Project not found");
 
       const membership = await db.query.workspaceMember.findFirst({
         where: and(
-          eq(workspaceMember.workspaceId, p!.workspaceId),
           eq(workspaceMember.userId, session.user.id),
           isNull(workspaceMember.deletedAt),
         ),
@@ -871,13 +848,12 @@ export const dashboardRouter = router({
         throw new Error("Forbidden: Insufficient permissions");
       }
 
-      if (!p!.customDomain) {
+      if (!p.customDomain) {
         throw new Error("No domain configured");
       }
 
       try {
         // Perform CNAME check via Google DNS JSON API
-        // For production, we'd check if CNAME points to kudoswall.org
         const response = await fetch(
           `https://dns.google/resolve?name=${p.customDomain}&type=CNAME`,
         );
@@ -931,32 +907,19 @@ export const dashboardRouter = router({
    * Generates a short-lived signed URL for a private video asset stored in R2.
    * Validates workspace ownership of the testimonial before issuing the token.
    */
-  getVideoSignedUrl: protectedProcedure
+  getVideoSignedUrl: workspaceProcedure
     .input(z.object({ testimonialId: z.string() }))
     .query(async ({ ctx, input }): Promise<{ signedUrl: string }> => {
-      const { db, session } = ctx;
+      const { db, workspaceId } = ctx;
       const { testimonialId } = input;
 
       // Resolve the testimonial and verify workspace ownership
       const t = await db.query.testimonial.findFirst({
-        where: eq(testimonial.id, testimonialId),
-        with: { project: { with: { workspace: true } } },
+        where: and(eq(testimonial.id, testimonialId), eq(testimonial.workspaceId, workspaceId)),
       });
 
       if (!t || !t.videoUrl) {
         throw new Error("Testimonial not found or has no video");
-      }
-
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.workspaceId, t.project.workspaceId),
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
-      });
-
-      if (!membership) {
-        throw new Error("Forbidden: You do not have access to this workspace");
       }
 
       const secret = env.R2_SIGNING_SECRET;

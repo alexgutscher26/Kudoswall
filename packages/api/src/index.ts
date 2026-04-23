@@ -97,3 +97,25 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * A procedure that requires both authentication and a valid workspace context.
+ * It uses the tenantDb provided in the context, which automatically filters queries.
+ */
+export const workspaceProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (!ctx.tenantDb) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Workspace context is required for this operation. Please select a workspace.",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      // Overwrite db with tenantDb to make it transparent for routers
+      db: ctx.tenantDb,
+      workspaceId: (ctx.tenantDb as any).workspaceId as string,
+    },
+  });
+});

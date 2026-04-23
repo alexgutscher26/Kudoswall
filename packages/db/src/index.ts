@@ -55,3 +55,4 @@ export function getDb() {
 }
 
 export * from "./audit";
+export * from "./tenant-db";

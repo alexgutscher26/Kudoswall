@@ -36,6 +36,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
       headers() {
         return {
           "x-trpc-csrf": getCookie("csrf-token") || "",
+          "x-workspace-id": getCookie("workspace-id") || "",
         };
       },
       fetch(url, options) {

@@ -99,6 +99,7 @@ export async function submitTestimonial(
 
   await db.insert(testimonial).values({
     id,
+    workspaceId: p.workspaceId,
     projectId,
     rating: data.rating,
     content: data.content,
@@ -117,6 +118,7 @@ export async function submitTestimonial(
     const key = data.videoUrl.replace("/api/videos/", "");
     await db.insert(videoTranscodingJob).values({
       id: `vtj_${nanoid()}`,
+      workspaceId: p.workspaceId,
       testimonialId: id,
       sourceKey: key,
       status: "pending",

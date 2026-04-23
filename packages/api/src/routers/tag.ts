@@ -1,46 +1,35 @@
-import { protectedProcedure, router } from "../index";
-import { tag, workspace, testimonialToTag } from "@my-better-t-app/db/schema";
+import { workspaceProcedure, router } from "../index";
+import { tag, testimonialToTag } from "@my-better-t-app/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 
 export const tagRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
-
-    const ws = await db.query.workspace.findFirst({
-      where: eq(workspace.ownerId, session.user.id),
-    });
-
-    if (!ws) return [];
+  list: workspaceProcedure.query(async ({ ctx }) => {
+    const { db } = ctx;
 
     return db.query.tag.findMany({
-      where: and(eq(tag.workspaceId, ws.id), isNull(tag.deletedAt)),
+      where: isNull(tag.deletedAt),
       orderBy: desc(tag.createdAt),
     });
   }),
 
-  create: protectedProcedure
+  create: workspaceProcedure
     .input(z.object({ name: z.string(), color: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
 
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
-
-      if (!ws) throw new Error("Workspace not found");
-
       const id = crypto.randomUUID();
       await db.insert(tag).values({
         id,
-        workspaceId: ws.id,
+        workspaceId: ctx.workspaceId,
         name: input.name,
         color: input.color,
       });
 
       await recordAuditLog({
-        userId: session.user.id,
+         userId: session.user.id,
+        workspaceId: ctx.workspaceId,
         entityType: "tag",
         entityId: id,
         action: "create",
@@ -50,20 +39,17 @@ export const tagRouter = router({
       return { id };
     }),
 
-  delete: protectedProcedure
+  delete: workspaceProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
 
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, input.id),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!t) {
+        throw new Error("Forbidden or not found");
       }
 
       await db.update(tag).set({ deletedAt: new Date().toISOString() }).where(eq(tag.id, input.id));
@@ -78,19 +64,18 @@ export const tagRouter = router({
       return { success: true };
     }),
 
-  assign: protectedProcedure
+  assign: workspaceProcedure
     .input(z.object({ testimonialId: z.string(), tagId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { testimonialId, tagId } = input;
 
-      // Verify tag ownership
+      // Verify tag ownership (handled by tenantDb)
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, tagId),
-        with: { workspace: true },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
+      if (!t) {
         throw new Error("Forbidden: Tag ownership");
       }
 
@@ -105,19 +90,18 @@ export const tagRouter = router({
       return { success: true };
     }),
 
-  unassign: protectedProcedure
+  unassign: workspaceProcedure
     .input(z.object({ testimonialId: z.string(), tagId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { testimonialId, tagId } = input;
 
-      // Verify tag ownership
+      // Verify tag ownership (handled by tenantDb)
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, tagId),
-        with: { workspace: true },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
+      if (!t) {
         throw new Error("Forbidden: Tag ownership");
       }
 

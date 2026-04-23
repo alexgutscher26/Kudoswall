@@ -96,7 +96,6 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
     }
 
     createCheckout.mutate({
-      workspaceId: workspace.id as string,
       priceId: ltdPriceId,
     });
   };

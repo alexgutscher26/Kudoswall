@@ -85,7 +85,6 @@ export default function PricingGrid({ plans }: PricingGridProps) {
     }
 
     createCheckout.mutate({
-      workspaceId,
       priceId,
     });
   };

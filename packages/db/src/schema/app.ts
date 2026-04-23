@@ -185,6 +185,9 @@ export const testimonial = pgTable(
   "testimonial",
   {
     id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
     projectId: text("project_id")
       .notNull()
       .references(() => project.id, { onDelete: "cascade" }),
@@ -214,6 +217,7 @@ export const testimonial = pgTable(
     updatedById: text("updated_by_id").references(() => user.id),
   },
   (table) => [
+    index("testimonial_workspace_id_idx").on(table.workspaceId),
     index("testimonial_project_id_idx").on(table.projectId),
     index("testimonial_status_idx").on(table.status),
     index("testimonial_project_status_createdAt_idx").on(
@@ -232,6 +236,9 @@ export const videoTranscodingJob = pgTable(
   "video_transcoding_job",
   {
     id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
     testimonialId: text("testimonial_id")
       .notNull()
       .references(() => testimonial.id, { onDelete: "cascade" }),
@@ -250,6 +257,7 @@ export const videoTranscodingJob = pgTable(
     processedAt: timestamp("processed_at"),
   },
   (table) => [
+    index("transcoding_job_workspace_id_idx").on(table.workspaceId),
     index("transcoding_job_testimonial_id_idx").on(table.testimonialId),
     index("transcoding_job_status_idx").on(table.status),
     index("transcoding_job_status_created_at_idx").on(table.status, table.createdAt),
@@ -349,6 +357,9 @@ export const auditLog = pgTable(
   "audit_log",
   {
     id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").references(() => workspace.id, {
+      onDelete: "cascade",
+    }),
     actorId: text("actor_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -359,6 +370,7 @@ export const auditLog = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
+    index("audit_log_workspace_id_idx").on(table.workspaceId),
     index("audit_log_actor_id_idx").on(table.actorId),
     index("audit_log_entity_idx").on(table.entityType, table.entityId),
   ],
@@ -441,6 +453,10 @@ export const testimonialRelations = relations(testimonial, ({ one, many }) => ({
     fields: [testimonial.projectId],
     references: [project.id],
   }),
+  workspace: one(workspace, {
+    fields: [testimonial.workspaceId],
+    references: [workspace.id],
+  }),
   testimonialToTags: many(testimonialToTag),
   createdBy: one(user, {
     fields: [testimonial.createdById],
@@ -514,5 +530,9 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
   actor: one(user, {
     fields: [auditLog.actorId],
     references: [user.id],
+  }),
+  workspace: one(workspace, {
+    fields: [auditLog.workspaceId],
+    references: [workspace.id],
   }),
 }));
