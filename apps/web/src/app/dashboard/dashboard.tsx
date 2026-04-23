@@ -614,9 +614,14 @@ export default function DashboardShell({
   const completeStep = useMutation({
     ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
     onSuccess: () => {
+      toast.success("Progress updated!");
       // Correctly invalidate the specific workspace query to trigger a refresh
       queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }));
     },
+    onError: (err) => {
+      console.error("❌ Onboarding mutation failed:", err);
+      toast.error("Failed to update progress");
+    }
   });
 
   const handleCopyCollectionLink = () => {
@@ -648,6 +653,9 @@ export default function DashboardShell({
       isModalOpen={isChildModalOpen}
       setIsModalOpen={setIsChildModalOpen}
       onShareLink={handleCopyCollectionLink}
+      onCompleteStep={async (step) => {
+        await completeStep.mutateAsync({ step, workspaceId: activeWorkspaceId });
+      }}
       data={activeData}
     >
       {/* Live Data Poller (Client Only) */}

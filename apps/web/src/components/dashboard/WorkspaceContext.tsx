@@ -11,6 +11,7 @@ interface WorkspaceContextType {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
   onShareLink?: () => void;
+  onCompleteStep?: (step: string) => Promise<void>;
   data?: DashboardData | null;
 }
 
@@ -23,6 +24,7 @@ export function WorkspaceProvider({
   isModalOpen,
   setIsModalOpen,
   onShareLink,
+  onCompleteStep,
   data,
 }: {
   children: ReactNode;
@@ -31,6 +33,7 @@ export function WorkspaceProvider({
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
   onShareLink?: () => void;
+  onCompleteStep?: (step: string) => Promise<void>;
   data?: DashboardData | null;
 }) {
   return (
@@ -41,6 +44,7 @@ export function WorkspaceProvider({
         isModalOpen,
         setIsModalOpen,
         onShareLink,
+        onCompleteStep,
         data,
       }}
     >

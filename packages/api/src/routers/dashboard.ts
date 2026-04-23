@@ -223,6 +223,7 @@ export const dashboardRouter = router({
         step3: dbStatus.step3 || false,
         step4: dbStatus.step4 || Number(approvedCount?.value || 0) > 0,
         step5: dbStatus.step5 || Number(widgetCount?.value || 0) > 0,
+        rewardClaimed: dbStatus.rewardClaimed || false,
       };
 
       // Calculate Conversion Rate

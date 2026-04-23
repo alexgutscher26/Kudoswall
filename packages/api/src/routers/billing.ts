@@ -60,48 +60,57 @@ export const billingRouter = router({
         });
       }
 
-      const stripeSession = await stripe.checkout.sessions.create({
-        customer: ws.stripeCustomerId || undefined,
-        customer_email: ws.stripeCustomerId ? undefined : session.user.email,
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        mode: isLTD ? "payment" : "subscription",
-        customer_creation: isLTD ? "always" : undefined,
-        client_reference_id: workspaceId,
-        subscription_data: isLTD
-          ? undefined
-          : {
-              trial_period_days: 7,
-              metadata: {
-                workspaceId,
-                userId: session.user.id,
-              },
+      try {
+        const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
+        const stripeSession = await stripe.checkout.sessions.create({
+          customer: ws.stripeCustomerId || undefined,
+          customer_email: ws.stripeCustomerId ? undefined : session.user.email,
+          line_items: [
+            {
+              price: priceId,
+              quantity: 1,
             },
-        allow_promotion_codes: true,
-        success_url: `${req.headers.get("origin")}/dashboard/settings?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.get("origin")}/dashboard/settings`,
-        payment_intent_data: isLTD
-          ? {
-              setup_future_usage: "on_session",
-              metadata: {
-                workspaceId,
-                userId: session.user.id,
-                planId: "ltd",
+          ],
+          mode: isLTD ? "payment" : "subscription",
+          customer_creation: isLTD ? "always" : undefined,
+          client_reference_id: workspaceId,
+          subscription_data: isLTD
+            ? undefined
+            : {
+                trial_period_days: 7,
+                metadata: {
+                  workspaceId,
+                  userId: session.user.id,
+                },
               },
-            }
-          : undefined,
-        metadata: {
-          workspaceId,
-          userId: session.user.id,
-          planId: isLTD ? "ltd" : (plan?.id ?? "free"),
-        },
-      });
+          allow_promotion_codes: true,
+          success_url: `${origin}/dashboard/settings?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/dashboard/settings`,
+          payment_intent_data: isLTD
+            ? {
+                setup_future_usage: "on_session",
+                metadata: {
+                  workspaceId,
+                  userId: session.user.id,
+                  planId: "ltd",
+                },
+              }
+            : undefined,
+          metadata: {
+            workspaceId,
+            userId: session.user.id,
+            planId: isLTD ? "ltd" : (plan?.id ?? "free"),
+          },
+        });
 
-      return { url: stripeSession.url };
+        return { url: stripeSession.url };
+      } catch (err) {
+        console.error("❌ Stripe Checkout Error:", err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err instanceof Error ? err.message : "Failed to create checkout session",
+        });
+      }
     }),
 
   createPortalSession: workspaceProcedure.mutation(async ({ ctx }) => {
@@ -129,11 +138,35 @@ export const billingRouter = router({
       });
     }
 
-    const stripeSession = await stripe.billingPortal.sessions.create({
-      customer: ws.stripeCustomerId,
-      return_url: `${req.headers.get("origin")}/dashboard/settings`,
-    });
+    const stripeCustomerId = ws.stripeCustomerId;
+    if (!stripeCustomerId?.startsWith("cus_")) {
+      console.error(`❌ Invalid Stripe Customer ID: ${stripeCustomerId}`);
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Invalid Stripe Customer ID found: ${stripeCustomerId}. Please ensure your workspace is correctly connected to Stripe.`,
+      });
+    }
 
-    return { url: stripeSession.url };
+    try {
+      const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
+      console.log(`[StripePortal] Creating session for workspace: ${workspaceId}, customer: ${stripeCustomerId}, origin: ${origin}`);
+      
+      if (!stripe.getApiKey()) {
+        throw new Error("Stripe API key is missing or not configured correctly.");
+      }
+
+      const stripeSession = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: `${origin}/dashboard/settings`,
+      });
+
+      return { url: stripeSession.url };
+    } catch (err) {
+      console.error("❌ Stripe Billing Portal Error:", err);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: err instanceof Error ? err.message : "Failed to create billing portal session",
+      });
+    }
   }),
 });
