@@ -38,7 +38,7 @@ export default function DPAPage() {
             Data Processing Agreement
           </h1>
           <p className="text-lg font-medium text-neutral-500">
-            Last updated: April 13, 2026 • Version 1.0
+            Last updated: April 23, 2026 • Version 1.2
           </p>
         </div>
 
@@ -150,6 +150,16 @@ export default function DPAPage() {
                     <td className="px-4 py-3 font-bold">Resend</td>
                     <td className="px-4 py-3">Email Service</td>
                     <td className="px-4 py-3">USA</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-bold">Stripe, Inc.</td>
+                    <td className="px-4 py-3">Payment Processing</td>
+                    <td className="px-4 py-3">USA</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-bold">Upstash</td>
+                    <td className="px-4 py-3">Redis / Rate Limiting</td>
+                    <td className="px-4 py-3">Global</td>
                   </tr>
                 </tbody>
               </table>

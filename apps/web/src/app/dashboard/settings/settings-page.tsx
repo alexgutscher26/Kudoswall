@@ -720,7 +720,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h4 className="text-[14px] font-bold text-neutral-800">
-                        KudosWall DPA (v1.0)
+                        KudosWall DPA (v1.2)
                       </h4>
                       <p className="text-[11px] font-medium text-neutral-400">
                         Standard GDPR & CCPA compliant contract.
