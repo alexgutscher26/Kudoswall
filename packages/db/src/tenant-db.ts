@@ -42,7 +42,7 @@ export function createTenantDb(db: Database, workspaceId: string) {
                   ...args,
                   where: (table: any, operators: any) => {
                     const { and, eq } = operators;
-                    const originalWhere = args?.where?.(table, operators);
+                    const originalWhere = typeof args?.where === 'function' ? args.where(table, operators) : args?.where;
                     const workspaceFilter = eq(table.workspaceId, workspaceId);
                     return originalWhere ? and(originalWhere, workspaceFilter) : workspaceFilter;
                   },
@@ -53,7 +53,7 @@ export function createTenantDb(db: Database, workspaceId: string) {
                   ...args,
                   where: (table: any, operators: any) => {
                     const { and, eq } = operators;
-                    const originalWhere = args?.where?.(table, operators);
+                    const originalWhere = typeof args?.where === 'function' ? args.where(table, operators) : args?.where;
                     const workspaceFilter = eq(table.workspaceId, workspaceId);
                     return originalWhere ? and(originalWhere, workspaceFilter) : workspaceFilter;
                   },
