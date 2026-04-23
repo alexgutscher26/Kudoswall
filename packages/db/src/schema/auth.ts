@@ -76,9 +76,30 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const trustedDevice = pgTable(
+  "trusted_device",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    city: text("city"),
+    country: text("country"),
+    lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("trustedDevice_userId_idx").on(table.userId),
+    index("trustedDevice_userId_ip_ua_idx").on(table.userId, table.ipAddress, table.userAgent),
+  ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  trustedDevices: many(trustedDevice),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -91,6 +112,13 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const trustedDeviceRelations = relations(trustedDevice, ({ one }) => ({
+  user: one(user, {
+    fields: [trustedDevice.userId],
     references: [user.id],
   }),
 }));

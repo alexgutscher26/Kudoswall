@@ -97,10 +97,8 @@
 - [x] Magic Link (passwordless) authentication
 - [ ] Two-Factor Authentication (2FA) via TOTP Authenticator App
 - [ ] Backup / recovery codes for locked-out 2FA accounts
-- [ ] Passkey / WebAuthn support (Biometric: FaceID / TouchID)
 - [ ] Session management UI: View all active sessions, terminate individually
-- [ ] Suspicious login detection with email alert
-- [ ] Account lockout after N failed login attempts with CAPTCHA unlock
+- [x] Suspicious login detection with email alert
 - [ ] "Remember this device for 30 days" checkbox on login
 
 ### 2.2 Enterprise Identity (SSO)

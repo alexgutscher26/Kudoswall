@@ -22,6 +22,7 @@ export function createAuth() {
         session: schema.session,
         account: schema.account,
         verification: schema.verification,
+        trustedDevice: schema.trustedDevice,
       },
     }),
     trustedOrigins: [env.CORS_ORIGIN],
@@ -165,6 +166,80 @@ export function createAuth() {
               console.log(`[Welcome Email] Sent to ${user.email}`);
             } catch (error) {
               console.error(`[Signup Hook] Error for ${user.email}:`, error);
+            }
+          },
+        },
+      },
+      session: {
+        create: {
+          after: async (session) => {
+            try {
+              const { trustedDevice, user } = await import("@my-better-t-app/db/schema/auth");
+              const { eq, and } = await import("drizzle-orm");
+
+              const ip = session.ipAddress;
+              const ua = session.userAgent;
+              const userId = session.userId;
+
+              if (!ip || !ua) return;
+
+              // Check if this (IP, UA) is already trusted for this user
+              const existingTrusted = await db.query.trustedDevice.findFirst({
+                where: and(
+                  eq(trustedDevice.userId, userId),
+                  eq(trustedDevice.ipAddress, ip),
+                  eq(trustedDevice.userAgent, ua),
+                ),
+              });
+
+              if (existingTrusted) {
+                // Update last used
+                await db
+                  .update(trustedDevice)
+                  .set({ lastUsedAt: new Date() })
+                  .where(eq(trustedDevice.id, existingTrusted.id));
+                return;
+              }
+
+              // It's a new device/IP.
+              // Check if user has ANY trusted devices already
+              const anyTrusted = await db.query.trustedDevice.findFirst({
+                where: eq(trustedDevice.userId, userId),
+              });
+
+              // Add current to trusted
+              await db.insert(trustedDevice).values({
+                id: crypto.randomUUID(),
+                userId,
+                ipAddress: ip,
+                userAgent: ua,
+                lastUsedAt: new Date(),
+              });
+
+              // If user had previous trusted devices, this is "suspicious" (new)
+              if (anyTrusted) {
+                const userData = await db.query.user.findFirst({
+                  where: eq(user.id, userId),
+                });
+
+                if (userData) {
+                  const { EmailService } = await import("@my-better-t-app/email");
+                  const emailService = new EmailService(env.RESEND_API_KEY || "");
+
+                  await emailService.sendSuspiciousLoginEmail(userData.email, userData.name, {
+                    ipAddress: ip,
+                    userAgent: ua,
+                    time: new Date().toLocaleString("en-US", {
+                      timeZone: "UTC",
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }),
+                  });
+                  console.log(`[Suspicious Login] Alert sent to ${userData.email}`);
+                }
+              }
+            } catch (error) {
+              console.error("[Suspicious Login Hook] Error:", error);
             }
           },
         },

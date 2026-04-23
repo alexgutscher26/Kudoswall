@@ -9,6 +9,7 @@ import { ReEngagementEmail } from "../emails/re-engagement";
 import { TeamInviteEmail } from "../emails/team-invite";
 import { TrialExpiringEmail } from "../emails/trial-expiring";
 import { CancellationEmail } from "../emails/cancellation";
+import { SuspiciousLoginEmail } from "../emails/suspicious-login";
 
 export class EmailService {
   public resend: Resend;
@@ -129,6 +130,27 @@ export class EmailService {
       to,
       subject: "Your KudosWall subscription has been canceled",
       react: React.createElement(CancellationEmail, { userName }),
+    });
+  }
+
+  async sendSuspiciousLoginEmail(
+    to: string,
+    userName: string,
+    data: {
+      ipAddress: string;
+      userAgent: string;
+      location?: string;
+      time: string;
+    },
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Security Alert: New login detected on KudosWall 🛡️",
+      react: React.createElement(SuspiciousLoginEmail, {
+        userName,
+        ...data,
+      }),
     });
   }
 }
