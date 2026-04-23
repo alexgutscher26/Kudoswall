@@ -99,7 +99,7 @@
 - [ ] Backup / recovery codes for locked-out 2FA accounts
 - [ ] Session management UI: View all active sessions, terminate individually
 - [x] Suspicious login detection with email alert
-- [ ] "Remember this device for 30 days" checkbox on login
+- [x] "Remember this device for 30 days" checkbox on login
 
 ### 2.2 Enterprise Identity (SSO)
 

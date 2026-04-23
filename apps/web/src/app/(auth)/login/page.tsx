@@ -16,6 +16,7 @@ import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
+import { Checkbox } from "@my-better-t-app/ui/components/checkbox";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
@@ -27,13 +28,17 @@ function LoginForm() {
   const [tab, setTab] = useState<AuthTab>("standard");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
-    const { error } = await authClient.signIn.social({ provider, callbackURL: redirect });
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL: redirect,
+    });
     setLoading(false);
     if (error) toast.error(error.message ?? "Failed to sign in");
   };
@@ -41,7 +46,12 @@ function LoginForm() {
   const handlePasswordLogin = async () => {
     if (!email || !password) return toast.error("Enter both email and password");
     setLoading(true);
-    const { error } = await authClient.signIn.email({ email, password, callbackURL: redirect });
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: redirect,
+      rememberMe: rememberMe,
+    });
     setLoading(false);
     if (error) {
       toast.error(error.message ?? "Invalid credentials");
@@ -176,6 +186,23 @@ function LoginForm() {
                     <Lock className="absolute top-1/2 right-4 size-3.5 -translate-y-1/2 text-neutral-300" />
                   </div>
                 </div>
+
+                {/* Remember Me Checkbox */}
+                <div className="flex items-center space-x-2 py-1">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(!!checked)}
+                    className="size-4 border-2 border-neutral-200 data-[state=checked]:bg-neutral-900 data-[state=checked]:border-neutral-900"
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-[10px] font-bold tracking-tight text-neutral-500 cursor-pointer select-none"
+                  >
+                    Remember this device for 30 days
+                  </label>
+                </div>
+
                 <Button
                   className="mt-2 h-12 w-full rounded-xl bg-neutral-900 text-xs font-black tracking-widest text-white uppercase shadow-lg shadow-black/5 transition-all hover:bg-neutral-800 active:scale-[0.98]"
                   onClick={handlePasswordLogin}
