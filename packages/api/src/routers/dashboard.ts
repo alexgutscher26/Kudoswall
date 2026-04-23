@@ -1,16 +1,18 @@
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
+
 import { protectedProcedure, router, workspaceProcedure } from "../index";
 import {
   workspace,
   project,
   testimonial,
+  workspaceMember,
+  user,
   widget,
   analyticsEvent,
-  user,
-  workspaceMember,
 } from "@my-better-t-app/db/schema";
-import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
-import { z } from "zod";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 import { generateSignedUrl } from "../lib/signed-url";
@@ -566,46 +568,56 @@ export const dashboardRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
-      const { name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
-        input;
+      try {
+        const { db, session } = ctx;
+        const { name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
+          input;
 
-      // Ensure user is admin/owner of the current workspace
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
-      });
+        console.log("Updating workspace:", { workspaceId: ctx.workspaceId, userId: session.user.id });
 
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
+        // Ensure user is admin/owner of the current workspace
+        const membership = await db.query.workspaceMember.findFirst({
+          where: (fields, { eq, and, isNull }) =>
+            and(eq(fields.userId, session.user.id), isNull(fields.deletedAt)),
+        });
+
+        console.log("Membership found:", !!membership, membership?.role);
+
+        if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Insufficient permissions to update this workspace",
+          });
+        }
+
+        const { workspaceId } = ctx;
+
+        await db
+          .update(workspace)
+          .set({
+            ...(name ? { name } : {}),
+            ...(slug ? { slug } : {}),
+            ...(logoUrl !== undefined ? { logoUrl } : {}),
+            ...(notificationSettingsJson !== undefined ? { notificationSettingsJson } : {}),
+            ...(retentionEnabled !== undefined ? { retentionEnabled } : {}),
+            ...(retentionDays !== undefined ? { retentionDays } : {}),
+          })
+          .where(eq(workspace.id, workspaceId));
+
+        await recordAuditLog({
+          userId: session.user.id,
+          workspaceId: workspaceId,
+          entityType: "workspace",
+          entityId: workspaceId,
+          action: "update",
+          diff: { name, slug, logoUrl, retentionEnabled, retentionDays },
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.error("❌ Error in updateWorkspace:", error);
+        throw error;
       }
-
-      const { workspaceId } = ctx;
-
-      await db
-        .update(workspace)
-        .set({
-          ...(name ? { name } : {}),
-          ...(slug ? { slug } : {}),
-          ...(logoUrl !== undefined ? { logoUrl } : {}),
-          ...(notificationSettingsJson !== undefined ? { notificationSettingsJson } : {}),
-          ...(retentionEnabled !== undefined ? { retentionEnabled } : {}),
-          ...(retentionDays !== undefined ? { retentionDays } : {}),
-        })
-        .where(eq(workspace.id, workspaceId));
-
-      await recordAuditLog({
-        userId: session.user.id,
-        workspaceId: workspaceId,
-        entityType: "workspace",
-        entityId: workspaceId,
-        action: "update",
-        diff: { name, slug, logoUrl, retentionEnabled, retentionDays },
-      });
-
-      return { success: true };
     }),
 
   deleteWorkspace: workspaceProcedure

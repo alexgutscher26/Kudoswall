@@ -110,6 +110,7 @@
         "date-fns": "^4.1.0",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
+        "nanoid": "^5.1.7",
         "next": "catalog:",
         "zod": "catalog:",
       },
