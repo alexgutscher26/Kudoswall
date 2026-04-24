@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Loader2 } from "lucide-react";
 
 interface VideoRecorderProps {
   isPro: boolean;
@@ -29,7 +29,7 @@ export default function VideoRecorder({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(initialBlob ?? null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 640);
@@ -43,26 +43,56 @@ export default function VideoRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isInitializing, setIsInitializing] = useState(false);
+
   // 1. Initialize Stream
-  const initStream = async () => {
+  const initStream = async (retryMinimal = false) => {
+    if (isInitializing && !retryMinimal) return;
+    
+    setIsInitializing(true);
+    setError(null);
+    
     try {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
-      const constraints: MediaStreamConstraints = {
-        video: isMobile
-          ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
-          : { width: 1280, height: 720, facingMode: "user" },
-        audio: true,
-      };
+
+      // If we are retrying with minimal constraints, we just ask for any video/audio
+      const constraints: MediaStreamConstraints = retryMinimal 
+        ? { video: true, audio: true }
+        : {
+            video: isMobile
+              ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
+              : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+            audio: true,
+          };
+
+      console.log(`Starting camera with ${retryMinimal ? "minimal" : "high-quality"} constraints...`);
+      
       const s = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(s);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Camera error:", err);
-      setError("Camera & Microphone access is required to record video.");
+      
+      // If the primary high-quality constraints failed and we haven't tried minimal yet, try minimal
+      if (!retryMinimal && (err.name === "AbortError" || err.name === "NotReadableError" || err.name === "OverconstrainedError")) {
+        console.warn("Retrying with minimal constraints due to:", err.name);
+        initStream(true);
+        return;
+      }
+
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setError("Camera and microphone access was denied. Please enable them in your browser settings to record.");
+      } else if (err.name === "AbortError" && err.message?.includes("Timeout")) {
+        setError("The camera took too long to start. Please check if another application is using it and try again.");
+      } else {
+        setError("Could not access camera or microphone. Please ensure they are connected and not in use by another app.");
+      }
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -225,6 +255,15 @@ export default function VideoRecorder({
           className="mirror size-full object-cover"
           style={{ transform: "scaleX(-1)" }}
         />
+
+        {/* Loading Overlay */}
+        {isInitializing && !error && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/80 backdrop-blur-sm p-6 text-center text-white">
+            <Loader2 className="mb-4 size-10 animate-spin text-white/50" />
+            <p className="text-lg font-bold">Starting camera...</p>
+            <p className="mt-2 text-sm text-neutral-400">This might take a few seconds</p>
+          </div>
+        )}
 
         {/* Error Overlay */}
         {error && (
