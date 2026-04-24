@@ -80,7 +80,6 @@
 - [x] Implement Edge Caching for Widget API via Cloudflare Cache Rules
 - [x] KV-store for fast widget metadata lookups (sub-10ms)
 - [x] Global CDN cache purge on testimonial approval/edit
-- [ ] Multi-region deployment strategy for <50ms P99 latency globally
 - [x] Stale-While-Revalidate (SWR) strategy for collection page data
 - [x] Request coalescing at edge to prevent cache stampedes
 
@@ -97,7 +96,7 @@
 - [x] Magic Link (passwordless) authentication
 - [ ] Two-Factor Authentication (2FA) via TOTP Authenticator App
 - [ ] Backup / recovery codes for locked-out 2FA accounts
-- [ ] Session management UI: View all active sessions, terminate individually
+- [x] Session management UI: View all active sessions, terminate individually
 - [x] Suspicious login detection with email alert
 - [x] "Remember this device for 30 days" checkbox on login
 

@@ -5,6 +5,7 @@ import { tagRouter } from "./tag";
 import { analyticsRouter } from "./analytics";
 import { teamRouter } from "./team";
 import { billingRouter } from "./billing";
+import { authRouter } from "./auth";
 
 export const appRouter = router({
   dashboard: dashboardRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   team: teamRouter,
   billing: billingRouter,
+  auth: authRouter,
   healthCheck: publicProcedure.query(() => {
     return "OK";
   }),

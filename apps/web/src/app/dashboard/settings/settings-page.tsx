@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Download,
   Upload,
+  History,
 } from "lucide-react";
 import Image from "next/image";
 import { UploadButton } from "@/utils/uploadthing";
@@ -29,11 +30,12 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 import TeamTab from "./team-tab";
+import SessionTab from "./session-tab";
 import type { Plan } from "@my-better-t-app/api/config/plans";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = "general" | "collection" | "billing" | "team" | "compliance";
+type Tab = "general" | "collection" | "billing" | "team" | "compliance" | "sessions";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -280,6 +282,7 @@ export default function SettingsPage() {
           { id: "billing", label: "Billing & Plans", icon: CreditCard },
           { id: "team", label: "Team Members", icon: Users },
           { id: "compliance", label: "Compliance & DPA", icon: Shield },
+          { id: "sessions", label: "Sessions", icon: History },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -945,6 +948,8 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+        {/* Sessions Tab */}
+        {activeTab === "sessions" && <SessionTab />}
       </div>
     </div>
   );
