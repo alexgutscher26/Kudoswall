@@ -82,7 +82,7 @@
 - [x] Global CDN cache purge on testimonial approval/edit
 - [ ] Multi-region deployment strategy for <50ms P99 latency globally
 - [x] Stale-While-Revalidate (SWR) strategy for collection page data
-- [ ] Request coalescing at edge to prevent cache stampedes
+- [x] Request coalescing at edge to prevent cache stampedes
 
 ---
 
