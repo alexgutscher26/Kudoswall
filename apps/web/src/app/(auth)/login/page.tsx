@@ -193,11 +193,11 @@ function LoginForm() {
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(!!checked)}
-                    className="size-4 border-2 border-neutral-200 data-[state=checked]:bg-neutral-900 data-[state=checked]:border-neutral-900"
+                    className="size-4 border-2 border-neutral-200 data-[state=checked]:border-neutral-900 data-[state=checked]:bg-neutral-900"
                   />
                   <label
                     htmlFor="remember"
-                    className="text-[10px] font-bold tracking-tight text-neutral-500 cursor-pointer select-none"
+                    className="cursor-pointer text-[10px] font-bold tracking-tight text-neutral-500 select-none"
                   >
                     Remember this device for 30 days
                   </label>

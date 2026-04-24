@@ -42,7 +42,7 @@ async function fix() {
 
     // Update missing workspace_ids if possible (backfill from relations)
     console.log("Attempting to backfill workspace_ids...");
-    
+
     // Testimonial from Project
     await pool.query(`
       UPDATE "testimonial" t
@@ -50,7 +50,7 @@ async function fix() {
       FROM "project" p
       WHERE t.project_id = p.id AND t.workspace_id IS NULL AND p.workspace_id IS NOT NULL
     `);
-    
+
     // Project from Workspace (if there's only one workspace or we can find an owner)
     // This is harder without a direct link, but we can assume the first workspace for now if needed.
     // Or just let the user fix it in the UI.

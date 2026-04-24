@@ -79,7 +79,6 @@ export const workspace = pgTable(
       .notNull()
       .defaultNow(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [
     index("workspace_slug_idx").on(table.slug),
@@ -104,7 +103,6 @@ export const workspaceMember = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [
     index("workspace_member_workspace_id_idx").on(table.workspaceId),
@@ -167,7 +165,6 @@ export const project = pgTable(
       .notNull()
       .defaultNow(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [
     index("project_workspace_id_idx").on(table.workspaceId),
@@ -210,7 +207,6 @@ export const testimonial = pgTable(
       .notNull()
       .defaultNow(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [
     index("testimonial_workspace_id_idx").on(table.workspaceId),
@@ -271,7 +267,6 @@ export const tag = pgTable(
     color: text("color").default("#e8527a").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [index("tag_workspace_id_idx").on(table.workspaceId)],
 );
@@ -308,7 +303,6 @@ export const widget = pgTable(
       .notNull()
       .defaultNow(),
     deletedAt: timestamp("deleted_at"),
-
   },
   (table) => [index("widget_workspace_id_idx").on(table.workspaceId)],
 );
@@ -382,7 +376,6 @@ export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   widgets: many(widget),
   members: many(workspaceMember),
   invitations: many(workspaceInvitation),
-
 }));
 
 export const workspaceMemberRelations = relations(workspaceMember, ({ one }) => ({
@@ -394,7 +387,6 @@ export const workspaceMemberRelations = relations(workspaceMember, ({ one }) => 
     fields: [workspaceMember.userId],
     references: [user.id],
   }),
-
 }));
 
 export const workspaceInvitationRelations = relations(workspaceInvitation, ({ one }) => ({
@@ -418,7 +410,6 @@ export const projectRelations = relations(project, ({ one, many }) => ({
     references: [workspace.id],
   }),
   testimonials: many(testimonial),
-
 }));
 
 export const testimonialRelations = relations(testimonial, ({ one, many }) => ({
@@ -431,7 +422,6 @@ export const testimonialRelations = relations(testimonial, ({ one, many }) => ({
     references: [workspace.id],
   }),
   testimonialToTags: many(testimonialToTag),
-
 }));
 
 export const tagRelations = relations(tag, ({ one, many }) => ({
@@ -440,7 +430,6 @@ export const tagRelations = relations(tag, ({ one, many }) => ({
     references: [workspace.id],
   }),
   testimonialToTags: many(testimonialToTag),
-
 }));
 
 export const testimonialToTagRelations = relations(testimonialToTag, ({ one }) => ({
@@ -460,7 +449,6 @@ export const widgetRelations = relations(widget, ({ one, many }) => ({
     references: [workspace.id],
   }),
   analyticsEvents: many(analyticsEvent),
-
 }));
 
 export const analyticsEventRelations = relations(analyticsEvent, ({ one }) => ({

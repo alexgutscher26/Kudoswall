@@ -616,12 +616,14 @@ export default function DashboardShell({
     onSuccess: () => {
       toast.success("Progress updated!");
       // Correctly invalidate the specific workspace query to trigger a refresh
-      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }));
+      queryClient.invalidateQueries(
+        trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+      );
     },
     onError: (err) => {
       console.error("❌ Onboarding mutation failed:", err);
       toast.error("Failed to update progress");
-    }
+    },
   });
 
   const handleCopyCollectionLink = () => {

@@ -13,6 +13,7 @@ import {
   KAJABI_BEST_TOOLS,
   GUMROAD_BEST_TOOLS,
   FREE_PLAN_COMPARISON,
+  WEBFLOW_WIDGET_GUIDE,
 } from "@/lib/comparisons";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { ChevronLeft } from "lucide-react";
@@ -29,6 +30,7 @@ export async function generateStaticParams() {
     { slug: "best-testimonial-tools-kajabi" },
     { slug: "best-testimonial-tools-gumroad" },
     { slug: "free-testimonial-widget-comparison" },
+    { slug: "testimonial-widget-for-webflow" },
   ];
 }
 
@@ -159,6 +161,22 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     };
   }
 
+  if (slug === "testimonial-widget-for-webflow") {
+    return {
+      title: "Testimonial Widget for Webflow: The Ultimate Guide (2026)",
+      description:
+        "How to add high-converting, edge-optimized testimonial widgets to your Webflow site without sacrificing page speed or design.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Testimonial Widget for Webflow",
+        description: "The best social proof integration for Webflow.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/webflow.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
   return {
     title: "Blog Post Not Found",
   };
@@ -206,6 +224,11 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = FREE_PLAN_COMPARISON.content;
     title = "Free Testimonial Widget: Every Tool's Free Plan Compared";
     description = "Who actually gives you the most value for free?";
+  } else if (slug === "testimonial-widget-for-webflow") {
+    content = WEBFLOW_WIDGET_GUIDE.content;
+    title = "Testimonial Widget for Webflow: The Ultimate Guide (2026)";
+    description =
+      "How to add high-converting, edge-optimized testimonial widgets to your Webflow site.";
   } else {
     return notFound();
   }

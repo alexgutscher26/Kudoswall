@@ -65,7 +65,9 @@ export function OnboardingChecklist({
   const [isClaiming, setIsClaiming] = useState(false);
 
   const status = data?.onboarding || initialStatus;
-  const doneCount = Object.entries(status).filter(([key, val]) => key !== "rewardClaimed" && val).length;
+  const doneCount = Object.entries(status).filter(
+    ([key, val]) => key !== "rewardClaimed" && val,
+  ).length;
   const totalCount = STEPS.length;
   const percentage = Math.round((doneCount / totalCount) * 100);
   const isComplete = doneCount === totalCount;
@@ -92,7 +94,9 @@ export function OnboardingChecklist({
     <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-center justify-between border-b border-neutral-50 px-6 py-5">
         <div>
-          <h3 className="text-[15px] font-bold tracking-tight text-neutral-900">Onboarding Guide</h3>
+          <h3 className="text-[15px] font-bold tracking-tight text-neutral-900">
+            Onboarding Guide
+          </h3>
           <p className="mt-0.5 text-[12px] font-medium text-neutral-400">
             {doneCount} of {totalCount} steps completed
           </p>
@@ -127,7 +131,7 @@ export function OnboardingChecklist({
                       <CheckCircle2 className="size-3.5" />
                     </div>
                   ) : (
-                    <div className="flex size-5 items-center justify-center rounded-full border-2 border-neutral-200 text-[10px] font-bold text-neutral-400 group-hover:border-neutral-300 group-hover:bg-neutral-50 group-hover:text-neutral-600 transition-all">
+                    <div className="flex size-5 items-center justify-center rounded-full border-2 border-neutral-200 text-[10px] font-bold text-neutral-400 transition-all group-hover:border-neutral-300 group-hover:bg-neutral-50 group-hover:text-neutral-600">
                       {index + 1}
                     </div>
                   )}
@@ -143,7 +147,7 @@ export function OnboardingChecklist({
                     {step.label}
                   </p>
                   {!isDone && (
-                    <p className="mt-1 text-[11px] leading-relaxed text-neutral-500 group-hover:text-neutral-600 transition-colors">
+                    <p className="mt-1 text-[11px] leading-relaxed text-neutral-500 transition-colors group-hover:text-neutral-600">
                       {step.desc}
                     </p>
                   )}
@@ -164,25 +168,25 @@ export function OnboardingChecklist({
               className="mt-6 border-t border-dashed border-neutral-100 pt-6"
             >
               {status.rewardClaimed ? (
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="rounded-2xl bg-emerald-50 p-6 text-center border-2 border-emerald-100 shadow-inner"
+                  className="rounded-2xl border-2 border-emerald-100 bg-emerald-50 p-6 text-center shadow-inner"
                 >
-                  <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl shadow-emerald-200 animate-in zoom-in duration-500">
+                  <div className="animate-in zoom-in mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl shadow-emerald-200 duration-500">
                     <Gift className="size-7" />
                   </div>
                   <h4 className="text-[16px] font-bold text-neutral-900">Your Gift is Ready! 🎊</h4>
                   <p className="mt-1.5 text-[12px] text-neutral-500">
                     Get 50% off any plan, forever.
                   </p>
-                  
+
                   <div className="mt-5 flex flex-col gap-2">
                     <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-white p-3 shadow-sm">
-                      <code className="font-mono text-[15px] font-black text-emerald-600 tracking-wider uppercase">
+                      <code className="font-mono text-[15px] font-black tracking-wider text-emerald-600 uppercase">
                         ONBOARDING50
                       </code>
-                      <button 
+                      <button
                         onClick={() => {
                           navigator.clipboard.writeText("ONBOARDING50");
                           toast.success("Code copied to clipboard!");
@@ -192,9 +196,7 @@ export function OnboardingChecklist({
                         Copy
                       </button>
                     </div>
-                    <p className="text-[10px] text-neutral-400">
-                      Apply this code at checkout
-                    </p>
+                    <p className="text-[10px] text-neutral-400">Apply this code at checkout</p>
                   </div>
                 </motion.div>
               ) : (
@@ -202,7 +204,7 @@ export function OnboardingChecklist({
                   <div className="absolute -top-4 -right-4 size-24 rounded-full bg-pink-500/20 blur-2xl transition-all group-hover:bg-pink-500/30" />
                   <div className="relative z-10 flex items-center gap-4">
                     <div className="flex size-12 items-center justify-center rounded-xl bg-white/10 shadow-inner">
-                      <Gift className="size-6 text-pink-400 animate-bounce" />
+                      <Gift className="size-6 animate-bounce text-pink-400" />
                     </div>
                     <div className="flex-1">
                       <p className="text-[13px] font-bold">You've unlocked a gift!</p>
@@ -221,7 +223,7 @@ export function OnboardingChecklist({
                         setIsClaiming(false);
                       }
                     }}
-                    className="relative z-10 mt-4 w-full rounded-xl bg-white py-2.5 text-[12px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 active:scale-[0.98] shadow-lg disabled:opacity-70"
+                    className="relative z-10 mt-4 w-full rounded-xl bg-white py-2.5 text-[12px] font-bold text-neutral-900 shadow-lg transition-all hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-70"
                   >
                     {isClaiming ? (
                       <div className="flex items-center justify-center gap-2">

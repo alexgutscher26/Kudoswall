@@ -392,10 +392,7 @@ export const dashboardRouter = router({
 
       // Check role via workspace member (still need to check role within the workspace)
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -436,10 +433,7 @@ export const dashboardRouter = router({
       if (!p) throw new Error("Project not found or forbidden");
 
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -472,10 +466,7 @@ export const dashboardRouter = router({
       if (!p) throw new Error("Project not found or forbidden");
 
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -573,7 +564,10 @@ export const dashboardRouter = router({
         const { name, slug, logoUrl, notificationSettingsJson, retentionEnabled, retentionDays } =
           input;
 
-        console.log("Updating workspace:", { workspaceId: ctx.workspaceId, userId: session.user.id });
+        console.log("Updating workspace:", {
+          workspaceId: ctx.workspaceId,
+          userId: session.user.id,
+        });
 
         // Ensure user is admin/owner of the current workspace
         const membership = await db.query.workspaceMember.findFirst({
@@ -620,78 +614,71 @@ export const dashboardRouter = router({
       }
     }),
 
-  deleteWorkspace: workspaceProcedure
-    .mutation(async ({ ctx }) => {
-      const { db, session } = ctx;
-      
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
-      });
+  deleteWorkspace: workspaceProcedure.mutation(async ({ ctx }) => {
+    const { db, session } = ctx;
 
-      if (!membership || membership.role !== "owner") {
-        throw new Error("Forbidden: Only owners can delete workspaces.");
-      }
+    const membership = await db.query.workspaceMember.findFirst({
+      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
+    });
 
-      const workspaceId = membership.workspaceId;
+    if (!membership || membership.role !== "owner") {
+      throw new Error("Forbidden: Only owners can delete workspaces.");
+    }
 
-      // Don't allow deleting the last active workspace
-      const allMemberships = await db.query.workspaceMember.findMany({
-        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      });
+    const workspaceId = membership.workspaceId;
 
-      if (allMemberships.length <= 1) {
-        throw new Error("Cannot delete your only workspace.");
-      }
+    // Don't allow deleting the last active workspace
+    const allMemberships = await db.query.workspaceMember.findMany({
+      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
+    });
 
-      await db.update(workspace).set({ deletedAt: new Date() }).where(eq(workspace.id, workspaceId));
+    if (allMemberships.length <= 1) {
+      throw new Error("Cannot delete your only workspace.");
+    }
 
-      await recordAuditLog({
-        userId: session.user.id,
-        workspaceId: workspaceId,
-        entityType: "workspace",
-        entityId: workspaceId,
-        action: "delete",
-      });
+    await db.update(workspace).set({ deletedAt: new Date() }).where(eq(workspace.id, workspaceId));
 
-      return { success: true };
-    }),
+    await recordAuditLog({
+      userId: session.user.id,
+      workspaceId: workspaceId,
+      entityType: "workspace",
+      entityId: workspaceId,
+      action: "delete",
+    });
+
+    return { success: true };
+  }),
 
   acceptDpa: workspaceProcedure.mutation(async ({ ctx }) => {
     const { db, session, workspaceId } = ctx;
 
     const membership = await db.query.workspaceMember.findFirst({
-      where: and(
-        eq(workspaceMember.userId, session.user.id),
-        isNull(workspaceMember.deletedAt),
-      ),
+      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
     });
 
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
-      }
+    if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+      throw new Error("Forbidden: Insufficient permissions");
+    }
 
-      await db
-        .update(workspace)
-        .set({
-          dpaAcceptedAt: new Date(),
-          dpaAcceptedById: session.user.id,
-        })
-        .where(eq(workspace.id, workspaceId));
+    await db
+      .update(workspace)
+      .set({
+        dpaAcceptedAt: new Date(),
+        dpaAcceptedById: session.user.id,
+      })
+      .where(eq(workspace.id, workspaceId));
 
-      await recordAuditLog({
-        userId: session.user.id,
-        workspaceId: workspaceId,
-        entityType: "workspace",
-        entityId: workspaceId,
-        action: "update",
-        diff: { dpaAccepted: true },
-      });
+    await recordAuditLog({
+      userId: session.user.id,
+      workspaceId: workspaceId,
+      entityType: "workspace",
+      entityId: workspaceId,
+      action: "update",
+      diff: { dpaAccepted: true },
+    });
 
-      return { success: true };
-    }),
+    return { success: true };
+  }),
 
   findRespondentData: workspaceProcedure
     .input(z.object({ email: z.string().email() }))
@@ -746,10 +733,7 @@ export const dashboardRouter = router({
       const { email } = input;
 
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -801,10 +785,7 @@ export const dashboardRouter = router({
       if (!p) throw new Error("Project not found");
 
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
@@ -851,10 +832,7 @@ export const dashboardRouter = router({
       if (!p) throw new Error("Project not found");
 
       const membership = await db.query.workspaceMember.findFirst({
-        where: and(
-          eq(workspaceMember.userId, session.user.id),
-          isNull(workspaceMember.deletedAt),
-        ),
+        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
       });
 
       if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {

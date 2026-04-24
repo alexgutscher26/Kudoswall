@@ -241,9 +241,9 @@ export default function TeamTab() {
                   <button
                     type="button"
                     onClick={() =>
-                        revokeMutation.mutate({
-                          invitationId: invite.id,
-                        })
+                      revokeMutation.mutate({
+                        invitationId: invite.id,
+                      })
                     }
                     className="rounded-lg p-2 text-neutral-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
                   >

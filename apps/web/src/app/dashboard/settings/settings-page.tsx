@@ -331,7 +331,6 @@ export default function SettingsPage() {
                 Workspace Identity
               </h3>
 
-
               {/* Name & Slug */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div className="space-y-2">

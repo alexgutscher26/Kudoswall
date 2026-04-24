@@ -1,11 +1,5 @@
 import { workspaceProcedure, router, publicProcedure } from "../index";
-import {
-  widget,
-  project,
-  testimonial,
-  testimonialToTag,
-  tag,
-} from "@my-better-t-app/db/schema";
+import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-t-app/db/schema";
 import { eq, and, desc, inArray, gte, isNull, exists } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
@@ -57,15 +51,14 @@ const widgetSettingsSchema = z.object({
 });
 
 export const widgetRouter = router({
-  list: workspaceProcedure
-    .query(async ({ ctx }) => {
-      const { db } = ctx;
+  list: workspaceProcedure.query(async ({ ctx }) => {
+    const { db } = ctx;
 
-      return db.query.widget.findMany({
-        where: isNull(widget.deletedAt),
-        orderBy: desc(widget.createdAt),
-      });
-    }),
+    return db.query.widget.findMany({
+      where: isNull(widget.deletedAt),
+      orderBy: desc(widget.createdAt),
+    });
+  }),
 
   getById: workspaceProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
     const { db } = ctx;

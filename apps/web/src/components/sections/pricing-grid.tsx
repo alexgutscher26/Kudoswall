@@ -149,25 +149,40 @@ export default function PricingGrid({ plans }: PricingGridProps) {
               >
                 {plan.name}
               </p>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className="text-4xl font-black tracking-tighter sm:text-5xl"
-                  style={{ color: plan.highlight ? "#ffffff" : "#111827" }}
-                >
-                  {plan.isComingSoon
-                    ? "Coming Soon"
-                    : billingCycle === "monthly"
-                      ? plan.monthlyPrice
-                      : plan.yearlyPrice}
-                </span>
-                {!plan.isComingSoon && plan.period && (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-2">
                   <span
-                    className="text-sm font-bold tracking-widest uppercase"
-                    style={{ color: plan.highlight ? "rgba(255,255,255,0.5)" : "#9ca3af" }}
+                    className="text-4xl font-black tracking-tighter sm:text-5xl"
+                    style={{ color: plan.highlight ? "#ffffff" : "#111827" }}
                   >
-                    {billingCycle === "monthly" ? "/month" : "/year"}
+                    {plan.isComingSoon
+                      ? "Coming Soon"
+                      : billingCycle === "monthly"
+                        ? plan.monthlyPrice
+                        : plan.yearlyPrice}
                   </span>
-                )}
+                  {!plan.isComingSoon && plan.period && (
+                    <span
+                      className="text-sm font-bold tracking-widest uppercase"
+                      style={{ color: plan.highlight ? "rgba(255,255,255,0.5)" : "#9ca3af" }}
+                    >
+                      {billingCycle === "monthly" ? "/month" : "/year"}
+                    </span>
+                  )}
+                </div>
+                {!plan.isComingSoon &&
+                  plan.monthlyPrice !== "Free" &&
+                  billingCycle === "yearly" && (
+                    <span
+                      className="animate-in fade-in slide-in-from-top-1 text-sm font-bold"
+                      style={{ color: plan.highlight ? "#fbcfe8" : "#e8527a" }}
+                    >
+                      Save $
+                      {parseInt(plan.monthlyPrice.replace(/\D/g, "")) * 12 -
+                        parseInt(plan.yearlyPrice.replace(/\D/g, ""))}{" "}
+                      a year
+                    </span>
+                  )}
               </div>
               <p
                 className="text-[15px] leading-relaxed font-medium"

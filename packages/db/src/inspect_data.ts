@@ -1,8 +1,8 @@
-import { Pool } from '@neondatabase/serverless';
-import dotenv from 'dotenv';
-import path from 'path';
+import { Pool } from "@neondatabase/serverless";
+import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config({ path: path.resolve('../../apps/web/.env') });
+dotenv.config({ path: path.resolve("../../apps/web/.env") });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

@@ -28,7 +28,7 @@ export const tagRouter = router({
       });
 
       await recordAuditLog({
-         userId: session.user.id,
+        userId: session.user.id,
         workspaceId: ctx.workspaceId,
         entityType: "tag",
         entityId: id,

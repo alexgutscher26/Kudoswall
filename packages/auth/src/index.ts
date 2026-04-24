@@ -180,7 +180,9 @@ export function createAuth() {
                     role: "owner" as const,
                   });
                 });
-                console.log(`[WORKSPACE] Created for ${user.email} with Stripe ID: ${stripeCustomerId}`);
+                console.log(
+                  `[WORKSPACE] Created for ${user.email} with Stripe ID: ${stripeCustomerId}`,
+                );
               }
 
               const { EmailService } = await import("@my-better-t-app/email");

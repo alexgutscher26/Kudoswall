@@ -143,10 +143,7 @@ export const billingRouter = router({
         });
         stripeCustomerId = customer.id;
 
-        await db
-          .update(workspace)
-          .set({ stripeCustomerId })
-          .where(eq(workspace.id, workspaceId));
+        await db.update(workspace).set({ stripeCustomerId }).where(eq(workspace.id, workspaceId));
 
         console.log(`[Stripe] Created customer ${stripeCustomerId} for workspace ${workspaceId}`);
       } catch (err) {
@@ -179,9 +176,9 @@ export const billingRouter = router({
 
     try {
       const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
-      console.log(`[StripePortal] Creating session for workspace: ${workspaceId}, customer: ${stripeCustomerId}, origin: ${origin}`);
-      
-
+      console.log(
+        `[StripePortal] Creating session for workspace: ${workspaceId}, customer: ${stripeCustomerId}, origin: ${origin}`,
+      );
 
       const stripeSession = await stripe.billingPortal.sessions.create({
         customer: stripeCustomerId,

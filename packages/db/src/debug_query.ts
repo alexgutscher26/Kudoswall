@@ -1,8 +1,8 @@
-import { Pool } from '@neondatabase/serverless';
-import dotenv from 'dotenv';
-import path from 'path';
+import { Pool } from "@neondatabase/serverless";
+import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config({ path: path.resolve('../../apps/web/.env') });
+dotenv.config({ path: path.resolve("../../apps/web/.env") });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -28,20 +28,20 @@ async function run() {
     where ("testimonial"."project_id" in ($3) and "testimonial"."deleted_at" is null) 
     order by "testimonial"."created_at" desc limit $4
   `;
-  
-  const params = [1, 1, '9cf4ea2a-add7-4dde-84cd-69526ce3e05b', 5];
-  
+
+  const params = [1, 1, "9cf4ea2a-add7-4dde-84cd-69526ce3e05b", 5];
+
   try {
     const res = await pool.query(sql, params);
-    console.log('Success!', res.rowCount, 'rows found');
+    console.log("Success!", res.rowCount, "rows found");
   } catch (err: any) {
-    console.error('--- PG ERROR ---');
+    console.error("--- PG ERROR ---");
     console.error(err.message);
-    if (err.detail) console.error('Detail:', err.detail);
-    if (err.hint) console.error('Hint:', err.hint);
-    if (err.where) console.error('Where:', err.where);
+    if (err.detail) console.error("Detail:", err.detail);
+    if (err.hint) console.error("Hint:", err.hint);
+    if (err.where) console.error("Where:", err.where);
   }
-  
+
   process.exit(0);
 }
 

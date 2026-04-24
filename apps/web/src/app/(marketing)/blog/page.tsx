@@ -58,6 +58,13 @@ const blogPosts = [
     slug: "free-testimonial-widget-comparison",
     date: "April 18, 2026",
   },
+  {
+    title: "Testimonial Widget for Webflow: The Ultimate Guide",
+    description:
+      "How to add high-converting, edge-optimized testimonial widgets to your Webflow site without sacrificing page speed or design.",
+    slug: "testimonial-widget-for-webflow",
+    date: "April 23, 2026",
+  },
 ];
 
 export default function BlogPage() {

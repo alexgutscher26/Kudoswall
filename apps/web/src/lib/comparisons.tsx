@@ -502,3 +502,79 @@ export const FREE_PLAN_COMPARISON = {
     </>
   ),
 };
+
+export const WEBFLOW_WIDGET_GUIDE = {
+  points: [
+    {
+      feature: "Webflow Integration",
+      competitor: "Manual Iframe",
+      kudoswall: "Copy-Paste Snippet",
+    },
+    { feature: "Design Match", competitor: "Rigid Styles", kudoswall: "Inherits Custom Fonts" },
+    { feature: "Page Speed", competitor: "Bloated Scripts", kudoswall: "Zero Layout Shift" },
+  ],
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>How to Add a High-Converting Testimonial Widget for Webflow</H2>
+        <P>
+          Webflow gives you pixel-perfect control over your site's design. The last thing you want
+          is a clunky, third-party testimonial widget that breaks your carefully crafted aesthetic.
+          In this guide, we'll explore how to choose and implement the best testimonial widget for
+          Webflow sites.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Why Most Widgets Fail on Webflow</H3>
+        <P>
+          Many testimonial tools use heavy iframes with fixed styling. When you drop them into a
+          Webflow project, they stand out like a sore thumb. The typography doesn't match, the
+          spacing is off, and worst of all, they can severely impact your page load speed and Core
+          Web Vitals.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>The KudosWall Advantage for Webflow</H3>
+        <P>
+          KudosWall is designed to feel native to your Webflow site. Here's why Webflow developers
+          prefer our testimonial widget:
+        </P>
+        <UL>
+          <LI>
+            <strong>Typography Sync:</strong> Choose from our library of Google Fonts to perfectly
+            match your Webflow project's typography, ensuring a seamless visual experience.
+          </LI>
+          <LI>
+            <strong>Zero Layout Shift:</strong> Our edge-optimized widgets load instantly without
+            causing layout shifts, protecting your SEO rankings.
+          </LI>
+          <LI>
+            <strong>Responsive Layouts:</strong> Whether you prefer a masonry grid for desktop or a
+            swipeable carousel for mobile, KudosWall adapts perfectly to your Webflow breakpoints.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>How to Embed Your Widget in 3 Steps</H3>
+        <P>Adding KudosWall to Webflow takes less than 5 minutes:</P>
+        <UL>
+          <LI>
+            <strong>1. Collect:</strong> Use your KudosWall collection link to gather high-fidelity
+            text testimonials.
+          </LI>
+          <LI>
+            <strong>2. Customize:</strong> Style your widget in the KudosWall dashboard to match
+            your brand colors and fonts.
+          </LI>
+          <LI>
+            <strong>3. Embed:</strong> Copy the provided script and paste it into a Webflow HTML
+            Embed element. Publish your site, and you're done!
+          </LI>
+        </UL>
+      </section>
+    </>
+  ),
+};

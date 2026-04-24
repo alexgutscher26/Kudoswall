@@ -40,11 +40,7 @@ export default function WidgetList() {
     setIsCreateModalOpen(false);
     setIsModalOpen(false);
   };
-  const {
-    data: widgets,
-    isLoading,
-    refetch,
-  } = useQuery(trpc.widget.list.queryOptions());
+  const { data: widgets, isLoading, refetch } = useQuery(trpc.widget.list.queryOptions());
 
   const createWidget = useMutation(
     trpc.widget.create.mutationOptions({
