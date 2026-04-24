@@ -27,6 +27,22 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
   // Start with 500 if loading, then calculate based on real data
   const realSeatsRemaining = ltdCountData ? Math.max(5, 500 - ltdCountData.count) : 500;
   const [displaySeats, setDisplaySeats] = useState(500);
+  const [showCard, setShowCard] = useState(false);
+
+  useEffect(() => {
+    // Check if they've visited before
+    const hasVisited = localStorage.getItem("hasVisitedPricing");
+    if (hasVisited) {
+      setShowCard(true);
+    } else {
+      localStorage.setItem("hasVisitedPricing", "true");
+      // Show after 30 seconds
+      const timer = setTimeout(() => {
+        setShowCard(true);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     if (ltdCountData) {
@@ -115,6 +131,8 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
       window.history.replaceState({}, "", newUrl);
     }
   }, [session, searchParams, dashboardData?.workspace]);
+
+  if (!showCard) return null;
 
   return (
     <div className="group relative mx-auto mb-14 w-full max-w-5xl">
