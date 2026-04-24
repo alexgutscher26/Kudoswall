@@ -3,6 +3,8 @@ import { tag, testimonialToTag } from "@my-better-t-app/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
+import { purgeWidgetCache } from "../utils/purge";
+import { getEnvAsync } from "@my-better-t-app/env/server";
 
 export const tagRouter = router({
   list: workspaceProcedure.query(async ({ ctx }) => {
@@ -60,6 +62,9 @@ export const tagRouter = router({
         entityId: input.id,
         action: "delete",
       });
+      
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
 
       return { success: true };
     }),
@@ -87,6 +92,9 @@ export const tagRouter = router({
         })
         .onConflictDoNothing();
 
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
+
       return { success: true };
     }),
 
@@ -110,6 +118,9 @@ export const tagRouter = router({
         .where(
           and(eq(testimonialToTag.testimonialId, testimonialId), eq(testimonialToTag.tagId, tagId)),
         );
+
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
 
       return { success: true };
     }),

@@ -34,6 +34,12 @@ declare global {
     /** R2 bucket for public images (avatars, logos). Separate from VIDEOS_BUCKET. */
     IMAGES_BUCKET?: R2Bucket;
     VIRUSTOTAL_API_KEY?: string;
+    /** KV namespace for caching widget metadata (sub-10ms lookups). */
+    WIDGET_KV?: KVNamespace;
+    /** Cloudflare API Token with Cache Purge permissions. */
+    CLOUDFLARE_API_TOKEN?: string;
+    /** Cloudflare Zone ID for the production domain. */
+    CLOUDFLARE_ZONE_ID?: string;
   };
 }
 

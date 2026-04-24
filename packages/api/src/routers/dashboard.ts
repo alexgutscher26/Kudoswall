@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { protectedProcedure, router, workspaceProcedure } from "../index";
 import {
@@ -14,8 +15,9 @@ import {
 } from "@my-better-t-app/db/schema";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { EmailService } from "@my-better-t-app/email";
-import { env } from "@my-better-t-app/env/server";
+import { env, getEnvAsync } from "@my-better-t-app/env/server";
 import { generateSignedUrl } from "../lib/signed-url";
+import { purgeWidgetCache } from "../utils/purge";
 
 import type { Database } from "@my-better-t-app/db";
 
@@ -443,6 +445,13 @@ export const dashboardRouter = router({
         diff: { collectionSettingsJson: settings, name, collectionSlug },
       });
 
+      if (p.collectionSlug) {
+        revalidatePath(`/collect/${p.collectionSlug}`);
+      }
+      if (collectionSlug && collectionSlug !== p.collectionSlug) {
+        revalidatePath(`/collect/${collectionSlug}`);
+      }
+
       return { success: true };
     }),
 
@@ -632,6 +641,9 @@ export const dashboardRouter = router({
           action: "update",
           diff: { name, slug, logoUrl, retentionEnabled, retentionDays },
         });
+
+        const cloudflareEnv = await getEnvAsync();
+        await purgeWidgetCache({ db, workspaceId, env: cloudflareEnv });
 
         return { success: true };
       } catch (error) {

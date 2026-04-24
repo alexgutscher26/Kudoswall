@@ -6,7 +6,7 @@ import Widget from "@/components/widget";
 import ErrorBoundary from "@/components/error-boundary";
 import { JsonLd } from "@/components/seo/json-ld";
 
-export const revalidate = 0; // Disable caching for debugging to ensure live updates
+export const revalidate = 300; // Cache for 5 minutes at the edge
 
 export default async function EmbedPage({
   params,

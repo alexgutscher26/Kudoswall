@@ -2,11 +2,29 @@ import { db } from "@/lib/server-db";
 import { widget, project, testimonial } from "@my-better-t-app/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { getEnvAsync } from "@my-better-t-app/env/server";
+
+export const runtime = "edge";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const env = await getEnvAsync();
 
   try {
+    // 1. Try KV lookup for sub-10ms response
+    if (env.WIDGET_KV) {
+      const cached = await env.WIDGET_KV.get(`widget:${id}`, "json");
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+            Vary: "Origin",
+            "X-Cache": "HIT",
+          },
+        });
+      }
+    }
+
     const w = await db.query.widget.findFirst({
       where: eq(widget.id, id),
       with: {
@@ -26,10 +44,24 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     });
 
     if (projectsList.length === 0) {
-      return NextResponse.json({
-        widget: { ...w, settings },
+      const emptyResponse = {
+        widget: {
+          id: w.id,
+          name: w.name,
+          settings,
+          workspaceName: w.workspace.name,
+          isPro: w.workspace.plan !== "free",
+        },
         testimonials: [],
-      });
+      };
+
+      if (env.WIDGET_KV) {
+        await env.WIDGET_KV.put(`widget:${id}`, JSON.stringify(emptyResponse), {
+          expirationTtl: 3600,
+        });
+      }
+
+      return NextResponse.json(emptyResponse);
     }
 
     const projectIds = projectsList.map((p) => p.id);
@@ -52,8 +84,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
     });
 
-    // Return the widget config and testimonials
-    return NextResponse.json({
+    const responseData = {
       widget: {
         id: w.id,
         name: w.name,
@@ -77,6 +108,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           color: tt.tag.color,
         })),
       })),
+    };
+
+    // 2. Store in KV for subsequent requests
+    if (env.WIDGET_KV) {
+      await env.WIDGET_KV.put(`widget:${id}`, JSON.stringify(responseData), {
+        expirationTtl: 3600, // 1 hour
+      });
+    }
+
+    // Return the response
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        Vary: "Origin",
+        "X-Cache": "MISS",
+      },
     });
   } catch (error) {
     console.error("Widget API Error:", error);

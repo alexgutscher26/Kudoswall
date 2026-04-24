@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
+import { revalidatePath } from "next/cache";
 
 import { z } from "zod";
 
@@ -102,12 +103,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
 
     // 4. Rate limit is automatically managed by Upstash on .limit() call.
 
-    // 5. Fire non-blocking email notification
     void notifyOwnerNewTestimonial(proj.id, {
       authorName: body.authorName,
       content: body.content,
       rating: body.rating,
     });
+
+    // 6. Revalidate the collection page to update testimonial counts etc.
+    revalidatePath(`/collect/${slug}`);
 
     return NextResponse.json({
       success: true,

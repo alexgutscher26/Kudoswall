@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import Image from "next/image";
 import { db } from "@/lib/server-db";
 import { project, testimonial } from "@my-better-t-app/db/schema";
@@ -22,7 +23,7 @@ const BASE_URL = "https://kudoswall.org";
 
 export async function generateMetadata({ params }: CollectPageProps) {
   const { slug } = await params;
-  const projectData = await getProjectByCollectionSlug(slug);
+  const projectData = await getProjectData(slug);
 
   if (!projectData) return {};
 
@@ -108,81 +109,91 @@ const DEFAULT_SETTINGS = {
   },
 };
 
-async function getProjectByCollectionSlug(slug: string) {
-  const result = await db.query.project.findFirst({
-    where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
-    with: {
-      workspace: true,
-      testimonials: {
-        where: eq(testimonial.status, "approved"),
+export const revalidate = 600; // Cache for 10 minutes, then SWR
+
+const getProjectByCollectionSlug = unstable_cache(
+  async (slug: string) => {
+    const result = await db.query.project.findFirst({
+      where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
+      with: {
+        workspace: true,
+        testimonials: {
+          where: eq(testimonial.status, "approved"),
+        },
       },
-    },
-  });
+    });
 
-  if (!result) return null;
+    if (!result) return null;
 
-  const parsed = result.collectionSettingsJson ? JSON.parse(result.collectionSettingsJson) : {};
+    const parsed = result.collectionSettingsJson ? JSON.parse(result.collectionSettingsJson) : {};
 
-  // Deep merge basics for consistency
-  const settings = {
-    ...DEFAULT_SETTINGS,
-    ...parsed,
-    form: {
-      ...DEFAULT_SETTINGS.form,
-      ...(parsed.form || {}),
-      fields: {
-        ...DEFAULT_SETTINGS.form.fields,
-        ...(parsed.form?.fields || {}),
+    // Deep merge basics for consistency
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      form: {
+        ...DEFAULT_SETTINGS.form,
+        ...(parsed.form || {}),
+        fields: {
+          ...DEFAULT_SETTINGS.form.fields,
+          ...(parsed.form?.fields || {}),
+        },
       },
-    },
-    pageContent: {
-      ...DEFAULT_SETTINGS.pageContent,
-      ...(parsed.pageContent || {}),
-    },
-    compliance: {
-      ...DEFAULT_SETTINGS.compliance,
-      ...(parsed.compliance || {}),
-      cookieConsent: {
-        ...DEFAULT_SETTINGS.compliance.cookieConsent,
-        ...(parsed.compliance?.cookieConsent || {}),
+      pageContent: {
+        ...DEFAULT_SETTINGS.pageContent,
+        ...(parsed.pageContent || {}),
       },
-    },
-  };
+      compliance: {
+        ...DEFAULT_SETTINGS.compliance,
+        ...(parsed.compliance || {}),
+        cookieConsent: {
+          ...DEFAULT_SETTINGS.compliance.cookieConsent,
+          ...(parsed.compliance?.cookieConsent || {}),
+        },
+      },
+    };
 
-  // Enhance with branding logic and permissions
-  const plan = result.workspace.plan;
-  const isPro = plan !== "free" && plan !== null;
-  const isAgency = plan === "plan_2" || plan === "ltd";
+    // Enhance with branding logic and permissions
+    const plan = result.workspace.plan;
+    const isPro = plan !== "free" && plan !== null;
+    const isAgency = plan === "plan_2" || plan === "ltd";
 
-  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
-  const permissions = getWorkspacePermissions({
-    plan: result.workspace.plan,
-    testimonialsCount: result.testimonials.length,
-  });
+    const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+    const permissions = getWorkspacePermissions({
+      plan: result.workspace.plan,
+      testimonialsCount: result.testimonials.length,
+    });
 
-  return {
-    ...result,
-    settings,
-    permissions,
-    workspace: {
-      ...result.workspace,
-      isPro,
-      isAgency,
-      branding: result.workspace.brandingJson
-        ? JSON.parse(result.workspace.brandingJson)
-        : {
-            accentColor: "#e8527a",
-            font: "sans",
-            logoUrl: result.workspace.logoUrl,
-          },
-    },
-  };
+    return {
+      ...result,
+      settings,
+      permissions,
+      workspace: {
+        ...result.workspace,
+        isPro,
+        isAgency,
+        branding: result.workspace.brandingJson
+          ? JSON.parse(result.workspace.brandingJson)
+          : {
+              accentColor: "#e8527a",
+              font: "sans",
+              logoUrl: result.workspace.logoUrl,
+            },
+      },
+    };
+  },
+  ["collection-project"],
+  { revalidate: 600, tags: ["collection"] }
+);
+
+async function getProjectData(slug: string) {
+  return getProjectByCollectionSlug(slug);
 }
 
 export default async function CollectPage({ params, searchParams }: CollectPageProps) {
   const { slug } = await params;
   const { t } = await searchParams;
-  const projectData = await getProjectByCollectionSlug(slug);
+  const projectData = await getProjectData(slug);
 
   if (!projectData) {
     notFound();

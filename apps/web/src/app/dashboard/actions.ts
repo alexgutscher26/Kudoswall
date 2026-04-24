@@ -16,8 +16,9 @@ import { headers } from "next/headers";
 const generateSlug = (name: string) =>
   name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
 import { EmailService } from "@my-better-t-app/email";
-import { env } from "@my-better-t-app/env/server";
+import { env, getEnvAsync } from "@my-better-t-app/env/server";
 import { analyticsEvent, user } from "@my-better-t-app/db/schema";
+import { purgeWidgetCache } from "@my-better-t-app/api";
 
 /**
  * Ensures the user has a workspace, creating one if it doesn't exist.
@@ -477,8 +478,14 @@ export async function updateTestimonialStatus(
     }
   }
 
+  const cloudflareEnv = await getEnvAsync();
+  await purgeWidgetCache({ db, workspaceId: t.project.workspaceId, env: cloudflareEnv });
+
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  if (t.project.collectionSlug) {
+    revalidatePath(`/collect/${t.project.collectionSlug}`);
+  }
   return { success: true };
 }
 
@@ -508,7 +515,13 @@ export async function deleteTestimonial(id: string) {
 
   await db.delete(testimonial).where(eq(testimonial.id, id));
 
+  const cloudflareEnv = await getEnvAsync();
+  await purgeWidgetCache({ db, workspaceId: t.project.workspaceId, env: cloudflareEnv });
+
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  if (t.project.collectionSlug) {
+    revalidatePath(`/collect/${t.project.collectionSlug}`);
+  }
   return { success: true };
 }

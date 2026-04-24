@@ -29,7 +29,9 @@ export default function VideoRecorder({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(initialBlob ?? null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false,
+  );
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 640);
@@ -48,17 +50,17 @@ export default function VideoRecorder({
   // 1. Initialize Stream
   const initStream = async (retryMinimal = false) => {
     if (isInitializing && !retryMinimal) return;
-    
+
     setIsInitializing(true);
     setError(null);
-    
+
     try {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
 
       // If we are retrying with minimal constraints, we just ask for any video/audio
-      const constraints: MediaStreamConstraints = retryMinimal 
+      const constraints: MediaStreamConstraints = retryMinimal
         ? { video: true, audio: true }
         : {
             video: isMobile
@@ -67,8 +69,10 @@ export default function VideoRecorder({
             audio: true,
           };
 
-      console.log(`Starting camera with ${retryMinimal ? "minimal" : "high-quality"} constraints...`);
-      
+      console.log(
+        `Starting camera with ${retryMinimal ? "minimal" : "high-quality"} constraints...`,
+      );
+
       const s = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(s);
       if (videoRef.current) {
@@ -76,20 +80,31 @@ export default function VideoRecorder({
       }
     } catch (err: any) {
       console.error("Camera error:", err);
-      
+
       // If the primary high-quality constraints failed and we haven't tried minimal yet, try minimal
-      if (!retryMinimal && (err.name === "AbortError" || err.name === "NotReadableError" || err.name === "OverconstrainedError")) {
+      if (
+        !retryMinimal &&
+        (err.name === "AbortError" ||
+          err.name === "NotReadableError" ||
+          err.name === "OverconstrainedError")
+      ) {
         console.warn("Retrying with minimal constraints due to:", err.name);
         initStream(true);
         return;
       }
 
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setError("Camera and microphone access was denied. Please enable them in your browser settings to record.");
+        setError(
+          "Camera and microphone access was denied. Please enable them in your browser settings to record.",
+        );
       } else if (err.name === "AbortError" && err.message?.includes("Timeout")) {
-        setError("The camera took too long to start. Please check if another application is using it and try again.");
+        setError(
+          "The camera took too long to start. Please check if another application is using it and try again.",
+        );
       } else {
-        setError("Could not access camera or microphone. Please ensure they are connected and not in use by another app.");
+        setError(
+          "Could not access camera or microphone. Please ensure they are connected and not in use by another app.",
+        );
       }
     } finally {
       setIsInitializing(false);
@@ -259,7 +274,7 @@ export default function VideoRecorder({
 
         {/* Loading Overlay */}
         {isInitializing && !error && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/80 backdrop-blur-sm p-6 text-center text-white">
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/80 p-6 text-center text-white backdrop-blur-sm">
             <Loader2 className="mb-4 size-10 animate-spin text-white/50" />
             <p className="text-lg font-bold">Starting camera...</p>
             <p className="mt-2 text-sm text-neutral-400">This might take a few seconds</p>

@@ -77,11 +77,11 @@
 
 ### 1.4 Edge & Caching Strategy
 
-- [ ] Implement Edge Caching for Widget API via Cloudflare Cache Rules
-- [ ] KV-store for fast widget metadata lookups (sub-10ms)
-- [ ] Global CDN cache purge on testimonial approval/edit
+- [x] Implement Edge Caching for Widget API via Cloudflare Cache Rules
+- [x] KV-store for fast widget metadata lookups (sub-10ms)
+- [x] Global CDN cache purge on testimonial approval/edit
 - [ ] Multi-region deployment strategy for <50ms P99 latency globally
-- [ ] Stale-While-Revalidate (SWR) strategy for collection page data
+- [x] Stale-While-Revalidate (SWR) strategy for collection page data
 - [ ] Request coalescing at edge to prevent cache stampedes
 
 ---

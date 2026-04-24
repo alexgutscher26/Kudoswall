@@ -3,6 +3,8 @@ import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-
 import { eq, and, desc, inArray, gte, isNull, exists } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
+import { purgeWidgetCache } from "../utils/purge";
+import { getEnvAsync } from "@my-better-t-app/env/server";
 
 const widgetSettingsSchema = z.object({
   // Layout & Display
@@ -179,6 +181,9 @@ export const widgetRouter = router({
         action: "update",
         diff: { name: input.name, settings: input.settings },
       });
+      
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId, env });
 
       return { success: true };
     }),
@@ -205,6 +210,9 @@ export const widgetRouter = router({
         entityId: input.id,
         action: "delete",
       });
+
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId, env });
 
       return { success: true };
     }),
