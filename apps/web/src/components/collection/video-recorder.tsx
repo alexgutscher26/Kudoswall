@@ -213,9 +213,10 @@ export default function VideoRecorder({
         >
           <video
             key={previewUrl}
-            src={previewUrl}
+            src={`${previewUrl}#t=0.001`}
             controls
             autoPlay
+            preload="metadata"
             className="size-full object-cover"
             playsInline
           />

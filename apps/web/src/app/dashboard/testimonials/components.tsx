@@ -864,7 +864,12 @@ function TestimonialCard({
 
           {t.type === "video" && t.videoUrl && (
             <div className="mb-6 aspect-video w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-100 bg-black shadow-lg">
-              <video src={t.videoUrl} controls className="size-full object-cover" />
+              <video 
+                src={`${t.videoUrl}#t=0.001`} 
+                controls 
+                preload="metadata"
+                className="size-full object-cover" 
+              />
             </div>
           )}
 

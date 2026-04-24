@@ -94,6 +94,32 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
   return newWorkspace;
 }
 
+/**
+ * Helper to sign video URLs for a list of testimonials.
+ */
+async function signTestimonials<T extends { type: string | null; videoUrl: string | null }>(
+  testimonials: T[],
+): Promise<T[]> {
+  const secret = env.R2_SIGNING_SECRET;
+  if (!secret) return testimonials;
+
+  return Promise.all(
+    testimonials.map(async (t) => {
+      if (t.type === "video" && t.videoUrl && t.videoUrl.startsWith("/api/videos/")) {
+        try {
+          const key = t.videoUrl.replace(/^\/api\/videos\//, "");
+          const signedUrl = await generateSignedUrl(key, secret, 3600);
+          return { ...t, videoUrl: signedUrl };
+        } catch (err) {
+          console.error("Failed to sign testimonial video URL", err);
+          return t;
+        }
+      }
+      return t;
+    }),
+  );
+}
+
 export const dashboardRouter = router({
   getData: protectedProcedure
     .input(z.object({ workspaceId: z.string().optional() }).optional())
@@ -250,7 +276,7 @@ export const dashboardRouter = router({
         workspace: ws,
         permissions,
         projects,
-        recentTestimonials,
+        recentTestimonials: await signTestimonials(recentTestimonials),
         onboarding,
         workspaceCount: allMemberships.length,
         stats: {
@@ -367,7 +393,7 @@ export const dashboardRouter = router({
 
       return {
         project: p,
-        testimonials,
+        testimonials: await signTestimonials(testimonials),
       };
     }),
 
