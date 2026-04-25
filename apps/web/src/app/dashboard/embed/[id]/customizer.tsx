@@ -34,7 +34,7 @@ import Widget from "@/components/widget";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type LayoutType = "grid" | "masonry" | "carousel";
+type LayoutType = "grid" | "masonry" | "carousel" | "bento";
 type ThemeType = "light" | "dark" | "auto";
 
 export interface WidgetSettings {
@@ -243,6 +243,39 @@ export default function WidgetCustomizer({
       type: "text" as const,
       authorImage: "",
     },
+    {
+      id: "4",
+      authorName: "Sarah J.",
+      authorTagline: "Product Manager",
+      authorCompany: "TechFlow",
+      content: "The interface is so intuitive. We were up and running in minutes.",
+      rating: 5,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
+    {
+      id: "5",
+      authorName: "Michael R.",
+      authorTagline: "Software Engineer",
+      authorCompany: "DevOps Inc",
+      content: "Robust API and great documentation. Highly recommended for developers.",
+      rating: 4,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
+    {
+      id: "6",
+      authorName: "Elena V.",
+      authorTagline: "Marketing Director",
+      authorCompany: "Creative co",
+      content: "Our conversion rate jumped by 20% after adding these testimonials to our landing page.",
+      rating: 5,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
   ];
 
   const ProBadge = () => (
@@ -294,6 +327,7 @@ export default function WidgetCustomizer({
                     {[
                       { id: "grid", icon: LayoutGrid, label: "Grid", pro: false },
                       { id: "masonry", icon: Columns, label: "Masonry", pro: true },
+                      { id: "bento", icon: Layout, label: "Bento", pro: true },
                       { id: "carousel", icon: GalleryHorizontal, label: "Carousel", pro: true },
                     ].map((l) => (
                       <button

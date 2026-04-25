@@ -346,27 +346,66 @@ export default function EmbedPage() {
                 className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-5xl"}`}
               >
                 <div
-                  className={`grid gap-6 ${viewMode === "mobile" ? "grid-cols-1" : settings.layout === "grid" ? "grid-cols-2 lg:grid-cols-3" : settings.layout === "carousel" ? "grid-cols-3 lg:grid-cols-4" : "grid-cols-2 lg:grid-cols-3"}`}
+                  className={`grid gap-6 ${
+                    viewMode === "mobile"
+                      ? "grid-cols-1"
+                      : settings.layout === "bento"
+                        ? "grid-cols-2 lg:grid-cols-3"
+                        : settings.layout === "grid"
+                          ? "grid-cols-2 lg:grid-cols-3"
+                          : settings.layout === "carousel"
+                            ? "grid-cols-3 lg:grid-cols-4"
+                            : "grid-cols-2 lg:grid-cols-3"
+                  }`}
+                  style={
+                    viewMode === "desktop" && settings.layout === "bento"
+                      ? { gridAutoRows: "minmax(150px, auto)" }
+                      : undefined
+                  }
                 >
-                  {MOCK_TESTIMONIALS.map((t, i) => (
-                    <div
-                      key={t.author}
-                      className={
-                        settings.layout === "carousel" && i > 0 && viewMode === "mobile"
-                          ? "hidden"
-                          : ""
-                      }
-                    >
-                      <PreviewCard testimonial={t} settings={settings} />
-                    </div>
-                  ))}
-                  {/* Duplicate items for a fuller preview in the expanded space */}
-                  {viewMode === "desktop" &&
-                    MOCK_TESTIMONIALS.map((t, i) => (
-                      <div key={t.author + i}>
+                  {MOCK_TESTIMONIALS.map((t, i) => {
+                    let spanClass = "";
+                    if (viewMode === "desktop" && settings.layout === "bento") {
+                      const mod = i % 5;
+                      if (mod === 0) spanClass = "md:col-span-2 md:row-span-2";
+                      else if (mod === 1) spanClass = "md:col-span-1 md:row-span-1";
+                      else if (mod === 2) spanClass = "md:col-span-1 md:row-span-1";
+                      else if (mod === 3) spanClass = "md:col-span-1 md:row-span-2";
+                      else if (mod === 4) spanClass = "md:col-span-2 md:row-span-1";
+                    }
+
+                    return (
+                      <div
+                        key={t.author + i}
+                        className={`${
+                          settings.layout === "carousel" && i > 0 && viewMode === "mobile"
+                            ? "hidden"
+                            : ""
+                        } ${spanClass}`}
+                      >
                         <PreviewCard testimonial={t} settings={settings} />
                       </div>
-                    ))}
+                    );
+                  })}
+                  {/* Duplicate items for a fuller preview in the expanded space */}
+                  {viewMode === "desktop" &&
+                    MOCK_TESTIMONIALS.map((t, i) => {
+                      const offset = MOCK_TESTIMONIALS.length + i;
+                      let spanClass = "";
+                      if (settings.layout === "bento") {
+                        const mod = offset % 5;
+                        if (mod === 0) spanClass = "md:col-span-2 md:row-span-2";
+                        else if (mod === 1) spanClass = "md:col-span-1 md:row-span-1";
+                        else if (mod === 2) spanClass = "md:col-span-1 md:row-span-1";
+                        else if (mod === 3) spanClass = "md:col-span-1 md:row-span-2";
+                        else if (mod === 4) spanClass = "md:col-span-2 md:row-span-1";
+                      }
+                      return (
+                        <div key={t.author + "dup" + i} className={spanClass}>
+                          <PreviewCard testimonial={t} settings={settings} />
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             </div>

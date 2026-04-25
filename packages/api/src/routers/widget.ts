@@ -8,7 +8,7 @@ import { getEnvAsync } from "@my-better-t-app/env/server";
 
 const widgetSettingsSchema = z.object({
   // Layout & Display
-  layout: z.enum(["grid", "masonry", "carousel"]),
+  layout: z.enum(["grid", "masonry", "carousel", "bento"]),
   theme: z.enum(["light", "dark", "auto"]),
   maxItems: z.number().default(20),
   showRating: z.boolean().default(true),
@@ -150,7 +150,9 @@ export const widgetRouter = router({
 
       // Enforce Layout restrictions
       if (
-        (input.settings.layout === "masonry" || input.settings.layout === "carousel") &&
+        (input.settings.layout === "masonry" ||
+          input.settings.layout === "carousel" ||
+          input.settings.layout === "bento") &&
         !planConfig.features.premiumWidgets
       ) {
         throw new Error(

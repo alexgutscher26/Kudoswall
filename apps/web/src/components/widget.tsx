@@ -14,7 +14,7 @@ interface WidgetProps {
     id: string;
     name: string;
     settings: {
-      layout: "grid" | "masonry" | "carousel";
+      layout: "grid" | "masonry" | "carousel" | "bento";
       theme: "light" | "dark" | "auto";
       accentColor: string;
       backgroundColor: string;
@@ -177,132 +177,182 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       : "bg-[#fafafa] text-neutral-900 border-neutral-100";
 
   const renderCard = (t: WidgetProps["testimonials"][number], index: number) => {
-    const isTruncated = settings.truncateText !== "off";
-    const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 0;
-    const content =
-      isTruncated && t.content.length > maxLength
-        ? t.content.substring(0, maxLength) + "..."
-        : t.content;
-
-    const cardStyle: React.CSSProperties = {
-      borderRadius: getBorderRadius(),
-      boxShadow: getShadow(),
-      backdropFilter: settings.backgroundColor === "transparent" ? "blur(12px)" : "none",
-      color: settings.textColor || undefined,
-    };
-
     return (
-      <div
+      <TestimonialCard
         key={t.id}
-        className={`relative flex min-h-[160px] flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
-        style={cardStyle}
-      >
-        {t.type === "video" && t.videoUrl && (
-          <div className="mb-4 overflow-hidden rounded-lg">
-            <VideoPlayer
-              url={t.videoUrl}
-              thumbnail={t.authorImage}
-              accentColor={settings.accentColor}
-              onPlay={() => {
-                trackEvent.mutate(
-                  {
-                    workspaceId: data.workspaceId,
-                    widgetId: data.id,
-                    eventType: "video_play",
-                  },
-                  {
-                    onError: (err) =>
-                      console.error(
-                        "[KudosWall Analytics] video_play tracking failed:",
-                        err.message,
-                      ),
-                  },
-                );
-              }}
-              onProgress={(milestone) => {
-                trackEvent.mutate(
-                  {
-                    workspaceId: data.workspaceId,
-                    widgetId: data.id,
-                    eventType: "video_progress",
-                    metadataJson: JSON.stringify({ milestone }),
-                  },
-                  {
-                    onError: (err) =>
-                      console.error(
-                        `[KudosWall Analytics] video_progress ${milestone}% failed:`,
-                        err.message,
-                      ),
-                  },
-                );
-              }}
-            />
-          </div>
-        )}
-
-        {t.type === "text" && <Quote className="mb-2 size-5 text-neutral-200" />}
-
-        {settings.showRating && (
-          <div className="mb-1.5 flex gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`size-3.5 ${i < t.rating ? "fill-current" : "text-neutral-200"}`}
-                style={{ color: i < t.rating ? settings.accentColor : undefined }}
-              />
-            ))}
-          </div>
-        )}
-
-        <p className="mb-3 flex-1 text-xs leading-relaxed wrap-break-word text-neutral-600 dark:text-neutral-400">
-          "{content}"
-        </p>
-
-        <div className="flex items-center gap-2">
-          {settings.showReviewerPhoto && (
-            <div className="size-8 shrink-0 overflow-hidden rounded-full bg-neutral-100 shadow-sm ring-2 ring-white">
-              {t.authorImage ? (
-                <Image
-                  src={t.authorImage}
-                  alt={t.authorName}
-                  width={32}
-                  height={32}
-                  priority={index < 4}
-                  className="size-full object-cover"
-                  loading={index < 4 ? undefined : "lazy"}
-                />
-              ) : (
-                <div
-                  className="flex size-full items-center justify-center text-xs font-bold text-white uppercase"
-                  style={{ backgroundColor: settings.accentColor }}
-                >
-                  {t.authorName.charAt(0)}
-                </div>
-              )}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h5
-              className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
-              style={{ color: settings.textColor || undefined }}
-            >
-              {t.authorName}
-            </h5>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
-              {t.authorTagline}{" "}
-              {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
-            </p>
-          </div>
-        </div>
-
-        {settings.showDate && (
-          <div className="mt-3 text-[9px] font-bold tracking-widest text-neutral-200 uppercase">
-            {formatDistanceToNow(new Date(t.createdAt))} ago
-          </div>
-        )}
-      </div>
+        t={t}
+        index={index}
+        data={data}
+        settings={settings}
+        themeClasses={themeClasses}
+        trackEvent={trackEvent}
+        getBorderRadius={getBorderRadius}
+        getShadow={getShadow}
+      />
     );
   };
+
+interface TestimonialCardProps {
+  t: WidgetProps["testimonials"][number];
+  index: number;
+  data: WidgetProps["data"];
+  settings: WidgetProps["data"]["settings"];
+  themeClasses: string;
+  trackEvent: any;
+  getBorderRadius: () => string;
+  getShadow: () => string;
+}
+
+function TestimonialCard({
+  t,
+  index,
+  data,
+  settings,
+  themeClasses,
+  trackEvent,
+  getBorderRadius,
+  getShadow,
+}: TestimonialCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const isTruncatedSetting = settings.truncateText !== "off";
+  const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 500;
+  const shouldTruncate = t.content.length > maxLength;
+
+  const displayContent =
+    shouldTruncate && !isExpanded ? t.content.substring(0, maxLength) + "..." : t.content;
+
+  const cardStyle: React.CSSProperties = {
+    borderRadius: getBorderRadius(),
+    boxShadow: getShadow(),
+    backdropFilter: settings.backgroundColor === "transparent" ? "blur(12px)" : "none",
+    color: settings.textColor || undefined,
+  };
+
+  return (
+    <div
+      className={`relative flex min-h-[160px] flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""} ${settings.layout === "bento" ? "h-full" : ""}`}
+      style={cardStyle}
+    >
+      {t.type === "video" && t.videoUrl && (
+        <div className="mb-4 overflow-hidden rounded-lg">
+          <VideoPlayer
+            url={t.videoUrl}
+            thumbnail={t.authorImage}
+            accentColor={settings.accentColor}
+            onPlay={() => {
+              trackEvent.mutate(
+                {
+                  workspaceId: data.workspaceId,
+                  widgetId: data.id,
+                  eventType: "video_play",
+                },
+                {
+                  onError: (err: any) =>
+                    console.error("[KudosWall Analytics] video_play tracking failed:", err.message),
+                },
+              );
+            }}
+            onProgress={(milestone) => {
+              trackEvent.mutate(
+                {
+                  workspaceId: data.workspaceId,
+                  widgetId: data.id,
+                  eventType: "video_progress",
+                  metadataJson: JSON.stringify({ milestone }),
+                },
+                {
+                  onError: (err: any) =>
+                    console.error(
+                      `[KudosWall Analytics] video_progress ${milestone}% failed:`,
+                      err.message,
+                    ),
+                },
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {t.type === "text" && <Quote className="mb-2 size-5 text-neutral-200" />}
+
+      {settings.showRating && (
+        <div className="mb-1.5 flex gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={`size-3.5 ${i < t.rating ? "fill-current" : "text-neutral-200"}`}
+              style={{ color: i < t.rating ? settings.accentColor : undefined }}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="mb-3 flex-1">
+        <p className="text-xs leading-relaxed whitespace-pre-wrap break-words text-neutral-600 dark:text-neutral-400">
+          "{displayContent}"
+        </p>
+        {shouldTruncate && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            className="mt-1 text-[11px] font-bold transition-opacity hover:opacity-80"
+            style={{ color: settings.accentColor }}
+          >
+            {isExpanded ? "Read less" : "Read more"}
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {settings.showReviewerPhoto && (
+          <div className="size-8 shrink-0 overflow-hidden rounded-full bg-neutral-100 shadow-sm ring-2 ring-white">
+            {t.authorImage ? (
+              <Image
+                src={t.authorImage}
+                alt={t.authorName}
+                width={32}
+                height={32}
+                priority={index < 4}
+                className="size-full object-cover"
+                loading={index < 4 ? undefined : "lazy"}
+              />
+            ) : (
+              <div
+                className="flex size-full items-center justify-center text-xs font-bold text-white uppercase"
+                style={{ backgroundColor: settings.accentColor }}
+              >
+                {t.authorName.charAt(0)}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h5
+            className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
+            style={{ color: settings.textColor || undefined }}
+          >
+            {t.authorName}
+          </h5>
+          <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
+            {t.authorTagline}{" "}
+            {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
+          </p>
+        </div>
+      </div>
+
+      {settings.showDate && (
+        <div className="mt-3 text-[9px] font-bold tracking-widest text-neutral-200 uppercase">
+          {formatDistanceToNow(new Date(t.createdAt))} ago
+        </div>
+      )}
+    </div>
+  );
+}
+
 
   // Resolve fontFamily to a valid CSS font-family stack
   const resolvedFontFamily = (() => {
@@ -469,6 +519,40 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                     })}
                   </div>
                 )}
+              </div>
+            ) : settings.layout === "bento" ? (
+              <div
+                className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                style={{ gridAutoRows: "minmax(180px, auto)" }}
+              >
+                {testimonials.map((t, index) => {
+                  // Repeating bento pattern every 5 items
+                  const mod = index % 5;
+                  let spanClass = "";
+                  
+                  if (mod === 0) {
+                    // Item 1: Large Featured (2x2)
+                    spanClass = "md:col-span-2 md:row-span-2";
+                  } else if (mod === 1) {
+                    // Item 2: Standard (1x1)
+                    spanClass = "md:col-span-1 md:row-span-1";
+                  } else if (mod === 2) {
+                    // Item 3: Standard (1x1)
+                    spanClass = "md:col-span-1 md:row-span-1";
+                  } else if (mod === 3) {
+                    // Item 4: Tall (1x2)
+                    spanClass = "md:col-span-1 md:row-span-2";
+                  } else if (mod === 4) {
+                    // Item 5: Wide (2x1)
+                    spanClass = "md:col-span-2 md:row-span-1";
+                  }
+
+                  return (
+                    <div key={t.id} className={spanClass}>
+                      {renderCard(t, index)}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div
