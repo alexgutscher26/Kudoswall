@@ -102,7 +102,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       "Unlimited testimonials",
       "1 Project",
       "Text & Video testimonials",
-      "All 3 widget layouts",
+      "All 4 widget layouts",
       "Custom branding & colors",
       "Remove 'Powered by' badge",
       "Custom domain for collection",
