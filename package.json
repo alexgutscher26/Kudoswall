@@ -47,7 +47,8 @@
     "db:migrate": "turbo -F @my-better-t-app/db db:migrate",
     "deploy": "turbo -F @my-better-t-app/infra deploy",
     "destroy": "turbo -F @my-better-t-app/infra destroy",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.66",
@@ -67,6 +68,7 @@
     "@cloudflare/workers-types": "catalog:",
     "@lhci/cli": "^0.15.1",
     "@my-better-t-app/config": "workspace:*",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.13.14",
     "lefthook": "latest",
     "prettier": "^3.8.1",

@@ -964,7 +964,7 @@
 - [x] Add "Read more / Read less" to long text testimonials in widgets
 - [x] Build Bento Grid layout for widgets
 - [x] Add filter bar to the testimonial inbox (by rating, type, tag)
-- [ ] Write Playwright E2E tests for the core submission flow
+- [x] Write Playwright E2E tests for the core submission flow
 
 ### 🟡 Medium (Next Quarter)
 
