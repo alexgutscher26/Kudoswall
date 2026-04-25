@@ -55,7 +55,7 @@ const UI_PLANS: Plan[] = [
       "Unlimited testimonials",
       "1 Workspace",
       "Text testimonials", // Video + text reviews (coming soon)
-      "All 3 widget layouts",
+      "All 4 widget layouts",
       "Filter testimonials by tag",
       "Custom branding & colors",
       "Remove 'Powered by' badge",
