@@ -15,24 +15,18 @@ import {
   FREE_PLAN_COMPARISON,
   WEBFLOW_WIDGET_GUIDE,
 } from "@/lib/comparisons";
+import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateStaticParams() {
-  return [
-    { slug: "kudoswall-vs-senja" },
-    { slug: "kudoswall-vs-testimonial-to" },
-    { slug: "testimonial-to-alternative-course-creators" },
-    { slug: "affordable-senja-alternative" },
-    { slug: "best-testimonial-tools-teachable" },
-    { slug: "best-testimonial-tools-kajabi" },
-    { slug: "best-testimonial-tools-gumroad" },
-    { slug: "free-testimonial-widget-comparison" },
-    { slug: "testimonial-widget-for-webflow" },
-  ];
+  return BLOG_POSTS.map((post) => ({
+    slug: post.slug,
+  }));
 }
+
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
@@ -184,11 +178,19 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function BlogPostPage({ params }: { params: Params }) {
   const { slug } = await params;
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  if (!post) {
+    return notFound();
+  }
 
   let content = null;
   let title = "";
   let description = "";
-  let date = "April 18, 2026";
+  let date = new Date(post.date).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
   const baseUrl = "https://kudoswall.org";
 
   if (slug === "kudoswall-vs-senja") {
