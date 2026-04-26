@@ -451,38 +451,50 @@ export async function updateTestimonialStatus(
     const approvedCount = Number(approvedCountQuery[0]?.value || 0);
 
     if (approvedCount === 1) {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, t.project.workspace.ownerId),
-      });
-      if (u?.email) {
-        const emailService = new EmailService(env.RESEND_API_KEY || "");
-        await emailService.sendFirstTestimonialEmail(
-          u.email,
-          u.name || "there",
-          t.authorName || "Someone",
-          t.content || "Awesome product!",
-          t.rating || 5,
-        );
+      try {
+        const u = await db.query.user.findFirst({
+          where: eq(user.id, t.project.workspace.ownerId),
+        });
+        if (u?.email) {
+          const emailService = new EmailService(env.RESEND_API_KEY || "");
+          await emailService.sendFirstTestimonialEmail(
+            u.email,
+            u.name || "there",
+            t.authorName || "Someone",
+            t.content || "Awesome product!",
+            t.rating || 5,
+          );
+        }
+      } catch (err) {
+        console.error("Failed to send first testimonial email:", err);
       }
     }
 
     // (Paid Plan) 5th Testimonial Upgrade Prompt
     if (t.project.workspace.plan === "free" && approvedCount === 5) {
-      const u = await db.query.user.findFirst({
-        where: eq(user.id, t.project.workspace.ownerId),
-      });
-      if (u?.email) {
-        const emailService = new EmailService(env.RESEND_API_KEY || "");
-        await emailService.sendUpgradePrompt(u.email, u.name || "there", approvedCount);
+      try {
+        const u = await db.query.user.findFirst({
+          where: eq(user.id, t.project.workspace.ownerId),
+        });
+        if (u?.email) {
+          const emailService = new EmailService(env.RESEND_API_KEY || "");
+          await emailService.sendUpgradePrompt(u.email, u.name || "there", approvedCount);
+        }
+      } catch (err) {
+        console.error("Failed to send upgrade prompt email:", err);
       }
     }
   }
 
-  const cloudflareEnv = await getEnvAsync();
-  await purgeWidgetCache({ db, workspaceId: t.project.workspaceId, env: cloudflareEnv });
+  try {
+    // Use sync env instead of getEnvAsync for Server Actions
+    await purgeWidgetCache({ db, workspaceId: t.workspaceId, env });
+  } catch (err) {
+    console.error("Failed to purge widget cache:", err);
+  }
 
   revalidatePath("/dashboard");
-  revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  revalidatePath(`/dashboard/testimonials?workspaceId=${t.workspaceId}`);
   if (t.project.collectionSlug) {
     revalidatePath(`/collect/${t.project.collectionSlug}`);
   }
@@ -515,11 +527,15 @@ export async function deleteTestimonial(id: string) {
 
   await db.delete(testimonial).where(eq(testimonial.id, id));
 
-  const cloudflareEnv = await getEnvAsync();
-  await purgeWidgetCache({ db, workspaceId: t.project.workspaceId, env: cloudflareEnv });
+  try {
+    // Use sync env instead of getEnvAsync for Server Actions
+    await purgeWidgetCache({ db, workspaceId: t.workspaceId, env });
+  } catch (err) {
+    console.error("Failed to purge widget cache:", err);
+  }
 
   revalidatePath("/dashboard");
-  revalidatePath(`/dashboard/testimonials/${t.projectId}`);
+  revalidatePath(`/dashboard/testimonials?workspaceId=${t.workspaceId}`);
   if (t.project.collectionSlug) {
     revalidatePath(`/collect/${t.project.collectionSlug}`);
   }
