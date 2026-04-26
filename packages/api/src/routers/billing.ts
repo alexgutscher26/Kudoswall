@@ -72,7 +72,7 @@ export const billingRouter = router({
             },
           ],
           mode: isLTD ? "payment" : "subscription",
-          customer_creation: isLTD ? "always" : undefined,
+          customer_creation: isLTD && !ws.stripeCustomerId ? "always" : undefined,
           client_reference_id: workspaceId,
           subscription_data: isLTD
             ? undefined
