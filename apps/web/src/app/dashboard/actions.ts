@@ -8,17 +8,19 @@ import {
   testimonial,
   widget,
   workspaceMember,
+  organization,
+  analyticsEvent,
+  user,
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { EmailService } from "@my-better-t-app/email";
+import { env, getEnvAsync } from "@my-better-t-app/env/server";
+import { purgeWidgetCache } from "@my-better-t-app/api";
 
 const generateSlug = (name: string) =>
   name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
-import { EmailService } from "@my-better-t-app/email";
-import { env, getEnvAsync } from "@my-better-t-app/env/server";
-import { analyticsEvent, user } from "@my-better-t-app/db/schema";
-import { purgeWidgetCache } from "@my-better-t-app/api";
 
 /**
  * Ensures the user has a workspace, creating one if it doesn't exist.
@@ -26,6 +28,7 @@ import { purgeWidgetCache } from "@my-better-t-app/api";
 async function getOrCreateWorkspace(userId: string, userName: string) {
   const existing = await db.query.workspace.findFirst({
     where: eq(workspace.ownerId, userId),
+    with: { organization: true },
   });
 
   if (existing) {
@@ -41,7 +44,31 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
         role: "owner",
       });
     }
+    // Normalize plan and status
+    if (existing.organization) {
+      existing.plan = (existing.organization as any).plan || existing.plan;
+      existing.subscriptionStatus =
+        (existing.organization as any).subscriptionStatus || existing.subscriptionStatus;
+    }
     return existing;
+  }
+
+  // Find or create a default organization for the user
+  let org = await db.query.organization.findFirst({
+    where: eq(organization.ownerId, userId),
+  });
+
+  if (!org) {
+    const orgId = crypto.randomUUID();
+    await db.insert(organization).values({
+      id: orgId,
+      name: `${userName}'s Org`,
+      ownerId: userId,
+      plan: "free",
+    });
+    org = await db.query.organization.findFirst({
+      where: eq(organization.id, orgId),
+    });
   }
 
   const wsId = crypto.randomUUID();
@@ -50,6 +77,7 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     name: `${userName}'s Workspace`,
     slug: generateSlug(userName),
     ownerId: userId,
+    organizationId: org?.id || null,
     onboardingStatus: JSON.stringify({
       step1: false,
       step2: false,
@@ -92,7 +120,16 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
     }
   }
 
+  // Normalize plan and status
+  if (org) {
+    (newWorkspace as any).plan = org.plan || newWorkspace.plan;
+    (newWorkspace as any).subscriptionStatus =
+      org.subscriptionStatus || newWorkspace.subscriptionStatus;
+  }
+
   return newWorkspace as any;
+
+
 }
 
 export async function createProject(formData: FormData, workspaceId?: string) {
@@ -123,13 +160,16 @@ export async function createProject(formData: FormData, workspaceId?: string) {
 
   const ws = await db.query.workspace.findFirst({
     where: eq(workspace.id, wsId as string),
+    with: { organization: true },
   });
 
   const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
   const permissions = getWorkspacePermissions({
     plan: ws?.plan || "free",
+    organization: (ws as any)?.organization,
     projectsCount: projectsCount[0]?.value || 0,
   });
+
 
   if (!permissions.canAddProject) {
     throw new Error(
@@ -164,12 +204,21 @@ export async function getDashboardData(workspaceId?: string) {
     if (workspaceId) {
       ws = await db.query.workspace.findFirst({
         where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        with: { organization: true },
       });
     }
+
 
     if (!ws) {
       ws = await getOrCreateWorkspace(session.user.id, session.user.name);
     }
+
+    // Normalize plan and status
+    if (ws.organization) {
+      ws.plan = (ws.organization as any).plan || ws.plan;
+      ws.subscriptionStatus = (ws.organization as any).subscriptionStatus || ws.subscriptionStatus;
+    }
+
 
     // Fetch everything in parallel to eliminate waterfalls
     const [projects, [testimonialCount], [pendingCount], [approvedCount], [widgetCount]] =
@@ -296,9 +345,11 @@ export async function getDashboardData(workspaceId?: string) {
     const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
     const permissions = getWorkspacePermissions({
       plan: ws.plan,
+      organization: (ws as any).organization,
       projectsCount: projects.length,
       testimonialsCount: testimonialsCount,
     });
+
 
     return {
       workspace: {
@@ -361,9 +412,12 @@ export async function getProjectTestimonials(projectId: string) {
   const p = await db.query.project.findFirst({
     where: eq(project.id, projectId),
     with: {
-      workspace: true,
+      workspace: {
+        with: { organization: true },
+      },
     },
   });
+
 
   if (!p || p.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");
@@ -426,11 +480,14 @@ export async function updateTestimonialStatus(
     with: {
       project: {
         with: {
-          workspace: true,
+          workspace: {
+            with: { organization: true },
+          },
         },
       },
     },
   });
+
 
   if (!t || t.project.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");
@@ -471,7 +528,9 @@ export async function updateTestimonialStatus(
     }
 
     // (Paid Plan) 5th Testimonial Upgrade Prompt
-    if (t.project.workspace.plan === "free" && approvedCount === 5) {
+    const effectivePlan = t.project.workspace.organization?.plan || t.project.workspace.plan;
+    if (effectivePlan === "free" && approvedCount === 5) {
+
       try {
         const u = await db.query.user.findFirst({
           where: eq(user.id, t.project.workspace.ownerId),
@@ -515,11 +574,14 @@ export async function deleteTestimonial(id: string) {
     with: {
       project: {
         with: {
-          workspace: true,
+          workspace: {
+            with: { organization: true },
+          },
         },
       },
     },
   });
+
 
   if (!t || t.project.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");

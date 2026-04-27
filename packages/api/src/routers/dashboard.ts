@@ -12,7 +12,9 @@ import {
   user,
   widget,
   analyticsEvent,
+  organization,
 } from "@my-better-t-app/db/schema";
+
 import { recordAuditLog } from "@my-better-t-app/db";
 import { EmailService } from "@my-better-t-app/email";
 import { env, getEnvAsync } from "@my-better-t-app/env/server";
@@ -27,6 +29,7 @@ import type { Database } from "@my-better-t-app/db";
 async function getOrCreateWorkspace(db: Database, userId: string, userName: string) {
   const existing = await db.query.workspace.findFirst({
     where: eq(workspace.ownerId, userId),
+    with: { organization: true },
   });
 
   if (existing) {
@@ -42,17 +45,62 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
         role: "owner",
       });
     }
+
+    // Heal missing organization if needed
+    if (!existing.organizationId) {
+      let org = await db.query.organization.findFirst({
+        where: eq(organization.ownerId, userId),
+      });
+
+      if (!org) {
+        const orgId = crypto.randomUUID();
+        await db.insert(organization).values({
+          id: orgId,
+          name: `${userName}'s Org`,
+          ownerId: userId,
+          plan: existing.plan,
+          stripeCustomerId: existing.stripeCustomerId,
+          stripeSubscriptionId: existing.stripeSubscriptionId,
+          subscriptionStatus: existing.subscriptionStatus,
+        });
+        org = (await db.query.organization.findFirst({ where: eq(organization.id, orgId) }))!;
+      }
+
+      await db
+        .update(workspace)
+        .set({ organizationId: org.id })
+        .where(eq(workspace.id, existing.id));
+      existing.organizationId = org.id;
+    }
+
     return existing;
   }
 
   const generateSlug = (name: string) =>
     name.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 6);
 
+  // Ensure organization exists
+  let org = await db.query.organization.findFirst({
+    where: eq(organization.ownerId, userId),
+  });
+
+  if (!org) {
+    const orgId = crypto.randomUUID();
+    await db.insert(organization).values({
+      id: orgId,
+      name: `${userName}'s Org`,
+      ownerId: userId,
+      plan: "free",
+    });
+    org = (await db.query.organization.findFirst({ where: eq(organization.id, orgId) }))!;
+  }
+
   const newWorkspace = {
     id: crypto.randomUUID(),
     name: `${userName}'s Workspace`,
     slug: generateSlug(userName),
     ownerId: userId,
+    organizationId: org.id,
     onboardingStatus: JSON.stringify({
       step1: false,
       step2: false,
@@ -65,8 +113,9 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     logoUrl: null,
     brandingJson: null,
     notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
-    plan: "free" as const,
-    subscriptionStatus: null,
+    plan: (org.plan || "free") as any,
+    subscriptionStatus: (org.subscriptionStatus || "active") as any,
+
     retentionEnabled: false,
     retentionDays: 365,
     createdAt: new Date(),
@@ -93,7 +142,7 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     }
   }
 
-  return newWorkspace;
+  return { ...newWorkspace, organization: org };
 }
 
 /**
@@ -129,7 +178,8 @@ export const dashboardRouter = router({
       const { db, session } = ctx;
       const workspaceId = input?.workspaceId;
 
-      let ws;
+      let ws: any;
+
       if (workspaceId) {
         // Check membership
         const membership = await db.query.workspaceMember.findFirst({
@@ -138,8 +188,9 @@ export const dashboardRouter = router({
             eq(workspaceMember.userId, session.user.id),
             isNull(workspaceMember.deletedAt),
           ),
-          with: { workspace: true },
+          with: { workspace: { with: { organization: true } } },
         });
+
         if (membership) ws = membership.workspace;
       }
 
@@ -150,7 +201,7 @@ export const dashboardRouter = router({
             eq(workspaceMember.userId, session.user.id),
             isNull(workspaceMember.deletedAt),
           ),
-          with: { workspace: true },
+          with: { workspace: { with: { organization: true } } },
           orderBy: desc(workspaceMember.createdAt),
         });
         if (membership) ws = membership.workspace;
@@ -159,6 +210,13 @@ export const dashboardRouter = router({
       if (!ws) {
         ws = await getOrCreateWorkspace(db, session.user.id, session.user.name);
       }
+
+      // Normalize workspace plan and subscription status based on organization
+      if (ws.organization) {
+        ws.plan = ws.organization.plan || ws.plan;
+        ws.subscriptionStatus = ws.organization.subscriptionStatus || ws.subscriptionStatus;
+      }
+
 
       const projects = await db.query.project.findMany({
         where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
@@ -270,6 +328,7 @@ export const dashboardRouter = router({
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: ws.organization,
         projectsCount: projects.length,
         testimonialsCount: testimonialsCount,
       });
@@ -277,7 +336,12 @@ export const dashboardRouter = router({
       return {
         workspace: ws,
         permissions,
+        billing: {
+          plan: ws.organization?.plan || ws.plan,
+          status: ws.organization?.subscriptionStatus || ws.subscriptionStatus || "active",
+        },
         projects,
+
         recentTestimonials: await signTestimonials(recentTestimonials),
         onboarding,
         workspaceCount: allMemberships.length,
@@ -294,10 +358,20 @@ export const dashboardRouter = router({
     const { db, session } = ctx;
     const memberships = await db.query.workspaceMember.findMany({
       where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      with: { workspace: true },
+      with: { workspace: { with: { organization: true } } },
       orderBy: desc(workspaceMember.createdAt),
     });
-    return memberships.map((m) => m.workspace).filter((ws) => !ws.deletedAt);
+    return memberships
+      .map((m) => {
+        const ws = m.workspace as any;
+        if (ws.organization) {
+          ws.plan = ws.organization.plan || ws.plan;
+          ws.subscriptionStatus = ws.organization.subscriptionStatus || ws.subscriptionStatus;
+        }
+        return ws;
+      })
+      .filter((ws) => !ws.deletedAt);
+
   }),
 
   createWorkspace: protectedProcedure
@@ -308,11 +382,27 @@ export const dashboardRouter = router({
 
       // Allow multiple workspaces only for Agency (plan_2) or Lifetime (ltd) plans.
       // Otherwise, restrict to 1 active workspace.
+      let org = await db.query.organization.findFirst({
+        where: eq(organization.ownerId, session.user.id),
+      });
+
+      if (!org) {
+        // Fallback for edge cases where org wasn't created yet
+        const orgId = crypto.randomUUID();
+        await db.insert(organization).values({
+          id: orgId,
+          name: `${session.user.name}'s Org`,
+          ownerId: session.user.id,
+          plan: "free",
+        });
+        org = (await db.query.organization.findFirst({ where: eq(organization.id, orgId) }))!;
+      }
+
       const ownedWorkspaces = await db.query.workspace.findMany({
         where: and(eq(workspace.ownerId, session.user.id), isNull(workspace.deletedAt)),
       });
 
-      const hasAgencyPlan = ownedWorkspaces.some((ws) => ws.plan === "plan_2" || ws.plan === "ltd");
+      const hasAgencyPlan = org.plan === "plan_2" || org.plan === "ltd";
 
       if (ownedWorkspaces.length >= 1 && !hasAgencyPlan) {
         throw new Error(
@@ -328,6 +418,7 @@ export const dashboardRouter = router({
         name,
         slug: generateSlug(name),
         ownerId: session.user.id,
+        organizationId: org.id,
         onboardingStatus: JSON.stringify({
           step1: false,
           step2: false,
@@ -340,8 +431,8 @@ export const dashboardRouter = router({
         logoUrl: null,
         brandingJson: null,
         notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
-        plan: "free" as const,
-        subscriptionStatus: null,
+        plan: (org.plan || "free") as any,
+        subscriptionStatus: (org.subscriptionStatus || "active") as any,
         retentionEnabled: false,
         retentionDays: 365,
         createdAt: new Date(),
@@ -350,6 +441,7 @@ export const dashboardRouter = router({
       };
 
       await db.insert(workspace).values(newWs);
+
 
       await db.insert(workspaceMember).values({
         id: crypto.randomUUID(),

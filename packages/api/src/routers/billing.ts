@@ -2,7 +2,8 @@ import { z } from "zod";
 import { publicProcedure, router, workspaceProcedure } from "../index";
 import { stripe } from "../lib/stripe";
 import { eq, count as dCount } from "drizzle-orm";
-import { workspace, workspaceMember } from "@my-better-t-app/db/schema";
+import { workspace, workspaceMember, organization } from "@my-better-t-app/db/schema";
+
 import { TRPCError } from "@trpc/server";
 import { PLANS } from "../config/plans";
 
@@ -40,14 +41,17 @@ export const billingRouter = router({
 
       const ws = await db.query.workspace.findFirst({
         where: eq(workspace.id, workspaceId),
+        with: { organization: true },
       });
 
-      if (!ws) {
+      if (!ws || !ws.organization) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Workspace not found",
+          message: "Workspace or Organization not found",
         });
       }
+
+      const org = ws.organization;
 
       const membership = await db.query.workspaceMember.findFirst({
         where: eq(workspaceMember.userId, session.user.id),
@@ -63,8 +67,9 @@ export const billingRouter = router({
       try {
         const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
         const stripeSession = await stripe.checkout.sessions.create({
-          customer: ws.stripeCustomerId || undefined,
-          customer_email: ws.stripeCustomerId ? undefined : session.user.email,
+          customer: org.stripeCustomerId || undefined,
+          customer_email: org.stripeCustomerId ? undefined : session.user.email,
+
           line_items: [
             {
               price: priceId,
@@ -72,17 +77,20 @@ export const billingRouter = router({
             },
           ],
           mode: isLTD ? "payment" : "subscription",
-          customer_creation: isLTD && !ws.stripeCustomerId ? "always" : undefined,
-          client_reference_id: workspaceId,
+          customer_creation: isLTD && !org.stripeCustomerId ? "always" : undefined,
+          client_reference_id: org.id,
+
           subscription_data: isLTD
             ? undefined
             : {
                 trial_period_days: 7,
                 metadata: {
+                  organizationId: org.id,
                   workspaceId,
                   userId: session.user.id,
                 },
               },
+
           allow_promotion_codes: true,
           success_url: `${origin}/dashboard/settings?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${origin}/dashboard/settings`,
@@ -97,6 +105,7 @@ export const billingRouter = router({
               }
             : undefined,
           metadata: {
+            organizationId: org.id,
             workspaceId,
             userId: session.user.id,
             planId: isLTD ? "ltd" : (plan?.id ?? "free"),
@@ -118,16 +127,18 @@ export const billingRouter = router({
 
     let ws = await db.query.workspace.findFirst({
       where: eq(workspace.id, workspaceId),
+      with: { organization: true },
     });
 
-    if (!ws) {
+    if (!ws || !ws.organization) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Workspace not found",
+        message: "Workspace or Organization not found",
       });
     }
 
-    let stripeCustomerId = ws.stripeCustomerId;
+    const org = ws.organization;
+    let stripeCustomerId = org.stripeCustomerId;
 
     // If missing, create it on the fly
     if (!stripeCustomerId) {
@@ -143,7 +154,7 @@ export const billingRouter = router({
         });
         stripeCustomerId = customer.id;
 
-        await db.update(workspace).set({ stripeCustomerId }).where(eq(workspace.id, workspaceId));
+        await db.update(organization).set({ stripeCustomerId }).where(eq(organization.id, org.id));
 
         console.log(`[Stripe] Created customer ${stripeCustomerId} for workspace ${workspaceId}`);
       } catch (err) {

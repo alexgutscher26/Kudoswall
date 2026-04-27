@@ -270,7 +270,8 @@ export default function WidgetCustomizer({
       authorName: "Elena V.",
       authorTagline: "Marketing Director",
       authorCompany: "Creative co",
-      content: "Our conversion rate jumped by 20% after adding these testimonials to our landing page.",
+      content:
+        "Our conversion rate jumped by 20% after adding these testimonials to our landing page.",
       rating: 5,
       createdAt: new Date(),
       type: "text" as const,

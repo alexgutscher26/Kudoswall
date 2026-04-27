@@ -27,7 +27,6 @@ export async function generateStaticParams() {
   }));
 }
 
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const baseUrl = "https://kudoswall.org";

@@ -62,7 +62,7 @@ export const tagRouter = router({
         entityId: input.id,
         action: "delete",
       });
-      
+
       const env = await getEnvAsync();
       await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
 

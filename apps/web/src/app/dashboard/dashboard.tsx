@@ -546,8 +546,8 @@ export default function DashboardShell({
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
 
-  const anyModalOpen = isChildModalOpen || newCollectionOpen;
   const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
+
 
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {
@@ -611,20 +611,24 @@ export default function DashboardShell({
     return activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
   })();
 
-  const completeStep = useMutation({
-    ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
-    onSuccess: () => {
-      toast.success("Progress updated!");
-      // Correctly invalidate the specific workspace query to trigger a refresh
-      queryClient.invalidateQueries(
-        trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
-      );
+  const completeStep = useMutation(
+    {
+      ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
+      onSuccess: () => {
+        toast.success("Progress updated!");
+        // Correctly invalidate the specific workspace query to trigger a refresh
+        queryClient.invalidateQueries(
+          trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+        );
+      },
+      onError: (err) => {
+        console.error("❌ Onboarding mutation failed:", err);
+        toast.error("Failed to update progress");
+      },
     },
-    onError: (err) => {
-      console.error("❌ Onboarding mutation failed:", err);
-      toast.error("Failed to update progress");
-    },
-  });
+    queryClient,
+  );
+
 
   const handleCopyCollectionLink = () => {
     if (activeData?.projects && activeData.projects.length > 0) {
@@ -671,27 +675,26 @@ export default function DashboardShell({
 
       <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
         {/* Desktop sidebar */}
-        {!anyModalOpen && (
-          <DesktopSidebar
-            userName={userName}
-            userEmail={userEmail}
-            onSignOut={handleSignOut}
-            onNewCollection={() => setNewCollectionOpen(true)}
-            currentWorkspaceId={activeWorkspaceId}
-            plan={activeData?.workspace.plan}
-            onWorkspaceChange={(id) => {
-              setActiveWorkspaceId(id);
-              const params = new URLSearchParams(searchParams.toString());
-              params.set("workspaceId", id);
-              // Clear project-specific params that won't exist in the new workspace
-              params.delete("project");
 
-              // Stay on current page if it's a dashboard page, otherwise go to overview
-              const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
-              router.push(`${targetPath}?${params.toString()}` as any);
-            }}
-          />
-        )}
+        <DesktopSidebar
+          userName={userName}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          onNewCollection={() => setNewCollectionOpen(true)}
+          currentWorkspaceId={activeWorkspaceId}
+          plan={activeData?.workspace.plan}
+          onWorkspaceChange={(id) => {
+            setActiveWorkspaceId(id);
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("workspaceId", id);
+            // Clear project-specific params that won't exist in the new workspace
+            params.delete("project");
+
+            // Stay on current page if it's a dashboard page, otherwise go to overview
+            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+            router.push(`${targetPath}?${params.toString()}` as any);
+          }}
+        />
 
         {/* Mobile drawer */}
         <MobileDrawer
@@ -722,10 +725,11 @@ export default function DashboardShell({
           workspaceSlug={activeData?.workspace.slug || "loading"}
         />
 
-        {/* Main content — offset only on lg+ and when sidebar is visible */}
+        {/* Main content — offset only on lg+ */}
         <div
-          className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden ${anyModalOpen ? "" : "lg:ml-60"}`}
+          className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60"
         >
+
           <DotGrid opacity={0.08} />
 
           {/* Soft central glow */}

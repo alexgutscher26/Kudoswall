@@ -131,11 +131,5 @@
   }
 }
 
-/* Hide sidebar and remove content offset when any modal is open.
-   Kept outside @layer so it wins over Tailwind utility layers (lg:flex etc.) */
-body[data-modal-open="true"] .dashboard-sidebar {
-  display: none !important;
-}
-body[data-modal-open="true"] .dashboard-content {
-  margin-left: 0 !important;
-}
+
+

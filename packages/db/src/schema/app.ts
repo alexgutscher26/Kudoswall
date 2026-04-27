@@ -51,6 +51,29 @@ export const virusScanStatusEnum = pgEnum("virus_scan_status", [
   "skipped", // When no API key is configured
 ]);
 
+export const organization = pgTable(
+  "organization",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    plan: planEnum("plan").default("free").notNull(),
+    stripeCustomerId: text("stripe_customer_id").unique(),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    subscriptionStatus: subscriptionStatusEnum("subscription_status"),
+    trialEndsAt: timestamp("trial_ends_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull()
+      .defaultNow(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => [index("organization_owner_id_idx").on(table.ownerId)],
+);
+
 export const workspace = pgTable(
   "workspace",
   {
@@ -60,8 +83,12 @@ export const workspace = pgTable(
     ownerId: text("owner_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id").references(() => organization.id, {
+      onDelete: "set null",
+    }),
     logoUrl: text("logo_url"),
     plan: planEnum("plan").default("free").notNull(),
+
     stripeCustomerId: text("stripe_customer_id").unique(),
     stripeSubscriptionId: text("stripe_subscription_id"),
     subscriptionStatus: subscriptionStatusEnum("subscription_status"),
@@ -83,6 +110,7 @@ export const workspace = pgTable(
   (table) => [
     index("workspace_slug_idx").on(table.slug),
     index("workspace_owner_id_idx").on(table.ownerId),
+    index("workspace_organization_id_idx").on(table.organizationId),
     index("workspace_dpa_accepted_idx").on(table.dpaAcceptedAt),
   ],
 );
@@ -366,10 +394,22 @@ export const auditLog = pgTable(
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 
+export const organizationRelations = relations(organization, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [organization.ownerId],
+    references: [user.id],
+  }),
+  workspaces: many(workspace),
+}));
+
 export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   owner: one(user, {
     fields: [workspace.ownerId],
     references: [user.id],
+  }),
+  organization: one(organization, {
+    fields: [workspace.organizationId],
+    references: [organization.id],
   }),
   projects: many(project),
   tags: many(tag),

@@ -117,7 +117,8 @@ export function createAuth() {
         create: {
           after: async (user) => {
             try {
-              const { workspace, workspaceMember } = await import("@my-better-t-app/db/schema/app");
+              const { workspace, workspaceMember, organization } =
+                await import("@my-better-t-app/db/schema/app");
               const { eq } = await import("drizzle-orm");
 
               // Ensure workspace exists
@@ -150,12 +151,23 @@ export function createAuth() {
                   console.error("[STRIPE] Error creating customer:", stripeError);
                 }
 
+                const orgId = crypto.randomUUID();
+                const newOrg = {
+                  id: orgId,
+                  name: `${user.name || "My"}'s Org`,
+                  ownerId: user.id,
+                  stripeCustomerId,
+                  plan: "free" as const,
+                };
+
                 const newWorkspace = {
                   id: wsId,
                   name: `${user.name || "My"}'s Workspace`,
                   slug: generateSlug(user.name || "user"),
                   ownerId: user.id,
+                  organizationId: orgId,
                   stripeCustomerId,
+
                   onboardingStatus: JSON.stringify({
                     step1: false,
                     step2: false,
@@ -172,6 +184,7 @@ export function createAuth() {
                 };
 
                 await db.transaction(async (tx) => {
+                  await tx.insert(organization).values(newOrg);
                   await tx.insert(workspace).values(newWorkspace);
                   await tx.insert(workspaceMember).values({
                     id: crypto.randomUUID(),

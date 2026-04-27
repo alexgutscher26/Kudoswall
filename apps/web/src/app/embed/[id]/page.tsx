@@ -21,9 +21,12 @@ export default async function EmbedPage({
   const w = await db.query.widget.findFirst({
     where: eq(widget.id, id),
     with: {
-      workspace: true,
+      workspace: {
+        with: { organization: true },
+      },
     },
   });
+
 
   if (!w) {
     notFound();
@@ -51,7 +54,9 @@ export default async function EmbedPage({
   };
 
   // Allow query param overrides if Pro
-  const isPro = w.workspace.plan !== "free" && w.workspace.plan !== null;
+  const effectivePlan = w.workspace.organization?.plan || w.workspace.plan;
+  const isPro = effectivePlan !== "free" && effectivePlan !== null;
+
 
   if (isPro) {
     if (sParams.theme) settings.theme = sParams.theme as any;

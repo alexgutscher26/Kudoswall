@@ -17,9 +17,9 @@ export interface CoalesceResult<T> {
 
 /**
  * withCoalescing
- * 
- * Prevents cache stampedes by ensuring only one request fetches data 
- * from the origin (DB) for a given key. Other simultaneous requests 
+ *
+ * Prevents cache stampedes by ensuring only one request fetches data
+ * from the origin (DB) for a given key. Other simultaneous requests
  * wait for the first one to populate the cache.
  */
 export async function withCoalescing<T>({
@@ -66,7 +66,7 @@ export async function withCoalescing<T>({
   const start = Date.now();
   while (Date.now() - start < maxWait) {
     await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    
+
     if (kv) {
       const cached = await kv.get(key, "json");
       if (cached) return { data: cached as T, source: "lock" };
@@ -77,4 +77,3 @@ export async function withCoalescing<T>({
   console.warn(`Coalesce timeout for key: ${key}, falling back to fetcher.`);
   return { data: await fetcher(), source: "fallback" };
 }
-

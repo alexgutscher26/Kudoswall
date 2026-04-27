@@ -116,11 +116,14 @@ const getProjectByCollectionSlug = unstable_cache(
     const result = await db.query.project.findFirst({
       where: or(eq(project.collectionSlug, slug), eq(project.slug, slug)),
       with: {
-        workspace: true,
+        workspace: {
+          with: { organization: true },
+        },
         testimonials: {
           where: eq(testimonial.status, "approved"),
         },
       },
+
     });
 
     if (!result) return null;
@@ -154,15 +157,17 @@ const getProjectByCollectionSlug = unstable_cache(
     };
 
     // Enhance with branding logic and permissions
-    const plan = result.workspace.plan;
-    const isPro = plan !== "free" && plan !== null;
-    const isAgency = plan === "plan_2" || plan === "ltd";
+    const effectivePlan = result.workspace.organization?.plan || result.workspace.plan;
+    const isPro = effectivePlan !== "free" && effectivePlan !== null;
+    const isAgency = effectivePlan === "plan_2" || effectivePlan === "ltd";
 
     const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
     const permissions = getWorkspacePermissions({
-      plan: result.workspace.plan,
+      plan: effectivePlan,
+      organization: result.workspace.organization,
       testimonialsCount: result.testimonials.length,
     });
+
 
     return {
       ...result,
@@ -183,7 +188,7 @@ const getProjectByCollectionSlug = unstable_cache(
     };
   },
   ["collection-project"],
-  { revalidate: 600, tags: ["collection"] }
+  { revalidate: 600, tags: ["collection"] },
 );
 
 async function getProjectData(slug: string) {

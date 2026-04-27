@@ -31,7 +31,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 import TeamTab from "./team-tab";
 import SessionTab from "./session-tab";
-import type { Plan } from "@my-better-t-app/api/config/plans";
+import { type Plan, PLANS } from "@my-better-t-app/api/config/plans";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,7 @@ export default function SettingsPage() {
   });
 
   const workspace = dashboardData?.workspace;
+  const billing = dashboardData?.billing;
 
   const updateWorkspace = useMutation({
     ...trpc.dashboard.updateWorkspace.mutationOptions(),
@@ -473,22 +475,22 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                     Custom Redirect URL
-                    {workspace?.plan === "free" && <Lock className="size-3" />}
+                    {billing?.plan === "free" && <Lock className="size-3" />}
                   </label>
                   <div className="relative">
                     <Link className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-neutral-300" />
                     <input
                       type="url"
-                      disabled={workspace?.plan === "free"}
+                      disabled={billing?.plan === "free"}
                       value={redirectUrl}
                       onChange={(e) => setRedirectUrl(e.target.value)}
                       placeholder={
-                        workspace?.plan === "free"
+                        billing?.plan === "free"
                           ? "Available on Pro plans"
                           : "https://yourwebsite.com/welcome"
                       }
                       className={`w-full rounded-xl border border-neutral-100 bg-neutral-50 py-2.5 pr-4 pl-11 text-[14px] font-medium transition-all outline-none focus:border-pink-500 ${
-                        workspace?.plan === "free" ? "cursor-not-allowed opacity-60" : ""
+                        billing?.plan === "free" ? "cursor-not-allowed opacity-60" : ""
                       }`}
                     />
                   </div>
@@ -514,9 +516,10 @@ export default function SettingsPage() {
         {/* Billing Tab */}
         {activeTab === "billing" &&
           (() => {
-            const { PLANS } = require("@my-better-t-app/api/config/plans");
-            const planConfig = PLANS[dashboardData?.workspace?.plan || "free"];
-            const isPaid = dashboardData?.workspace?.plan !== "free";
+            const planConfig = PLANS[(billing?.plan || "free") as Plan];
+
+
+            const isPaid = billing?.plan !== "free";
 
             return (
               <div className="space-y-8 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
@@ -542,7 +545,7 @@ export default function SettingsPage() {
                       <p className="mt-2 text-[13px] text-neutral-400">
                         Status:{" "}
                         <strong className="capitalize">
-                          {dashboardData?.workspace?.subscriptionStatus || "active"}
+                          {dashboardData?.billing?.status || "active"}
                         </strong>
                       </p>
                     </div>
@@ -557,7 +560,7 @@ export default function SettingsPage() {
                         >
                           {createPortal.isPending
                             ? "Connecting..."
-                            : dashboardData?.workspace?.plan === "ltd"
+                            : dashboardData?.billing?.plan === "ltd"
                               ? "Manage Billing"
                               : "Manage Subscription"}
                         </button>
@@ -570,7 +573,7 @@ export default function SettingsPage() {
                           Select a Plan
                         </button>
                       )}
-                      {isPaid && dashboardData?.workspace?.plan !== "ltd" && (
+                      {isPaid && dashboardData?.billing?.plan !== "ltd" && (
                         <button
                           type="button"
                           onClick={() => createPortal.mutate()}
@@ -590,17 +593,16 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       {["plan_1", "plan_2"].map((pid) => {
                         const p = PLANS[pid as Plan];
-                        const isCurrent = dashboardData?.workspace?.plan === pid;
                         return (
                           <div
                             key={pid}
                             className={`group relative flex flex-col rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-2xl ${
-                              isCurrent
+                              dashboardData?.billing?.plan === pid
                                 ? "border-pink-500 bg-neutral-50/50 shadow-lg"
                                 : "border-neutral-100 bg-white hover:border-pink-100"
                             }`}
                           >
-                            {isCurrent && (
+                            {dashboardData?.billing?.plan === pid && (
                               <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-pink-500 px-3 py-1 text-[10px] font-black tracking-widest text-white uppercase shadow-lg">
                                 <Check className="size-3" /> Current Plan
                               </div>
@@ -633,7 +635,9 @@ export default function SettingsPage() {
                             <button
                               type="button"
                               disabled={
-                                isCurrent || createCheckout.isPending || !p.stripePriceIdMonthly
+                                dashboardData?.billing?.plan === pid ||
+                                createCheckout.isPending ||
+                                !p.stripePriceIdMonthly
                               }
                               onClick={() =>
                                 createCheckout.mutate({
@@ -641,14 +645,14 @@ export default function SettingsPage() {
                                 })
                               }
                               className={`w-full rounded-2xl py-3.5 text-[13px] font-black transition-all active:scale-[0.98] ${
-                                isCurrent
+                                dashboardData?.billing?.plan === pid
                                   ? "bg-neutral-100 text-neutral-400"
                                   : "bg-neutral-900 text-white shadow-lg hover:bg-neutral-800"
                               }`}
                             >
                               {createCheckout.isPending
                                 ? "Starting..."
-                                : isCurrent
+                                : dashboardData?.billing?.plan === pid
                                   ? "Active Plan"
                                   : "Select Plan"}
                             </button>

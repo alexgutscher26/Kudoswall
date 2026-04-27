@@ -28,12 +28,15 @@ interface WorkspaceSwitcherProps {
   onWorkspaceChange: (workspaceId: string) => void;
 }
 
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+
 export function WorkspaceSwitcher({
   currentWorkspaceId,
   onWorkspaceChange,
 }: WorkspaceSwitcherProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isModalOpen, setIsModalOpen } = useWorkspace();
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
+
 
   useEffect(() => {
     if (isModalOpen) {
@@ -65,7 +68,10 @@ export function WorkspaceSwitcher({
   const canCreateMoreWorkspaces =
     !workspaces ||
     workspaces.length === 0 ||
-    workspaces.some((ws) => ws.plan === "plan_2" || ws.plan === "ltd");
+    workspaces.some((ws: any) => {
+      const plan = ws.organization?.plan || ws.plan;
+      return plan === "plan_2" || plan === "ltd";
+    });
 
   const activeWorkspace = (workspaces as any)?.find((ws: any) => ws.id === currentWorkspaceId);
 

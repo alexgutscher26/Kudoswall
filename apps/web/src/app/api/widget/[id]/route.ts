@@ -20,9 +20,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const w = await db.query.widget.findFirst({
           where: eq(widget.id, id),
           with: {
-            workspace: true,
+            workspace: { with: { organization: true } },
           },
         });
+
 
         if (!w) {
           throw new Error("WIDGET_NOT_FOUND");
@@ -42,7 +43,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
               name: w.name,
               settings,
               workspaceName: w.workspace.name,
-              isPro: w.workspace.plan !== "free",
+              isPro: (w.workspace.organization?.plan || w.workspace.plan) !== "free",
+
             },
             testimonials: [],
           };
@@ -73,7 +75,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             name: w.name,
             settings,
             workspaceName: w.workspace.name,
-            isPro: w.workspace.plan !== "free",
+            isPro: (w.workspace.organization?.plan || w.workspace.plan) !== "free",
+
           },
           testimonials: testimonials.map((t) => ({
             id: t.id,
@@ -103,7 +106,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         "X-Coalesce": source,
       },
     });
-
   } catch (error: any) {
     if (error.message === "WIDGET_NOT_FOUND") {
       return NextResponse.json({ error: "Widget not found" }, { status: 404 });
@@ -112,4 +114,3 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

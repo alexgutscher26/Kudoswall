@@ -2,7 +2,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { stripe } from "@my-better-t-app/api/lib/stripe";
 import { db } from "@/lib/server-db";
-import { workspace, user } from "@my-better-t-app/db/schema";
+import { workspace, user, organization } from "@my-better-t-app/db/schema";
+
 import { eq } from "drizzle-orm";
 import { env } from "@my-better-t-app/env/server";
 import type Stripe from "stripe";
@@ -47,7 +48,8 @@ export async function POST(req: Request) {
         trialEnd = subscription.trial_end;
       }
 
-      const workspaceId = session.client_reference_id || session.metadata?.workspaceId;
+      const organizationId = session.client_reference_id || session.metadata?.organizationId;
+      const workspaceId = session.metadata?.workspaceId;
       const userId = session.metadata?.userId;
 
       console.log(`🔍 Received Webhook Session:`, {
@@ -59,18 +61,18 @@ export async function POST(req: Request) {
         client_ref: session.client_reference_id,
       });
 
-      if (!workspaceId) {
+      if (!organizationId) {
         console.error(
-          "❌ CRITICAL: No workspaceId found in checkout session metadata OR client_reference_id",
+          "❌ CRITICAL: No organizationId found in checkout session metadata OR client_reference_id",
         );
-        return new NextResponse("No workspaceId found to link payment", { status: 400 });
+        return new NextResponse("No organizationId found to link payment", { status: 400 });
       }
 
       try {
         await db.transaction(async (tx) => {
-          // 1. Update Workspace
+          // 1. Update Organization
           await tx
-            .update(workspace)
+            .update(organization)
             .set({
               stripeCustomerId: session.customer as string,
               stripeSubscriptionId: session.subscription || null,
@@ -78,7 +80,18 @@ export async function POST(req: Request) {
               plan: plan || "free",
               trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : null,
             })
-            .where(eq(workspace.id, workspaceId));
+            .where(eq(organization.id, organizationId));
+
+          // 2. Optional: Sync to Workspace (legacy/fallback)
+          if (workspaceId) {
+            await tx
+              .update(workspace)
+              .set({
+                plan: plan || "free",
+                subscriptionStatus: "active",
+              })
+              .where(eq(workspace.id, workspaceId));
+          }
 
           // 2. Update User if present
           if (userId) {
@@ -108,16 +121,29 @@ export async function POST(req: Request) {
       const priceId = subscription.items.data[0]?.price.id;
       const plan = priceId ? priceToPlan[priceId] : undefined;
       const userId = subscription.metadata?.userId;
+      const organizationId = subscription.metadata?.organizationId;
 
       await db.transaction(async (tx) => {
+        // Update Organization
         await tx
-          .update(workspace)
+          .update(organization)
           .set({
             subscriptionStatus: subscription.status as any,
             plan: plan || undefined,
             trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
           })
-          .where(eq(workspace.stripeSubscriptionId, subscription.id));
+          .where(eq(organization.stripeSubscriptionId, subscription.id));
+
+        // Sync Workspaces
+        if (organizationId) {
+          await tx
+            .update(workspace)
+            .set({
+              subscriptionStatus: subscription.status as any,
+              plan: plan || undefined,
+            })
+            .where(eq(workspace.organizationId, organizationId));
+        }
 
         if (userId && plan) {
           await tx
@@ -137,19 +163,29 @@ export async function POST(req: Request) {
       const subscription = event.data.object as Stripe.Subscription;
       const userId = subscription.metadata?.userId;
 
-      const workspaceData = await db.query.workspace.findFirst({
-        where: eq(workspace.stripeSubscriptionId, subscription.id),
-        with: { owner: true },
+      const organizationData = await db.query.organization.findFirst({
+        where: eq(organization.stripeSubscriptionId, subscription.id),
+        with: { owner: true, workspaces: true },
       });
 
       await db.transaction(async (tx) => {
         await tx
-          .update(workspace)
+          .update(organization)
           .set({
             subscriptionStatus: "canceled",
             plan: "free",
           })
-          .where(eq(workspace.stripeSubscriptionId, subscription.id));
+          .where(eq(organization.stripeSubscriptionId, subscription.id));
+
+        if (organizationData?.id) {
+          await tx
+            .update(workspace)
+            .set({
+              subscriptionStatus: "canceled",
+              plan: "free",
+            })
+            .where(eq(workspace.organizationId, organizationData.id));
+        }
 
         if (userId) {
           await tx
@@ -161,13 +197,13 @@ export async function POST(req: Request) {
         }
       });
 
-      if (workspaceData?.owner?.email) {
+      if (organizationData?.owner?.email) {
         try {
           const { EmailService } = await import("@my-better-t-app/email");
           const emailService = new EmailService(env.RESEND_API_KEY || "", env.EMAIL_FROM);
           await emailService.sendCancellationEmail(
-            workspaceData.owner.email,
-            workspaceData.owner.name || "there",
+            organizationData.owner.email,
+            organizationData.owner.name || "there",
           );
         } catch (emailError) {
           console.error("❌ Failed to send cancellation email:", emailError);

@@ -32,9 +32,7 @@ export async function purgeWidgetCache({
   // 2. Purge Cloudflare KV (Sub-10ms metadata store)
   if (env.WIDGET_KV) {
     try {
-      await Promise.all(
-        widgetIds.map((id) => env.WIDGET_KV!.delete(`widget:${id}`))
-      );
+      await Promise.all(widgetIds.map((id) => env.WIDGET_KV!.delete(`widget:${id}`)));
       console.log(`[Purge] KV keys deleted for ${widgetIds.length} widgets`);
     } catch (err) {
       console.error("[Purge] KV deletion error:", err);
@@ -47,7 +45,7 @@ export async function purgeWidgetCache({
 
   if (apiToken && zoneId) {
     const baseUrl = "https://kudoswall.org";
-    
+
     // Construct URLs to purge on the main domain
     const urlsToPurge = widgetIds.flatMap((id) => [
       `${baseUrl}/api/widget/${id}`,
@@ -69,7 +67,7 @@ export async function purgeWidgetCache({
     }
 
     try {
-      // Cloudflare API allows up to 30 URLs per request on some plans, 
+      // Cloudflare API allows up to 30 URLs per request on some plans,
       // but usually 500-1000. We'll send them in one go for now.
       const response = await fetch(
         `https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`,
@@ -82,7 +80,7 @@ export async function purgeWidgetCache({
           body: JSON.stringify({
             files: urlsToPurge,
           }),
-        }
+        },
       );
 
       if (!response.ok) {

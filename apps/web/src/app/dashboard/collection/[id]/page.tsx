@@ -54,7 +54,9 @@ async function CollectionDetailContentWrapper({
   const p = await db.query.project.findFirst({
     where: eq(project.id, id),
     with: {
-      workspace: true,
+      workspace: {
+        with: { organization: true },
+      },
     },
   });
 
@@ -81,10 +83,11 @@ async function CollectionDetailContentWrapper({
         <CollectionCustomizer
           project={p}
           workspace={p.workspace}
-          isPro={p.workspace.plan !== "free"}
+          isPro={(p.workspace.organization?.plan || p.workspace.plan) !== "free"}
           permissions={data.permissions}
         />
       </div>
     </DashboardShell>
   );
+
 }

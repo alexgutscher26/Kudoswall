@@ -8,11 +8,15 @@ export interface WorkspacePermissions extends PlanConfig {
 
 export function getWorkspacePermissions(workspace: {
   plan: string | null;
+  organization?: {
+    plan: string | null;
+  } | null;
   projectsCount?: number;
   testimonialsCount?: number;
 }): WorkspacePermissions {
-  const config = getPlanConfig(workspace.plan);
-  const isPro = workspace.plan !== "free" && workspace.plan !== null;
+  const effectivePlan = workspace.organization?.plan || workspace.plan;
+  const config = getPlanConfig(effectivePlan);
+  const isPro = effectivePlan !== "free" && effectivePlan !== null;
 
   return {
     ...config,

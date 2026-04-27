@@ -44,17 +44,18 @@ export default function SessionTab() {
 
   const parseUA = (ua: string | null) => {
     if (!ua) return { browser: "Unknown", device: "Unknown Device" };
-    
+
     let browser = "Browser";
     if (ua.includes("Firefox")) browser = "Firefox";
     else if (ua.includes("Edg")) browser = "Edge";
     else if (ua.includes("Chrome")) browser = "Chrome";
     else if (ua.includes("Safari")) browser = "Safari";
-    
+
     let device = "Desktop Device";
-    if (ua.includes("iPhone") || ua.includes("Android") && ua.includes("Mobile")) device = "Mobile Device";
+    if (ua.includes("iPhone") || (ua.includes("Android") && ua.includes("Mobile")))
+      device = "Mobile Device";
     else if (ua.includes("iPad") || ua.includes("Tablet")) device = "Tablet Device";
-    
+
     return { browser, device };
   };
 
@@ -119,11 +120,17 @@ export default function SessionTab() {
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`flex size-12 items-center justify-center rounded-xl bg-white shadow-sm ${isCurrent ? "border border-emerald-100" : ""}`}>
+                  <div
+                    className={`flex size-12 items-center justify-center rounded-xl bg-white shadow-sm ${isCurrent ? "border border-emerald-100" : ""}`}
+                  >
                     {device.includes("Mobile") || device.includes("Tablet") ? (
-                      <Mobile className={`size-6 ${isCurrent ? "text-emerald-600" : "text-neutral-400"}`} />
+                      <Mobile
+                        className={`size-6 ${isCurrent ? "text-emerald-600" : "text-neutral-400"}`}
+                      />
                     ) : (
-                      <Laptop className={`size-6 ${isCurrent ? "text-emerald-600" : "text-neutral-400"}`} />
+                      <Laptop
+                        className={`size-6 ${isCurrent ? "text-emerald-600" : "text-neutral-400"}`}
+                      />
                     )}
                   </div>
                   <div className="space-y-0.5">
@@ -142,7 +149,8 @@ export default function SessionTab() {
                         <Globe className="size-3" /> {formatIP(session.ipAddress)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="size-3" /> Last active {formatDistanceToNow(new Date(session.updatedAt || session.createdAt))} ago
+                        <Clock className="size-3" /> Last active{" "}
+                        {formatDistanceToNow(new Date(session.updatedAt || session.createdAt))} ago
                       </span>
                     </div>
                   </div>
@@ -177,7 +185,8 @@ export default function SessionTab() {
           <div className="space-y-1">
             <p className="text-[13px] font-bold text-amber-900">Security Tip</p>
             <p className="text-[12px] leading-relaxed text-amber-700/80">
-              If you see a session or location you don't recognize, revoke it immediately and change your password.
+              If you see a session or location you don't recognize, revoke it immediately and change
+              your password.
             </p>
           </div>
         </div>

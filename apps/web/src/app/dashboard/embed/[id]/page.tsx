@@ -49,7 +49,9 @@ async function WidgetDetailContentWrapper({
   const w = await db.query.widget.findFirst({
     where: eq(widget.id, id),
     with: {
-      workspace: true,
+      workspace: {
+        with: { organization: true },
+      },
     },
   });
 
@@ -72,9 +74,10 @@ async function WidgetDetailContentWrapper({
           widgetId={w.id}
           workspaceId={w.workspaceId}
           initialSettings={settings}
-          isPro={w.workspace.plan !== "free"}
+          isPro={(w.workspace.organization?.plan || w.workspace.plan) !== "free"}
         />
       </div>
     </DashboardShell>
   );
+
 }

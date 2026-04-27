@@ -62,21 +62,26 @@ export const analyticsRouter = router({
       if (workspaceId) {
         ws = await db.query.workspace.findFirst({
           where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
         });
       }
 
       if (!ws) {
         ws = await db.query.workspace.findFirst({
           where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
         });
       }
+
 
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: (ws as any).organization,
       });
+
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -226,21 +231,26 @@ export const analyticsRouter = router({
       if (workspaceId) {
         ws = await db.query.workspace.findFirst({
           where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
         });
       }
 
       if (!ws) {
         ws = await db.query.workspace.findFirst({
           where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
         });
       }
+
 
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: (ws as any).organization,
       });
+
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -300,21 +310,26 @@ export const analyticsRouter = router({
       if (workspaceId) {
         ws = await db.query.workspace.findFirst({
           where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
         });
       }
 
       if (!ws) {
         ws = await db.query.workspace.findFirst({
           where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
         });
       }
+
 
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: (ws as any).organization,
       });
+
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -377,21 +392,26 @@ export const analyticsRouter = router({
       if (workspaceId) {
         ws = await db.query.workspace.findFirst({
           where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
         });
       }
 
       if (!ws) {
         ws = await db.query.workspace.findFirst({
           where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
         });
       }
+
 
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: (ws as any).organization,
       });
+
 
       if (!permissions.features.csvExport) {
         throw new Error("CSV Export is not available on your plan.");
@@ -454,21 +474,26 @@ export const analyticsRouter = router({
       if (workspaceId) {
         ws = await db.query.workspace.findFirst({
           where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
         });
       }
 
       if (!ws) {
         ws = await db.query.workspace.findFirst({
           where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
         });
       }
+
 
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        organization: (ws as any).organization,
       });
+
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");

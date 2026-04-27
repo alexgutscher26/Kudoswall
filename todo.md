@@ -94,8 +94,6 @@
 - [x] GitHub OAuth provider
 - [x] LinkedIn OAuth provider
 - [x] Magic Link (passwordless) authentication
-- [ ] Two-Factor Authentication (2FA) via TOTP Authenticator App
-- [ ] Backup / recovery codes for locked-out 2FA accounts
 - [x] Session management UI: View all active sessions, terminate individually
 - [x] Suspicious login detection with email alert
 - [x] "Remember this device for 30 days" checkbox on login
@@ -114,8 +112,7 @@
 - [x] Workspace switcher UI in the top navigation bar
 - [x] **Row-Level Security (RLS)**: Implement tenant isolation at the ORM layer to ensure data security between different workspaces.
 - [x] Custom subdomain per workspace (`customer.kudoswall.com`)
-- [ ] Workspace-level settings page (name, timezone, language)
-- [ ] Organization-wide billing: One subscription covers all workspaces
+- [x] Organization-wide billing: One subscription covers all workspaces
 
 ### 2.4 Team Collaboration & RBAC
 
@@ -973,6 +970,8 @@
 - [ ] Public API v1 with API key management
 - [ ] Shopify App Store listing
 - [ ] Multi-language support on collection pages
+- [ ] Two-Factor Authentication (2FA) via TOTP Authenticator App
+- [ ] Backup / recovery codes for locked-out 2FA accounts
 
 ---
 

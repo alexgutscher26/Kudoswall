@@ -61,4 +61,3 @@ export const BLOG_POSTS = [
     date: "2026-04-23",
   },
 ] as const;
-

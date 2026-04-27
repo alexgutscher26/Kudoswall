@@ -25,12 +25,17 @@ export const teamRouter = router({
 
     const ws = await db.query.workspace.findFirst({
       where: eq(workspace.id, workspaceId),
-      columns: {
-        plan: true,
-      },
+      with: { organization: true },
     });
 
-    const planConfig = getPlanConfig(ws?.plan);
+
+    const { getWorkspacePermissions } = await import("../logic/billing");
+    const permissions = getWorkspacePermissions({
+      plan: ws?.plan ?? "free",
+      organization: (ws as any)?.organization,
+    });
+    const planConfig = permissions;
+
 
     return {
       members: members.map((m) => ({
@@ -80,13 +85,17 @@ export const teamRouter = router({
       // Check plan restrictions
       const ws = await db.query.workspace.findFirst({
         where: eq(workspace.id, workspaceId),
-        columns: {
-          plan: true,
-          name: true,
-        },
+        with: { organization: true },
       });
 
-      const planConfig = getPlanConfig(ws?.plan);
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws?.plan ?? "free",
+        organization: (ws as any)?.organization,
+      });
+      const planConfig = permissions;
+
       if (!planConfig.features.memberInvites) {
         throw new TRPCError({
           code: "FORBIDDEN",

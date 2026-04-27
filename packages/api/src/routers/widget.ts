@@ -137,16 +137,24 @@ export const widgetRouter = router({
       const w = await db.query.widget.findFirst({
         where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
         with: {
-          workspace: true,
+          workspace: {
+            with: { organization: true },
+          },
         },
+
       });
 
       if (!w) {
         throw new Error("Forbidden or not found");
       }
 
-      const { getPlanConfig } = await import("../config/plans");
-      const planConfig = getPlanConfig(w.workspace.plan);
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: w.workspace.plan,
+        organization: (w.workspace as any).organization,
+      });
+      const planConfig = permissions;
+
 
       // Enforce Layout restrictions
       if (
@@ -183,7 +191,7 @@ export const widgetRouter = router({
         action: "update",
         diff: { name: input.name, settings: input.settings },
       });
-      
+
       const env = await getEnvAsync();
       await purgeWidgetCache({ db, workspaceId, env });
 
@@ -230,8 +238,11 @@ export const widgetRouter = router({
       const w = await dbRead.query.widget.findFirst({
         where: eq(widget.id, input.widgetId),
         with: {
-          workspace: true,
+          workspace: {
+            with: { organization: true },
+          },
         },
+
       });
 
       if (!w) throw new Error("Widget not found");
