@@ -3,6 +3,7 @@ import Link from "next/link";
 const PRODUCT_LINKS = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Docs", href: "https://kudoswall.mintlify.app/introduction" },
   { label: "Blog", href: "/blog" },
 ] as const;
 
@@ -149,7 +150,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-6">
             <Link
-              href="https://twitter.com"
+              href="https://x.com/snackforcode"
               className="text-xs text-neutral-400 transition-colors hover:text-neutral-900"
             >
               Twitter

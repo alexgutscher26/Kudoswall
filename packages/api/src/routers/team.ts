@@ -6,7 +6,6 @@ import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
-import { getPlanConfig } from "../config/plans";
 
 export const teamRouter = router({
   getMembers: workspaceProcedure.query(async ({ ctx }) => {
