@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Quote, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { trpc } from "@/utils/trpc";
@@ -61,6 +61,7 @@ interface WidgetProps {
     createdAt: Date;
     type: "text" | "video";
     videoUrl?: string;
+    verifiedVia?: string | null;
   }>;
 }
 
@@ -334,16 +335,27 @@ export default function Widget({ data, testimonials }: WidgetProps) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h5
-              className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
-              style={{ color: settings.textColor || undefined }}
-            >
-              {t.authorName}
-            </h5>
+            <div className="flex items-center gap-1.5">
+              <h5
+                className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
+                style={{ color: settings.textColor || undefined }}
+              >
+                {t.authorName}
+              </h5>
+              {t.verifiedVia && (
+                <ShieldCheck
+                  className="size-3.5 shrink-0"
+                  aria-label={`Verified via ${t.verifiedVia}`}
+                  style={{ color: "#3b82f6" }}
+                  strokeWidth={3}
+                />
+              )}
+            </div>
             <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
               {t.authorTagline}{" "}
               {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
             </p>
+            {/* Verification Badge - Moved Inline */}
           </div>
         </div>
 

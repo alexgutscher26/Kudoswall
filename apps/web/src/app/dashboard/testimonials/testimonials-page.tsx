@@ -39,6 +39,8 @@ interface Testimonial {
   status: TestimonialStatus;
   submittedAt: string;
   featured: boolean;
+  verifiedVia?: string;
+  verifiedAt?: string;
 }
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -308,6 +310,12 @@ function TestimonialCard({
           <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">
             {testimonial.role} · {testimonial.company}
           </p>
+          {testimonial.verifiedVia && (
+            <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-green-600">
+              <CheckCircle2 className="size-2.5" />
+              Verified via {testimonial.verifiedVia === "verified" ? "Social" : testimonial.verifiedVia}
+            </div>
+          )}
         </div>
         {/* Badges — hide on very small, show inline on sm+ */}
         <div className="hidden shrink-0 items-center gap-1.5 sm:flex">

@@ -221,6 +221,9 @@ export const testimonial = pgTable(
     authorCompany: text("author_company"),
     authorLinkedin: text("author_linkedin"),
     authorTagline: text("author_tagline"),
+    verifiedVia: text("verified_via"), // "google" | "linkedin"
+    verifiedAt: timestamp("verified_at"),
+    verifiedId: text("verified_id"), // Provider-specific unique ID
     status: testimonialStatusEnum("status").default("pending").notNull(),
     type: testimonialTypeEnum("type").default("text").notNull(),
     videoUrl: text("video_url"),

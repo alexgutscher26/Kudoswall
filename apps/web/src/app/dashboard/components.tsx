@@ -10,6 +10,7 @@ import {
   BarChart2,
   Plus,
   Lock,
+  CheckCircle2,
 } from "lucide-react";
 import type { RouterOutputs } from "@/utils/trpc";
 import { CopyButton } from "./CopyButton";
@@ -123,6 +124,12 @@ export function RecentTestimonialsList({
                 "{t.content || (t.type === "video" ? "Video testimonial" : "No content")}"
               </p>
               <div className="mt-1 flex items-center gap-2">
+                {t.verifiedVia && (
+                  <span className="inline-flex items-center gap-0.5 rounded-md bg-green-50 px-1.5 py-0.5 text-[9px] font-bold text-green-600 ring-1 ring-green-100/50">
+                    <CheckCircle2 className="size-2.5" />
+                    Verified
+                  </span>
+                )}
                 <span className="rounded-md border border-neutral-100/50 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-medium text-neutral-400">
                   {t.project?.name}
                 </span>

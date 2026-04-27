@@ -79,6 +79,14 @@ export function createAuth() {
             },
           }
         : {}),
+      ...(env.LINKEDIN_CLIENT_ID && env.LINKEDIN_CLIENT_SECRET
+        ? {
+            linkedin: {
+              clientId: env.LINKEDIN_CLIENT_ID,
+              clientSecret: env.LINKEDIN_CLIENT_SECRET,
+            },
+          }
+        : {}),
     },
 
     plugins: [

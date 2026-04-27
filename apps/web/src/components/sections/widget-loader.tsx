@@ -15,7 +15,7 @@ export default function WidgetLoader({ widgetId }: WidgetLoaderProps) {
     const timer = setTimeout(() => {
       if (containerRef.current && !containerRef.current.querySelector("script")) {
         const script = document.createElement("script");
-        script.src = "https://kudoswall.org/widget.js";
+        script.src = "/widget.js"; // Relative URL → uses current origin (localhost in dev, kudoswall.org in prod)
         script.setAttribute("data-id", widgetId);
         script.async = true;
         // Optimization: Ensure it doesn't try to initialize multiple times

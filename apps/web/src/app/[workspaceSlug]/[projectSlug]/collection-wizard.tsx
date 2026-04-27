@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   User,
   SkipForward,
+  Linkedin,
 } from "lucide-react";
 import { useLocale } from "@/lib/collection-i18n";
 import { useState, useMemo, useEffect } from "react";
@@ -25,6 +26,7 @@ import VideoRecorder from "@/components/collection/video-recorder";
 import { submitTestimonial } from "./actions";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
 
 interface CollectionWizardProps {
   project: {
@@ -250,6 +252,7 @@ export default function CollectionWizard({
   const [loading, setLoading] = useState(false);
   // Consent state — gating the Submit button on the review step
   const [hasConsented, setHasConsented] = useState(false);
+  const { data: session } = authClient.useSession();
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
   const DRAFT_KEY = `t-wall-draft-${project.id}`;
@@ -321,6 +324,15 @@ export default function CollectionWizard({
     step,
     hasConsented,
   ]);
+
+  // Auto-fill from session if verified
+  useEffect(() => {
+    if (session?.user) {
+      if (!name) setName(session.user.name || "");
+      if (!email) setEmail(session.user.email || "");
+      if (!photo) setPhoto(session.user.image || null);
+    }
+  }, [session, name, email, photo]);
 
   // Track page view
   useEffect(() => {
@@ -485,6 +497,9 @@ export default function CollectionWizard({
         authorLinkedin: linkedin || undefined,
         authorTagline: tagline || undefined,
         videoUrl,
+        verifiedVia: session?.user ? "verified" : undefined, // simplified for now, could be more specific
+        verifiedAt: session?.user ? new Date() : undefined,
+        verifiedId: session?.user?.id,
       });
 
       localStorage.removeItem(DRAFT_KEY);
@@ -1079,27 +1094,92 @@ export default function CollectionWizard({
                       )}
                     </div>
 
+                    {/* Social Verification Buttons */}
+                    <div className="mt-4 space-y-3">
+                      {!session ? (
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-bold tracking-widest text-neutral-500 uppercase">
+                            Trust Verification (Recommended)
+                          </p>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <button
+                              type="button"
+                              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: window.location.href })}
+                              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-[13px] font-medium text-neutral-900 transition-all hover:bg-neutral-50 active:scale-95"
+                            >
+                              <svg className="size-4" viewBox="0 0 24 24">
+                                <path
+                                  fill="currentColor"
+                                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                />
+                              </svg>
+                              {t.verifyWithGoogle}
+                            </button>
+                            {/* LinkedIn hidden for now as per user request */}
+                            {/* 
+                            <button
+                              type="button"
+                              onClick={() => authClient.signIn.social({ provider: "linkedin", callbackURL: window.location.href })}
+                              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-[13px] font-medium text-neutral-900 transition-all hover:bg-neutral-50 active:scale-95"
+                            >
+                              <Linkedin className="size-4 text-[#0077b5]" />
+                              {t.verifyWithLinkedIn}
+                            </button>
+                            */}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
+                          <div
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900"
+                          >
+                            <BadgeCheck className="size-5 text-white" />
+                          </div>
+                          <div>
+                            <p
+                              className="text-[13px] font-bold text-neutral-900"
+                            >
+                              {t.verifiedAs.replace("{name}", session.user.name)}
+                            </p>
+                            <p
+                              className="text-[10px] text-neutral-500 opacity-70"
+                            >
+                              Identity confirmed via social login
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Trust Verification Signal */}
                     <div
-                      className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2"
-                      style={{ backgroundColor: "var(--cw-surface)" }}
+                      className="mt-1 flex items-center gap-3 rounded-lg bg-neutral-50 px-3 py-2"
                     >
                       <div
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
-                        style={{ backgroundColor: "var(--cw-badge)" }}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-neutral-100"
                       >
-                        <ShieldCheck className="size-3.5" style={{ color: "var(--cw-green)" }} />
+                        <ShieldCheck className="size-3.5 text-green-600" />
                       </div>
                       <div>
                         <p
-                          className="text-xs leading-none font-semibold"
-                          style={{ color: "var(--cw-text-primary)" }}
+                          className="text-xs leading-none font-semibold text-neutral-900"
                         >
                           {t.identityVerification}
                         </p>
                         <p
-                          className="mt-1 text-[10px] leading-relaxed"
-                          style={{ color: "var(--cw-text-secondary)" }}
+                          className="mt-1 text-[10px] leading-relaxed text-neutral-500"
                         >
                           {t.identityVerificationSub}
                         </p>
@@ -1215,21 +1295,14 @@ export default function CollectionWizard({
                             </p>
                           </div>
                         </div>
-                        <div
-                          className="flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1"
-                          style={{
-                            backgroundColor: "var(--cw-blue-tint-40)",
-                            border: "1px solid var(--cw-blue-tint-border)",
-                          }}
-                        >
-                          <BadgeCheck className="size-3.5" style={{ color: "var(--cw-fg)" }} />
-                          <span
-                            className="text-[10px] font-bold tracking-tighter uppercase"
-                            style={{ color: "var(--cw-fg)" }}
-                          >
-                            {t.reviewVerified}
-                          </span>
-                        </div>
+                        {session && (
+                          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1">
+                            <BadgeCheck className="size-3.5 text-blue-600" />
+                            <span className="text-[10px] font-bold tracking-tighter text-blue-700 uppercase">
+                              {session?.user ? t.reviewVerified : t.verifiedUser}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="relative mt-2 text-left">
                         <Quote

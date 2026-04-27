@@ -89,6 +89,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             createdAt: t.createdAt,
             type: t.type,
             videoUrl: t.videoUrl,
+            verifiedVia: t.verifiedVia,
             tags: t.testimonialToTags.map((tt) => ({
               name: tt.tag.name,
               color: tt.tag.color,

@@ -87,6 +87,10 @@ export interface CollectionStrings {
   nextStep: string;
   back: string;
   reviewTestimonial: string;
+  verifyWithGoogle: string;
+  verifyWithLinkedIn: string;
+  verifiedAs: string;
+  verificationFailed: string;
 
   // Footer
   footerDisclaimer: string;
@@ -157,6 +161,10 @@ const en: CollectionStrings = {
   nextStep: "Next Step",
   back: "Back",
   reviewTestimonial: "Review Testimonial",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "By continuing, you agree to our terms of service and acknowledge that your rating may be used for marketing purposes.",
   trustQuote:
@@ -220,6 +228,10 @@ const es: CollectionStrings = {
   nextStep: "Siguiente Paso",
   back: "Atrás",
   reviewTestimonial: "Revisar Testimonio",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "Al continuar, aceptas nuestros términos de servicio y reconoces que tu calificación puede usarse con fines de marketing.",
   trustQuote:
@@ -283,6 +295,10 @@ const fr: CollectionStrings = {
   nextStep: "Étape Suivante",
   back: "Retour",
   reviewTestimonial: "Réviser le Témoignage",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "En continuant, vous acceptez nos conditions d'utilisation et reconnaissez que votre évaluation peut être utilisée à des fins marketing.",
   trustQuote:
@@ -346,6 +362,10 @@ const de: CollectionStrings = {
   nextStep: "Nächster Schritt",
   back: "Zurück",
   reviewTestimonial: "Zeugnis Überprüfen",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "Durch das Fortfahren stimmen Sie unseren Nutzungsbedingungen zu und erkennen an, dass Ihre Bewertung für Marketingzwecke verwendet werden kann.",
   trustQuote:
@@ -409,6 +429,10 @@ const pt: CollectionStrings = {
   nextStep: "Próximo Passo",
   back: "Voltar",
   reviewTestimonial: "Rever Depoimento",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "Ao continuar, você concorda com nossos termos de serviço e reconhece que sua avaliação pode ser usada para fins de marketing.",
   trustQuote:
@@ -471,6 +495,10 @@ const ja: CollectionStrings = {
   nextStep: "次のステップ",
   back: "戻る",
   reviewTestimonial: "推薦文を確認",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "続行することで、利用規約に同意し、評価がマーケティング目的に使用される場合があることを認めます。",
   trustQuote:
@@ -530,6 +558,10 @@ const zh: CollectionStrings = {
   nextStep: "下一步",
   back: "返回",
   reviewTestimonial: "审核推荐",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer: "继续即表示您同意我们的服务条款，并承认您的评分可能用于营销目的。",
   trustQuote: '"像您这样真实的反馈，正是让我们社区蓬勃发展的动力。感谢您的时间。"',
   dir: "ltr",
@@ -589,6 +621,10 @@ const ar: CollectionStrings = {
   nextStep: "الخطوة التالية",
   back: "رجوع",
   reviewTestimonial: "مراجعة الشهادة",
+  verifyWithGoogle: "Verify with Google",
+  verifyWithLinkedIn: "Verify with LinkedIn",
+  verifiedAs: "Verified as {name}",
+  verificationFailed: "Verification failed. Please try again.",
   footerDisclaimer:
     "بالمتابعة، فإنك توافق على شروط الخدمة وتُقرّ بأن تقييمك قد يُستخدم لأغراض تسويقية.",
   trustQuote: '"التغذية الراجعة الحقيقية مثل تغذيتك هي ما يجعل مجتمعنا يزدهر. شكراً لك على وقتك."',

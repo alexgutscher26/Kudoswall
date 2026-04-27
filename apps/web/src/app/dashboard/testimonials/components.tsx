@@ -23,6 +23,7 @@ import {
   Layers,
   Tag,
   Download,
+  ShieldCheck,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -55,6 +56,9 @@ interface Testimonial {
   status: "pending" | "approved" | "archived";
   type: "text" | "video";
   videoUrl?: string | null;
+  verifiedVia?: string | null;
+  verifiedAt?: string | Date | null;
+  verifiedId?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
   deletedAt?: string | Date | null;
@@ -897,7 +901,15 @@ function TestimonialCard({
               )}
             </div>
             <div className="min-w-0">
-              <h4 className="truncate text-[15px] font-bold text-neutral-900">{t.authorName}</h4>
+              <h4 className="flex items-center gap-2 truncate text-[15px] font-bold text-neutral-900">
+                {t.authorName}
+                {t.verifiedVia && (
+                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 ring-1 ring-blue-500/10 uppercase">
+                    <ShieldCheck className="size-2.5" />
+                    Verified
+                  </span>
+                )}
+              </h4>
               <p className="mt-0.5 truncate text-[13px] text-neutral-400">
                 {t.authorEmail}
                 <span className="mx-2 inline-block size-1 rounded-full bg-neutral-200" />

@@ -68,6 +68,9 @@ export async function submitTestimonial(
     authorLinkedin?: string;
     authorTagline?: string;
     videoUrl?: string;
+    verifiedVia?: string;
+    verifiedAt?: Date;
+    verifiedId?: string;
   },
 ) {
   const id = `tst_${nanoid()}`;
@@ -110,6 +113,9 @@ export async function submitTestimonial(
     authorLinkedin: data.authorLinkedin,
     authorTagline: data.authorTagline,
     videoUrl: data.videoUrl,
+    verifiedVia: data.verifiedVia,
+    verifiedAt: data.verifiedAt,
+    verifiedId: data.verifiedId,
     status: "pending",
     type: data.videoUrl ? "video" : "text",
   });
