@@ -161,6 +161,9 @@ export default async function EmbedPage({
           <link rel="stylesheet" href={fontHref} />
         </>
       )}
+      {w.customCss && (
+        <style dangerouslySetInnerHTML={{ __html: w.customCss }} />
+      )}
       <style
         dangerouslySetInnerHTML={{
           __html: [

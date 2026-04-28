@@ -495,14 +495,16 @@ export const dashboardRouter = router({
     .input(
       z.object({
         projectId: z.string(),
-        settings: z.unknown(),
+        settings: z.unknown().optional(),
         name: z.string().optional(),
         collectionSlug: z.string().optional(),
+        customCss: z.string().optional(),
+        emailFromName: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const { projectId, settings, name, collectionSlug } = input;
+      const { projectId, settings, name, collectionSlug, customCss, emailFromName } = input;
 
       const p = await db.query.project.findFirst({
         where: eq(project.id, projectId),
@@ -520,9 +522,11 @@ export const dashboardRouter = router({
       await db
         .update(project)
         .set({
-          collectionSettingsJson: JSON.stringify(settings),
-          ...(name ? { name } : {}),
-          ...(collectionSlug ? { collectionSlug } : {}),
+          ...(settings !== undefined ? { collectionSettingsJson: JSON.stringify(settings) } : {}),
+          ...(name !== undefined ? { name } : {}),
+          ...(collectionSlug !== undefined ? { collectionSlug } : {}),
+          ...(customCss !== undefined ? { customCss } : {}),
+          ...(emailFromName !== undefined ? { emailFromName } : {}),
         })
         .where(eq(project.id, projectId));
 
@@ -532,7 +536,7 @@ export const dashboardRouter = router({
         entityType: "project",
         entityId: projectId,
         action: "update",
-        diff: { collectionSettingsJson: settings, name, collectionSlug },
+        diff: { collectionSettingsJson: settings, name, collectionSlug, customCss, emailFromName },
       });
 
       if (p.collectionSlug) {

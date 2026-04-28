@@ -74,6 +74,7 @@ async function WidgetDetailContentWrapper({
           widgetId={w.id}
           workspaceId={w.workspaceId}
           initialSettings={settings}
+          initialCustomCss={w.customCss}
           isPro={(w.workspace.organization?.plan || w.workspace.plan) !== "free"}
         />
       </div>

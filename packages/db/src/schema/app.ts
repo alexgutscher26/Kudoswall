@@ -187,6 +187,8 @@ export const project = pgTable(
     customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
     customDomainVerificationToken: text("custom_domain_verification_token"),
     customDomainVerificationError: text("custom_domain_verification_error"),
+    customCss: text("custom_css"),
+    emailFromName: text("email_from_name"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
@@ -328,6 +330,7 @@ export const widget = pgTable(
       .references(() => workspace.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     settingsJson: text("settings_json").notNull(),
+    customCss: text("custom_css"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())

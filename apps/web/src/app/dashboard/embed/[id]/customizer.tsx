@@ -24,6 +24,7 @@ import {
   Type,
   MoreHorizontal,
   Lock,
+  Terminal,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -87,11 +88,13 @@ export default function WidgetCustomizer({
   widgetId,
   workspaceId,
   initialSettings,
+  initialCustomCss,
   isPro,
 }: {
   widgetId: string;
   workspaceId: string;
   initialSettings: Partial<WidgetSettings>;
+  initialCustomCss?: string | null;
   isPro: boolean;
 }) {
   const router = useRouter();
@@ -127,6 +130,7 @@ export default function WidgetCustomizer({
     hideHeader: false,
     ...initialSettings,
   });
+  const [customCss, setCustomCss] = useState(initialCustomCss || "");
 
   const [activeTab, setActiveTab] = useState<"layout" | "display" | "filtering" | "branding">(
     "layout",
@@ -153,6 +157,7 @@ export default function WidgetCustomizer({
     updateWidget.mutate({
       id: widgetId,
       settings: settings,
+      customCss,
     });
   };
 
@@ -851,6 +856,37 @@ export default function WidgetCustomizer({
                       />
                     </button>
                   </div>
+                </div>
+
+                {/* Custom CSS */}
+                <div className="space-y-4 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Custom CSS
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      className="h-32 w-full resize-none rounded-2xl border border-neutral-100 bg-neutral-900 p-3 font-mono text-[11px] text-emerald-400 outline-none focus:ring-1 focus:ring-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!isPro}
+                      onChange={(e) => setCustomCss(e.target.value)}
+                      placeholder="/* .card { background: red; } */"
+                      spellCheck={false}
+                      value={customCss}
+                    />
+                    {!isPro && (
+                      <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-900/10 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
+                          <Lock className="size-3 text-neutral-400" />
+                          <span className="text-[10px] font-bold text-neutral-600">Pro Feature</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-neutral-400 italic">
+                    Advanced users only. Target classes like .card, .author-name, etc.
+                  </p>
                 </div>
               </div>
             )}

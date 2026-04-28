@@ -4,7 +4,7 @@ import { db } from "@/lib/server-db";
 import { project, testimonial, workspace, videoTranscodingJob } from "@my-better-t-app/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
+import { notifyOwnerNewTestimonial, sendAuthorConfirmationEmail } from "@/lib/email-helpers";
 import { unstable_noStore as noStore } from "next/cache";
 
 export async function getProjectBySlug(workspaceSlug: string, projectSlug: string) {
@@ -137,6 +137,13 @@ export async function submitTestimonial(
     content: data.content,
     rating: data.rating,
   });
+
+  if (data.authorEmail) {
+    void sendAuthorConfirmationEmail(projectId, {
+      authorName: data.authorName,
+      authorEmail: data.authorEmail,
+    });
+  }
 
   return { success: true };
 }

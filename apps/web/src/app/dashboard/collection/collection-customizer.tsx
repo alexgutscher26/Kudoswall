@@ -20,6 +20,9 @@ import {
   Quote,
   Camera,
   Globe,
+  Terminal,
+  Image as LucideImage,
+  Layers,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -37,6 +40,8 @@ interface CollectionCustomizerProps {
     customDomainVerified?: boolean | null;
     customDomainVerificationToken?: string | null;
     customDomainVerificationError?: string | null;
+    customCss?: string | null;
+    emailFromName?: string | null;
   };
   workspace: {
     id: string;
@@ -107,6 +112,14 @@ export type CollectionSettings = {
     footerPrivacyText: string;
     privacyPolicyContent?: string;
   };
+  background?: {
+    type: "color" | "gradient" | "image";
+    gradient?: string;
+    imageUrl?: string;
+    imageOpacity?: number;
+    imageBlur?: number;
+    isAnimated?: boolean;
+  };
 };
 
 const DEFAULT_SETTINGS: CollectionSettings = {
@@ -154,6 +167,12 @@ const DEFAULT_SETTINGS: CollectionSettings = {
     footerPrivacyText: "Privacy Policy",
     privacyPolicyContent: "",
   },
+  background: {
+    type: "color",
+    imageOpacity: 1,
+    imageBlur: 0,
+    isAnimated: false,
+  },
 };
 
 export function CollectionCustomizer({
@@ -199,6 +218,10 @@ export function CollectionCustomizer({
           ...DEFAULT_SETTINGS.video,
           ...(parsed.video || {}),
         },
+        background: {
+          ...DEFAULT_SETTINGS.background!,
+          ...(parsed.background || {}),
+        },
         compliance: {
           ...DEFAULT_SETTINGS.compliance!,
           ...(parsed.compliance || {}),
@@ -219,6 +242,8 @@ export function CollectionCustomizer({
 
   const [projectName, setProjectName] = useState(project.name);
   const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
+  const [customCss, setCustomCss] = useState(project.customCss || "");
+  const [emailFromName, setEmailFromName] = useState(project.emailFromName || "");
 
   const [activeTab, setActiveTab] = useState<
     "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
@@ -286,12 +311,19 @@ export function CollectionCustomizer({
     }
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      updateSettings.mutate({ projectId: project.id, settings, name: projectName, collectionSlug });
+      updateSettings.mutate({
+        projectId: project.id,
+        settings,
+        name: projectName,
+        collectionSlug,
+        customCss,
+        emailFromName,
+      });
     }, 1500);
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
-  }, [settings, projectName, collectionSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings, projectName, collectionSlug, customCss, emailFromName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -300,6 +332,8 @@ export function CollectionCustomizer({
       settings,
       name: projectName,
       collectionSlug,
+      customCss,
+      emailFromName,
     });
   };
 
@@ -409,17 +443,169 @@ export function CollectionCustomizer({
                     value={settings.accentColor}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Background
-                  </label>
-                  <input
-                    className="size-8 cursor-pointer rounded-lg border-0 p-0"
-                    disabled={!isPro}
-                    onChange={(e) => setNestedSetting("backgroundColor", e.target.value)}
-                    type="color"
-                    value={settings.backgroundColor}
-                  />
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/30 p-4">
+                  <div className="flex items-center gap-2">
+                    <LucideImage className="size-3.5 text-neutral-400" />
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Background Design
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: "color", label: "Solid", icon: Palette },
+                      { id: "gradient", label: "Gradient", icon: Layers },
+                      { id: "image", label: "Image", icon: LucideImage },
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => setNestedSetting("background.type", t.id)}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all ${
+                          settings.background?.type === t.id
+                            ? "border-pink-500 bg-pink-50 text-pink-500"
+                            : "border-neutral-100 bg-white text-neutral-400 hover:bg-neutral-50"
+                        }`}
+                      >
+                        <t.icon className="size-4" />
+                        <span className="text-[10px] font-bold">{t.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {settings.background?.type === "color" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 flex items-center justify-between pt-2 duration-300">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                        Select Color
+                      </label>
+                      <input
+                        className="size-8 cursor-pointer rounded-lg border-0 p-0"
+                        disabled={!isPro}
+                        onChange={(e) => setNestedSetting("backgroundColor", e.target.value)}
+                        type="color"
+                        value={settings.backgroundColor}
+                      />
+                    </div>
+                  )}
+
+                  {settings.background?.type === "gradient" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 pt-2 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                          CSS Gradient
+                        </label>
+                        <textarea
+                          className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-white px-3 py-2 text-[11px] font-medium outline-none focus:border-pink-500"
+                          disabled={!isPro}
+                          onChange={(e) => setNestedSetting("background.gradient", e.target.value)}
+                          placeholder="linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%)"
+                          value={settings.background?.gradient || ""}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%)",
+                          "linear-gradient(135deg, #ffedfa 0%, #f3e8ff 100%)",
+                          "linear-gradient(to right, #ffecd2 0%, #fcb69f 100%)",
+                          "linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)",
+                          "linear-gradient(120deg, #f6d365 0%, #fda085 100%)",
+                          "linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)",
+                        ].map((g) => (
+                          <button
+                            key={g}
+                            onClick={() => setNestedSetting("background.gradient", g)}
+                            className="size-6 rounded-lg border border-neutral-100 shadow-sm transition-transform hover:scale-110"
+                            style={{ background: g }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] font-bold text-neutral-500 uppercase">
+                          Animate Gradient
+                        </span>
+                        <input
+                          checked={settings.background?.isAnimated || false}
+                          className="accent-pink-500"
+                          disabled={!isPro}
+                          onChange={(e) => setNestedSetting("background.isAnimated", e.target.checked)}
+                          type="checkbox"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {settings.background?.type === "image" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-2 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                          Upload Image
+                        </label>
+                        <UploadButton
+                          endpoint="imageUploader"
+                          onClientUploadComplete={(res) => {
+                            if (res?.[0]) {
+                              setNestedSetting("background.imageUrl", res[0].url);
+                              toast.success("Background uploaded!");
+                            }
+                          }}
+                          onUploadError={(error: Error) => {
+                            toast.error(`Error: ${error.message}`);
+                          }}
+                          appearance={{
+                            button:
+                              "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                            allowedContent: "hidden",
+                          }}
+                        />
+                      </div>
+
+                      {settings.background?.imageUrl && (
+                        <>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between">
+                              <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                                Opacity
+                              </label>
+                              <span className="text-[10px] font-bold text-neutral-400">
+                                {Math.round((settings.background?.imageOpacity || 1) * 100)}%
+                              </span>
+                            </div>
+                            <input
+                              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-pink-500"
+                              max="1"
+                              min="0"
+                              onChange={(e) =>
+                                setNestedSetting("background.imageOpacity", parseFloat(e.target.value))
+                              }
+                              step="0.01"
+                              type="range"
+                              value={settings.background?.imageOpacity ?? 1}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between">
+                              <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                                Blur
+                              </label>
+                              <span className="text-[10px] font-bold text-neutral-400">
+                                {settings.background?.imageBlur || 0}px
+                              </span>
+                            </div>
+                            <input
+                              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-pink-500"
+                              max="20"
+                              min="0"
+                              onChange={(e) =>
+                                setNestedSetting("background.imageBlur", parseInt(e.target.value))
+                              }
+                              step="1"
+                              type="range"
+                              value={settings.background?.imageBlur ?? 0}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
@@ -961,6 +1147,32 @@ export function CollectionCustomizer({
 
           {activeTab === "advanced" && (
             <div className="space-y-6">
+              <SectionHeader icon={Terminal} pro title="Custom CSS" />
+              <div className="space-y-2">
+                <p className="text-[10px] leading-normal text-neutral-400">
+                  Override styles on your collection page with custom CSS. Use this to fine-tune
+                  colors, spacing, or add custom animations.
+                </p>
+                <div className="relative">
+                  <textarea
+                    className="h-40 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-900 p-3 font-mono text-[11px] text-emerald-400 outline-none focus:ring-1 focus:ring-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!isPro}
+                    onChange={(e) => setCustomCss(e.target.value)}
+                    placeholder="/* .collect-heading { color: red; } */"
+                    spellCheck={false}
+                    value={customCss}
+                  />
+                  {!isPro && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-neutral-900/10 backdrop-blur-[1px]">
+                      <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
+                        <Lock className="size-3 text-neutral-400" />
+                        <span className="text-[10px] font-bold text-neutral-600">Pro Feature</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <SectionHeader icon={Command} title="General Info" />
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -1062,6 +1274,32 @@ export function CollectionCustomizer({
                   <p className="text-[10px] text-neutral-400">
                     Linked in the collection form consent checkbox.
                   </p>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Email "From" Name {isPro && <Sparkles className="size-3 text-pink-500" />}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-medium text-neutral-500">
+                      Customize the sender name for confirmation emails sent to authors.
+                    </p>
+                    <input
+                      className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500 disabled:opacity-50"
+                      disabled={!isPro}
+                      onChange={(e) => setEmailFromName(e.target.value)}
+                      placeholder="e.g. Alex from KudosWall"
+                      type="text"
+                      value={emailFromName}
+                    />
+                    {!isPro && (
+                      <p className="text-[9px] font-bold text-pink-500 uppercase">
+                        Requires Pro Plan
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
@@ -1191,9 +1429,16 @@ export function CollectionCustomizer({
       {/* Main Area - Preview */}
       <div
         id="collection-preview-area"
-        className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300"
+        className={`relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300 ${
+          settings.background?.type === "gradient" && settings.background?.isAnimated
+            ? "animate-gradient"
+            : ""
+        }`}
         style={{
-          backgroundColor: settings.backgroundColor,
+          backgroundColor:
+            settings.background?.type === "color" ? settings.backgroundColor : undefined,
+          backgroundImage:
+            settings.background?.type === "gradient" ? settings.background.gradient : undefined,
           fontFamily:
             settings?.fontFamily === "custom" && settings.customFontUrl
               ? "'CustomFont', sans-serif"
@@ -1206,6 +1451,33 @@ export function CollectionCustomizer({
                     : "var(--font-sans), sans-serif",
         }}
       >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            @keyframes gradient-shift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            .animate-gradient {
+              background-size: 400% 400% !important;
+              animation: gradient-shift 15s ease infinite !important;
+            }
+          `,
+          }}
+        />
+        {settings.background?.type === "image" && settings.background.imageUrl && (
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${settings.background.imageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: settings.background.imageOpacity ?? 1,
+              filter: `blur(${settings.background.imageBlur ?? 0}px)`,
+            }}
+          />
+        )}
         {settings?.fontFamily === "custom" && settings.customFontUrl && (
           <style
             dangerouslySetInnerHTML={{

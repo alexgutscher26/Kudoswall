@@ -62,3 +62,31 @@ export async function notifyOwnerNewTestimonial(
     console.error("[TESTIMONIAL_NOTIFICATION_FAILURE]", error);
   }
 }
+
+export async function sendAuthorConfirmationEmail(
+  projectId: string,
+  testimonialData: {
+    authorName: string;
+    authorEmail: string;
+  },
+) {
+  try {
+    const proj = await db.query.project.findFirst({
+      where: eq(project.id, projectId),
+    });
+
+    if (!proj || !testimonialData.authorEmail) return;
+
+    const emailService = new EmailService(env.RESEND_API_KEY || "", env.EMAIL_FROM);
+    await emailService.sendSubmissionConfirmationEmail(
+      testimonialData.authorEmail,
+      testimonialData.authorName,
+      proj.name,
+      proj.thankYouMessage,
+      proj.emailFromName,
+    );
+    console.log(`[AUTHOR_CONFIRMATION_SENT] Sent to ${testimonialData.authorEmail}`);
+  } catch (error) {
+    console.error("[AUTHOR_CONFIRMATION_FAILURE]", error);
+  }
+}

@@ -10,6 +10,7 @@ import { TeamInviteEmail } from "../emails/team-invite";
 import { TrialExpiringEmail } from "../emails/trial-expiring";
 import { CancellationEmail } from "../emails/cancellation";
 import { SuspiciousLoginEmail } from "../emails/suspicious-login";
+import { SubmissionConfirmationEmail } from "../emails/submission-confirmation";
 
 export class EmailService {
   public resend: Resend;
@@ -150,6 +151,27 @@ export class EmailService {
       react: React.createElement(SuspiciousLoginEmail, {
         userName,
         ...data,
+      }),
+    });
+  }
+
+  async sendSubmissionConfirmationEmail(
+    to: string,
+    authorName: string,
+    projectName: string,
+    thankYouMessage?: string | null,
+    fromName?: string | null,
+  ) {
+    const from = fromName ? `${fromName} via KudosWall <alex@kudoswall.org>` : this.from;
+
+    return this.resend.emails.send({
+      from,
+      to,
+      subject: `Thank you for your feedback!`,
+      react: React.createElement(SubmissionConfirmationEmail, {
+        authorName,
+        projectName,
+        thankYouMessage,
       }),
     });
   }

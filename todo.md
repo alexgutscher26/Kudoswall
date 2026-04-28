@@ -119,9 +119,6 @@
 - [x] Invite team members via email link or auto-capture company domain
 - [x] Granular role system: Owner, Admin, Editor, Moderator, Viewer
 - [x] Custom permission sets per role (e.g., can-approve, can-delete)
-- [ ] In-app commenting system for team discussions on specific testimonials
-- [ ] Notifications: @mention teammates in comments
-- [ ] Audit trail: Who approved / rejected each testimonial
 
 ---
 
@@ -164,20 +161,20 @@
 - [x] Custom "Thank You" page with configurable CTA button
 - [x] 35+ Google Fonts selectable and dynamically loaded
 - [x] Upload custom `.woff2` font file for 100% brand match
-- [ ] Full custom CSS override textarea for advanced users
+- [x] Full custom CSS override textarea for advanced users
 - [x] Branded Favicon for collection page tab
 - [x] Custom domain for collection page (`reviews.yourbrand.com`)
-- [ ] Custom email "From" name for submission confirmation emails
+- [x] Custom email "From" name for submission confirmation emails
 - [x] Remove "Powered by KudosWall" badge (paid plan)
-- [ ] Custom background (solid color, gradient, or image upload)
-- [ ] Animated gradient background option for high-end feel
+- [x] Custom background (solid color, gradient, or image upload)
+- [x] Animated gradient background option for high-end feel
 
 ### 3.4 Identity Verification
 
-- [ ] "Verify via LinkedIn" button to reduce fake testimonials
-- [ ] "Verify via Google" OAuth verification with badge display
-- [ ] Display verified badge on testimonial cards in the widget
-- [ ] Optional email verification step before submission is accepted
+- [x] "Verify via LinkedIn" button to reduce fake testimonials
+- [x] "Verify via Google" OAuth verification with badge display
+- [x] Display verified badge on testimonial cards in the widget
+- [x] Optional email verification step before submission is accepted
 
 ---
 

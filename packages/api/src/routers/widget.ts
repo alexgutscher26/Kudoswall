@@ -129,6 +129,7 @@ export const widgetRouter = router({
         id: z.string(),
         name: z.string().optional(),
         settings: widgetSettingsSchema,
+        customCss: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -180,6 +181,7 @@ export const widgetRouter = router({
         .set({
           name: input.name ?? w.name,
           settingsJson: JSON.stringify(input.settings),
+          ...(input.customCss !== undefined ? { customCss: input.customCss } : {}),
         })
         .where(eq(widget.id, input.id));
 
@@ -189,7 +191,7 @@ export const widgetRouter = router({
         entityType: "widget",
         entityId: input.id,
         action: "update",
-        diff: { name: input.name, settings: input.settings },
+        diff: { name: input.name, settings: input.settings, customCss: input.customCss },
       });
 
       const env = await getEnvAsync();

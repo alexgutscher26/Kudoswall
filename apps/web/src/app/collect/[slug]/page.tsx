@@ -5,7 +5,6 @@ import { db } from "@/lib/server-db";
 import { project, testimonial } from "@my-better-t-app/db/schema";
 import { eq, or } from "drizzle-orm";
 import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wizard";
-import ErrorBoundary from "@/components/error-boundary";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CookieConsentBanner } from "@/components/collection/cookie-consent-banner";
 import { CollectionFooter } from "@/components/collection/collection-footer";
@@ -107,6 +106,12 @@ const DEFAULT_SETTINGS = {
     showFooterPrivacy: true,
     footerPrivacyText: "Privacy Policy",
   },
+  background: {
+    type: "color",
+    imageOpacity: 1,
+    imageBlur: 0,
+    isAnimated: false,
+  },
 };
 
 export const revalidate = 600; // Cache for 10 minutes, then SWR
@@ -153,6 +158,10 @@ const getProjectByCollectionSlug = unstable_cache(
           ...DEFAULT_SETTINGS.compliance.cookieConsent,
           ...(parsed.compliance?.cookieConsent || {}),
         },
+      },
+      background: {
+        ...DEFAULT_SETTINGS.background,
+        ...(parsed.background || {}),
       },
     };
 
@@ -241,6 +250,9 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   return (
     <>
       <JsonLd data={jsonLd} />
+      {projectData.customCss && (
+        <style dangerouslySetInnerHTML={{ __html: projectData.customCss }} />
+      )}
       {settings?.fontFamily === "custom" && settings.customFontUrl && (
         <style
           dangerouslySetInnerHTML={{
@@ -264,10 +276,34 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
             }}
           />
         )}
+      {settings?.background?.type === "gradient" && settings.background.isAnimated && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              @keyframes gradient-shift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+              }
+              .animate-gradient {
+                background-size: 400% 400% !important;
+                animation: gradient-shift 15s ease infinite !important;
+              }
+            `,
+          }}
+        />
+      )}
       <main
-        className="collect-main relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6"
+        className={`collect-main relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-300 sm:px-6 ${
+          settings?.background?.type === "gradient" && settings.background.isAnimated
+            ? "animate-gradient"
+            : ""
+        }`}
         style={{
-          backgroundColor,
+          backgroundColor:
+            settings?.background?.type === "color" ? backgroundColor : undefined,
+          backgroundImage:
+            settings?.background?.type === "gradient" ? settings.background.gradient : undefined,
           fontFamily:
             settings?.fontFamily === "custom" && settings.customFontUrl
               ? "'CustomFont', sans-serif"
@@ -280,20 +316,34 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
                     : "var(--font-sans), sans-serif",
         }}
       >
-        {/* Background patterns */}
-        <div className="absolute inset-0 z-0">
+        {settings?.background?.type === "image" && settings.background.imageUrl && (
           <div
-            className="absolute -top-[10%] -right-[5%] size-[600px] animate-pulse rounded-full blur-[120px]"
-            style={{ backgroundColor: `${accentColor}10` }}
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${settings.background.imageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: settings.background.imageOpacity ?? 1,
+              filter: `blur(${settings.background.imageBlur ?? 0}px)`,
+            }}
           />
-          <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
-          <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
-          {/* Dot pattern: bg moved to inline style so CSS @media can override it */}
-          <div
-            className="collect-dot absolute inset-0 mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40"
-            style={{ backgroundImage: "radial-gradient(#e5e7eb 1px, transparent 1px)" }}
-          />
-        </div>
+        )}
+        {/* Background patterns - Only show if not using a custom image or gradient */}
+        {!settings?.background || settings.background.type === "color" ? (
+          <div className="absolute inset-0 z-0">
+            <div
+              className="absolute -top-[10%] -right-[5%] size-[600px] animate-pulse rounded-full blur-[120px]"
+              style={{ backgroundColor: `${accentColor}10` }}
+            />
+            <div className="absolute -bottom-[10%] -left-[5%] size-[700px] rounded-full bg-indigo-500/5 blur-[150px]" />
+            <div className="absolute top-1/4 left-1/3 size-[500px] rounded-full bg-blue-500/3 blur-[130px]" />
+            {/* Dot pattern: bg moved to inline style so CSS @media can override it */}
+            <div
+              className="collect-dot absolute inset-0 mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[32px_32px] opacity-40"
+              style={{ backgroundImage: "radial-gradient(#e5e7eb 1px, transparent 1px)" }}
+            />
+          </div>
+        ) : null}
 
         <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
           <div className="mb-6 space-y-4 text-center">
