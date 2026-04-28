@@ -186,7 +186,7 @@
 - [x] Approve / Reject / Delete individual testimonials
 - [x] Tag assignment to testimonials
 - [x] Tag persistence across API queries (testimonialToTags relation included)
-- [ ] Real-time inbox (WebSocket or SSE) — new submissions appear instantly
+- [x] Real-time inbox (WebSocket or SSE) — new submissions appear instantly
 - [x] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
 - [ ] Search bar: Filter by customer name, email, company, or keyword
 - [ ] Advanced filter panel: By rating (1-5), by type (Text/Video), by tag, by language, by date range

@@ -41,6 +41,7 @@ import {
 } from "@my-better-t-app/ui/components/dropdown-menu";
 import { updateTestimonialStatus, deleteTestimonial } from "../actions";
 import { formatDistanceToNow } from "date-fns";
+import { useRealtimeInbox } from "@/hooks/use-realtime-inbox";
 
 interface Testimonial {
   id: string;
@@ -109,6 +110,9 @@ export function TestimonialInbox({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Enable real-time updates for this project and workspace
+  useRealtimeInbox(project.workspaceId, project.id);
   const [rawTestimonial, setRawTestimonial] = useState<Testimonial | null>(null);
   const [isPending, startTransition] = useTransition();
 

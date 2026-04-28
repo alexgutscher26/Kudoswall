@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
 import { revalidatePath } from "next/cache";
+import { getPusherServer } from "@/lib/pusher-server";
 
 import { z } from "zod";
 
@@ -100,6 +101,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       videoUrl: body.videoUrl,
       status: "pending",
     });
+
+    // 4. Trigger Real-time Update
+    try {
+      const pusher = await getPusherServer();
+      if (pusher) {
+        await pusher.trigger(`private-inbox:${proj.workspaceId}`, "new-testimonial", {
+          testimonialId: id,
+          projectId: proj.id,
+          authorName: body.authorName,
+          rating: body.rating,
+        });
+      }
+    } catch (err) {
+      // Don't fail the submission if Pusher fails
+      console.error("Failed to trigger Pusher event:", err);
+    }
 
     // 4. Rate limit is automatically managed by Upstash on .limit() call.
 

@@ -49,6 +49,8 @@
     "nanoid": "^5.1.7",
     "next": "catalog:",
     "next-themes": "catalog:",
+    "pusher": "^5.3.3",
+    "pusher-js": "^8.5.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-easy-crop": "^5.5.7",

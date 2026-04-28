@@ -42,8 +42,14 @@ declare global {
     WIDGET_KV?: KVNamespace;
     /** Cloudflare API Token with Cache Purge permissions. */
     CLOUDFLARE_API_TOKEN?: string;
-    /** Cloudflare Zone ID for the production domain. */
     CLOUDFLARE_ZONE_ID?: string;
+    /** Pusher app credentials for real-time updates. */
+    PUSHER_APP_ID?: string;
+    PUSHER_KEY?: string;
+    PUSHER_SECRET?: string;
+    PUSHER_CLUSTER?: string;
+    NEXT_PUBLIC_PUSHER_KEY?: string;
+    NEXT_PUBLIC_PUSHER_CLUSTER?: string;
   };
 }
 
