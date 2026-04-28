@@ -510,13 +510,11 @@ export const dashboardRouter = router({
 
       if (!p) throw new Error("Project not found or forbidden");
 
-      // Check role via workspace member (still need to check role within the workspace)
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      });
-
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
+      if (!ctx.permissions.includes("project:update")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to update this project",
+        });
       }
 
       await db
@@ -559,12 +557,11 @@ export const dashboardRouter = router({
 
       if (!p) throw new Error("Project not found or forbidden");
 
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      });
-
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
+      if (!ctx.permissions.includes("project:delete")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to delete this project",
+        });
       }
 
       await db.update(project).set({ deletedAt: new Date() }).where(eq(project.id, id));
@@ -592,12 +589,11 @@ export const dashboardRouter = router({
 
       if (!p) throw new Error("Project not found or forbidden");
 
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      });
-
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
+      if (!ctx.permissions.includes("project:create")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to duplicate this project",
+        });
       }
 
       const generateSlug = (name: string) =>
@@ -696,15 +692,7 @@ export const dashboardRouter = router({
           userId: session.user.id,
         });
 
-        // Ensure user is admin/owner of the current workspace
-        const membership = await db.query.workspaceMember.findFirst({
-          where: (fields, { eq, and, isNull }) =>
-            and(eq(fields.userId, session.user.id), isNull(fields.deletedAt)),
-        });
-
-        console.log("Membership found:", !!membership, membership?.role);
-
-        if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+        if (!ctx.permissions.includes("settings:manage")) {
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "Insufficient permissions to update this workspace",
@@ -782,11 +770,7 @@ export const dashboardRouter = router({
   acceptDpa: workspaceProcedure.mutation(async ({ ctx }) => {
     const { db, session, workspaceId } = ctx;
 
-    const membership = await db.query.workspaceMember.findFirst({
-      where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-    });
-
-    if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+    if (!ctx.permissions.includes("settings:manage")) {
       throw new Error("Forbidden: Insufficient permissions");
     }
 
@@ -862,12 +846,11 @@ export const dashboardRouter = router({
       const { db, session, workspaceId } = ctx;
       const { email } = input;
 
-      const membership = await db.query.workspaceMember.findFirst({
-        where: and(eq(workspaceMember.userId, session.user.id), isNull(workspaceMember.deletedAt)),
-      });
-
-      if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-        throw new Error("Forbidden: Insufficient permissions");
+      if (!ctx.permissions.includes("testimonial:delete")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to delete respondent data",
+        });
       }
 
       // Find all testimonials in this workspace for this email

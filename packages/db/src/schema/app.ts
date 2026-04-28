@@ -405,6 +405,26 @@ export const organizationRelations = relations(organization, ({ one, many }) => 
   workspaces: many(workspace),
 }));
 
+export const workspacePermissionSet = pgTable(
+  "workspace_permission_set",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspace.id, { onDelete: "cascade" }),
+    role: workspaceRoleEnum("role").notNull(),
+    permissionsJson: text("permissions_json").notNull(), // Array of Permission strings
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => new Date())
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("workspace_permission_set_workspace_role_idx").on(table.workspaceId, table.role),
+  ],
+);
+
 export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   owner: one(user, {
     fields: [workspace.ownerId],
@@ -419,6 +439,14 @@ export const workspaceRelations = relations(workspace, ({ one, many }) => ({
   widgets: many(widget),
   members: many(workspaceMember),
   invitations: many(workspaceInvitation),
+  permissionSets: many(workspacePermissionSet),
+}));
+
+export const workspacePermissionSetRelations = relations(workspacePermissionSet, ({ one }) => ({
+  workspace: one(workspace, {
+    fields: [workspacePermissionSet.workspaceId],
+    references: [workspace.id],
+  }),
 }));
 
 export const workspaceMemberRelations = relations(workspaceMember, ({ one }) => ({

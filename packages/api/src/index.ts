@@ -3,6 +3,8 @@ import { trace, SpanStatusCode } from "@opentelemetry/api";
 
 import { checkRateLimit } from "./rateLimit";
 import type { Context } from "./context";
+import { getPermissions } from "./utils/permissions";
+
 
 export const t = initTRPC.context<Context>().create();
 
@@ -110,12 +112,16 @@ export const workspaceProcedure = protectedProcedure.use(async ({ ctx, next }) =
     });
   }
 
+  const workspaceId = (ctx.tenantDb as any).workspaceId as string;
+  const permissions = await getPermissions(ctx.db, workspaceId, ctx.session.user.id);
+
   return next({
     ctx: {
       ...ctx,
       // Overwrite db with tenantDb to make it transparent for routers
       db: ctx.tenantDb,
-      workspaceId: (ctx.tenantDb as any).workspaceId as string,
+      workspaceId,
+      permissions,
     },
   });
 });

@@ -118,8 +118,7 @@
 
 - [x] Invite team members via email link or auto-capture company domain
 - [x] Granular role system: Owner, Admin, Editor, Moderator, Viewer
-- [ ] Custom permission sets per role (e.g., can-approve, can-delete)
-- [ ] Activity feed: See what teammates are working on in real-time
+- [x] Custom permission sets per role (e.g., can-approve, can-delete)
 - [ ] In-app commenting system for team discussions on specific testimonials
 - [ ] Notifications: @mention teammates in comments
 - [ ] Audit trail: Who approved / rejected each testimonial

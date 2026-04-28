@@ -6,6 +6,8 @@ import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
+import { ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS } from "../logic/permissions";
+import { workspacePermissionSet } from "@my-better-t-app/db/schema";
 
 export const teamRouter = router({
   getMembers: workspaceProcedure.query(async ({ ctx }) => {
@@ -69,15 +71,10 @@ export const teamRouter = router({
       const { db, session, workspaceId } = ctx;
       const { email, role } = input;
 
-      // Verify inviter is owner or admin
-      const inviter = await db.query.workspaceMember.findFirst({
-        where: eq(workspaceMember.userId, session.user.id),
-      });
-
-      if (!inviter || (inviter.role !== "owner" && inviter.role !== "admin")) {
+      if (!ctx.permissions.includes("team:invite")) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only owners and admins can invite members",
+          message: "Insufficient permissions to invite members",
         });
       }
 
@@ -173,15 +170,22 @@ export const teamRouter = router({
   removeMember: workspaceProcedure
     .input(z.object({ memberId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, session, permissions } = ctx;
       const { memberId } = input;
+
+      if (!permissions.includes("team:remove_member")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to remove members",
+        });
+      }
 
       const actor = await db.query.workspaceMember.findFirst({
         where: eq(workspaceMember.userId, session.user.id),
       });
 
-      if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+      if (!actor) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Membership not found" });
       }
 
       const target = await db.query.workspaceMember.findFirst({
@@ -216,15 +220,14 @@ export const teamRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, permissions } = ctx;
       const { memberId, role } = input;
 
-      const actor = await db.query.workspaceMember.findFirst({
-        where: eq(workspaceMember.userId, session.user.id),
-      });
-
-      if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+      if (!permissions.includes("team:manage_roles")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to update member roles",
+        });
       }
 
       await db.update(workspaceMember).set({ role }).where(eq(workspaceMember.id, memberId));
@@ -235,15 +238,14 @@ export const teamRouter = router({
   revokeInvitation: workspaceProcedure
     .input(z.object({ invitationId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db, permissions } = ctx;
       const { invitationId } = input;
 
-      const actor = await db.query.workspaceMember.findFirst({
-        where: eq(workspaceMember.userId, session.user.id),
-      });
-
-      if (!actor || (actor.role !== "owner" && actor.role !== "admin")) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+      if (!permissions.includes("team:invite")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to revoke invitations",
+        });
       }
 
       await db.delete(workspaceInvitation).where(eq(workspaceInvitation.id, invitationId));
@@ -297,5 +299,64 @@ export const teamRouter = router({
       await db.delete(workspaceInvitation).where(eq(workspaceInvitation.id, invitation.id));
 
       return { success: true, workspaceId: invitation.workspaceId };
+    }),
+
+  getPermissionSets: workspaceProcedure.query(async ({ ctx }) => {
+    const { db, workspaceId } = ctx;
+
+    const sets = await db.query.workspacePermissionSet.findMany({
+      where: eq(workspacePermissionSet.workspaceId, workspaceId),
+    });
+
+    return {
+      permissionSets: sets,
+      defaults: DEFAULT_ROLE_PERMISSIONS,
+      allPermissions: ALL_PERMISSIONS,
+    };
+  }),
+
+  updatePermissionSet: workspaceProcedure
+    .input(
+      z.object({
+        role: z.enum(["admin", "member"]),
+        permissions: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, workspaceId, permissions: userPermissions } = ctx;
+      const { role, permissions } = input;
+
+      if (!userPermissions.includes("team:manage_roles")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to update role permissions",
+        });
+      }
+
+      const existing = await db.query.workspacePermissionSet.findFirst({
+        where: and(
+          eq(workspacePermissionSet.workspaceId, workspaceId),
+          eq(workspacePermissionSet.role, role),
+        ),
+      });
+
+      if (existing) {
+        await db
+          .update(workspacePermissionSet)
+          .set({
+            permissionsJson: JSON.stringify(permissions),
+            updatedAt: new Date(),
+          })
+          .where(eq(workspacePermissionSet.id, existing.id));
+      } else {
+        await db.insert(workspacePermissionSet).values({
+          id: crypto.randomUUID(),
+          workspaceId,
+          role,
+          permissionsJson: JSON.stringify(permissions),
+        });
+      }
+
+      return { success: true };
     }),
 });

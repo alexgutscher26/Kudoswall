@@ -12,7 +12,10 @@ import {
   Trash2,
   ShieldAlert,
   Lock,
+  Settings2,
+  Check,
 } from "lucide-react";
+
 import { trpc } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
@@ -37,6 +40,10 @@ export default function TeamTab() {
 
   const { data, isLoading, refetch } = useQuery({
     ...trpc.team.getMembers.queryOptions(),
+  });
+
+  const { data: permissionData, isLoading: isLoadingPermissions, refetch: refetchPermissions } = useQuery({
+    ...trpc.team.getPermissionSets.queryOptions(),
   });
 
   const inviteMutation = useMutation({
@@ -85,7 +92,18 @@ export default function TeamTab() {
     },
   });
 
-  if (isLoading) {
+  const updatePermissionMutation = useMutation({
+    ...trpc.team.updatePermissionSet.mutationOptions(),
+    onSuccess: () => {
+      toast.success("Permissions updated");
+      refetchPermissions();
+    },
+    onError: (err) => {
+      toast.error("Failed to update permissions: " + err.message);
+    },
+  });
+
+  if (isLoading || isLoadingPermissions) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="size-8 animate-spin rounded-full border-4 border-pink-500/20 border-t-pink-500" />
@@ -255,6 +273,114 @@ export default function TeamTab() {
           </div>
         </div>
       )}
+
+      {/* Role Permissions Management */}
+      <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-400">
+            <Settings2 className="size-5" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-neutral-900">Role Permissions</h3>
+            <p className="text-[13px] text-neutral-400">Customize what each role can do in this workspace.</p>
+          </div>
+        </div>
+
+        <div className="mt-8 overflow-hidden rounded-2xl border border-neutral-50">
+          <table className="w-full text-left">
+            <thead className="bg-neutral-50/50 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+              <tr>
+                <th className="px-6 py-4">Permission</th>
+                <th className="px-6 py-4 text-center">Admin</th>
+                <th className="px-6 py-4 text-center">Member</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-50 text-[13px]">
+              {permissionData?.allPermissions.map((permission: string) => {
+                const adminSet = permissionData.permissionSets.find((s: any) => s.role === "admin");
+                const memberSet = permissionData.permissionSets.find((s: any) => s.role === "member");
+
+                const isAdminEnabled = adminSet 
+                  ? JSON.parse(adminSet.permissionsJson).includes(permission as any)
+                  : (permissionData.defaults.admin as any[]).includes(permission);
+                
+                const isMemberEnabled = memberSet
+                  ? JSON.parse(memberSet.permissionsJson).includes(permission as any)
+                  : (permissionData.defaults.member as any[]).includes(permission);
+
+                const togglePermission = (role: "admin" | "member", currentEnabled: boolean) => {
+                  const currentSet = role === "admin" ? adminSet : memberSet;
+                  const currentPerms = currentSet 
+                    ? JSON.parse(currentSet.permissionsJson)
+                    : (permissionData.defaults as any)[role];
+                  
+                  const nextPerms = currentEnabled
+                    ? currentPerms.filter((p: string) => p !== (permission as any))
+                    : [...currentPerms, permission];
+                  
+                  updatePermissionMutation.mutate({
+                    role,
+                    permissions: nextPerms,
+                  });
+                };
+
+                const isPending = (role: string) => 
+                  updatePermissionMutation.isPending && 
+                  updatePermissionMutation.variables?.role === role;
+
+                return (
+                  <tr key={permission} className="group hover:bg-neutral-50/50">
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-neutral-800">
+                        {permission.split(":").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")}
+                      </div>
+                      <div className="text-[11px] text-neutral-400">
+                        Allow {permission.replace(":", " ")} actions
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        type="button"
+                        disabled={isPending("admin")}
+                        onClick={() => togglePermission("admin", isAdminEnabled)}
+                        className={`mx-auto flex size-6 items-center justify-center rounded-lg transition-all ${
+                          isAdminEnabled 
+                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200" 
+                            : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"
+                        } disabled:opacity-50`}
+                      >
+                        {isPending("admin") ? (
+                          <div className="size-3 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                        ) : isAdminEnabled ? (
+                          <Check className="size-4" />
+                        ) : null}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        type="button"
+                        disabled={isPending("member")}
+                        onClick={() => togglePermission("member", isMemberEnabled)}
+                        className={`mx-auto flex size-6 items-center justify-center rounded-lg transition-all ${
+                          isMemberEnabled 
+                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200" 
+                            : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"
+                        } disabled:opacity-50`}
+                      >
+                        {isPending("member") ? (
+                          <div className="size-3 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                        ) : isMemberEnabled ? (
+                          <Check className="size-4" />
+                        ) : null}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Invite Modal Overlay */}
       {isInviteModalOpen && (
