@@ -398,255 +398,239 @@ export function TestimonialInbox({
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header Toolbar: Collection Info & Quick Actions */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:flex sm:flex-wrap sm:items-center lg:gap-4">
-          {/* Project Switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white p-2.5 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md sm:px-4 sm:py-2">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-50 transition-colors group-hover:bg-pink-100">
-                <MessageSquareQuote className="size-4 text-pink-500" />
-              </div>
-              <div className="min-w-0 text-left">
-                <p className="mb-0.5 hidden text-[10px] font-bold tracking-widest text-neutral-400 uppercase sm:block">
-                  Active Collection
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <p className="truncate text-[13px] font-bold text-neutral-900 sm:text-[14px]">
-                    {project.name}
-                  </p>
-                  <ChevronDown className="size-3.5 text-neutral-300 transition-colors group-hover:text-neutral-500" />
+    <div className="flex flex-col gap-8">
+      {/* Premium Header: Project Context & Search/Filter Toolbar */}
+      <div className="space-y-6">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-4">
+            {/* Project Switcher - Simplified */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group flex items-center gap-3 outline-none">
+                <div className="flex size-10 items-center justify-center rounded-2xl bg-pink-50 shadow-sm ring-1 ring-pink-100 transition-all group-hover:scale-105 group-hover:bg-pink-100 group-hover:shadow-md">
+                  <MessageSquareQuote className="size-5 text-pink-500" />
                 </div>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl duration-200"
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  Switch Collection
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                <div className="max-h-60 overflow-y-auto">
-                  <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
-                    {projects.map((p) => (
-                      <DropdownMenuRadioItem
-                        key={p.id}
-                        value={p.id}
-                        className="rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
-                      >
-                        {p.name}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
+                      {project.name}
+                    </h1>
+                    <ChevronDown className="mt-1 size-4 text-neutral-400 transition-colors group-hover:text-neutral-600" />
+                  </div>
+                  <p className="text-xs font-medium text-neutral-400">Personal Workspace</p>
                 </div>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-              <DropdownMenuItem
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set("new", "project");
-                  router.push(`${pathname}?${params.toString()}` as any);
-                }}
-                className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl duration-200"
               >
-                <Plus className="size-3.5" />
-                New Collection Link
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                    Switch Collection
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                  <div className="max-h-60 overflow-y-auto">
+                    <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
+                      {projects?.map((p) => (
+                        <DropdownMenuRadioItem
+                          key={p.id}
+                          value={p.id}
+                          className="rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
+                        >
+                          {p.name}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </div>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                <DropdownMenuItem
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set("new", "project");
+                    router.push(`${pathname}?${params.toString()}` as any);
+                  }}
+                  className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
+                >
+                  <Plus className="size-3.5" />
+                  New Collection Link
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* Collection Link Action */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white p-2.5 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md sm:px-4 sm:py-2"
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-neutral-50 transition-colors group-hover:bg-neutral-100">
-              <Copy className="size-4 text-neutral-400 transition-colors group-hover:text-neutral-600" />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="mb-0.5 hidden text-[10px] font-bold tracking-widest text-neutral-400 uppercase sm:block">
-                Collection Link
-              </p>
-              <p className="max-w-[140px] truncate text-[13px] font-bold text-neutral-900 group-hover:text-pink-600 sm:text-[14px] lg:max-w-[200px]">
-                {mounted
-                  ? `${window.location.host}/collect/${project.slug}`
-                  : `/collect/${project.slug}`}
-              </p>
-            </div>
-          </button>
+            <div className="h-8 w-px bg-neutral-100 mx-2 hidden sm:block" />
+
+            {/* Subtle Copy Link */}
+            <button
+              onClick={handleCopyLink}
+              className="group hidden items-center gap-2 rounded-xl border border-neutral-100 bg-white px-3 py-1.5 shadow-sm transition-all hover:border-neutral-200 hover:shadow-md sm:flex"
+            >
+              <Copy className="size-3.5 text-neutral-400 transition-colors group-hover:text-pink-500" />
+              <span className="text-[13px] font-semibold text-neutral-600 transition-colors group-hover:text-neutral-900">
+                Copy Link
+              </span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center lg:gap-3">
-          <div className="relative w-full sm:w-64 lg:w-72">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Search testimonials..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-[46px] w-full rounded-2xl border border-neutral-100 bg-white pr-4 pl-10 text-[14px] text-neutral-900 shadow-sm transition-all outline-none placeholder:text-neutral-400 focus:border-pink-200 focus:ring-2 focus:ring-pink-100 focus:outline-hidden"
-            />
-          </div>
+        {/* Unified Control Bar */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex flex-1 items-center gap-2 rounded-2xl border border-neutral-100 bg-white/50 p-1.5 shadow-xs ring-1 ring-black/[0.02] backdrop-blur-sm sm:gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search testimonials..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-10 w-full rounded-xl bg-transparent pr-4 pl-10 text-[14px] text-neutral-900 outline-none placeholder:text-neutral-400"
+              />
+            </div>
 
-          <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            {filteredTestimonials.length > 0 && (
-              <button
-                onClick={handleSelectAll}
-                className="flex h-[40px] shrink-0 items-center gap-2 rounded-xl border border-neutral-100 bg-white px-3 text-[13px] font-bold text-neutral-600 shadow-sm transition-all outline-none hover:bg-neutral-50 hover:text-neutral-900 sm:h-[46px] sm:rounded-2xl sm:px-4"
-              >
-                <Check
-                  className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`}
-                />
-                <span className="whitespace-nowrap">
-                  {selectedIds.length === filteredTestimonials.length ? "Deselect" : "Select All"}
-                </span>
-              </button>
-            )}
+            <div className="h-6 w-px bg-neutral-100" />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={`relative flex h-[40px] shrink-0 items-center gap-2 rounded-xl border px-3 text-[13px] font-bold shadow-sm transition-all outline-none sm:h-[46px] sm:rounded-2xl sm:px-4 ${
-                  minRating !== null
-                    ? "border-pink-200 bg-pink-50 text-pink-600"
-                    : "border-neutral-100 bg-white text-neutral-600 hover:bg-neutral-50"
-                } `}
-              >
-                <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
-                Rating
-                {minRating !== null && (
-                  <span className="absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white bg-pink-500 shadow-sm" />
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
-              >
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                    Minimum Rating
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                  <DropdownMenuRadioGroup
-                    value={minRating?.toString() || "all"}
-                    onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
-                  >
-                    <DropdownMenuRadioItem
-                      value="all"
-                      className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                    >
-                      All Ratings
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="5"
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                    >
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                      <span>5 Stars only</span>
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="4"
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                    >
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                      <span>4+ Stars</span>
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="3"
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                    >
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                      <span>3+ Stars</span>
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuGroup>
+            <div className="scrollbar-hide flex items-center gap-1.5 overflow-x-auto pr-1">
+              {filteredTestimonials.length > 0 && (
+                <button
+                  onClick={handleSelectAll}
+                  className="flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 hover:text-neutral-900"
+                >
+                  <Check
+                    className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`}
+                  />
+                  <span className="hidden whitespace-nowrap sm:inline">
+                    {selectedIds.length === filteredTestimonials.length ? "Deselect" : "Select All"}
+                  </span>
+                </button>
+              )}
 
-                {minRating !== null && (
-                  <>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
+                    minRating !== null ? "bg-pink-50 text-pink-600" : "text-neutral-600 hover:bg-neutral-100"
+                  } `}
+                >
+                  <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
+                  Rating
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+                >
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                      Minimum Rating
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                    <DropdownMenuItem
-                      onClick={() => setMinRating(null)}
-                      className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                    <DropdownMenuRadioGroup
+                      value={minRating?.toString() || "all"}
+                      onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
                     >
-                      Clear Filter
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Tag Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={`relative flex h-[40px] shrink-0 items-center gap-2 rounded-xl border px-3 text-[13px] font-bold shadow-sm transition-all outline-none sm:h-[46px] sm:rounded-2xl sm:px-4 ${
-                  selectedTagId !== null
-                    ? "border-pink-200 bg-pink-50 text-pink-600"
-                    : "border-neutral-100 bg-white text-neutral-600 hover:bg-neutral-50"
-                } `}
-              >
-                <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
-                Tag
-                {selectedTagId !== null && (
-                  <span className="absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white bg-pink-500 shadow-sm" />
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
-              >
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                    Filter by Tag
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                  <DropdownMenuRadioGroup
-                    value={selectedTagId || "all"}
-                    onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
-                  >
-                    <DropdownMenuRadioItem
-                      value="all"
-                      className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                    >
-                      All Testimonials
-                    </DropdownMenuRadioItem>
-                    {tags?.map((tag) => (
                       <DropdownMenuRadioItem
-                        key={tag.id}
-                        value={tag.id}
+                        value="all"
+                        className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        All Ratings
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="5"
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
                       >
-                        <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
-                        <span>{tag.name}</span>
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>5 Stars only</span>
                       </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuGroup>
+                      <DropdownMenuRadioItem
+                        value="4"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>4+ Stars</span>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="3"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>3+ Stars</span>
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuGroup>
+                  {minRating !== null && (
+                    <>
+                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                      <DropdownMenuItem
+                        onClick={() => setMinRating(null)}
+                        className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                      >
+                        Clear Filter
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {selectedTagId !== null && (
-                  <>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
+                    selectedTagId !== null ? "bg-pink-50 text-pink-600" : "text-neutral-600 hover:bg-neutral-100"
+                  } `}
+                >
+                  <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
+                  Tag
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+                >
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                      Filter by Tag
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                    <DropdownMenuItem
-                      onClick={() => setSelectedTagId(null)}
-                      className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
-                    >
-                      Clear Tag Filter
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <div className="max-h-60 overflow-y-auto">
+                      <DropdownMenuRadioGroup
+                        value={selectedTagId || "all"}
+                        onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
+                      >
+                        <DropdownMenuRadioItem
+                          value="all"
+                          className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                        >
+                          All Tags
+                        </DropdownMenuRadioItem>
+                        {tags?.map((tag) => (
+                          <DropdownMenuRadioItem
+                            key={tag.id}
+                            value={tag.id}
+                            className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                          >
+                            {tag.name}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </div>
+                  </DropdownMenuGroup>
+                  {selectedTagId !== null && (
+                    <>
+                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                      <DropdownMenuItem
+                        onClick={() => setSelectedTagId(null)}
+                        className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                      >
+                        Clear Filter
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            <button
-              type="button"
-              onClick={handleExport}
-              className="flex h-[40px] shrink-0 items-center gap-2 rounded-xl border border-neutral-100 bg-white px-3 text-[13px] font-bold text-neutral-600 shadow-sm transition-all outline-none hover:bg-neutral-50 hover:text-neutral-900 sm:h-[46px] sm:rounded-2xl sm:px-4"
-            >
-              <Download className="size-3.5 text-neutral-400" />
-              <span className="whitespace-nowrap">Export CSV</span>
-            </button>
+              <button
+                onClick={handleExport}
+                className="flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 hover:text-neutral-900"
+              >
+                <Download className="size-3.5 text-neutral-400" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
