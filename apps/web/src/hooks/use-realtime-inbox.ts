@@ -1,19 +1,16 @@
 import { useEffect } from "react";
-import Pusher from "pusher-js";
-import { env } from "@my-better-t-app/env/web";
+import { getPusherClient } from "@/lib/pusher-client";
 import { queryClient, trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
 
 export function useRealtimeInbox(workspaceId: string | undefined, projectId: string | undefined) {
   useEffect(() => {
-    if (!workspaceId || !env.NEXT_PUBLIC_PUSHER_KEY || !env.NEXT_PUBLIC_PUSHER_CLUSTER) {
+    if (!workspaceId) {
       return;
     }
 
-    const pusher = new Pusher(env.NEXT_PUBLIC_PUSHER_KEY, {
-      cluster: env.NEXT_PUBLIC_PUSHER_CLUSTER,
-      authEndpoint: "/api/pusher/auth",
-    });
+    const pusher = getPusherClient();
+    if (!pusher) return;
 
     const channelName = `private-inbox-${workspaceId}`;
     const channel = pusher.subscribe(channelName);
@@ -46,8 +43,8 @@ export function useRealtimeInbox(workspaceId: string | undefined, projectId: str
     );
 
     return () => {
+      channel.unbind_all();
       pusher.unsubscribe(channelName);
-      pusher.disconnect();
     };
   }, [workspaceId, projectId]);
 }

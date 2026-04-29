@@ -471,7 +471,7 @@ export const dashboardRouter = router({
       if (!p) throw new Error("Project not found or forbidden");
 
       const testimonials = await db.query.testimonial.findMany({
-        where: eq(testimonial.projectId, projectId),
+        where: and(eq(testimonial.projectId, projectId), isNull(testimonial.deletedAt)),
         orderBy: desc(testimonial.createdAt),
         with: {
           testimonialToTags: {
@@ -805,7 +805,13 @@ export const dashboardRouter = router({
         .select({ value: count() })
         .from(testimonial)
         .innerJoin(project, eq(testimonial.projectId, project.id))
-        .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.authorEmail, email)));
+        .where(
+          and(
+            eq(project.workspaceId, workspaceId),
+            eq(testimonial.authorEmail, email),
+            isNull(testimonial.deletedAt),
+          ),
+        );
 
       return { count: Number(countResult?.value || 0) };
     }),
@@ -831,7 +837,13 @@ export const dashboardRouter = router({
         })
         .from(testimonial)
         .innerJoin(project, eq(testimonial.projectId, project.id))
-        .where(and(eq(project.workspaceId, workspaceId), eq(testimonial.authorEmail, email)));
+        .where(
+          and(
+            eq(project.workspaceId, workspaceId),
+            eq(testimonial.authorEmail, email),
+            isNull(testimonial.deletedAt),
+          ),
+        );
 
       return {
         exportedAt: new Date().toISOString(),

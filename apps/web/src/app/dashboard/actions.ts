@@ -579,7 +579,7 @@ export async function deleteTestimonial(id: string) {
     throw new Error("Forbidden");
   }
 
-  await db.delete(testimonial).where(eq(testimonial.id, id));
+  await db.update(testimonial).set({ deletedAt: new Date() }).where(eq(testimonial.id, id));
 
   try {
     // Use sync env instead of getEnvAsync for Server Actions
@@ -688,14 +688,15 @@ export async function bulkDeleteTestimonials(ids: string[]) {
       throw new Error("Forbidden: You do not own some of these testimonials");
     }
 
-    if (testimonials.length !== uniqueIds.length) {
-      const foundIds = testimonials.map(t => t.id);
-      const missingIds = uniqueIds.filter(id => !foundIds.includes(id));
-      console.warn(`[bulkDeleteTestimonials] Some testimonials not found or already deleted:`, missingIds);
-      throw new Error(`Some testimonials were not found or already deleted: ${missingIds.join(", ")}`);
+    const authorizedIds = testimonials.map((t) => t.id);
+    if (authorizedIds.length === 0) {
+      return { success: true };
     }
 
-    await db.update(testimonial).set({ deletedAt: new Date() }).where(inArray(testimonial.id, uniqueIds));
+    await db
+      .update(testimonial)
+      .set({ deletedAt: new Date() })
+      .where(inArray(testimonial.id, authorizedIds));
 
     const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
     for (const wsId of workspaceIds) {
