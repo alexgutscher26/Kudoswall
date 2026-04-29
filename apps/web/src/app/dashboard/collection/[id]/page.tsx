@@ -89,5 +89,4 @@ async function CollectionDetailContentWrapper({
       </div>
     </DashboardShell>
   );
-
 }

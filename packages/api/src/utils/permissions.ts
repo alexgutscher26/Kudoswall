@@ -5,13 +5,13 @@ import { DEFAULT_ROLE_PERMISSIONS, type Permission } from "../logic/permissions"
 export async function getPermissions(
   db: any,
   workspaceId: string,
-  userId: string
+  userId: string,
 ): Promise<Permission[]> {
   const membership = await db.query.workspaceMember.findFirst({
     where: and(
       eq(workspaceMember.workspaceId, workspaceId),
       eq(workspaceMember.userId, userId),
-      isNull(workspaceMember.deletedAt)
+      isNull(workspaceMember.deletedAt),
     ),
   });
 
@@ -21,7 +21,7 @@ export async function getPermissions(
   const permissionSet = await db.query.workspacePermissionSet.findFirst({
     where: and(
       eq(workspacePermissionSet.workspaceId, workspaceId),
-      eq(workspacePermissionSet.role, membership.role)
+      eq(workspacePermissionSet.role, membership.role),
     ),
   });
 
@@ -41,7 +41,7 @@ export async function hasPermission(
   db: any,
   workspaceId: string,
   userId: string,
-  permission: Permission
+  permission: Permission,
 ): Promise<boolean> {
   const permissions = await getPermissions(db, workspaceId, userId);
   return permissions.includes(permission);

@@ -29,14 +29,12 @@ export const teamRouter = router({
       with: { organization: true },
     });
 
-
     const { getWorkspacePermissions } = await import("../logic/billing");
     const permissions = getWorkspacePermissions({
       plan: ws?.plan ?? "free",
       organization: (ws as any)?.organization,
     });
     const planConfig = permissions;
-
 
     return {
       members: members.map((m) => ({
@@ -83,7 +81,6 @@ export const teamRouter = router({
         where: eq(workspace.id, workspaceId),
         with: { organization: true },
       });
-
 
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({

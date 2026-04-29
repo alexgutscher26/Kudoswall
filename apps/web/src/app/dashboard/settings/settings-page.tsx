@@ -33,7 +33,6 @@ import TeamTab from "./team-tab";
 import SessionTab from "./session-tab";
 import { type Plan, PLANS } from "@my-better-t-app/api/config/plans";
 
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Tab = "general" | "collection" | "billing" | "team" | "compliance" | "sessions";
@@ -517,7 +516,6 @@ export default function SettingsPage() {
         {activeTab === "billing" &&
           (() => {
             const planConfig = PLANS[(billing?.plan || "free") as Plan];
-
 
             const isPaid = billing?.plan !== "free";
 

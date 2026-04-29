@@ -17,19 +17,17 @@ export const SubmissionConfirmationEmail = ({
       <Section>
         <Text className="text-dark mb-6 font-serif text-[18px]">Hi {authorName},</Text>
         <Text className="text-[14px] leading-[24px] text-neutral-700">
-          Thank you so much for sharing your feedback for <strong>{projectName}</strong>. 
-          Your support means a lot!
+          Thank you so much for sharing your feedback for <strong>{projectName}</strong>. Your
+          support means a lot!
         </Text>
 
         {thankYouMessage && (
           <Section className="mt-6 border-l-4 border-neutral-200 pl-4">
-            <Text className="text-[14px] italic text-neutral-600">
-              "{thankYouMessage}"
-            </Text>
+            <Text className="text-[14px] text-neutral-600 italic">"{thankYouMessage}"</Text>
           </Section>
         )}
 
-        <Text className="text-[14px] leading-[24px] text-neutral-700 mt-6">
+        <Text className="mt-6 text-[14px] leading-[24px] text-neutral-700">
           We've received your testimonial and it has been sent to the team for review.
         </Text>
 

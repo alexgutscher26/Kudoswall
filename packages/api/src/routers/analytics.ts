@@ -73,7 +73,6 @@ export const analyticsRouter = router({
         });
       }
 
-
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
@@ -81,7 +80,6 @@ export const analyticsRouter = router({
         plan: ws.plan,
         organization: (ws as any).organization,
       });
-
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -242,7 +240,6 @@ export const analyticsRouter = router({
         });
       }
 
-
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
@@ -250,7 +247,6 @@ export const analyticsRouter = router({
         plan: ws.plan,
         organization: (ws as any).organization,
       });
-
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -321,7 +317,6 @@ export const analyticsRouter = router({
         });
       }
 
-
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
@@ -329,7 +324,6 @@ export const analyticsRouter = router({
         plan: ws.plan,
         organization: (ws as any).organization,
       });
-
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
@@ -403,7 +397,6 @@ export const analyticsRouter = router({
         });
       }
 
-
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
@@ -411,7 +404,6 @@ export const analyticsRouter = router({
         plan: ws.plan,
         organization: (ws as any).organization,
       });
-
 
       if (!permissions.features.csvExport) {
         throw new Error("CSV Export is not available on your plan.");
@@ -485,7 +477,6 @@ export const analyticsRouter = router({
         });
       }
 
-
       if (!ws) throw new Error("No workspace found");
 
       const { getWorkspacePermissions } = await import("../logic/billing");
@@ -493,7 +484,6 @@ export const analyticsRouter = router({
         plan: ws.plan,
         organization: (ws as any).organization,
       });
-
 
       if (!permissions.features.analytics) {
         throw new Error("Analytics is not available on your current plan. Please upgrade.");

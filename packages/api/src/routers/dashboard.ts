@@ -217,7 +217,6 @@ export const dashboardRouter = router({
         ws.subscriptionStatus = ws.organization.subscriptionStatus || ws.subscriptionStatus;
       }
 
-
       const projects = await db.query.project.findMany({
         where: and(eq(project.workspaceId, ws.id), isNull(project.deletedAt)),
         orderBy: desc(project.createdAt),
@@ -371,7 +370,6 @@ export const dashboardRouter = router({
         return ws;
       })
       .filter((ws) => !ws.deletedAt);
-
   }),
 
   createWorkspace: protectedProcedure
@@ -441,7 +439,6 @@ export const dashboardRouter = router({
       };
 
       await db.insert(workspace).values(newWs);
-
 
       await db.insert(workspaceMember).values({
         id: crypto.randomUUID(),

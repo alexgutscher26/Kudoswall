@@ -879,7 +879,9 @@ export default function WidgetCustomizer({
                       <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-900/10 backdrop-blur-[1px]">
                         <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
                           <Lock className="size-3 text-neutral-400" />
-                          <span className="text-[10px] font-bold text-neutral-600">Pro Feature</span>
+                          <span className="text-[10px] font-bold text-neutral-600">
+                            Pro Feature
+                          </span>
                         </div>
                       </div>
                     )}

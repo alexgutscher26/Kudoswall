@@ -5,7 +5,6 @@ import { checkRateLimit } from "./rateLimit";
 import type { Context } from "./context";
 import { getPermissions } from "./utils/permissions";
 
-
 export const t = initTRPC.context<Context>().create();
 
 export const router = t.router;

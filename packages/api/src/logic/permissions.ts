@@ -30,9 +30,5 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<"owner" | "admin" | "member", Perm
     "team:invite",
     "settings:manage",
   ],
-  member: [
-    "testimonial:approve",
-    "testimonial:archive",
-    "tag:manage",
-  ],
+  member: ["testimonial:approve", "testimonial:archive", "tag:manage"],
 };

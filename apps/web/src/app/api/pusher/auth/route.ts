@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     where: and(
       eq(workspaceMember.workspaceId, workspaceId),
       eq(workspaceMember.userId, session.user.id),
-      isNull(workspaceMember.deletedAt)
+      isNull(workspaceMember.deletedAt),
     ),
   });
 

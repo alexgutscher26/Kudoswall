@@ -258,9 +258,7 @@ export function TestimonialInbox({
   };
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   const handleCopyLink = () => {
@@ -486,7 +484,9 @@ export function TestimonialInbox({
               onClick={handleSelectAll}
               className="flex h-[46px] items-center gap-2 rounded-2xl border border-neutral-100 bg-white px-4 py-2 text-[13px] font-bold text-neutral-600 shadow-sm transition-all outline-none hover:bg-neutral-50 hover:text-neutral-900 active:scale-[0.98]"
             >
-              <Check className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`} />
+              <Check
+                className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`}
+              />
               {selectedIds.length === filteredTestimonials.length ? "Deselect All" : "Select All"}
             </button>
           )}
@@ -981,27 +981,27 @@ function TestimonialCard({
                 {isSelected && <Check className="size-3.5" strokeWidth={3} />}
               </div>
               <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <div key={s} className="relative">
-                  <Star className="size-4 fill-neutral-100 text-neutral-100" />
-                  {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
-                    <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                    </div>
-                  )}
-                  {(t.rating ?? 0) >= s && (
-                    <div className="absolute inset-0 z-10 overflow-hidden">
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                    </div>
-                  )}
-                </div>
-              ))}
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <div key={s} className="relative">
+                    <Star className="size-4 fill-neutral-100 text-neutral-100" />
+                    {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
+                      <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
+                        <Star className="size-4 fill-amber-400 text-amber-400" />
+                      </div>
+                    )}
+                    {(t.rating ?? 0) >= s && (
+                      <div className="absolute inset-0 z-10 overflow-hidden">
+                        <Star className="size-4 fill-amber-400 text-amber-400" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
+                · {t.type} Testimonial
+              </span>
             </div>
-            <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
-              · {t.type} Testimonial
-            </span>
           </div>
-        </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
             {t.testimonialToTags?.map((tt) => (
@@ -1103,7 +1103,7 @@ function TestimonialCard({
               <h4 className="flex items-center gap-2 truncate text-[15px] font-bold text-neutral-900">
                 {t.authorName}
                 {t.verifiedVia && (
-                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 ring-1 ring-blue-500/10 uppercase">
+                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 uppercase ring-1 ring-blue-500/10">
                     <ShieldCheck className="size-2.5" />
                     Verified
                   </span>
@@ -1331,11 +1331,14 @@ function BulkActionToolbar({
           </button>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 outline-none active:scale-95">
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all outline-none hover:bg-neutral-100 active:scale-95">
               <Tag className="size-3.5" />
               Tag
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-48 rounded-2xl border-neutral-100 p-2 shadow-xl">
+            <DropdownMenuContent
+              align="center"
+              className="w-48 rounded-2xl border-neutral-100 p-2 shadow-xl"
+            >
               <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
                 Tag Selected
               </DropdownMenuLabel>

@@ -313,7 +313,8 @@ function TestimonialCard({
           {testimonial.verifiedVia && (
             <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-green-600">
               <CheckCircle2 className="size-2.5" />
-              Verified via {testimonial.verifiedVia === "verified" ? "Social" : testimonial.verifiedVia}
+              Verified via{" "}
+              {testimonial.verifiedVia === "verified" ? "Social" : testimonial.verifiedVia}
             </div>
           )}
         </div>

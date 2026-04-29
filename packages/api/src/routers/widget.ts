@@ -142,7 +142,6 @@ export const widgetRouter = router({
             with: { organization: true },
           },
         },
-
       });
 
       if (!w) {
@@ -155,7 +154,6 @@ export const widgetRouter = router({
         organization: (w.workspace as any).organization,
       });
       const planConfig = permissions;
-
 
       // Enforce Layout restrictions
       if (
@@ -244,7 +242,6 @@ export const widgetRouter = router({
             with: { organization: true },
           },
         },
-
       });
 
       if (!w) throw new Error("Widget not found");

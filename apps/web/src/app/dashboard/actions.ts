@@ -130,8 +130,6 @@ async function getOrCreateWorkspace(userId: string, userName: string) {
   }
 
   return newWorkspace as any;
-
-
 }
 
 export async function createProject(formData: FormData, workspaceId?: string) {
@@ -172,7 +170,6 @@ export async function createProject(formData: FormData, workspaceId?: string) {
     projectsCount: projectsCount[0]?.value || 0,
   });
 
-
   if (!permissions.canAddProject) {
     throw new Error(
       `You have reached the project limit for your ${permissions.name} plan. Please upgrade.`,
@@ -210,7 +207,6 @@ export async function getDashboardData(workspaceId?: string) {
       });
     }
 
-
     if (!ws) {
       ws = await getOrCreateWorkspace(session.user.id, session.user.name);
     }
@@ -220,7 +216,6 @@ export async function getDashboardData(workspaceId?: string) {
       ws.plan = (ws.organization as any).plan || ws.plan;
       ws.subscriptionStatus = (ws.organization as any).subscriptionStatus || ws.subscriptionStatus;
     }
-
 
     // Fetch everything in parallel to eliminate waterfalls
     const [projects, [testimonialCount], [pendingCount], [approvedCount], [widgetCount]] =
@@ -352,7 +347,6 @@ export async function getDashboardData(workspaceId?: string) {
       testimonialsCount: testimonialsCount,
     });
 
-
     return {
       workspace: {
         ...ws,
@@ -419,7 +413,6 @@ export async function getProjectTestimonials(projectId: string) {
       },
     },
   });
-
 
   if (!p || p.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");
@@ -490,7 +483,6 @@ export async function updateTestimonialStatus(
     },
   });
 
-
   if (!t || t.project.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");
   }
@@ -532,7 +524,6 @@ export async function updateTestimonialStatus(
     // (Paid Plan) 5th Testimonial Upgrade Prompt
     const effectivePlan = t.project.workspace.organization?.plan || t.project.workspace.plan;
     if (effectivePlan === "free" && approvedCount === 5) {
-
       try {
         const u = await db.query.user.findFirst({
           where: eq(user.id, t.project.workspace.ownerId),
@@ -583,7 +574,6 @@ export async function deleteTestimonial(id: string) {
       },
     },
   });
-
 
   if (!t || t.project.workspace.ownerId !== session.user.id) {
     throw new Error("Forbidden");
@@ -739,7 +729,10 @@ export async function bulkTagTestimonials(
     where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
   });
 
-  if (testimonials.length !== ids.length || testimonials.some((test) => test.workspaceId !== t.workspaceId)) {
+  if (
+    testimonials.length !== ids.length ||
+    testimonials.some((test) => test.workspaceId !== t.workspaceId)
+  ) {
     throw new Error("Forbidden or some testimonials not found in this workspace");
   }
 

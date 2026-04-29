@@ -548,7 +548,6 @@ export default function DashboardShell({
 
   const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
-
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {
     if (searchParams.get("new") === "project") {
@@ -628,7 +627,6 @@ export default function DashboardShell({
     },
     queryClient,
   );
-
 
   const handleCopyCollectionLink = () => {
     if (activeData?.projects && activeData.projects.length > 0) {
@@ -726,10 +724,7 @@ export default function DashboardShell({
         />
 
         {/* Main content — offset only on lg+ */}
-        <div
-          className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60"
-        >
-
+        <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
           <DotGrid opacity={0.08} />
 
           {/* Soft central glow */}

@@ -27,7 +27,6 @@ export default async function EmbedPage({
     },
   });
 
-
   if (!w) {
     notFound();
   }
@@ -56,7 +55,6 @@ export default async function EmbedPage({
   // Allow query param overrides if Pro
   const effectivePlan = w.workspace.organization?.plan || w.workspace.plan;
   const isPro = effectivePlan !== "free" && effectivePlan !== null;
-
 
   if (isPro) {
     if (sParams.theme) settings.theme = sParams.theme as any;
@@ -161,9 +159,7 @@ export default async function EmbedPage({
           <link rel="stylesheet" href={fontHref} />
         </>
       )}
-      {w.customCss && (
-        <style dangerouslySetInnerHTML={{ __html: w.customCss }} />
-      )}
+      {w.customCss && <style dangerouslySetInnerHTML={{ __html: w.customCss }} />}
       <style
         dangerouslySetInnerHTML={{
           __html: [

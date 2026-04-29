@@ -37,7 +37,6 @@ export function WorkspaceSwitcher({
   const { isModalOpen, setIsModalOpen } = useWorkspace();
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
-
   useEffect(() => {
     if (isModalOpen) {
       document.body.setAttribute("data-modal-open", "true");

@@ -80,5 +80,4 @@ async function WidgetDetailContentWrapper({
       </div>
     </DashboardShell>
   );
-
 }

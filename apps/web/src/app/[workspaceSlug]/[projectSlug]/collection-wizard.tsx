@@ -1104,7 +1104,12 @@ export default function CollectionWizard({
                           <div className="flex flex-col gap-2 sm:flex-row">
                             <button
                               type="button"
-                              onClick={() => authClient.signIn.social({ provider: "google", callbackURL: window.location.href })}
+                              onClick={() =>
+                                authClient.signIn.social({
+                                  provider: "google",
+                                  callbackURL: window.location.href,
+                                })
+                              }
                               className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-[13px] font-medium text-neutral-900 transition-all hover:bg-neutral-50 active:scale-95"
                             >
                               <svg className="size-4" viewBox="0 0 24 24">
@@ -1142,20 +1147,14 @@ export default function CollectionWizard({
                         </div>
                       ) : (
                         <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
-                          <div
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900"
-                          >
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900">
                             <BadgeCheck className="size-5 text-white" />
                           </div>
                           <div>
-                            <p
-                              className="text-[13px] font-bold text-neutral-900"
-                            >
+                            <p className="text-[13px] font-bold text-neutral-900">
                               {t.verifiedAs.replace("{name}", session.user.name)}
                             </p>
-                            <p
-                              className="text-[10px] text-neutral-500 opacity-70"
-                            >
+                            <p className="text-[10px] text-neutral-500 opacity-70">
                               Identity confirmed via social login
                             </p>
                           </div>
@@ -1164,23 +1163,15 @@ export default function CollectionWizard({
                     </div>
 
                     {/* Trust Verification Signal */}
-                    <div
-                      className="mt-1 flex items-center gap-3 rounded-lg bg-neutral-50 px-3 py-2"
-                    >
-                      <div
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-neutral-100"
-                      >
+                    <div className="mt-1 flex items-center gap-3 rounded-lg bg-neutral-50 px-3 py-2">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-neutral-100">
                         <ShieldCheck className="size-3.5 text-green-600" />
                       </div>
                       <div>
-                        <p
-                          className="text-xs leading-none font-semibold text-neutral-900"
-                        >
+                        <p className="text-xs leading-none font-semibold text-neutral-900">
                           {t.identityVerification}
                         </p>
-                        <p
-                          className="mt-1 text-[10px] leading-relaxed text-neutral-500"
-                        >
+                        <p className="mt-1 text-[10px] leading-relaxed text-neutral-500">
                           {t.identityVerificationSub}
                         </p>
                       </div>

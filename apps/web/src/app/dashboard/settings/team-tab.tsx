@@ -42,7 +42,11 @@ export default function TeamTab() {
     ...trpc.team.getMembers.queryOptions(),
   });
 
-  const { data: permissionData, isLoading: isLoadingPermissions, refetch: refetchPermissions } = useQuery({
+  const {
+    data: permissionData,
+    isLoading: isLoadingPermissions,
+    refetch: refetchPermissions,
+  } = useQuery({
     ...trpc.team.getPermissionSets.queryOptions(),
   });
 
@@ -282,7 +286,9 @@ export default function TeamTab() {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-neutral-900">Role Permissions</h3>
-            <p className="text-[13px] text-neutral-400">Customize what each role can do in this workspace.</p>
+            <p className="text-[13px] text-neutral-400">
+              Customize what each role can do in this workspace.
+            </p>
           </div>
         </div>
 
@@ -298,41 +304,46 @@ export default function TeamTab() {
             <tbody className="divide-y divide-neutral-50 text-[13px]">
               {permissionData?.allPermissions.map((permission: string) => {
                 const adminSet = permissionData.permissionSets.find((s: any) => s.role === "admin");
-                const memberSet = permissionData.permissionSets.find((s: any) => s.role === "member");
+                const memberSet = permissionData.permissionSets.find(
+                  (s: any) => s.role === "member",
+                );
 
-                const isAdminEnabled = adminSet 
+                const isAdminEnabled = adminSet
                   ? JSON.parse(adminSet.permissionsJson).includes(permission as any)
                   : (permissionData.defaults.admin as any[]).includes(permission);
-                
+
                 const isMemberEnabled = memberSet
                   ? JSON.parse(memberSet.permissionsJson).includes(permission as any)
                   : (permissionData.defaults.member as any[]).includes(permission);
 
                 const togglePermission = (role: "admin" | "member", currentEnabled: boolean) => {
                   const currentSet = role === "admin" ? adminSet : memberSet;
-                  const currentPerms = currentSet 
+                  const currentPerms = currentSet
                     ? JSON.parse(currentSet.permissionsJson)
                     : (permissionData.defaults as any)[role];
-                  
+
                   const nextPerms = currentEnabled
                     ? currentPerms.filter((p: string) => p !== (permission as any))
                     : [...currentPerms, permission];
-                  
+
                   updatePermissionMutation.mutate({
                     role,
                     permissions: nextPerms,
                   });
                 };
 
-                const isPending = (role: string) => 
-                  updatePermissionMutation.isPending && 
+                const isPending = (role: string) =>
+                  updatePermissionMutation.isPending &&
                   updatePermissionMutation.variables?.role === role;
 
                 return (
                   <tr key={permission} className="group hover:bg-neutral-50/50">
                     <td className="px-6 py-4">
                       <div className="font-bold text-neutral-800">
-                        {permission.split(":").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")}
+                        {permission
+                          .split(":")
+                          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                          .join(" ")}
                       </div>
                       <div className="text-[11px] text-neutral-400">
                         Allow {permission.replace(":", " ")} actions
@@ -344,8 +355,8 @@ export default function TeamTab() {
                         disabled={isPending("admin")}
                         onClick={() => togglePermission("admin", isAdminEnabled)}
                         className={`mx-auto flex size-6 items-center justify-center rounded-lg transition-all ${
-                          isAdminEnabled 
-                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200" 
+                          isAdminEnabled
+                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200"
                             : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"
                         } disabled:opacity-50`}
                       >
@@ -362,8 +373,8 @@ export default function TeamTab() {
                         disabled={isPending("member")}
                         onClick={() => togglePermission("member", isMemberEnabled)}
                         className={`mx-auto flex size-6 items-center justify-center rounded-lg transition-all ${
-                          isMemberEnabled 
-                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200" 
+                          isMemberEnabled
+                            ? "bg-pink-500 text-white shadow-sm shadow-pink-200"
                             : "bg-neutral-100 text-neutral-300 hover:bg-neutral-200"
                         } disabled:opacity-50`}
                       >

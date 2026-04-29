@@ -128,7 +128,6 @@ const getProjectByCollectionSlug = unstable_cache(
           where: eq(testimonial.status, "approved"),
         },
       },
-
     });
 
     if (!result) return null;
@@ -176,7 +175,6 @@ const getProjectByCollectionSlug = unstable_cache(
       organization: result.workspace.organization,
       testimonialsCount: result.testimonials.length,
     });
-
 
     return {
       ...result,
@@ -300,8 +298,7 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
             : ""
         }`}
         style={{
-          backgroundColor:
-            settings?.background?.type === "color" ? backgroundColor : undefined,
+          backgroundColor: settings?.background?.type === "color" ? backgroundColor : undefined,
           backgroundImage:
             settings?.background?.type === "gradient" ? settings.background.gradient : undefined,
           fontFamily:

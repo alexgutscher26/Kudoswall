@@ -526,7 +526,9 @@ export function CollectionCustomizer({
                           checked={settings.background?.isAnimated || false}
                           className="accent-pink-500"
                           disabled={!isPro}
-                          onChange={(e) => setNestedSetting("background.isAnimated", e.target.checked)}
+                          onChange={(e) =>
+                            setNestedSetting("background.isAnimated", e.target.checked)
+                          }
                           type="checkbox"
                         />
                       </div>
@@ -574,7 +576,10 @@ export function CollectionCustomizer({
                               max="1"
                               min="0"
                               onChange={(e) =>
-                                setNestedSetting("background.imageOpacity", parseFloat(e.target.value))
+                                setNestedSetting(
+                                  "background.imageOpacity",
+                                  parseFloat(e.target.value),
+                                )
                               }
                               step="0.01"
                               type="range"

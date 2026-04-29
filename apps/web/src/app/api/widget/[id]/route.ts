@@ -24,7 +24,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           },
         });
 
-
         if (!w) {
           throw new Error("WIDGET_NOT_FOUND");
         }
@@ -44,7 +43,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
               settings,
               workspaceName: w.workspace.name,
               isPro: (w.workspace.organization?.plan || w.workspace.plan) !== "free",
-
             },
             testimonials: [],
           };
@@ -76,7 +74,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             settings,
             workspaceName: w.workspace.name,
             isPro: (w.workspace.organization?.plan || w.workspace.plan) !== "free",
-
           },
           testimonials: testimonials.map((t) => ({
             id: t.id,
