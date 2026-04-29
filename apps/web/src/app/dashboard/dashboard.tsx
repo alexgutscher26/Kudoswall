@@ -751,7 +751,7 @@ export default function DashboardShell({
           </div>
 
           {/* Main content */}
-          <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
           </main>
         </div>
