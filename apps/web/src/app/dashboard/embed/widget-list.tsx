@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Code2,
@@ -30,15 +30,24 @@ export default function WidgetList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newWidgetName, setNewWidgetName] = useState("");
 
-  const { activeWorkspaceId, setIsModalOpen } = useWorkspace();
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [isCreateModalOpen]);
+
+  const { activeWorkspaceId } = useWorkspace();
 
   const openModal = () => {
     setIsCreateModalOpen(true);
-    setIsModalOpen(true);
   };
   const closeModal = () => {
     setIsCreateModalOpen(false);
-    setIsModalOpen(false);
   };
   const { data: widgets, isLoading, refetch } = useQuery(trpc.widget.list.queryOptions());
 
