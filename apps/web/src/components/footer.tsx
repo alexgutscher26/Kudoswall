@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const PRODUCT_LINKS = [
   { label: "Features", href: "/#features" },
@@ -58,6 +59,21 @@ export default function Footer() {
             <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
               Transform happy customers into your best sales tool in under 5 minutes.
             </p>
+            <Link
+              href="https://www.scrolllaunch.com/products/kudoswall?utm_source=badge&utm_medium=embed&utm_campaign=kudoswall&ref=scrolllaunch"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block grayscale transition-all hover:grayscale-0"
+            >
+              <Image
+                src="https://www.scrolllaunch.com/api/badge/kudoswall"
+                alt="Featured on ScrollLaunch"
+                width={220}
+                height={48}
+                loading="lazy"
+                className="h-auto w-44"
+              />
+            </Link>
           </div>
 
           {/* Product */}

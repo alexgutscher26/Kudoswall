@@ -188,8 +188,6 @@
 - [x] Tag persistence across API queries (testimonialToTags relation included)
 - [x] Real-time inbox (WebSocket or SSE) — new submissions appear instantly
 - [x] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
-- [ ] Search bar: Filter by customer name, email, company, or keyword
-- [ ] Advanced filter panel: By rating (1-5), by type (Text/Video), by tag, by language, by date range
 - [ ] Bulk actions: Approve all, Reject all, Tag selected, Export selected, Delete selected
 - [ ] Drag-and-drop reordering of featured testimonials
 - [ ] "Feature" toggle to pin top testimonials in widgets

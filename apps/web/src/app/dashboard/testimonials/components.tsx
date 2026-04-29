@@ -39,7 +39,13 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@my-better-t-app/ui/components/dropdown-menu";
-import { updateTestimonialStatus, deleteTestimonial } from "../actions";
+import {
+  updateTestimonialStatus,
+  deleteTestimonial,
+  bulkUpdateTestimonialStatus,
+  bulkDeleteTestimonials,
+  bulkTagTestimonials,
+} from "../actions";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtimeInbox } from "@/hooks/use-realtime-inbox";
 
@@ -105,6 +111,7 @@ export function TestimonialInbox({
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -164,6 +171,22 @@ export function TestimonialInbox({
     });
   };
 
+  const handleBulkStatusUpdate = async (status: "approved" | "archived" | "pending") => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      try {
+        await bulkUpdateTestimonialStatus(selectedIds, status);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(`${selectedIds.length} testimonials ${status}`);
+        setSelectedIds([]);
+      } catch (error) {
+        toast.error("Failed to update status");
+      }
+    });
+  };
+
   const handleDelete = (id: string) => {
     toast("Delete testimonial?", {
       description: "Are you sure you want to delete this? This action cannot be undone.",
@@ -184,6 +207,60 @@ export function TestimonialInbox({
         },
       },
     });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    toast(`Delete ${selectedIds.length} testimonials?`, {
+      description: "Are you sure you want to delete selected items? This action cannot be undone.",
+      action: {
+        label: "Delete All",
+        onClick: () => {
+          startTransition(async () => {
+            try {
+              await bulkDeleteTestimonials(selectedIds);
+              await queryClient.invalidateQueries(
+                trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+              );
+              toast.success(`${selectedIds.length} testimonials deleted`);
+              setSelectedIds([]);
+            } catch (error) {
+              toast.error("Failed to delete testimonials");
+            }
+          });
+        },
+      },
+    });
+  };
+
+  const handleBulkTag = async (tagId: string, action: "assign" | "unassign") => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      try {
+        await bulkTagTestimonials(selectedIds, tagId, action);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(`Tags ${action === "assign" ? "assigned" : "removed"}`);
+        setSelectedIds([]);
+      } catch (error) {
+        toast.error("Failed to update tags");
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredTestimonials.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredTestimonials.map((t: Testimonial) => t.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
   };
 
   const handleCopyLink = () => {
@@ -255,6 +332,71 @@ export function TestimonialInbox({
     toast.success("Export successful!", {
       description: `${filteredTestimonials.length} testimonials exported`,
     });
+  };
+
+  const handleBulkExport = () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your testimonials.",
+      });
+      return;
+    }
+
+    if (selectedIds.length === 0) return;
+
+    const selectedTestimonials = filteredTestimonials.filter((t: Testimonial) =>
+      selectedIds.includes(t.id),
+    );
+
+    const headers = [
+      "ID",
+      "Author Name",
+      "Author Email",
+      "Author Company",
+      "Rating",
+      "Status",
+      "Type",
+      "Content",
+      "Video URL",
+      "Tags",
+      "Submitted At",
+    ];
+
+    const csvRows = selectedTestimonials.map((t: Testimonial) => {
+      const tags = t.testimonialToTags?.map((tt) => tt.tag.name).join("; ") || "";
+      const row = [
+        t.id,
+        t.authorName || "",
+        t.authorEmail || "",
+        t.authorCompany || "",
+        t.rating?.toString() || "",
+        t.status,
+        t.type,
+        (t.content || "").replace(/"/g, '""'),
+        t.videoUrl || "",
+        tags,
+        new Date(t.createdAt).toISOString(),
+      ];
+      return row.map((val) => `"${val}"`).join(",");
+    });
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `selected_testimonials_${project.slug}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Export successful!", {
+      description: `${selectedIds.length} testimonials exported`,
+    });
+    setSelectedIds([]);
   };
 
   return (
@@ -339,6 +481,16 @@ export function TestimonialInbox({
         </div>
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
+          {filteredTestimonials.length > 0 && (
+            <button
+              onClick={handleSelectAll}
+              className="flex h-[46px] items-center gap-2 rounded-2xl border border-neutral-100 bg-white px-4 py-2 text-[13px] font-bold text-neutral-600 shadow-sm transition-all outline-none hover:bg-neutral-50 hover:text-neutral-900 active:scale-[0.98]"
+            >
+              <Check className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`} />
+              {selectedIds.length === filteredTestimonials.length ? "Deselect All" : "Select All"}
+            </button>
+          )}
+
           <div className="relative w-full sm:w-72">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
             <input
@@ -564,6 +716,8 @@ export function TestimonialInbox({
               onDelete={handleDelete}
               onViewRaw={() => setRawTestimonial(t)}
               workspaceId={project.workspaceId}
+              isSelected={selectedIds.includes(t.id)}
+              onSelect={() => toggleSelect(t.id)}
             />
           ))
         ) : (
@@ -589,6 +743,17 @@ export function TestimonialInbox({
           </div>
         )}
       </div>
+
+      <BulkActionToolbar
+        selectedIds={selectedIds}
+        onApprove={() => handleBulkStatusUpdate("approved")}
+        onReject={() => handleBulkStatusUpdate("archived")}
+        onDelete={handleBulkDelete}
+        onExport={handleBulkExport}
+        onTag={(tagId) => handleBulkTag(tagId, "assign")}
+        tags={tags ?? []}
+        onClearSelection={() => setSelectedIds([])}
+      />
 
       <RawDataModal
         open={!!rawTestimonial}
@@ -735,12 +900,16 @@ function TestimonialCard({
   onDelete,
   onViewRaw,
   workspaceId,
+  isSelected,
+  onSelect,
 }: {
   testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
   onViewRaw: () => void;
   workspaceId?: string;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }) {
   const t = testimonial;
   const { data: tags } = useQuery(trpc.tag.list.queryOptions());
@@ -772,7 +941,18 @@ function TestimonialCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7">
+    <div
+      onClick={(e) => {
+        // If clicking anywhere on the card, toggle selection if the user didn't click a button
+        if ((e.target as HTMLElement).closest("button")) return;
+        onSelect?.();
+      }}
+      className={`group relative cursor-pointer overflow-hidden rounded-[24px] border p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7 ${
+        isSelected
+          ? "border-pink-200 bg-pink-50/30 ring-1 ring-pink-100"
+          : "border-neutral-100 bg-white"
+      }`}
+    >
       <div
         className={`absolute top-0 bottom-0 left-0 w-1 ${
           t.status === "approved"
@@ -785,8 +965,22 @@ function TestimonialCard({
 
       <div className="flex flex-col gap-8 lg:flex-row">
         <div className="min-w-0 flex-1">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex items-center gap-0.5">
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect?.();
+                }}
+                className={`flex size-5 items-center justify-center rounded-md border transition-all ${
+                  isSelected
+                    ? "border-pink-500 bg-pink-500 text-white"
+                    : "border-neutral-200 bg-white group-hover:border-neutral-300"
+                }`}
+              >
+                {isSelected && <Check className="size-3.5" strokeWidth={3} />}
+              </div>
+              <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="relative">
                   <Star className="size-4 fill-neutral-100 text-neutral-100" />
@@ -807,6 +1001,7 @@ function TestimonialCard({
               · {t.type} Testimonial
             </span>
           </div>
+        </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
             {t.testimonialToTags?.map((tt) => (
@@ -1071,6 +1266,108 @@ function RawDataModal({
               Close Metadata
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface BulkActionToolbarProps {
+  selectedIds: string[];
+  onApprove: () => void;
+  onReject: () => void;
+  onDelete: () => void;
+  onExport: () => void;
+  onTag: (tagId: string) => void;
+  tags: any[];
+  onClearSelection: () => void;
+}
+
+function BulkActionToolbar({
+  selectedIds,
+  onApprove,
+  onReject,
+  onDelete,
+  onExport,
+  onTag,
+  tags,
+  onClearSelection,
+}: BulkActionToolbarProps) {
+  if (selectedIds.length === 0) return null;
+
+  return (
+    <div className="animate-in slide-in-from-bottom-8 fixed right-0 bottom-8 left-0 z-50 flex justify-center px-4 duration-300">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-neutral-200 bg-white/80 p-2 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-3">
+        <div className="flex items-center gap-3 px-3 sm:border-r sm:border-neutral-100 sm:pr-4">
+          <div className="flex size-6 items-center justify-center rounded-full bg-pink-500 text-[12px] font-bold text-white">
+            {selectedIds.length}
+          </div>
+          <span className="hidden text-[13px] font-bold text-neutral-600 sm:inline">Selected</span>
+          <button
+            onClick={onClearSelection}
+            className="rounded-full p-1 transition-colors hover:bg-neutral-100"
+          >
+            <X className="size-3.5 text-neutral-400" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 sm:gap-2">
+          <button
+            onClick={onApprove}
+            className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-[13px] font-bold text-green-600 transition-all hover:bg-green-100 active:scale-95"
+          >
+            <Check className="size-3.5" />
+            <span className="hidden sm:inline">Approve All</span>
+            <span className="sm:hidden">Approve</span>
+          </button>
+
+          <button
+            onClick={onReject}
+            className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-[13px] font-bold text-amber-600 transition-all hover:bg-amber-100 active:scale-95"
+          >
+            <Archive className="size-3.5" />
+            <span className="hidden sm:inline">Archive All</span>
+            <span className="sm:hidden">Archive</span>
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 outline-none active:scale-95">
+              <Tag className="size-3.5" />
+              Tag
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-48 rounded-2xl border-neutral-100 p-2 shadow-xl">
+              <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                Tag Selected
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="mx-2 my-1" />
+              {tags.map((tag) => (
+                <DropdownMenuItem
+                  key={tag.id}
+                  onClick={() => onTag(tag.id)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
+                >
+                  <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                  {tag.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            onClick={onExport}
+            className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 active:scale-95"
+          >
+            <Download className="size-3.5" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-[13px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-95"
+          >
+            <Trash2 className="size-3.5" />
+            <span className="hidden sm:inline">Delete</span>
+          </button>
         </div>
       </div>
     </div>

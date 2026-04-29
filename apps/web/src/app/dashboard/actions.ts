@@ -11,6 +11,8 @@ import {
   organization,
   analyticsEvent,
   user,
+  tag,
+  testimonialToTag,
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -601,5 +603,161 @@ export async function deleteTestimonial(id: string) {
   if (t.project.collectionSlug) {
     revalidatePath(`/collect/${t.project.collectionSlug}`);
   }
+  return { success: true };
+}
+
+export async function bulkUpdateTestimonialStatus(
+  ids: string[],
+  status: "approved" | "archived" | "pending",
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (ids.length === 0) return { success: true };
+
+  // Verify ownership of all testimonials
+  const testimonials = await db.query.testimonial.findMany({
+    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
+  if (unauthorized || testimonials.length !== ids.length) {
+    throw new Error("Forbidden or some testimonials not found");
+  }
+
+  await db.update(testimonial).set({ status }).where(inArray(testimonial.id, ids));
+
+  // Purge cache for all affected workspaces
+  const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
+  for (const wsId of workspaceIds) {
+    try {
+      await purgeWidgetCache({ db, workspaceId: wsId, env });
+    } catch (err) {
+      console.error(`Failed to purge widget cache for workspace ${wsId}:`, err);
+    }
+  }
+
+  revalidatePath("/dashboard");
+  for (const wsId of workspaceIds) {
+    revalidatePath(`/dashboard/testimonials?workspaceId=${wsId}`);
+  }
+
+  return { success: true };
+}
+
+export async function bulkDeleteTestimonials(ids: string[]) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (ids.length === 0) return { success: true };
+
+  // Verify ownership
+  const testimonials = await db.query.testimonial.findMany({
+    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
+  if (unauthorized || testimonials.length !== ids.length) {
+    throw new Error("Forbidden or some testimonials not found");
+  }
+
+  await db.update(testimonial).set({ deletedAt: new Date() }).where(inArray(testimonial.id, ids));
+
+  const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
+  for (const wsId of workspaceIds) {
+    try {
+      await purgeWidgetCache({ db, workspaceId: wsId, env });
+    } catch (err) {
+      console.error(`Failed to purge widget cache for workspace ${wsId}:`, err);
+    }
+  }
+
+  revalidatePath("/dashboard");
+  for (const wsId of workspaceIds) {
+    revalidatePath(`/dashboard/testimonials?workspaceId=${wsId}`);
+  }
+
+  return { success: true };
+}
+
+export async function bulkTagTestimonials(
+  ids: string[],
+  tagId: string,
+  action: "assign" | "unassign",
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (ids.length === 0) return { success: true };
+
+  // Verify tag ownership
+  const t = await db.query.tag.findFirst({
+    where: eq(tag.id, tagId),
+  });
+
+  if (!t) throw new Error("Tag not found");
+
+  const ws = await db.query.workspace.findFirst({
+    where: eq(workspace.id, t.workspaceId),
+  });
+
+  if (!ws || ws.ownerId !== session.user.id) {
+    throw new Error("Forbidden: Tag ownership");
+  }
+
+  // Verify testimonial ownership
+  const testimonials = await db.query.testimonial.findMany({
+    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
+  });
+
+  if (testimonials.length !== ids.length || testimonials.some((test) => test.workspaceId !== t.workspaceId)) {
+    throw new Error("Forbidden or some testimonials not found in this workspace");
+  }
+
+  if (action === "assign") {
+    const values = ids.map((id) => ({ testimonialId: id, tagId }));
+    await db.insert(testimonialToTag).values(values).onConflictDoNothing();
+  } else {
+    await db
+      .delete(testimonialToTag)
+      .where(and(inArray(testimonialToTag.testimonialId, ids), eq(testimonialToTag.tagId, tagId)));
+  }
+
+  try {
+    await purgeWidgetCache({ db, workspaceId: t.workspaceId, env });
+  } catch (err) {
+    console.error("Failed to purge widget cache:", err);
+  }
+
+  revalidatePath(`/dashboard/testimonials?workspaceId=${t.workspaceId}`);
   return { success: true };
 }
