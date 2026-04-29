@@ -73,6 +73,20 @@ export default function Footer() {
                 className="h-auto w-44"
               />
             </a>
+            <a
+              href="https://www.producthunt.com/products/kudoswall?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kudoswall-2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block transition-all"
+            >
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1133229&theme=light&t=1777492433080"
+                alt="KudosWall - Turn happy customers into your best sales tool. | Product Hunt"
+                width={220}
+                height={48}
+                className="h-auto w-44"
+              />
+            </a>
           </div>
 
           {/* Product */}
