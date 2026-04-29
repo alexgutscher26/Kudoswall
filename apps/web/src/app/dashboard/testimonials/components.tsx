@@ -1339,20 +1339,22 @@ function BulkActionToolbar({
               align="center"
               className="w-48 rounded-2xl border-neutral-100 p-2 shadow-xl"
             >
-              <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                Tag Selected
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="mx-2 my-1" />
-              {tags.map((tag) => (
-                <DropdownMenuItem
-                  key={tag.id}
-                  onClick={() => onTag(tag.id)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
-                >
-                  <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
-                  {tag.name}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                  Tag Selected
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 my-1" />
+                {tags.map((tag) => (
+                  <DropdownMenuItem
+                    key={tag.id}
+                    onClick={() => onTag(tag.id)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
+                  >
+                    <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                    {tag.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 
