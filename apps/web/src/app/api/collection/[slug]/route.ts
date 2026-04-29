@@ -106,7 +106,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     try {
       const pusher = await getPusherServer();
       if (pusher) {
-        await pusher.trigger(`private-inbox:${proj.workspaceId}`, "new-testimonial", {
+        await pusher.trigger(`private-inbox-${proj.workspaceId}`, "new-testimonial", {
           testimonialId: id,
           projectId: proj.id,
           authorName: body.authorName,

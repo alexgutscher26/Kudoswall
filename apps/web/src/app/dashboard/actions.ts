@@ -608,11 +608,11 @@ export async function bulkUpdateTestimonialStatus(
     throw new Error("Unauthorized");
   }
 
-  if (ids.length === 0) return { success: true };
+  const uniqueIds = Array.from(new Set(ids));
 
   // Verify ownership of all testimonials
   const testimonials = await db.query.testimonial.findMany({
-    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
+    where: and(inArray(testimonial.id, uniqueIds), isNull(testimonial.deletedAt)),
     with: {
       project: {
         with: {
@@ -623,11 +623,11 @@ export async function bulkUpdateTestimonialStatus(
   });
 
   const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
-  if (unauthorized || testimonials.length !== ids.length) {
+  if (unauthorized || testimonials.length !== uniqueIds.length) {
     throw new Error("Forbidden or some testimonials not found");
   }
 
-  await db.update(testimonial).set({ status }).where(inArray(testimonial.id, ids));
+  await db.update(testimonial).set({ status }).where(inArray(testimonial.id, uniqueIds));
 
   // Purge cache for all affected workspaces
   const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
@@ -648,50 +648,74 @@ export async function bulkUpdateTestimonialStatus(
 }
 
 export async function bulkDeleteTestimonials(ids: string[]) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
 
-  if (ids.length === 0) return { success: true };
+    if (ids.length === 0) return { success: true };
+    const uniqueIds = Array.from(new Set(ids));
 
-  // Verify ownership
-  const testimonials = await db.query.testimonial.findMany({
-    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
-    with: {
-      project: {
-        with: {
-          workspace: true,
+    console.log(`[bulkDeleteTestimonials] Attempting to delete ${uniqueIds.length} testimonials`, uniqueIds);
+
+    const firstTest = await db.query.testimonial.findFirst({
+      where: eq(testimonial.id, uniqueIds[0]),
+    });
+    console.log(`[bulkDeleteTestimonials] Debug findFirst for ${uniqueIds[0]}:`, firstTest ? { id: firstTest.id, deletedAt: firstTest.deletedAt } : "NOT FOUND");
+
+    // Verify ownership
+    const testimonials = await db.query.testimonial.findMany({
+      where: and(inArray(testimonial.id, uniqueIds), isNull(testimonial.deletedAt)),
+      with: {
+        project: {
+          with: {
+            workspace: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
-  if (unauthorized || testimonials.length !== ids.length) {
-    throw new Error("Forbidden or some testimonials not found");
-  }
+    console.log(`[bulkDeleteTestimonials] Found ${testimonials.length} matching testimonials in DB`);
 
-  await db.update(testimonial).set({ deletedAt: new Date() }).where(inArray(testimonial.id, ids));
-
-  const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
-  for (const wsId of workspaceIds) {
-    try {
-      await purgeWidgetCache({ db, workspaceId: wsId, env });
-    } catch (err) {
-      console.error(`Failed to purge widget cache for workspace ${wsId}:`, err);
+    const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
+    
+    if (unauthorized) {
+      console.error(`[bulkDeleteTestimonials] Forbidden: User ${session.user.id} tried to delete testimonials they don't own.`);
+      throw new Error("Forbidden: You do not own some of these testimonials");
     }
-  }
 
-  revalidatePath("/dashboard");
-  for (const wsId of workspaceIds) {
-    revalidatePath(`/dashboard/testimonials?workspaceId=${wsId}`);
-  }
+    if (testimonials.length !== uniqueIds.length) {
+      const foundIds = testimonials.map(t => t.id);
+      const missingIds = uniqueIds.filter(id => !foundIds.includes(id));
+      console.warn(`[bulkDeleteTestimonials] Some testimonials not found or already deleted:`, missingIds);
+      throw new Error(`Some testimonials were not found or already deleted: ${missingIds.join(", ")}`);
+    }
 
-  return { success: true };
+    await db.update(testimonial).set({ deletedAt: new Date() }).where(inArray(testimonial.id, uniqueIds));
+
+    const workspaceIds = Array.from(new Set(testimonials.map((t) => t.workspaceId)));
+    for (const wsId of workspaceIds) {
+      try {
+        await purgeWidgetCache({ db, workspaceId: wsId, env });
+      } catch (err) {
+        console.error(`[bulkDeleteTestimonials] Failed to purge widget cache for workspace ${wsId}:`, err);
+      }
+    }
+
+    revalidatePath("/dashboard");
+    for (const wsId of workspaceIds) {
+      revalidatePath(`/dashboard/testimonials?workspaceId=${wsId}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("[bulkDeleteTestimonials] Error:", error);
+    throw error;
+  }
 }
 
 export async function bulkTagTestimonials(
@@ -724,25 +748,27 @@ export async function bulkTagTestimonials(
     throw new Error("Forbidden: Tag ownership");
   }
 
+  const uniqueIds = Array.from(new Set(ids));
+
   // Verify testimonial ownership
   const testimonials = await db.query.testimonial.findMany({
-    where: and(inArray(testimonial.id, ids), isNull(testimonial.deletedAt)),
+    where: and(inArray(testimonial.id, uniqueIds), isNull(testimonial.deletedAt)),
   });
 
   if (
-    testimonials.length !== ids.length ||
+    testimonials.length !== uniqueIds.length ||
     testimonials.some((test) => test.workspaceId !== t.workspaceId)
   ) {
     throw new Error("Forbidden or some testimonials not found in this workspace");
   }
 
   if (action === "assign") {
-    const values = ids.map((id) => ({ testimonialId: id, tagId }));
+    const values = uniqueIds.map((id) => ({ testimonialId: id, tagId }));
     await db.insert(testimonialToTag).values(values).onConflictDoNothing();
   } else {
     await db
       .delete(testimonialToTag)
-      .where(and(inArray(testimonialToTag.testimonialId, ids), eq(testimonialToTag.tagId, tagId)));
+      .where(and(inArray(testimonialToTag.testimonialId, uniqueIds), eq(testimonialToTag.tagId, tagId)));
   }
 
   try {

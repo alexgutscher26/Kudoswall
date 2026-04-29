@@ -34,8 +34,8 @@ export async function POST(req: Request) {
       return new Response("Missing socket_id or channel_name", { status: 400 });
     }
 
-    // Expected channel format: private-inbox:workspaceId
-    const workspaceId = channel.replace("private-inbox:", "");
+    // Expected channel format: private-inbox-workspaceId
+    const workspaceId = channel.replace("private-inbox-", "");
 
     if (!workspaceId || workspaceId === channel) {
       return new Response("Invalid channel format", { status: 400 });

@@ -15,7 +15,7 @@ export function useRealtimeInbox(workspaceId: string | undefined, projectId: str
       authEndpoint: "/api/pusher/auth",
     });
 
-    const channelName = `private-inbox:${workspaceId}`;
+    const channelName = `private-inbox-${workspaceId}`;
     const channel = pusher.subscribe(channelName);
 
     channel.bind(
