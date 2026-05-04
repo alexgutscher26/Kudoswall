@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   return {
     title: `KudosWall vs ${competitor}: Best 2026 Comparison & Alternative`,
-    description: `Comparing KudosWall and ${competitor}. Discover which social proof tool offers better automation, high-fidelity text-only testimonials, and faster widgets.`,
+    description: `Comparing KudosWall and ${competitor}. Discover which social proof tool offers better automation, high-fidelity text and video too testimonials, and faster widgets.`,
     alternates: {
       canonical: `${baseUrl}/vs/${slug}`,
     },

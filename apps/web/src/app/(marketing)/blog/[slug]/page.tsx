@@ -51,11 +51,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     return {
       title: "KudosWall vs Testimonial.to: The Modern Social Proof Comparison",
       description:
-        "Looking for an alternative to Testimonial.to? See how KudosWall offers better high-fidelity text testimonials and faster edge-optimized widgets.",
+        "Looking for an alternative to Testimonial.to? See how KudosWall offers better high-fidelity text and video too testimonials and faster edge-optimized widgets.",
       alternates: { canonical: `${baseUrl}/blog/${slug}` },
       openGraph: {
         title: "KudosWall vs Testimonial.to: The Ultimate Comparison",
-        description: "Why high-fidelity text-only testimonials are winning in 2026.",
+        description: "Why high-fidelity text and video too testimonials are winning in 2026.",
         url: `${baseUrl}/blog/${slug}`,
         type: "article",
         images: [{ url: `${baseUrl}/og/vs-testimonial-to.png`, width: 1200, height: 630 }],

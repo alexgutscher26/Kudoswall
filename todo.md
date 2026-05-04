@@ -188,8 +188,8 @@
 - [x] Tag persistence across API queries (testimonialToTags relation included)
 - [x] Real-time inbox (WebSocket or SSE) — new submissions appear instantly
 - [x] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
-- [ ] Bulk actions: Approve all, Reject all, Tag selected, Export selected, Delete selected
-- [ ] Drag-and-drop reordering of featured testimonials
+- [x] Bulk actions: Approve all, Reject all, Tag selected, Export selected, Delete selected
+- [x] Drag-and-drop reordering of featured testimonials
 - [ ] "Feature" toggle to pin top testimonials in widgets
 - [ ] External public link to share a single testimonial (for sales teams)
 - [ ] Testimonial preview modal with full card render

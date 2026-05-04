@@ -234,6 +234,8 @@ export const testimonial = pgTable(
     videoProcessingStatus: videoProcessingStatusEnum("video_processing_status").default("pending"),
     virusScanStatus: virusScanStatusEnum("virus_scan_status").default("pending"),
     virusScanHash: text("virus_scan_hash"), // SHA-256 of the uploaded file for audit trail
+    featured: boolean("featured").default(false).notNull(),
+    featuredOrder: integer("featured_order").default(0).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())

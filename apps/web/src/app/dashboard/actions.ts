@@ -781,3 +781,90 @@ export async function bulkTagTestimonials(
   revalidatePath(`/dashboard/testimonials?workspaceId=${t.workspaceId}`);
   return { success: true };
 }
+
+export async function featureTestimonial(id: string, featured: boolean) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const t = await db.query.testimonial.findFirst({
+    where: eq(testimonial.id, id),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  if (!t || t.project.workspace.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  await db.update(testimonial).set({ featured }).where(eq(testimonial.id, id));
+
+  try {
+    await purgeWidgetCache({ db, workspaceId: t.workspaceId, env });
+  } catch (err) {
+    console.error("Failed to purge widget cache:", err);
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/testimonials?workspaceId=${t.workspaceId}`);
+  return { success: true };
+}
+
+export async function reorderFeaturedTestimonials(
+  orders: { id: string; featuredOrder: number }[],
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (orders.length === 0) return { success: true };
+
+  // Verify ownership of the first one to check workspace
+  const first = await db.query.testimonial.findFirst({
+    where: eq(testimonial.id, orders[0].id),
+    with: {
+      project: {
+        with: {
+          workspace: true,
+        },
+      },
+    },
+  });
+
+  if (!first || first.project.workspace.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  const workspaceId = first.workspaceId;
+
+  await db.transaction(async (tx) => {
+    for (const order of orders) {
+      await tx
+        .update(testimonial)
+        .set({ featuredOrder: order.featuredOrder })
+        .where(and(eq(testimonial.id, order.id), eq(testimonial.workspaceId, workspaceId)));
+    }
+  });
+
+  try {
+    await purgeWidgetCache({ db, workspaceId, env });
+  } catch (err) {
+    console.error("Failed to purge widget cache:", err);
+  }
+
+  revalidatePath(`/dashboard/testimonials?workspaceId=${workspaceId}`);
+  return { success: true };
+}

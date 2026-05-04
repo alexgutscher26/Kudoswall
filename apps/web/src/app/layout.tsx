@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://kudoswall.org"),
   title: "KudosWall — Collect & Display Customer Testimonials",
   description:
-    "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
+    "Collect text and video too testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
   alternates: {
     canonical: "/",
     languages: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KudosWall — Collect & Display Customer Testimonials",
     description:
-      "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website.",
+      "Collect text and video too testimonials via a shareable link, then embed a beautiful, customizable widget on any website.",
     url: "https://kudoswall.org",
     siteName: "KudosWall",
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "KudosWall — Collect & Display Customer Testimonials",
     description:
-      "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget.",
+      "Collect text and video too testimonials via a shareable link, then embed a beautiful, customizable widget.",
     images: ["/og-image.png"],
   },
 };

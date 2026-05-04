@@ -172,7 +172,7 @@ export const TESTIMONIAL_TO_COMPARISON = {
     { feature: "Branding", competitor: "Standard Style", kudoswall: "Bespoke (Custom Fonts)" },
     { feature: "Automation", competitor: "Manual", kudoswall: "Automated Follow-ups" },
     { feature: "Performance", competitor: "Standard", kudoswall: "Edge-Optimized" },
-    { feature: "Focus", competitor: "Video-First", kudoswall: "High-Fidelity Text" },
+    { feature: "Focus", competitor: "Manual", kudoswall: "Text and Video too" },
     { feature: "SEO Rich Snippets", competitor: "$80 tier", kudoswall: "Included in Pro" },
   ],
   testimonials: [
@@ -186,13 +186,13 @@ export const TESTIMONIAL_TO_COMPARISON = {
       name: "Elena Rodriguez",
       role: "CEO at StealthAI",
       content:
-        "We moved away from video because nobody wanted to record them. KudosWall's high-fidelity text focus is exactly what we needed to build trust without the friction of recorded reviews.",
+        "We love that KudosWall handles both text and video too. The high-fidelity video recording is so smooth that our customers actually enjoy leaving reviews, and the text fallback is perfect for those who are camera-shy.",
     },
   ],
   content: (
     <>
       <section className="mb-12">
-        <H2>KudosWall vs Testimonial.to: The Text-First Alternative</H2>
+        <H2>KudosWall vs Testimonial.to: The Text and Video too Alternative</H2>
         <P>
           Testimonial.to pioneered the video testimonial space. But for many businesses, **video is
           overkill**. It's hard to get customers to record, hard to moderate, and often slows down
@@ -200,8 +200,8 @@ export const TESTIMONIAL_TO_COMPARISON = {
         </P>
         <P>
           KudosWall is the modern alternative designed for businesses that want{" "}
-          <strong>high-fidelity text testimonials</strong> that look like a native part of their
-          website.
+          <strong>high-fidelity text and video testimonials</strong> that look like a native part of
+          their website.
         </P>
       </section>
 
@@ -240,10 +240,10 @@ export const TESTIMONIAL_TO_COMPARISON = {
       <section className="mb-12">
         <H3>Summary: The Best Tool for Your Sales Stack</H3>
         <P>
-          By focusing on text-only excellence, we've created a tool that is faster, cheaper, and
-          more visually integrated than Testimonial.to. If you're ready to turn your customers into
-          your best sales tool without the "video tax," join the thousands of founders switching to
-          KudosWall.
+          By focusing on text and video too excellence, we've created a tool that is faster,
+          cheaper, and more visually integrated than Testimonial.to. If you're ready to turn your
+          customers into your best sales tool with video too, join the thousands of founders
+          switching to KudosWall.
         </P>
       </section>
     </>
@@ -278,8 +278,7 @@ export const COURSE_CREATORS_COMPARISON = {
         <P>
           If you're selling a course, your sales page is your most valuable asset. Every millisecond
           of delay in page load time directly translates to lost revenue. This is why many top
-          creators are moving away from video-heavy tools like Testimonial.to and toward the
-          high-performance, text-first approach of KudosWall.
+          creators are moving to KudosWall for high-performance text and video too testimonials.
         </P>
       </section>
 
@@ -563,7 +562,7 @@ export const WEBFLOW_WIDGET_GUIDE = {
         <UL>
           <LI>
             <strong>1. Collect:</strong> Use your KudosWall collection link to gather high-fidelity
-            text testimonials.
+            text and video too testimonials.
           </LI>
           <LI>
             <strong>2. Customize:</strong> Style your widget in the KudosWall dashboard to match

@@ -58,8 +58,8 @@ export default function Hero() {
 
         {/* Sub-headline */}
         <p className="max-w-xl px-2 text-base leading-relaxed text-neutral-500 sm:text-lg md:text-xl">
-          Collect text testimonials in one link. Embed anywhere in 5 minutes. Build trust and close
-          more deals.
+          Collect text and video testimonials in one link. Embed anywhere in 5 minutes. Build trust
+          and close more deals.
         </p>
 
         {/* CTA Buttons */}

@@ -1051,4 +1051,74 @@ export const dashboardRouter = router({
 
       return { signedUrl };
     }),
+  featureTestimonial: workspaceProcedure
+    .input(z.object({ id: z.string(), featured: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session, workspaceId } = ctx;
+      const { id, featured } = input;
+
+      const t = await db.query.testimonial.findFirst({
+        where: and(eq(testimonial.id, id), eq(testimonial.workspaceId, workspaceId)),
+      });
+
+      if (!t) throw new Error("Testimonial not found");
+
+      if (!ctx.permissions.includes("testimonial:update")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to update this testimonial",
+        });
+      }
+
+      await db
+        .update(testimonial)
+        .set({ featured, updatedAt: new Date() })
+        .where(eq(testimonial.id, id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        workspaceId,
+        entityType: "testimonial",
+        entityId: id,
+        action: "update",
+        diff: { featured },
+      });
+
+      return { success: true };
+    }),
+
+  reorderFeaturedTestimonials: workspaceProcedure
+    .input(z.object({ orders: z.array(z.object({ id: z.string(), featuredOrder: z.number() })) }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, session, workspaceId } = ctx;
+      const { orders } = input;
+
+      if (!ctx.permissions.includes("testimonial:update")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions to reorder testimonials",
+        });
+      }
+
+      // Perform updates in a transaction for atomicity
+      await db.transaction(async (tx) => {
+        for (const order of orders) {
+          await tx
+            .update(testimonial)
+            .set({ featuredOrder: order.featuredOrder, updatedAt: new Date() })
+            .where(and(eq(testimonial.id, order.id), eq(testimonial.workspaceId, workspaceId)));
+        }
+      });
+
+      await recordAuditLog({
+        userId: session.user.id,
+        workspaceId,
+        entityType: "testimonial",
+        entityId: "multiple",
+        action: "update",
+        diff: { reordered: orders.length },
+      });
+
+      return { success: true };
+    }),
 });

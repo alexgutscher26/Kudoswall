@@ -24,8 +24,11 @@ import {
   Tag,
   Download,
   ShieldCheck,
+  Sparkles,
+  GripVertical,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import {
@@ -45,6 +48,8 @@ import {
   bulkUpdateTestimonialStatus,
   bulkDeleteTestimonials,
   bulkTagTestimonials,
+  featureTestimonial,
+  reorderFeaturedTestimonials,
 } from "../actions";
 import { formatDistanceToNow } from "date-fns";
 import { useRealtimeInbox } from "@/hooks/use-realtime-inbox";
@@ -69,6 +74,8 @@ interface Testimonial {
   createdAt: string | Date;
   updatedAt: string | Date;
   deletedAt?: string | Date | null;
+  featured: boolean;
+  featuredOrder: number;
   testimonialToTags?: {
     tag: {
       id: string;
@@ -91,6 +98,7 @@ interface InboxProps {
 const TABS = [
   { id: "pending", label: "Pending", icon: Clock },
   { id: "approved", label: "Approved", icon: Check },
+  { id: "featured", label: "Featured", icon: Sparkles },
   { id: "archived", label: "Archived", icon: Archive },
   { id: "all", label: "All", icon: MessageSquareQuote },
 ] as const;
@@ -104,7 +112,7 @@ export function TestimonialInbox({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">(
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived" | "featured">(
     "pending",
   );
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
@@ -144,8 +152,9 @@ export function TestimonialInbox({
     router.push(`/dashboard/testimonials?${params.toString()}` as any);
   };
 
-  const filteredTestimonials = displayedTestimonials.filter((t: Testimonial) => {
-    const matchesTab = activeTab === "all" || t.status === activeTab;
+  const filteredTestimonials = (displayedTestimonials as Testimonial[]).filter((t: Testimonial) => {
+    const matchesTab =
+      activeTab === "all" ? true : activeTab === "featured" ? t.featured : t.status === activeTab;
     const matchesType = typeFilter === "all" || t.type === typeFilter;
     const matchesSearch =
       t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -155,6 +164,13 @@ export function TestimonialInbox({
     const matchesTag =
       selectedTagId === null || t.testimonialToTags?.some((tt) => tt.tag.id === selectedTagId);
     return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
+  });
+
+  const sortedTestimonials = [...filteredTestimonials].sort((a, b) => {
+    if (activeTab === "featured") {
+      return a.featuredOrder - b.featuredOrder;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const handleStatusUpdate = async (id: string, status: "approved" | "archived" | "pending") => {
@@ -247,6 +263,42 @@ export function TestimonialInbox({
         toast.error("Failed to update tags");
       }
     });
+  };
+
+  const handleFeatureToggle = async (id: string, featured: boolean) => {
+    startTransition(async () => {
+      try {
+        await featureTestimonial(id, featured);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(featured ? "Testimonial featured" : "Testimonial unfeatured");
+      } catch (error) {
+        toast.error("Failed to update featured status");
+      }
+    });
+  };
+
+  const onDragEnd = async (result: any) => {
+    if (!result.destination) return;
+    if (result.destination.index === result.source.index) return;
+
+    const items = Array.from(sortedTestimonials);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistic update
+    const orders = items.map((t, index) => ({ id: t.id, featuredOrder: index }));
+
+    try {
+      await reorderFeaturedTestimonials(orders);
+      await queryClient.invalidateQueries(
+        trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+      );
+      toast.success("Order updated");
+    } catch (error) {
+      toast.error("Failed to save new order");
+    }
   };
 
   const handleSelectAll = () => {
@@ -666,8 +718,8 @@ export function TestimonialInbox({
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const count = displayedTestimonials.filter(
-              (t: { status: string }) => tab.id === "all" || t.status === tab.id,
+            const count = (displayedTestimonials as Testimonial[]).filter((t: Testimonial) =>
+              tab.id === "all" ? true : tab.id === "featured" ? t.featured : t.status === tab.id,
             ).length;
 
             return (
@@ -693,16 +745,49 @@ export function TestimonialInbox({
         </div>
       </div>
 
-      {/* Testimonials List */}
       <div className="grid grid-cols-1 gap-4">
-        {filteredTestimonials.length > 0 ? (
-          filteredTestimonials.map((t: Testimonial) => (
+        {activeTab === "featured" ? (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="testimonials">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="grid grid-cols-1 gap-4">
+                  {sortedTestimonials.map((t, index) => (
+                    <Draggable key={t.id} draggableId={t.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className="group relative"
+                        >
+                          <TestimonialCard
+                            testimonial={t}
+                            onUpdateStatus={handleStatusUpdate}
+                            onDelete={handleDelete}
+                            onViewRaw={() => setRawTestimonial(t)}
+                            onFeatureToggle={handleFeatureToggle}
+                            workspaceId={project.workspaceId}
+                            isSelected={selectedIds.includes(t.id)}
+                            onSelect={() => toggleSelect(t.id)}
+                            dragHandleProps={provided.dragHandleProps}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : sortedTestimonials.length > 0 ? (
+          sortedTestimonials.map((t: Testimonial) => (
             <TestimonialCard
               key={t.id}
               testimonial={t}
               onUpdateStatus={handleStatusUpdate}
               onDelete={handleDelete}
               onViewRaw={() => setRawTestimonial(t)}
+              onFeatureToggle={handleFeatureToggle}
               workspaceId={project.workspaceId}
               isSelected={selectedIds.includes(t.id)}
               onSelect={() => toggleSelect(t.id)}
@@ -715,9 +800,11 @@ export function TestimonialInbox({
             </div>
             <h3 className="text-[16px] font-bold text-neutral-900">No testimonials found</h3>
             <p className="mx-auto mt-1 max-w-xs text-[14px] leading-relaxed text-neutral-500">
-              {searchQuery || typeFilter !== "all" || minRating !== null
-                ? "Try adjusting your filters to find what you're looking for."
-                : "You haven't received any testimonials for this project yet."}
+              {(activeTab as string) === "featured"
+                ? "Feature your best testimonials to show them off in your widgets and wall of fame."
+                : searchQuery || typeFilter !== "all" || minRating !== null
+                  ? "Try adjusting your filters to find what you're looking for."
+                  : "You haven't received any testimonials for this project yet."}
             </p>
             {!(searchQuery || typeFilter !== "all" || minRating !== null) && (
               <button
@@ -887,17 +974,21 @@ function TestimonialCard({
   onUpdateStatus,
   onDelete,
   onViewRaw,
+  onFeatureToggle,
   workspaceId,
   isSelected,
   onSelect,
+  dragHandleProps,
 }: {
   testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
   onViewRaw: () => void;
+  onFeatureToggle?: (id: string, featured: boolean) => void;
   workspaceId?: string;
   isSelected?: boolean;
   onSelect?: () => void;
+  dragHandleProps?: any;
 }) {
   const t = testimonial;
   const { data: tags } = useQuery(trpc.tag.list.queryOptions());
@@ -968,6 +1059,13 @@ function TestimonialCard({
               >
                 {isSelected && <Check className="size-3.5" strokeWidth={3} />}
               </div>
+
+              {dragHandleProps && (
+                <div {...dragHandleProps} className="mr-1 cursor-grab active:cursor-grabbing">
+                  <GripVertical className="size-4 text-neutral-300" />
+                </div>
+              )}
+
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <div key={s} className="relative">
@@ -1126,6 +1224,19 @@ function TestimonialCard({
               >
                 <Clock className="size-4" />
                 Unapprove
+              </button>
+            )}
+            {t.status === "approved" && (
+              <button
+                onClick={() => onFeatureToggle?.(t.id, !t.featured)}
+                className={`flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-[13px] font-bold transition-all ${
+                  t.featured
+                    ? "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100"
+                    : "border-neutral-100 bg-white text-neutral-400 hover:border-neutral-200 hover:text-neutral-900 shadow-sm"
+                }`}
+              >
+                <Sparkles className={`size-4 ${t.featured ? "fill-pink-500" : ""}`} />
+                {t.featured ? "Featured" : "Feature"}
               </button>
             )}
             <div className="flex items-center gap-2.5">

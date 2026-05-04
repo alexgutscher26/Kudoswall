@@ -3,6 +3,7 @@ export const ALL_PERMISSIONS = [
   "project:update",
   "project:delete",
   "testimonial:approve",
+  "testimonial:update",
   "testimonial:archive",
   "testimonial:delete",
   "tag:manage",
@@ -23,6 +24,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<"owner" | "admin" | "member", Perm
     "project:update",
     "project:delete",
     "testimonial:approve",
+    "testimonial:update",
     "testimonial:archive",
     "testimonial:delete",
     "tag:manage",
@@ -30,5 +32,5 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<"owner" | "admin" | "member", Perm
     "team:invite",
     "settings:manage",
   ],
-  member: ["testimonial:approve", "testimonial:archive", "tag:manage"],
+  member: ["testimonial:approve", "testimonial:update", "testimonial:archive", "tag:manage"],
 };

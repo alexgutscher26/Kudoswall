@@ -54,7 +54,7 @@ const UI_PLANS: Plan[] = [
     features: [
       "Unlimited testimonials",
       "1 Workspace",
-      "Text testimonials", // Video + text reviews (coming soon)
+      "Text and video testimonials",
       "All 4 widget layouts",
       "Filter testimonials by tag",
       "Custom branding & colors",
