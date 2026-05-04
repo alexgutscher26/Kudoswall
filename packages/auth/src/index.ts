@@ -25,7 +25,7 @@ export function createAuth() {
         trustedDevice: schema.trustedDevice,
       },
     }),
-    trustedOrigins: [env.CORS_ORIGIN],
+    trustedOrigins: [env.CORS_ORIGIN, env.BETTER_AUTH_URL, "https://kudoswall.org"].filter(Boolean),
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     debug: true,
@@ -34,6 +34,7 @@ export function createAuth() {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       },
+      trustHost: true,
     },
     session: {
       expiresIn: 60 * 60 * 24 * 30, // 30 days

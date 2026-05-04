@@ -31,7 +31,9 @@ function LoginForm() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get("redirect") || "/";
+  // Ensure redirect is relative to prevent "Invalid callbackURL" for untrusted absolute URLs
+  const redirect = rawRedirect.startsWith("http") ? "/" : rawRedirect;
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
