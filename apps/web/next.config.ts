@@ -1,8 +1,8 @@
 import "@my-better-t-app/env/web";
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import type { NextConfig } from "next";
 
 if (process.env.NODE_ENV === "development") {
+  const { initOpenNextCloudflareForDev } = await import("@opennextjs/cloudflare");
   initOpenNextCloudflareForDev();
 }
 
