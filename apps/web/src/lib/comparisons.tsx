@@ -368,7 +368,7 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
             high-quality testimonials at zero cost.
           </LI>
           <LI>
-            <strong>LTD Advantage:</strong> Break free from the $348/year cycle of competitors.
+            <strong>LTD Advantage:</strong> Break free from the $228/year cycle of competitors.
           </LI>
           <LI>
             <strong>No Hidden Limits:</strong> All core customization features included in the base

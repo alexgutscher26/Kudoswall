@@ -76,7 +76,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
   plan_1: {
     id: "plan_1",
     name: "Pro",
-    priceLabel: "$29/mo",
+    priceLabel: "$19/mo",
     stripePriceIdMonthly:
       env.STRIPE_PLAN_1_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID,
     stripePriceIdYearly:
@@ -112,7 +112,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
   plan_2: {
     id: "plan_2",
     name: "Agency",
-    priceLabel: "$79/mo",
+    priceLabel: "$59/mo",
     stripePriceIdMonthly:
       env.STRIPE_PLAN_2_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID,
     stripePriceIdYearly:

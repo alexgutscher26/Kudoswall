@@ -43,8 +43,8 @@ const UI_PLANS: Plan[] = [
   {
     id: "plan_1",
     name: "Pro",
-    monthlyPrice: "$29",
-    yearlyPrice: "$290",
+    monthlyPrice: "$19",
+    yearlyPrice: "$190",
     period: "per month",
     description: "For growing businesses that want unlimited social proof.",
     cta: "Start free trial",
@@ -68,8 +68,8 @@ const UI_PLANS: Plan[] = [
   {
     id: "plan_2",
     name: "Agency",
-    monthlyPrice: "$79",
-    yearlyPrice: "$790",
+    monthlyPrice: "$59",
+    yearlyPrice: "$590",
     period: "per month",
     description: "Manage 5 client brands. White-label everything. Look like a pro.",
     cta: "Get started now",
