@@ -25,9 +25,14 @@ export function createAuth() {
         trustedDevice: schema.trustedDevice,
       },
     }),
-    trustedOrigins: [env.CORS_ORIGIN, env.BETTER_AUTH_URL, "https://kudoswall.org"].filter(Boolean),
+    trustedOrigins: [
+      env.CORS_ORIGIN,
+      env.BETTER_AUTH_URL,
+      "https://kudoswall.org",
+      "https://www.kudoswall.org",
+    ].filter(Boolean),
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
+    baseURL: env.BETTER_AUTH_URL || "https://kudoswall.org",
     debug: true,
     advanced: {
       defaultCookieAttributes: {
