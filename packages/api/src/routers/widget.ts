@@ -1,4 +1,5 @@
 import { workspaceProcedure, router, publicProcedure } from "../index";
+import { TRPCError } from "@trpc/server";
 import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-t-app/db/schema";
 import { eq, and, desc, inArray, gte, isNull, exists } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
@@ -70,7 +71,10 @@ export const widgetRouter = router({
     });
 
     if (!w) {
-      throw new Error("Not found or forbidden");
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Widget not found or you don't have access.",
+      });
     }
 
     return w;
@@ -135,67 +139,91 @@ export const widgetRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { db, session, workspaceId } = ctx;
 
-      const w = await db.query.widget.findFirst({
-        where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
-        with: {
-          workspace: {
-            with: { organization: true },
+      console.log(`[WIDGET_UPDATE] User ${session.user.id} updating widget ${input.id} in workspace ${workspaceId}`);
+
+      try {
+        const w = await db.query.widget.findFirst({
+          where: and(eq(widget.id, input.id), isNull(widget.deletedAt)),
+          with: {
+            workspace: {
+              with: { organization: true },
+            },
           },
-        },
-      });
+        });
 
-      if (!w) {
-        throw new Error("Forbidden or not found");
+        if (!w) {
+          console.warn(`[WIDGET_UPDATE] Widget ${input.id} not found or forbidden`);
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Widget not found or you don't have access.",
+          });
+        }
+
+        const { getWorkspacePermissions } = await import("../logic/billing");
+        const permissions = getWorkspacePermissions({
+          plan: w.workspace.plan,
+          organization: (w.workspace as any).organization,
+        });
+        const planConfig = permissions;
+
+        // Enforce Layout restrictions
+        if (
+          (input.settings.layout === "masonry" ||
+            input.settings.layout === "carousel" ||
+            input.settings.layout === "bento") &&
+          !planConfig.features.premiumWidgets
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `The ${input.settings.layout} layout is a premium feature. Please upgrade to Pro.`,
+          });
+        }
+
+        // Enforce Branding restrictions
+        if (input.settings.hideBadge && !planConfig.features.whiteLabel) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Removing the KudosWall badge is a premium feature. Please upgrade to Pro.",
+          });
+        }
+
+        await db
+          .update(widget)
+          .set({
+            name: input.name ?? w.name,
+            settingsJson: JSON.stringify(input.settings),
+            ...(input.customCss !== undefined ? { customCss: input.customCss } : {}),
+          })
+          .where(eq(widget.id, input.id));
+
+        await recordAuditLog({
+          userId: session.user.id,
+          workspaceId,
+          entityType: "widget",
+          entityId: input.id,
+          action: "update",
+          diff: { name: input.name, settings: input.settings, customCss: input.customCss },
+        });
+
+        // Cache purge is non-critical for the update success, but we try/catch it individually
+        try {
+          const env = await getEnvAsync();
+          await purgeWidgetCache({ db, workspaceId, env });
+        } catch (purgeError) {
+          console.error("[WIDGET_UPDATE] Cache purge failed:", purgeError);
+        }
+
+        return { success: true };
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        
+        console.error("[WIDGET_UPDATE] Unexpected error:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred while updating the widget.",
+          cause: error,
+        });
       }
-
-      const { getWorkspacePermissions } = await import("../logic/billing");
-      const permissions = getWorkspacePermissions({
-        plan: w.workspace.plan,
-        organization: (w.workspace as any).organization,
-      });
-      const planConfig = permissions;
-
-      // Enforce Layout restrictions
-      if (
-        (input.settings.layout === "masonry" ||
-          input.settings.layout === "carousel" ||
-          input.settings.layout === "bento") &&
-        !planConfig.features.premiumWidgets
-      ) {
-        throw new Error(
-          `The ${input.settings.layout} layout is a premium feature. Please upgrade to Pro.`,
-        );
-      }
-
-      // Enforce Branding restrictions
-      if (input.settings.hideBadge && !planConfig.features.whiteLabel) {
-        throw new Error(
-          "Removing the KudosWall badge is a premium feature. Please upgrade to Pro.",
-        );
-      }
-
-      await db
-        .update(widget)
-        .set({
-          name: input.name ?? w.name,
-          settingsJson: JSON.stringify(input.settings),
-          ...(input.customCss !== undefined ? { customCss: input.customCss } : {}),
-        })
-        .where(eq(widget.id, input.id));
-
-      await recordAuditLog({
-        userId: session.user.id,
-        workspaceId,
-        entityType: "widget",
-        entityId: input.id,
-        action: "update",
-        diff: { name: input.name, settings: input.settings, customCss: input.customCss },
-      });
-
-      const env = await getEnvAsync();
-      await purgeWidgetCache({ db, workspaceId, env });
-
-      return { success: true };
     }),
 
   delete: workspaceProcedure
@@ -208,7 +236,10 @@ export const widgetRouter = router({
       });
 
       if (!w) {
-        throw new Error("Forbidden or not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Widget not found or you don't have access.",
+        });
       }
 
       await db.update(widget).set({ deletedAt: new Date() }).where(eq(widget.id, input.id));
