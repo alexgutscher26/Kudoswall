@@ -9,12 +9,12 @@ const FAQS: FAQItem[] = [
   {
     question: "How does KudosWall work?",
     answer:
-      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, share a photo or type a written testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
+      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, share a photo, record a video, or type a written testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
   },
   {
     question: "Do my customers need to create an account to leave a review?",
     answer:
-      "No. We believe in zero friction. Your customers can leave a high-quality text testimonial with a photo directly from their browser without ever signing up or downloading an app.",
+      "No. We believe in zero friction. Your customers can leave high-quality text or video testimonials directly from their browser without ever signing up or downloading an app.",
   },
   {
     question: "Can I customize the look of the testimonial widget?",
@@ -29,7 +29,7 @@ const FAQS: FAQItem[] = [
   {
     question: "Is there a limit on how many testimonials I can collect?",
     answer:
-      "Our Free forever plan allows you to collect and display a limited number of testimonials. Our Pro and Business plans offer unlimited collection, advanced analytics, and premium customization options.",
+      "Our Free forever plan allows you to collect and display up to 50 text and video testimonials. Our Pro and Agency plans offer unlimited collection, advanced analytics, and premium customization options.",
   },
 ];
 

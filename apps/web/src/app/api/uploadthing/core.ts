@@ -7,7 +7,7 @@ const f = createUploadthing();
 export const ourFileRouter = {
   videoUploader: f({
     video: {
-      maxFileSize: "64MB",
+      maxFileSize: "128MB",
       maxFileCount: 1,
     },
   })

@@ -1,11 +1,11 @@
-import { Link2, Palette, Code2, ShieldCheck, BarChart2, Camera } from "lucide-react";
+import { Link2, Palette, Code2, ShieldCheck, BarChart2, Video } from "lucide-react";
 
 const FEATURES = [
   {
-    icon: Camera,
-    title: "Photo social proof",
+    icon: Video,
+    title: "Video & Photo testimonials",
     description:
-      "Allow customers to upload their photo with their testimonial to build trust and authenticity.",
+      "Allow customers to record high-fidelity video or upload photos with their testimonials in seconds.",
     accent: "#e8527a",
     bg: "#fff5f7",
   },

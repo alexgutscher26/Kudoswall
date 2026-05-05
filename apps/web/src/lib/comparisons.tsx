@@ -172,7 +172,7 @@ export const TESTIMONIAL_TO_COMPARISON = {
     { feature: "Branding", competitor: "Standard Style", kudoswall: "Bespoke (Custom Fonts)" },
     { feature: "Automation", competitor: "Manual", kudoswall: "Automated Follow-ups" },
     { feature: "Performance", competitor: "Standard", kudoswall: "Edge-Optimized" },
-    { feature: "Focus", competitor: "Manual", kudoswall: "Text and Video too" },
+    { feature: "Focus", competitor: "Manual", kudoswall: "Text and Video" },
     { feature: "SEO Rich Snippets", competitor: "$80 tier", kudoswall: "Included in Pro" },
   ],
   testimonials: [
@@ -186,13 +186,13 @@ export const TESTIMONIAL_TO_COMPARISON = {
       name: "Elena Rodriguez",
       role: "CEO at StealthAI",
       content:
-        "We love that KudosWall handles both text and video too. The high-fidelity video recording is so smooth that our customers actually enjoy leaving reviews, and the text fallback is perfect for those who are camera-shy.",
+        "We love that KudosWall handles both text and video. The high-fidelity video recording is so smooth that our customers actually enjoy leaving reviews, and the text fallback is perfect for those who are camera-shy.",
     },
   ],
   content: (
     <>
       <section className="mb-12">
-        <H2>KudosWall vs Testimonial.to: The Text and Video too Alternative</H2>
+        <H2>KudosWall vs Testimonial.to: The Text and Video Alternative</H2>
         <P>
           Testimonial.to pioneered the video testimonial space. But for many businesses, **video is
           overkill**. It's hard to get customers to record, hard to moderate, and often slows down
@@ -240,9 +240,9 @@ export const TESTIMONIAL_TO_COMPARISON = {
       <section className="mb-12">
         <H3>Summary: The Best Tool for Your Sales Stack</H3>
         <P>
-          By focusing on text and video too excellence, we've created a tool that is faster,
+          By focusing on text and video excellence, we've created a tool that is faster,
           cheaper, and more visually integrated than Testimonial.to. If you're ready to turn your
-          customers into your best sales tool with video too, join the thousands of founders
+          customers into your best sales tool with video, join the thousands of founders
           switching to KudosWall.
         </P>
       </section>
@@ -278,7 +278,7 @@ export const COURSE_CREATORS_COMPARISON = {
         <P>
           If you're selling a course, your sales page is your most valuable asset. Every millisecond
           of delay in page load time directly translates to lost revenue. This is why many top
-          creators are moving to KudosWall for high-performance text and video too testimonials.
+          creators are moving to KudosWall for high-performance text and video testimonials.
         </P>
       </section>
 
@@ -364,7 +364,7 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         </P>
         <UL>
           <LI>
-            <strong>Free Forever Tier:</strong> Perfect for starting out—collect up to 5
+            <strong>Free Forever Tier:</strong> Perfect for starting out—collect up to 50
             high-quality testimonials at zero cost.
           </LI>
           <LI>
@@ -478,7 +478,7 @@ export const GUMROAD_BEST_TOOLS = {
 
 export const FREE_PLAN_COMPARISON = {
   points: [
-    { feature: "Free Limit", competitor: "10 Reviews", kudoswall: "5 Reviews" },
+    { feature: "Free Limit", competitor: "10 Reviews", kudoswall: "50 Reviews" },
     { feature: "Branding", competitor: "Always on", kudoswall: "KudosWall Logo" },
     { feature: "Layouts", competitor: "Grid Only", kudoswall: "Grid Layout" },
   ],
@@ -493,7 +493,7 @@ export const FREE_PLAN_COMPARISON = {
         </P>
         <H3>KudosWall Free Plan</H3>
         <P>
-          We offer 5 testimonials for free because we believe social proof should be high-quality,
+          We offer 50 testimonials for free because we believe social proof should be high-quality,
           not high-volume, when you are starting out. You get access to our high-fidelity Grid
           layout from day one, ensuring your site looks professional even on zero budget.
         </P>
@@ -562,7 +562,7 @@ export const WEBFLOW_WIDGET_GUIDE = {
         <UL>
           <LI>
             <strong>1. Collect:</strong> Use your KudosWall collection link to gather high-fidelity
-            text and video too testimonials.
+            text and video testimonials.
           </LI>
           <LI>
             <strong>2. Customize:</strong> Style your widget in the KudosWall dashboard to match

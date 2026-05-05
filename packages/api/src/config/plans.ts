@@ -51,13 +51,13 @@ export const PLANS: Record<Plan, PlanConfig> = {
     priceLabel: "$0",
     limits: {
       maxProjects: 1,
-      maxTestimonials: 5,
+      maxTestimonials: 50,
       maxTeamMembers: 1,
-      maxVideoSizeMb: 0, // Video disabled on free plan
+      maxVideoSizeMb: 128, // Enabled video
       maxImageSizeMb: 5,
     },
     features: {
-      video: false,
+      video: IS_VIDEO_ENABLED,
       customDomain: false,
       whiteLabel: false,
       prioritySupport: false,
@@ -67,9 +67,9 @@ export const PLANS: Record<Plan, PlanConfig> = {
       premiumWidgets: false,
     },
     displayFeatures: [
-      "Up to 5 testimonials",
+      "Up to 50 testimonials",
       "1 Project",
-      "Text testimonials only",
+      "Text & Video testimonials",
       "KudosWall branding",
     ],
   },
@@ -85,7 +85,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 1,
       maxTestimonials: Infinity,
       maxTeamMembers: 1,
-      maxVideoSizeMb: 100,
+      maxVideoSizeMb: 128,
       maxImageSizeMb: 10,
     },
     features: {

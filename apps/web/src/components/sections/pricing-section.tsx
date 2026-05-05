@@ -33,9 +33,9 @@ const UI_PLANS: Plan[] = [
     ctaHref: "/login",
     highlight: false,
     features: [
-      "Up to 5 testimonials",
+      "Up to 50 testimonials",
       "1 Workspace",
-      "Text testimonials only",
+      "Text and video testimonials",
       "Grid layout widget",
       "KudosWall branding",
     ],

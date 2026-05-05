@@ -902,7 +902,7 @@ export function CollectionCustomizer({
                   <input
                     checked={settings.video.enabled}
                     className="accent-pink-500"
-                    disabled={!isPro}
+                    disabled={!videoEnabled}
                     onChange={(e) => setNestedSetting("video.enabled", e.target.checked)}
                     type="checkbox"
                   />
@@ -916,6 +916,7 @@ export function CollectionCustomizer({
                       </label>
                       <input
                         className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                        disabled={!videoEnabled}
                         onChange={(e) => setNestedSetting("video.prompt", e.target.value)}
                         type="text"
                         value={settings.video.prompt}
@@ -927,6 +928,7 @@ export function CollectionCustomizer({
                       </label>
                       <select
                         className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                        disabled={!videoEnabled}
                         onChange={(e) =>
                           setNestedSetting("video.maxLength", parseInt(e.target.value))
                         }
