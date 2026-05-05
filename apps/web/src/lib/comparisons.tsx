@@ -586,7 +586,6 @@ export const TEN_X_FREE_TIER = {
   content: (
     <>
       <section className="mb-12">
-        <H2>Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)</H2>
         <P>
           Most SaaS "free tiers" are demos.
         </P>
