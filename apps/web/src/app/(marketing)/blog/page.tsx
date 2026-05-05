@@ -19,7 +19,9 @@ export default function BlogPage() {
         </header>
 
         <div className="grid gap-8">
-          {BLOG_POSTS.map((post) => (
+          {[...BLOG_POSTS]
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
               <Card className="dark:hover:shadow-primary/5 group-hover:border-primary/50 transition-all hover:shadow-lg">
                 <CardContent className="p-8">

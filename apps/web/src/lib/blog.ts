@@ -60,4 +60,11 @@ export const BLOG_POSTS = [
     slug: "testimonial-widget-for-webflow",
     date: "2026-04-23",
   },
+  {
+    title: "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)",
+    description:
+      "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video. Free forever, no credit card.",
+    slug: "why-we-made-free-tier-10x-bigger",
+    date: "2026-05-05",
+  },
 ] as const;

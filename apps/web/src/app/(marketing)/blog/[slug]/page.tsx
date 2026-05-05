@@ -14,6 +14,7 @@ import {
   GUMROAD_BEST_TOOLS,
   FREE_PLAN_COMPARISON,
   WEBFLOW_WIDGET_GUIDE,
+  TEN_X_FREE_TIER,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -170,6 +171,22 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     };
   }
 
+  if (slug === "why-we-made-free-tier-10x-bigger") {
+    return {
+      title: "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video)",
+      description:
+        "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video. Free forever, no credit card.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Why we just made KudosWall's free tier 10× bigger",
+        description: "50 testimonials with video. Free forever. No credit card required.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/10x-free.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
   return {
     title: "Blog Post Not Found",
   };
@@ -230,6 +247,10 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     title = "Testimonial Widget for Webflow: The Ultimate Guide (2026)";
     description =
       "How to add high-converting, edge-optimized testimonial widgets to your Webflow site.";
+  } else if (slug === "why-we-made-free-tier-10x-bigger") {
+    content = TEN_X_FREE_TIER.content;
+    title = "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)";
+    description = "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video.";
   } else {
     return notFound();
   }
