@@ -15,6 +15,9 @@ import {
   FREE_PLAN_COMPARISON,
   WEBFLOW_WIDGET_GUIDE,
   TEN_X_FREE_TIER,
+  FREE_VIDEO_TESTIMONIAL_SOFTWARE,
+  FREE_SENJA_ALTERNATIVE,
+  FREE_WALL_OF_LOVE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -170,7 +173,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       },
     };
   }
-
   if (slug === "why-we-made-free-tier-10x-bigger") {
     return {
       title: "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video)",
@@ -183,6 +185,54 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
         url: `${baseUrl}/blog/${slug}`,
         type: "article",
         images: [{ url: `${baseUrl}/og/10x-free.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "free-testimonial-software-with-video") {
+    return {
+      title: "Free Testimonial Software with Video: The 2026 Guide",
+      description:
+        "Looking for free testimonial software with video support? Compare the best tools and see why KudosWall is the top choice for founders.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Free Testimonial Software with Video: The 2026 Guide",
+        description: "50 testimonials with video. Free forever. No credit card required.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/free-video.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "free-senja-alternative") {
+    return {
+      title: "Free Senja Alternative: 5 Tools Compared (2026)",
+      description:
+        "Looking for a free Senja alternative? Compare the best tools and see why KudosWall is the top choice for indie hackers.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Free Senja Alternative: 5 Tools Compared",
+        description: "50 testimonials with video. Free forever. No credit card required.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/free-senja.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "free-wall-of-love") {
+    return {
+      title: "Free Wall of Love: How to Build One for $0 (2026)",
+      description:
+        "Want a beautiful Wall of Love for free? Compare the best tools and learn how to collect and display testimonials for $0.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Free Wall of Love: Build Your Social Proof Page for $0",
+        description: "50 testimonials with video. Free forever. No credit card required.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/free-wall.png`, width: 1200, height: 630 }],
       },
     };
   }
@@ -251,6 +301,18 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = TEN_X_FREE_TIER.content;
     title = "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)";
     description = "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video.";
+  } else if (slug === "free-testimonial-software-with-video") {
+    content = FREE_VIDEO_TESTIMONIAL_SOFTWARE.content;
+    title = "Free Testimonial Software with Video: The 2026 Guide";
+    description = "Compare the best free testimonial tools with video support.";
+  } else if (slug === "free-senja-alternative") {
+    content = FREE_SENJA_ALTERNATIVE.content;
+    title = "Free Senja Alternative: 5 Tools Compared";
+    description = "Discover the best free Senja alternatives for founders.";
+  } else if (slug === "free-wall-of-love") {
+    content = FREE_WALL_OF_LOVE.content;
+    title = "Free Wall of Love: How to Build One in 2026";
+    description = "Build a beautiful Wall of Love for your website for free.";
   } else {
     return notFound();
   }

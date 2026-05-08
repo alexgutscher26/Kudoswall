@@ -67,4 +67,25 @@ export const BLOG_POSTS = [
     slug: "why-we-made-free-tier-10x-bigger",
     date: "2026-05-05",
   },
+  {
+    title: "Free Testimonial Software with Video: The 2026 Guide",
+    description:
+      "Looking for free testimonial software with video support? Discover why KudosWall offers 10x more value than competitors.",
+    slug: "free-testimonial-software-with-video",
+    date: "2026-05-08",
+  },
+  {
+    title: "Free Senja Alternative: 5 Tools Compared",
+    description:
+      "Looking for a free Senja alternative? Discover why KudosWall is the most generous option in 2026.",
+    slug: "free-senja-alternative",
+    date: "2026-05-08",
+  },
+  {
+    title: "Free Wall of Love: How to Build One in 2026",
+    description:
+      "Want a beautiful Wall of Love for free? Learn how to collect and display testimonials without a monthly fee.",
+    slug: "free-wall-of-love",
+    date: "2026-05-08",
+  },
 ] as const;
