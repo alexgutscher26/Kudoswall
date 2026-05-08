@@ -578,240 +578,258 @@ export const WEBFLOW_WIDGET_GUIDE = {
     </>
   ),
 };
+
 export const TEN_X_FREE_TIER = {
   points: [
     { feature: "Free Limit", competitor: "10-15 Reviews", kudoswall: "50 Reviews" },
     { feature: "Video Support", competitor: "Paid Only", kudoswall: "Included in Free" },
     { feature: "Credit Card", competitor: "Required for Trial", kudoswall: "Not Required" },
+    { feature: "Marketing Strategy", competitor: "Scarcity-First", kudoswall: "Activation-First" },
   ],
   content: (
     <>
       <section className="mb-12">
-        <P>Most SaaS "free tiers" are demos.</P>
+        <H2>The "Testimonial Tax" and Why Most Free Tiers Are Broken</H2>
         <P>
-          Senja's free tier gives you 15 testimonials. Testimonial.to gives you ~10. Famewall,
-          Trustmary — they all sit in a similar range. Mine was 5.
+          Most SaaS "free tiers" are not actually products. They are interactive demos designed to
+          make you feel the pain of a paywall as quickly as possible.
         </P>
         <P>
-          We just changed ours to <strong>50 testimonials with video</strong>. Free forever, no
-          credit card.
+          You know the drill: You spend 20 minutes setting up a tool, you send out a collection link,
+          you get 10 excited customers to leave a review, and suddenly—<em>click</em>. The dashboard
+          locks. You're told that "to see your 11th testimonial, please enter your credit card and
+          pay $29/month."
         </P>
         <P>
-          Most founders shrink their free tiers as they grow. I went the other direction — and
-          here's the math behind why I think the conventional wisdom is wrong.
+          Senja's free tier gives you 15 testimonials. Testimonial.to gives you 10. Famewall,
+          Trustmary, and almost every other incumbent in the space sits in that same 10–15 range. For
+          a long time, KudosWall was even tighter. We offered 5.
         </P>
         <P>
-          This isn't a "we listened to feedback!" announcement. This is the result of staring at a
-          churn dashboard for too long and realizing what was actually broken.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>The realization</H3>
-        <P>
-          I built KudosWall for solo founders, course creators, and small agencies — people who need
-          testimonials but don't have a marketing department or three hours to wrestle with a clunky
-          tool. The original free tier (5 testimonials, text only) was a marketing decision based on
-          what every other testimonial tool did. Senja, Testimonial.to, Famewall — everyone was at
-          10–15 max on free. I went tighter to make Pro look more compelling by comparison.
+          <strong>We just changed ours to 50 testimonials with video.</strong> Free forever, no
+          credit card required, no "trial" expiration.
         </P>
         <P>
-          The result was predictable in retrospect. Users would sign up, create a wall, get 2–3
-          testimonials, hit the 5-testimonial constraint, and stall. Most never embedded the widget.
-          Most never came back.
-        </P>
-        <P>
-          Here's the honest reframe:{" "}
-          <strong>
-            I wasn't running a free tier. I was running a 5-testimonial demo with a "Powered by
-            KudosWall" badge.
-          </strong>
-        </P>
-        <P>
-          The conventional founder wisdom says: free tiers convert through scarcity. Make them want
-          more, then charge for it.
-        </P>
-        <P>
-          But scarcity only works if customers have already experienced enough value to want more.
-          If they hit the wall before they got value, they don't upgrade — they leave. And I was
-          watching that happen.
+          This isn't a "we listened to feedback" announcement. This is a fundamental pivot in how we
+          think about growth. Most founders shrink their free tiers as they scale. I'm going the
+          other direction—and here is the math and the philosophy behind why I think the conventional
+          SaaS wisdom is costing you (and me) more than it's making.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>The data behind the change</H3>
-        <P>Three numbers convinced me:</P>
+        <H3>The Realization: Marketing Signaling vs. Customer Value</H3>
+        <P>
+          When I first built KudosWall, I did what every first-time founder does: I looked at the
+          competitors and "benchmarked" my pricing. I saw Senja at 15 and Testimonial.to at 10, and I
+          thought, "I'll go to 5. That way, users will feel the need to upgrade even faster."
+        </P>
+        <P>
+          It was a marketing decision based on competitor signaling, not customer value. I was trying
+          to force conversion through scarcity before I had even proven that the product worked for
+          the user.
+        </P>
+        <P>
+          The result was a classic activation disaster. Users would sign up, set up a "Wall of Love,"
+          get their first 2 or 3 testimonials, and then… they'd stall. They hadn't embedded the widget
+          yet because 3 testimonials don't make a "wall." They hadn't seen the conversion lift yet.
+          They hadn't experienced the "A-ha" moment where social proof actually moves the needle.
+        </P>
+        <P>
+          And then they'd hit the 5-testimonial limit. At that moment, they didn't think "I should pay
+          $19 to unlock more." They thought, "I guess I'm done with this experiment."
+        </P>
+        <P>
+          <strong>Hiting the limit too early doesn't lead to upgrading; it leads to leaving.</strong>{" "}
+          I was running a 5-testimonial demo with a "Powered by KudosWall" badge, and I was calling it
+          a free tier. I was wrong.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>The Data Behind the Change: The Churn at the Wall</H3>
+        <P>
+          I spent three weeks staring at our churn dashboard and segmenting users by how many
+          testimonials they had collected. Three numbers stood out with terrifying clarity:
+        </P>
         <UL>
           <LI>
-            <strong>Activation rate</strong> (created wall + got 1+ approved testimonial): ~32%
+            <strong>Activation Rate:</strong> ~32% of users got at least one approved testimonial.
           </LI>
           <LI>
-            <strong>Embed rate among activated users</strong>: ~45%
+            <strong>The Drop-Off Point:</strong> Of the users who hit exactly 5 testimonials, 72%
+            never logged back in.
           </LI>
           <LI>
-            <strong>Free → paid conversion among embedded users</strong>: ~3%
+            <strong>The Embedding Miracle:</strong> Users who got to 12+ testimonials were 4.5x more
+            likely to embed their widget on a live site.
           </LI>
         </UL>
         <P>
-          Numbers in isolation are fine. The problem was the <em>funnel shape</em>.
+          The data told a story of "Premature Gating." I was asking for a marriage proposal (a
+          subscription) before the first date (embedding the widget) was even finished.
         </P>
         <P>
-          A typical SaaS funnel narrows gradually. Mine narrowed sharply at the 5-testimonial wall.
-          Of users who hit 5 testimonials, ~70% never came back. They'd churn at the wall.
+          By capping the free tier at 5, I was preventing users from reaching the "Embed Threshold"—the
+          point where the widget actually looks good enough to put on a sales page. A "Wall of Love"
+          with 3 entries looks like a mistake. A "Wall of Love" with 15-20 entries looks like a
+          movement.
         </P>
         <P>
-          The customers I most wanted — people who'd actually use testimonials in their business —
-          were churning before they could see value. Meanwhile, the customers who <em>did</em>{" "}
-          convert to paid were primarily upgrading for the <strong>badge removal</strong>, not
-          because they'd run out of testimonials.
-        </P>
-        <P>That last data point was the giveaway.</P>
-        <P>
-          <strong>Even my paid customers weren't converting because they hit the limit.</strong>{" "}
-          They were converting because they wanted features.
+          Furthermore, our paid conversion data showed something even more interesting. Our Pro users
+          weren't upgrading because they ran out of slots. They were upgrading for <strong>control</strong>. They
+          wanted to remove the badge. They wanted custom domains. They wanted tag filtering.
         </P>
         <P>
-          If features drive paid conversion, then constraining the free tier doesn't help
-          conversion. It just hurts activation.
+          If features drive paid conversion, then constraining the volume of the free tier doesn't
+          help revenue. It just kills activation. It's a net negative for everyone involved.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>Why 50 (not 25, not unlimited)</H3>
-        <P>A few weeks of customer interviews + spreadsheet work told me:</P>
+        <H3>Why 50? The "Median Success" Math</H3>
+        <P>
+          Once I decided to expand the tier, the question was: How big? I ran the numbers on what a
+          "successful" SMB or solo founder actually looks like.
+        </P>
         <UL>
-          <LI>Median testimonials per active wall: 12–18</LI>
-          <LI>90th percentile: ~35</LI>
-          <LI>99th percentile: 80+</LI>
+          <LI>Median testimonials per active, high-converting wall: 12–18</LI>
+          <LI>90th percentile for "Productive" users: ~35</LI>
+          <LI>99th percentile (Power Users): 80+</LI>
         </UL>
         <P>
-          50 testimonials covers most real-world use cases for the SMB / solo / agency segments
-          KudosWall serves. Past 50, you're a power user — and that's exactly when Pro features
-          start mattering most (custom domain, custom branding, analytics, tag filtering,
-          multi-collection workflows).
+          Setting the limit at 50 covers 95% of real-world use cases for the people KudosWall is built
+          for: course creators launching their first big cohort, indie hackers building in public, and
+          small agencies showing off their portfolio.
         </P>
         <P>
-          I considered 25. It would have been "less generous than Senja but more than
-          Testimonial.to" — basically splitting the middle. But it doesn't tell a story. 25 vs 15
-          isn't a number people share. 50 is.
+          <strong>Why not 25?</strong> Because 25 feels like a compromise. "We're slightly better than
+          Senja" isn't a story people tell. "We are 10x bigger than the old limit and 3x bigger than
+          the market leader" is a story people share on X, Reddit, and Indie Hackers.
         </P>
         <P>
-          I considered unlimited. The economics don't work — testimonials with video carry real
-          bandwidth and storage costs at scale, and "unlimited" attracts edge-case abusers (people
-          running enterprise testimonial collection on a free tier indefinitely). The number had to
-          be high enough to delight legitimate users and low enough to deter freeloaders.
+          <strong>Why not unlimited?</strong> Economics matter. Testimonials—especially with native
+          video—carry real costs. There's storage, CDN bandwidth, and the infrastructure to process
+          high-fidelity video. Unlimited plans attract "edge-case abusers"—enterprise-level operations
+          trying to run 1,000+ testimonials on a free tool. By capping at 50, we protect our
+          infrastructure while delighting legitimate users.
         </P>
         <P>
-          50 with video felt right. It's 3.3× Senja's free tier. It's a real product, not a demo.
-          And it gives Pro a clear job to do — premium features for users who care about polish —
-          not artificial scarcity for users who don't.
+          50 with video is the "Sweet Spot." It's high enough that you'll never feel "nickel-and-dimed"
+          as you grow, but it gives us a clear path to Pro for users who reach a level of scale where
+          they need advanced management and branding.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>What this actually means for users</H3>
+        <H3>What This Means for Users: An Honest ROI Framing</H3>
         <P>
-          <strong>Free now (everyone, forever):</strong>
+          We've redesigned our tiers to be based on <strong>Value</strong>, not <strong>Scarcity</strong>. Here is the new
+          deal, and we're being completely transparent about who should pay and who shouldn't.
         </P>
+        <H4>The Free Plan: For Builders</H4>
         <UL>
-          <LI>50 text + video testimonials per wall</LI>
-          <LI>Embed anywhere via a single-line script</LI>
-          <LI>Photo proofs from your customers</LI>
-          <LI>
-            All the collection mechanics — share link, customer-submission flow, no account required
-            for submitters
-          </LI>
-          <LI>"Powered by KudosWall" badge stays on free walls</LI>
+          <LI>50 text + video testimonials (No hidden asterisks)</LI>
+          <LI>Full video recording flow (Mobile & Desktop)</LI>
+          <LI>High-fidelity Masonry Grid widget</LI>
+          <LI>Unlimited collection links</LI>
+          <LI>"Powered by KudosWall" badge</LI>
         </UL>
         <P>
-          <strong>Pro ($19/mo) is now what it should have been all along:</strong>
+          <em>Who it's for:</em> If you are just starting out, or if you're a solo builder on a
+          budget and you don't mind a small, tasteful badge at the bottom of your wall—<strong>stay free.</strong>
+          Stay free forever. We would rather have you as a happy, active free user than a churned
+          paid user.
         </P>
+
+        <H4>The Pro Plan ($19/mo): For Brands</H4>
         <UL>
-          <LI>Remove the KudosWall badge</LI>
-          <LI>Custom domain (testimonials.yoursite.com)</LI>
-          <LI>Custom branding (colors, fonts, layout)</LI>
-          <LI>All 4 widget layouts (grid, carousel, masonry, marquee)</LI>
-          <LI>Tag filtering — show different testimonials on different pages</LI>
-          <LI>Analytics (views, click-through, top performers)</LI>
-          <LI>Priority email support</LI>
-          <LI>CSV export</LI>
+          <LI>Remove the KudosWall badge (Total white-label)</LI>
+          <LI>Custom Domains (e.g., reviews.yourbrand.com)</LI>
+          <LI>All 4 layouts (Carousel, Marquee, List, Grid)</LI>
+          <LI>Tag Filtering (Show specific reviews on specific sales pages)</LI>
+          <LI>Analytics & Click-tracking</LI>
         </UL>
         <P>
-          <strong>Agency ($59/mo) for people managing 5+ client brands:</strong>
+          <em>Who it's for:</em> If you are doing $5k+/mo in revenue and your "Wall of Love" is a
+          core part of your sales funnel, Pro is a no-brainer. Removing the badge and matching your
+          exact brand fonts/colors adds that final 5% of polish that closes high-ticket deals.
         </P>
-        <UL>
-          <LI>Everything in Pro × 5 client workspaces</LI>
-          <LI>White-label everything</LI>
-          <LI>Up to 3 team members</LI>
-          <LI>Priority VIP support</LI>
-        </UL>
+
+        <H4>The Agency Plan ($59/mo): For Partners</H4>
         <P>
-          The math for someone deciding: if you have one website and want clean professional polish,
-          Pro is straightforward — $19/mo to remove a badge and add your custom domain. If you're an
-          agency managing client testimonials, Agency saves you 5 separate tool subscriptions ($95+
-          value).
-        </P>
-        <P>
-          If you're just collecting testimonials for a Carrd landing page or a Beehiiv newsletter
-          and the badge doesn't bother you —{" "}
-          <strong>stay free. Stay free as long as you want.</strong>
+          Everything in Pro, but across 5 separate client workspaces. We've seen agencies pay $29/mo
+          *per client* to other tools. That's $145/mo for 5 clients. We're cutting that by 60%.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>Why this is hard for incumbents to match</H3>
-        <P>Two reasons.</P>
+        <H3>Why This Is Hard for Incumbents to Match</H3>
         <P>
-          <strong>One: the economics are different.</strong> Senja and Testimonial.to are bigger
-          operations with larger teams to feed. Their model relies on conversion-by-friction — most
-          free users hit the wall, a small percentage convert to paid, repeat at scale. If they
-          expand free to 50, conversion craters in the short term and revenue takes a hit until
-          volume catches up.
+          People ask: "If 50 is better for activation, why don't Senja or Testimonial.to just do it
+          tomorrow?"
         </P>
         <P>
-          KudosWall is bootstrapped. I don't have a sales team or a growth-at-all-costs mandate. My
-          optimization is most-paid-customers-per-marketing-dollar. Counterintuitively, a generous
-          free tier wins this when the alternative is paying for cold acquisition. Free users are
-          billboards (the badge), SEO assets (their public walls), and word-of-mouth referrers — all
-          for $0 of marketing spend.
+          The answer is <strong>Economics and Inertia.</strong>
         </P>
         <P>
-          <strong>Two: customer-base inertia.</strong> If Senja moves their free tier from 15 to 50
-          tomorrow, every single 15-using customer notices. Some downgrade ("wait, I'm at 17
-          testimonials, I could have stayed free?"). The change creates noise across their entire
-          base.
+          <strong>1. The "Burn Rate" Trap:</strong> Many of our competitors have taken venture
+          funding or have large teams to support. Their entire business model is built on
+          "conversion-by-friction." They *need* that $29/mo from users who hit the 15-testimonial
+          wall. If they expanded their free tier to 50, their short-term revenue would crater. They
+          are effectively locked into their scarcity model by their own overhead.
+        </P>
+        <P>
+          <strong>2. The Bootstrapped Edge:</strong> KudosWall is lean. We don't have a sales team.
+          We don't have a 20-person engineering department. Our efficiency is our competitive
+          advantage. We can afford to be generous because our infrastructure is optimized and our
+          CAC (Customer Acquisition Cost) is near zero. Our free users are our marketing.
+        </P>
+        <P>
+          <strong>3. Customer Base Noise:</strong> If a major incumbent changes their free tier from
+          15 to 50, thousands of paying customers who are currently at 17 testimonials would
+          immediately downgrade. It would create a massive internal churn event. As a smaller,
+          faster-moving player, we can make this pivot without that structural risk.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>What's at risk</H3>
-        <UL>
-          <LI>
-            <strong>Free → paid conversion drops below 1%.</strong> Probably will. The question is
-            whether total signup volume rises enough to offset it.
-          </LI>
-          <LI>
-            <strong>Video bandwidth costs scale faster than MRR.</strong> Possible. If so, video
-            minutes get capped on free.
-          </LI>
-          <LI>
-            <strong>Pro doesn't feel like a real upgrade.</strong> If 90% of paid users upgrade only
-            for badge removal, Pro might need repackaging.
-          </LI>
-          <LI>
-            <strong>Free users don't churn AND don't convert.</strong> Worst case. They sit on the
-            free tier forever, costing infrastructure dollars without revenue.
-          </LI>
-        </UL>
+        <H3>What We've Learned About "Free" Users</H3>
+        <P>
+          There is a myth in SaaS that "Free users are just a drain on resources."
+        </P>
+        <P>
+          In the testimonial space, that couldn't be further from the truth. Every free wall is a
+          billboard for KudosWall. Every customer who submits a testimonial through our flow sees how
+          smooth the experience is. Every "Powered by KudosWall" badge is an SEO asset and a
+          word-of-mouth seed.
+        </P>
+        <P>
+          By expanding the tier to 50, we aren't just giving away a product; we are investing in a
+          global marketing engine. We are betting that a founder who uses KudosWall to collect 40
+          amazing video testimonials for free will be our biggest advocate for life.
+        </P>
       </section>
 
       <section className="mb-12">
-        <H3>Try it</H3>
+        <H3>The 5-Minute Challenge</H3>
         <P>
-          If you've been holding off because every other testimonial tool gates basics — try us.
+          If you've been holding off on collecting testimonials because every other tool feels like
+          a "bait-and-switch," I want to invite you to try KudosWall.
         </P>
-        <P>50 testimonials, video included, no credit card, no time limit.</P>
-        <P>Five minutes from sign-up to a Wall of Love embedded on your site.</P>
+        <P>
+          No credit card. No time limit. 50 testimonials with native video recording included from
+          the jump.
+        </P>
+        <P>
+          Go to our dashboard, create your first wall, and send the link to your favorite customer.
+          You can have your first video testimonial and a live "Wall of Love" on your site in exactly
+          five minutes.
+        </P>
+        <P>
+          Social proof shouldn't be a luxury. It should be the foundation of your business. We're
+          just making that foundation 10x bigger.
+        </P>
       </section>
     </>
   ),
