@@ -8,18 +8,18 @@ const PRODUCT_LINKS = [
 ] as const;
 
 const ALTERNATIVES_LINKS = [
+  { label: "Compare All", href: "/vs" },
   { label: "vs Senja", href: "/vs/senja" },
   { label: "vs Testimonial.to", href: "/vs/testimonial-to" },
-  { label: "Affordable Senja Alternatives", href: "/blog/affordable-senja-alternative" },
-  { slug: "kudoswall-vs-senja", label: "KudosWall vs Senja", href: "/blog/kudoswall-vs-senja" },
+  { label: "vs Vouch", href: "/vs/vouch" },
 ] as const;
 
 const PLATFORM_LINKS = [
   { label: "For Agencies", href: "/agencies" },
-  { label: "For Teachable Creators", href: "/blog/best-testimonial-tools-teachable" },
-  { label: "For Kajabi Creators", href: "/blog/best-testimonial-tools-kajabi" },
-  { label: "For Gumroad Sellers", href: "/blog/best-testimonial-tools-gumroad" },
-  { label: "For Course Creators", href: "/blog/testimonial-to-alternative-course-creators" },
+  { label: "For Carrd", href: "/free-testimonials-for/carrd" },
+  { label: "For Beehiiv", href: "/free-testimonials-for/beehiiv" },
+  { label: "For Webflow", href: "/free-testimonials-for/webflow" },
+  { label: "View All Platforms", href: "/free-testimonials-for" },
 ] as const;
 
 const RESOURCES_LINKS = [

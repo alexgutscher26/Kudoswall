@@ -6,9 +6,9 @@ import { Logo } from "@my-better-t-app/ui/components/logo";
 import MobileMenu from "./mobile-menu";
 
 const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it Works" },
-  { href: "#pricing", label: "Pricing" },
+  { href: "/free", label: "Free Tier" },
+  { href: "/vs", label: "Comparisons" },
+  { href: "/#pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },
 ] as const;
 
