@@ -60,8 +60,8 @@ export default async function VsPage({ params }: { params: Params }) {
         />
         <VsPageTemplate
           competitorName="Senja"
-          heroTitle="KudosWall vs Senja: Choose the Best Social Proof Tool"
-          heroDescription="Stop overpaying for complexity. KudosWall offers the premium features you need with the simplicity you crave."
+          heroTitle="KudosWall vs Senja: The Most Generous Free Alternative"
+          heroDescription="50 testimonials. Video included. No credit card. KudosWall has 3× the free tier of Senja — designed for founders who want their wall live in 5 minutes."
           comparisonPoints={SENJA_COMPARISON.points}
           articleContent={SENJA_COMPARISON.content}
           testimonials={SENJA_COMPARISON.testimonials}

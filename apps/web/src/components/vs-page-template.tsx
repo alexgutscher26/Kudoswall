@@ -176,7 +176,7 @@ export default function VsPageTemplate({
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground h-16 rounded-full px-10 text-xl font-bold"
               >
-                Start Your 7-Day Free Trial
+                Start Free — No Credit Card
               </Button>
             </Link>
           </div>

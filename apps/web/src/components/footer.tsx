@@ -3,8 +3,8 @@ import Link from "next/link";
 const PRODUCT_LINKS = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Free Plan", href: "/free" },
   { label: "Docs", href: "https://kudoswall.mintlify.app/introduction" },
-  { label: "Blog", href: "/blog" },
 ] as const;
 
 const ALTERNATIVES_LINKS = [
@@ -15,6 +15,7 @@ const ALTERNATIVES_LINKS = [
 ] as const;
 
 const PLATFORM_LINKS = [
+  { label: "For Agencies", href: "/agencies" },
   { label: "For Teachable Creators", href: "/blog/best-testimonial-tools-teachable" },
   { label: "For Kajabi Creators", href: "/blog/best-testimonial-tools-kajabi" },
   { label: "For Gumroad Sellers", href: "/blog/best-testimonial-tools-gumroad" },
@@ -56,7 +57,7 @@ export default function Footer() {
               KudosWall
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
-              Transform happy customers into your best sales tool in under 5 minutes.
+              The testimonial tool for small businesses that just want their wall live.
             </p>
             <a
               href="https://www.scrolllaunch.com/products/kudoswall?utm_source=badge&utm_medium=embed&utm_campaign=kudoswall&ref=scrolllaunch"

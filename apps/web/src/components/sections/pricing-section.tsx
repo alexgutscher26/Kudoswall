@@ -28,7 +28,7 @@ const UI_PLANS: Plan[] = [
     monthlyPrice: "Free",
     yearlyPrice: "Free",
     period: "",
-    description: "Perfect for trying it out and collecting your first reviews.",
+    description: "The most generous free tier in testimonial software. 50 reviews, video included, forever.",
     cta: "Get started free",
     ctaHref: "/login",
     highlight: false,

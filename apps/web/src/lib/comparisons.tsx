@@ -27,6 +27,11 @@ const LI = ({ children }: { children: React.ReactNode }) => (
 export const SENJA_COMPARISON = {
   points: [
     {
+      feature: "Free Tier",
+      competitor: "15 (No Video)",
+      kudoswall: "50 + Video (Generous)",
+    },
+    {
       feature: "Time-to-Embed",
       competitor: "15-20 mins (Complex)",
       kudoswall: "5 mins (Guaranteed)",
@@ -55,11 +60,6 @@ export const SENJA_COMPARISON = {
       feature: "Performance",
       competitor: "Standard iFrames",
       kudoswall: "Zero Layout Shift / Edge",
-    },
-    {
-      feature: "Support",
-      competitor: "Standard Email",
-      kudoswall: "Priority Solo-Founder Support",
     },
   ],
   testimonials: [
@@ -158,8 +158,8 @@ export const SENJA_COMPARISON = {
           AI-generated video sizzle reels.
         </P>
         <P>
-          **Choose KudosWall if:** You are a solo founder or course creator who wants **world-class
-          branding, 5-minute setup, and predictable pricing** without the growth penalties.
+          **Choose KudosWall if:** You want the most generous free tier in the market (3× Senja's)
+          to get your **Wall of Love live in 5 minutes** without the $29/mo paywall.
         </P>
       </section>
     </>
@@ -325,9 +325,9 @@ export const COURSE_CREATORS_COMPARISON = {
 
 export const AFFORDABLE_SENJA_ALTERNATIVE = {
   points: [
+    { feature: "Free Testimonials", competitor: "15 (No Video)", kudoswall: "50 + Video" },
     { feature: "Starter Monthly", competitor: "$29/mo", kudoswall: "$0/mo (Free Forever)" },
-    { feature: "Pro Annual", competitor: "$290/yr", kudoswall: "$149/LTD (One-time)" },
-    { feature: "Imports", competitor: "Unlimited", kudoswall: "Top 5 Platforms" },
+    { feature: "Pro Annual", competitor: "$290/yr", kudoswall: "$190/yr ($19/mo)" },
     { feature: "Support", competitor: "Email/Bot", kudoswall: "Direct to Founder" },
   ],
   testimonials: [

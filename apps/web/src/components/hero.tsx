@@ -51,15 +51,14 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 pt-24 text-center sm:px-6 lg:pt-28">
         {/* Main headline */}
-        <h1 className="-mt-2 text-4xl leading-[1.1] font-bold tracking-tight text-neutral-900 sm:text-5xl md:text-6xl">
-          Turn happy customers into your <br className="hidden md:block" />
-          <span style={{ color: "#e8527a" }}>best sales tool.</span>
+        <h1 className="-mt-2 text-4xl leading-[1.1] font-black tracking-tight text-neutral-900 sm:text-5xl md:text-7xl">
+          Wall of Love in <br className="hidden md:block" />
+          <span style={{ color: "#e8527a" }}>5 minutes.</span>
         </h1>
 
         {/* Sub-headline */}
         <p className="max-w-xl px-2 text-base leading-relaxed text-neutral-500 sm:text-lg md:text-xl">
-          Collect text and video testimonials in one link. Embed anywhere in 5 minutes. Build trust
-          and close more deals.
+The fast, no-bloat testimonial tool for founders who just want their wall live. No $29/mo paywalls. No unnecessary complexity. Just trust-building social proof, delivered at the edge.
         </p>
 
         {/* CTA Buttons */}
