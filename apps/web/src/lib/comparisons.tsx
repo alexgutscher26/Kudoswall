@@ -764,9 +764,8 @@ export const FREE_VIDEO_TESTIMONIAL_SOFTWARE = {
   content: (
     <>
       <section className="mb-12">
-        <H2>Free Testimonial Software with Video: The 2026 Comparison</H2>
         <P>
-          Finding **free testimonial software with video** support used to be impossible. Most tools
+          Finding free testimonial software with video support used to be impossible. Most tools
           gated video recording behind a $50/mo "Pro" plan, or limited you to just 5 text reviews
           before hitting a paywall.
         </P>
@@ -796,7 +795,7 @@ export const FREE_VIDEO_TESTIMONIAL_SOFTWARE = {
           </LI>
         </UL>
         <P>
-          These aren't free plans; they are **interactive demos**. They give you just enough to get
+          These aren't free plans; they are interactive demos. They give you just enough to get
           started, but as soon as your business sees any success, you're forced to pay $30-$50/mo.
         </P>
       </section>
@@ -809,7 +808,7 @@ export const FREE_VIDEO_TESTIMONIAL_SOFTWARE = {
           marketing budget.
         </P>
         <P>
-          KudosWall's free plan gives you **50 testimonials with video support** included. No credit
+          KudosWall's free plan gives you 50 testimonials with video support included. No credit
           card required, no trial expiration.
         </P>
         <UL>
@@ -856,8 +855,8 @@ export const FREE_VIDEO_TESTIMONIAL_SOFTWARE = {
         <H3>Summary: Start Collecting Video Today</H3>
         <P>
           Stop settling for 5-testimonial "trials." Get a real tool that grows with you. Whether
-          you're an indie hacker, a course creator, or a small agency, KudosWall is the only **free
-          testimonial software with video** that actually lets you run your business for free.
+          you're an indie hacker, a course creator, or a small agency, KudosWall is the only free
+          testimonial software with video that actually lets you run your business for free.
         </P>
       </section>
     </>
@@ -874,15 +873,14 @@ export const FREE_SENJA_ALTERNATIVE = {
   content: (
     <>
       <section className="mb-12">
-        <H2>The Best Free Senja Alternative: Why KudosWall Wins in 2026</H2>
         <P>
           Senja has become the "standard" for testimonial software. It's powerful, feature-rich, and
-          well-designed. But for many solo founders and early-stage startups, Senja's **$29/month
-          starter price** is a tough pill to swallow, especially when you're just starting to gather
+          well-designed. But for many solo founders and early-stage startups, Senja's $29/month
+          starter price is a tough pill to swallow, especially when you're just starting to gather
           your first few reviews.
         </P>
         <P>
-          If you're looking for a **free Senja alternative** that doesn't feel like a crippled demo,
+          If you're looking for a free Senja alternative that doesn't feel like a crippled demo,
           you're in the right place.
         </P>
       </section>
@@ -900,7 +898,7 @@ export const FREE_SENJA_ALTERNATIVE = {
       <section className="mb-12">
         <H3>Enter KudosWall: 10x More Value for $0</H3>
         <P>
-          KudosWall was built specifically to be the most generous **free Senja alternative** on the
+          KudosWall was built specifically to be the most generous free Senja alternative on the
           market. We don't believe in "bait-and-switch" pricing. We want you to get real value
           before you ever see a billing screen.
         </P>
@@ -929,14 +927,14 @@ export const FREE_SENJA_ALTERNATIVE = {
         <H4>1. Loading Speed & Performance</H4>
         <P>
           Senja uses standard iframes which can sometimes cause layout shifts (CLS). KudosWall uses
-          an **edge-optimized, CSS-first rendering engine**. This ensures your testimonial widgets
+          an edge-optimized, CSS-first rendering engine. This ensures your testimonial widgets
           load in milliseconds without making your site "jump," which is critical for your Core Web
           Vitals and SEO.
         </P>
         <H4>2. Collection Friction</H4>
         <P>
           KudosWall's collection flow is designed to be ultra-lean. We've removed every unnecessary
-          click, resulting in a **30% higher completion rate** compared to denser collection forms.
+          click, resulting in a 30% higher completion rate compared to denser collection forms.
           When you're looking for a free Senja alternative, you want a tool that actually helps you
           *get* the reviews, not just display them.
         </P>
@@ -945,12 +943,12 @@ export const FREE_SENJA_ALTERNATIVE = {
         <H3>Summary: The Best Path Forward</H3>
         <P>
           If you have a massive marketing team and a $500/mo budget for social proof, Senja is a
-          great choice. But if you're a founder who wants **premium design, video support, and
-          generous limits** without the monthly subscription, KudosWall is the clear winner.
+          great choice. But if you're a founder who wants premium design, video support, and
+          generous limits without the monthly subscription, KudosWall is the clear winner.
         </P>
         <P>
-          Stop settling for a 15-review limit. Switch to the most powerful **free Senja
-          alternative** today and start building the trust your brand deserves.
+          Stop settling for a 15-review limit. Switch to the most powerful free Senja
+          alternative today and start building the trust your brand deserves.
         </P>
       </section>
     </>
@@ -967,9 +965,8 @@ export const FREE_WALL_OF_LOVE = {
   content: (
     <>
       <section className="mb-12">
-        <H2>Free Wall of Love: How to Build Your Social Proof Page in 2026</H2>
         <P>
-          A **Wall of Love** is more than just a list of reviews—it's a high-converting landing page
+          A Wall of Love is more than just a list of reviews—it's a high-converting landing page
           asset that proves your product works. It's the "secret weapon" used by top SaaS companies
           and creators to build instant trust with new visitors.
         </P>
@@ -983,8 +980,8 @@ export const FREE_WALL_OF_LOVE = {
       <section className="mb-12">
         <H3>Why You Need a Wall of Love (and Why It Should Be Free)</H3>
         <P>
-          In 2026, visitors are skeptical. They've seen every marketing trick in the book. A **Wall
-          of Love** works because it's overwhelming. When a visitor sees 20, 30, or 50 positive
+          In 2026, visitors are skeptical. They've seen every marketing trick in the book. A Wall
+          of Love works because it's overwhelming. When a visitor sees 20, 30, or 50 positive
           experiences from real people, their "skepticism wall" breaks down.
         </P>
         <P>
@@ -997,14 +994,14 @@ export const FREE_WALL_OF_LOVE = {
         <H3>The 3 Keys to a High-Converting Wall of Love</H3>
         <H4>1. Diversity of Content</H4>
         <P>
-          A wall of just text is boring. A high-converting wall mixes **text, photos, and video**.
+          A wall of just text is boring. A high-converting wall mixes text, photos, and video.
           KudosWall allows you to mix and match all three on our free tier, ensuring your wall feels
           alive and authentic.
         </P>
         <H4>2. Performance is Non-Negotiable</H4>
         <P>
           A "Wall of Love" is often heavy. If it takes 3 seconds to load, you're losing customers
-          before they even see the praise. KudosWall widgets are **edge-optimized**, meaning they
+          before they even see the praise. KudosWall widgets are edge-optimized, meaning they
           load almost instantly anywhere in the world, with zero layout shift.
         </P>
         <H4>3. Mobile-First Design</H4>
@@ -1019,7 +1016,7 @@ export const FREE_WALL_OF_LOVE = {
         <H3>Build Your Free Wall of Love with KudosWall</H3>
         <P>
           While competitors like Senja or Testimonial.to limit their free "Walls" to 10 or 15
-          reviews, KudosWall gives you **50 testimonials for free**.
+          reviews, KudosWall gives you 50 testimonials for free.
         </P>
         <UL>
           <LI>
@@ -1043,7 +1040,7 @@ export const FREE_WALL_OF_LOVE = {
           shouldn't have to pay a "trust tax" just to show that off.
         </P>
         <P>
-          Start your **free Wall of Love** today with KudosWall. 50 testimonials, video included,
+          Start your free Wall of Love today with KudosWall. 50 testimonials, video included,
           and the best masonry layouts in the business—all for $0.
         </P>
       </section>
