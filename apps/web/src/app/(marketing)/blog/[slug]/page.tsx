@@ -43,373 +43,26 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
+  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  if (!post) {
+    return {
+      title: "Blog Post Not Found",
+    };
+  }
+
   const baseUrl = "https://kudoswall.org";
 
-  if (slug === "kudoswall-vs-senja") {
-    return {
-      title: "KudosWall vs Senja: Best Social Proof Alternative in 2026",
-      description:
-        "A deep dive comparison between KudosWall and Senja. Discover why KudosWall is the faster, more customizable social proof tool for SaaS founders.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "KudosWall vs Senja: Which Social Proof Tool is Best?",
-        description: "Compare features, pricing, and performance between KudosWall and Senja.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/vs-senja.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "kudoswall-vs-testimonial-to") {
-    return {
-      title: "KudosWall vs Testimonial.to: The Modern Social Proof Comparison",
-      description:
-        "Looking for an alternative to Testimonial.to? See how KudosWall offers better high-fidelity text and video testimonials and faster edge-optimized widgets.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "KudosWall vs Testimonial.to: The Ultimate Comparison",
-        description: "Why high-fidelity text and video testimonials are winning in 2026.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/vs-testimonial-to.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "testimonial-to-alternative-course-creators") {
-    return {
-      title: "The Best Testimonial.to Alternative for Course Creators (2026)",
-      description:
-        "Why the top 1% of course creators are moving to KudosWall for faster sales pages and verified student results.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Testimonial.to Alternative for Course Creators - KudosWall",
-        description: "Speed up your sales page and build student trust with verified testimonials.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/course-creators.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "affordable-senja-alternative") {
-    return {
-      title: "Affordable Senja Alternatives: Stop Overpaying for Social Proof",
-      description:
-        "Discover why KudosWall is the most cost-effective alternative to Senja for indie hackers and solo founders.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Affordable Senja Alternatives in 2026",
-        description:
-          "Indie hackers are switching to KudosWall for better value and lifetime access.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/affordable-senja.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "best-testimonial-tools-teachable") {
-    return {
-      title: "Best Testimonial Tools for Teachable Creators (2026)",
-      description: "Upgrade your course sales page with the best social proof tools for Teachable.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Best Testimonial Tools for Teachable",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/teachable.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "best-testimonial-tools-kajabi") {
-    return {
-      title: "Best Testimonial Tools for Kajabi Creators",
-      description: "Match your premium Kajabi branding with highest-fidelity testimonial widgets.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Best Testimonial Tools for Kajabi",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/kajabi.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "best-testimonial-tools-gumroad") {
-    return {
-      title: "Best Testimonial Tools for Gumroad Sellers",
-      description:
-        "Convert more Gumroad customers with simple, effective, and affordable social proof.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Best Testimonial Tools for Gumroad",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/gumroad.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "free-testimonial-widget-comparison") {
-    return {
-      title: "Free Testimonial Widget: Every Tool's Free Plan Compared",
-      description:
-        "Who actually gives you the most value for free? A detailed comparison of testimonial tool free plans.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Free Testimonial Widget Comparison",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/free-plan.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "testimonial-widget-for-webflow") {
-    return {
-      title: "Testimonial Widget for Webflow: The Ultimate Guide (2026)",
-      description:
-        "How to add high-converting, edge-optimized testimonial widgets to your Webflow site without sacrificing page speed or design.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Testimonial Widget for Webflow",
-        description: "The best social proof integration for Webflow.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/webflow.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-  if (slug === "why-we-made-free-tier-10x-bigger") {
-    return {
-      title: "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video)",
-      description:
-        "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video. Free forever, no credit card.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Why we just made KudosWall's free tier 10× bigger",
-        description: "50 testimonials with video. Free forever. No credit card required.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/10x-free.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "free-testimonial-software-with-video") {
-    return {
-      title: "Free Testimonial Software with Video: The 2026 Guide",
-      description:
-        "Looking for free testimonial software with video support? Compare the best tools and see why KudosWall is the top choice for founders.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Free Testimonial Software with Video: The 2026 Guide",
-        description: "50 testimonials with video. Free forever. No credit card required.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/free-video.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "free-senja-alternative") {
-    return {
-      title: "Free Senja Alternative: 5 Tools Compared (2026)",
-      description:
-        "Looking for a free Senja alternative? Compare the best tools and see why KudosWall is the top choice for indie hackers.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Free Senja Alternative: 5 Tools Compared",
-        description: "50 testimonials with video. Free forever. No credit card required.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/free-senja.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "free-wall-of-love") {
-    return {
-      title: "Free Wall of Love: How to Build One for $0 (2026)",
-      description:
-        "Want a beautiful Wall of Love for free? Compare the best tools and learn how to collect and display testimonials for $0.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Free Wall of Love: Build Your Social Proof Page for $0",
-        description: "50 testimonials with video. Free forever. No credit card required.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/free-wall.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "how-to-collect-customer-testimonials") {
-    return {
-      title: "How to Collect Customer Testimonials: The Complete Guide",
-      description:
-        "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "How to Collect Customer Testimonials: The Complete Guide",
-        description:
-          "Master the art of social proof. Learn exactly how to get customer testimonials that drive sales.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/collection-guide.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "best-free-testimonial-software") {
-    return {
-      title: "Best Free Testimonial Software in 2026",
-      description:
-        "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Best Free Testimonial Software Compared",
-        description: "Find the most generous free testimonial software for your business.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/free-tools.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "how-to-embed-testimonials-on-carrd") {
-    return {
-      title: "How to Embed Testimonials on Carrd in 5 Minutes",
-      description:
-        "Learn how to add beautiful, high-converting testimonial widgets to your Carrd site for free. No coding required.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "How to Embed Testimonials on Carrd",
-        description: "Add social proof to your Carrd site in seconds.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/carrd.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "how-to-embed-testimonials-on-beehiiv") {
-    return {
-      title: "How to Embed Testimonials on Beehiiv Newsletters",
-      description:
-        "Boost your newsletter trust and conversion rates by adding customer testimonials to your Beehiiv publications.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "How to Embed Testimonials on Beehiiv",
-        description: "Build trust with your readers using verified social proof.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/beehiiv.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "testimonial-questions-to-ask-customers") {
-    return {
-      title: "30 Testimonial Questions That Actually Get Usable Answers",
-      description:
-        "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "30 Testimonial Questions That Work",
-        description: "Extract the best possible social proof from your customers.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/questions.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "testimonial-software-for-agencies") {
-    return {
-      title: "Best Testimonial Tool for Marketing Agencies in 2026",
-      description:
-        "Scaling a marketing agency requires tools that grow with you. Discover why KudosWall is the top choice for agency social proof.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Best Agency Testimonial Software",
-        description: "Manage multiple clients and scale social proof with KudosWall.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/agency.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "how-to-collect-client-testimonials") {
-    return {
-      title: "How to Collect Client Testimonials at Scale (Agency Playbook)",
-      description:
-        "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "The Agency Testimonial Playbook",
-        description: "Automate your client review collection with this proven strategy.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/playbook.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "vouch-alternative") {
-    return {
-      title: "Best Vouch Alternatives in 2026 (Since the Pivot)",
-      description:
-        "Looking for a Vouch alternative for customer testimonials? Here are the best video-first social proof tools for marketers.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Vouch Alternative: Top 5 Tools for Video Testimonials",
-        description: "Why marketers are switching to KudosWall and Senja after Vouch's pivot.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/vouch-alternative.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "how-to-embed-testimonials-on-framer") {
-    return {
-      title: "How to Embed Testimonials on Framer in 2026",
-      description:
-        "A step-by-step guide to adding high-fidelity testimonial widgets to your Framer site for better conversions.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "How to Embed Testimonials on Framer",
-        description: "Add beautiful social proof to your Framer site in minutes.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/framer.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
-  if (slug === "course-creator-testimonials") {
-    return {
-      title: "Course Creator Testimonials: The Ultimate Strategy",
-      description:
-        "Learn how top course creators collect student success stories and display them to drive massive sales.",
-      alternates: { canonical: `${baseUrl}/blog/${slug}` },
-      openGraph: {
-        title: "Course Creator Testimonial Strategy",
-        description: "Collect and display student results for maximum impact.",
-        url: `${baseUrl}/blog/${slug}`,
-        type: "article",
-        images: [{ url: `${baseUrl}/og/course-creator-strategy.png`, width: 1200, height: 630 }],
-      },
-    };
-  }
-
   return {
-    title: "Blog Post Not Found",
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: `${baseUrl}/blog/${slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      url: `${baseUrl}/blog/${slug}`,
+      type: "article",
+      images: [{ url: `${baseUrl}/og/${slug}.png`, width: 1200, height: 630 }],
+    },
   };
 }
 
@@ -421,9 +74,9 @@ export default async function BlogPostPage({ params }: { params: Params }) {
   }
 
   let content = null;
-  let title = "";
-  let description = "";
-  let date = new Date(post.date).toLocaleDateString("en-US", {
+  const title = post.title;
+  const description = post.description;
+  const date = new Date(post.date).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -432,110 +85,50 @@ export default async function BlogPostPage({ params }: { params: Params }) {
 
   if (slug === "kudoswall-vs-senja") {
     content = SENJA_COMPARISON.content;
-    title = "KudosWall vs Senja: Best Social Proof Alternative in 2026";
-    description = "A deep dive comparison between KudosWall and Senja.";
   } else if (slug === "kudoswall-vs-testimonial-to") {
     content = TESTIMONIAL_TO_COMPARISON.content;
-    title = "KudosWall vs Testimonial.to: The Modern Social Proof Comparison";
-    description = "Looking for an alternative to Testimonial.to?";
   } else if (slug === "testimonial-to-alternative-course-creators") {
     content = COURSE_CREATORS_COMPARISON.content;
-    title = "The Best Testimonial.to Alternative for Course Creators (2026)";
-    description = "Why course creators are switching to KudosWall.";
   } else if (slug === "affordable-senja-alternative") {
     content = AFFORDABLE_SENJA_ALTERNATIVE.content;
-    title = "Affordable Senja Alternatives: Stop Overpaying for Social Proof";
-    description = "The best value alternative for indie hackers.";
   } else if (slug === "best-testimonial-tools-teachable") {
     content = TEACHABLE_BEST_TOOLS.content;
-    title = "Best Testimonial Tools for Teachable Creators (2026)";
-    description = "Upgrade your course sales page with the best social proof tools for Teachable.";
   } else if (slug === "best-testimonial-tools-kajabi") {
     content = KAJABI_BEST_TOOLS.content;
-    title = "Best Testimonial Tools for Kajabi Creators";
-    description = "Match your premium Kajabi branding with highest-fidelity testimonial widgets.";
   } else if (slug === "best-testimonial-tools-gumroad") {
     content = GUMROAD_BEST_TOOLS.content;
-    title = "Best Testimonial Tools for Gumroad Sellers";
-    description =
-      "Convert more Gumroad customers with simple, effective, and affordable social proof.";
   } else if (slug === "free-testimonial-widget-comparison") {
     content = FREE_PLAN_COMPARISON.content;
-    title = "Free Testimonial Widget: Every Tool's Free Plan Compared";
-    description = "Who actually gives you the most value for free?";
   } else if (slug === "testimonial-widget-for-webflow") {
     content = WEBFLOW_WIDGET_GUIDE.content;
-    title = "Testimonial Widget for Webflow: The Ultimate Guide (2026)";
-    description =
-      "How to add high-converting, edge-optimized testimonial widgets to your Webflow site.";
   } else if (slug === "why-we-made-free-tier-10x-bigger") {
     content = TEN_X_FREE_TIER.content;
-    title =
-      "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)";
-    description =
-      "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video.";
   } else if (slug === "free-testimonial-software-with-video") {
     content = FREE_VIDEO_TESTIMONIAL_SOFTWARE.content;
-    title = "Free Testimonial Software with Video: The 2026 Guide";
-    description = "Compare the best free testimonial tools with video support.";
   } else if (slug === "free-senja-alternative") {
     content = FREE_SENJA_ALTERNATIVE.content;
-    title = "Senja alternative: 8 testimonial tools (and the only one with a real free tier)";
-    description =
-      "Looking for a free Senja alternative? Discover why KudosWall is the most generous option in 2026, with 10x more testimonials and native video support on our free plan.";
   } else if (slug === "free-wall-of-love") {
     content = FREE_WALL_OF_LOVE.content;
-    title = "Free Wall of Love: How to Build One in 2026";
-    description = "Build a beautiful Wall of Love for your website for free.";
   } else if (slug === "best-free-testimonial-software") {
     content = BEST_FREE_TOOLS_2026.content;
-    title = "Best free testimonial software in 2026";
-    description =
-      "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.";
   } else if (slug === "how-to-collect-customer-testimonials") {
     content = COLLECT_TESTIMONIALS_GUIDE.content;
-    title = "How to collect customer testimonials: the complete guide";
-    description =
-      "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.";
   } else if (slug === "how-to-embed-testimonials-on-carrd") {
     content = CARRD_EMBED_GUIDE.content;
-    title = "How to embed testimonials on Carrd in 5 minutes";
-    description = "Learn how to add testimonial widgets to your Carrd site.";
   } else if (slug === "how-to-embed-testimonials-on-beehiiv") {
     content = BEEHIIV_EMBED_GUIDE.content;
-    title = "How to embed testimonials on Beehiiv newsletters";
-    description =
-      "Boost your newsletter trust by adding testimonials to your Beehiiv publications.";
   } else if (slug === "testimonial-questions-to-ask-customers") {
     content = TESTIMONIAL_QUESTIONS_GUIDE.content;
-    title = "30 testimonial questions that actually get usable answers";
-    description =
-      "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.";
   } else if (slug === "testimonial-software-for-agencies") {
     content = AGENCY_SOFTWARE_GUIDE.content;
-    title = "Best testimonial tool for marketing agencies in 2026";
-    description =
-      "Scaling a marketing agency requires tools that grow with you. Discover why KudosWall is the top choice for agencies managing multiple client projects.";
   } else if (slug === "how-to-collect-client-testimonials") {
     content = AGENCY_PLAYBOOK.content;
-    title = "How to collect client testimonials at scale (agency playbook)";
-    description =
-      "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.";
   } else if (slug === "vouch-alternative") {
     content = VOUCH_ALTERNATIVE.content;
-    title = "Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)";
-    description =
-      "Vouch pivoted to talent. If you're looking for a simple, video-first testimonial tool to replace it, here are the top 5 alternatives in 2026.";
   } else if (slug === "how-to-embed-testimonials-on-framer") {
     content = FRAMER_EMBED_GUIDE.content;
-    title = "How to embed testimonials on Framer in 2026";
-    description =
-      "A step-by-step guide to adding high-fidelity testimonial widgets to your Framer site for better conversions.";
   } else if (slug === "course-creator-testimonials") {
     content = COURSE_CREATOR_TESTIMONIALS.content;
-    title = "Course creator testimonials: how to collect and display social proof";
-    description =
-      "Learn the exact strategy top course creators use to collect student results and display them for maximum impact.";
   } else {
     return notFound();
   }
@@ -550,8 +143,8 @@ export default async function BlogPostPage({ params }: { params: Params }) {
       name: "Alex G.",
       url: baseUrl,
     },
-    datePublished: "2026-04-18T00:00:00Z",
-    dateModified: "2026-04-18T00:00:00Z",
+    datePublished: `${post.date}T00:00:00Z`,
+    dateModified: `${post.date}T00:00:00Z`,
     publisher: {
       "@type": "Organization",
       name: "KudosWall",
@@ -601,6 +194,34 @@ export default async function BlogPostPage({ params }: { params: Params }) {
               Start Your Free Trial
             </Button>
           </Link>
+        </div>
+
+        {/* Related Posts */}
+        <div className="mt-24 border-t pt-16">
+          <h3 className="mb-8 text-2xl font-bold">Recent Posts</h3>
+          <div className="grid gap-8 md:grid-cols-2">
+            {BLOG_POSTS.filter((p) => p.slug !== slug)
+              .slice(0, 4)
+              .map((relatedPost) => (
+                <Link
+                  key={relatedPost.slug}
+                  href={`/blog/${relatedPost.slug}`}
+                  className="group block space-y-2"
+                >
+                  <div className="text-muted-foreground text-sm">
+                    {new Date(relatedPost.date).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <h4 className="group-hover:text-primary text-xl font-bold transition-colors">
+                    {relatedPost.title}
+                  </h4>
+                  <p className="text-muted-foreground line-clamp-2">{relatedPost.description}</p>
+                </Link>
+              ))}
+          </div>
         </div>
       </div>
       <Footer />

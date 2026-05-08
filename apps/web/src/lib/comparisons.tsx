@@ -83,11 +83,11 @@ export const SENJA_COMPARISON = {
         <H2>KudosWall vs Senja: Why Simplicity Wins in 2026</H2>
         <P>
           Senja has grown into a powerful platform—arguably the most feature-heavy in the market.
-          But for many founders, that power has created a new problem: **Complexity Creep.**
+          But for many founders, that power has created a new problem: Complexity Creep.
         </P>
         <P>
-          KudosWall was built to solve a single pain point: **Getting your social proof live without
-          reading a manual.** While competitors add "spin-the-wheel" games and complex CRM features,
+          KudosWall was built to solve a single pain point: Getting your social proof live without
+          reading a manual. While competitors add "spin-the-wheel" games and complex CRM features,
           we focused on making the fastest, best-looking testimonial engine for indie hackers and
           course creators.
         </P>
@@ -100,7 +100,7 @@ export const SENJA_COMPARISON = {
           sizzle reels, and sentiment analysis, the dashboard has become dense.
         </P>
         <P>
-          KudosWall takes a **Minimalist First** approach. Our collection forms are designed to be
+          KudosWall takes a Minimalist First approach. Our collection forms are designed to be
           friction-free for your customers, and our dashboard is built for founders who want to
           spend their time building their product, not managing their testimonials.
         </P>
@@ -115,7 +115,7 @@ export const SENJA_COMPARISON = {
         </P>
         <P>
           At KudosWall, we believe in scaling with you, not taxing your growth. Our Agency plan
-          includes **up to 5 workspaces** and team members out of the box, with zero hidden per-seat
+          includes up to 5 workspaces and team members out of the box, with zero hidden per-seat
           fees.
         </P>
       </section>
@@ -128,7 +128,7 @@ export const SENJA_COMPARISON = {
           styling, leading to rigid design constraints.
         </P>
         <P>
-          KudosWall treats the **Collection Page** and the **Display Widget** as two distinct design
+          KudosWall treats the Collection Page and the Display Widget as two distinct design
           surfaces. You can have a high-conversion, branded landing page for collecting testimonials
           that feels completely different from the subtle, minimalist widget on your site.
         </P>
@@ -155,12 +155,12 @@ export const SENJA_COMPARISON = {
       <section className="mb-24">
         <H3>The Final Verdict</H3>
         <P>
-          **Choose Senja if:** You have a marketing team of 5+ and need deep CRM integrations or
+          Choose Senja if: You have a marketing team of 5+ and need deep CRM integrations or
           AI-generated video sizzle reels.
         </P>
         <P>
-          **Choose KudosWall if:** You want the most generous free tier in the market (3× Senja's)
-          to get your **Wall of Love live in 5 minutes** without the $29/mo paywall.
+          Choose KudosWall if: You want the most generous free tier in the market (3× Senja's)
+          to get your Wall of Love live in 5 minutes without the $29/mo paywall.
         </P>
       </section>
     </>
@@ -195,8 +195,8 @@ export const TESTIMONIAL_TO_COMPARISON = {
       <section className="mb-12">
         <H2>KudosWall vs Testimonial.to: The Text and Video Alternative</H2>
         <P>
-          Testimonial.to pioneered the video testimonial space. But for many businesses, **video is
-          overkill**. It's hard to get customers to record, hard to moderate, and often slows down
+          Testimonial.to pioneered the video testimonial space. But for many businesses, video is
+          overkill. It's hard to get customers to record, hard to moderate, and often slows down
           page load times.
         </P>
         <P>
@@ -210,7 +210,7 @@ export const TESTIMONIAL_TO_COMPARISON = {
         <H3>Deep Customization without the Complexity</H3>
         <P>
           Testimonial.to widgets are recognizable—and often look like "plugins." KudosWall uses
-          **CSS-first design tokens** and a library of 35+ Google Fonts to ensure your widget
+          CSS-first design tokens and a library of 35+ Google Fonts to ensure your widget
           matches your brand's exact typography and spacing.
         </P>
         <UL>
@@ -232,7 +232,7 @@ export const TESTIMONIAL_TO_COMPARISON = {
         <H3>Identity Verification Built-In</H3>
         <P>
           Credibility is everything. While Testimonial.to relies on simple name fields, KudosWall
-          allows users to verify their identity via **LinkedIn and Google OAuth**. This adds a
+          allows users to verify their identity via LinkedIn and Google OAuth. This adds a
           "Verified" badge to your testimonials, making them 10x more trustworthy to potential
           buyers.
         </P>
@@ -288,7 +288,7 @@ export const COURSE_CREATORS_COMPARISON = {
         <P>
           Course sales pages are notoriously long, often featuring dozens of student results.
           Traditional testimonial widgets can bloat your page size, causing layout shifts and slow
-          rendering. KudosWall solves this with **Edge-optimized delivery**.
+          rendering. KudosWall solves this with Edge-optimized delivery.
         </P>
         <UL>
           <LI>
@@ -306,7 +306,7 @@ export const COURSE_CREATORS_COMPARISON = {
         <H3>Verified Results = Higher Sales</H3>
         <P>
           In the "fake guru" era, skepticism is at an all-time high. A simple text quote isn't
-          enough anymore. KudosWall's **LinkedIn Verification** allows potential students to see
+          enough anymore. KudosWall's LinkedIn Verification allows potential students to see
           that the testimonial comes from a real professional with a verifiable profile.
         </P>
       </section>
@@ -315,7 +315,7 @@ export const COURSE_CREATORS_COMPARISON = {
         <H3>Seamless Integration with Your Stake</H3>
         <P>
           Whether you use Kajabi, Teachable, or a custom Next.js stack, KudosWall fits in perfectly.
-          Our **Custom CSS override engine** allows you to match the exact aesthetic of your sales
+          Our Custom CSS override engine allows you to match the exact aesthetic of your sales
           page, making the social proof feel like a core part of the experience rather than a
           third-party plugin.
         </P>
@@ -351,7 +351,7 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         <H2>Affordable Senja Alternatives: Why KudosWall is the Best Value</H2>
         <P>
           Social proof is essential, but it shouldn't cost as much as your server bill. While
-          **Senja** has moved toward Enterprise-level pricing with a $29/mo entry point, KudosWall
+          Senja has moved toward Enterprise-level pricing with a $29/mo entry point, KudosWall
           remains committed to the indie founder and solo creator market.
         </P>
       </section>
@@ -360,7 +360,7 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         <H3>The End of Subscription Fatigue</H3>
         <P>
           Why pay every month for a tool that simply displays text on your site? KudosWall offers a
-          **Lifetime Deal (LTD)** for a limited time, allowing you to pay once and own your social
+          Lifetime Deal (LTD) for a limited time, allowing you to pay once and own your social
           proof engine forever.
         </P>
         <UL>
@@ -382,8 +382,8 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         <H3>90% of the Value, 20% of the Cost</H3>
         <P>
           Unless you need enterprise-level automations and deep CRM integrations, you're likely
-          overpaying with other tools. KudosWall gives you the **premium widget layouts,
-          automations, and verification tools** you actually use, without the "enterprise tax."
+          overpaying with other tools. KudosWall gives you the premium widget layouts,
+          automations, and verification tools you actually use, without the "enterprise tax."
         </P>
       </section>
 
@@ -1814,8 +1814,8 @@ export const FRAMER_EMBED_GUIDE = {
         <P>
           Framer has become the go-to design tool for high-end landing pages and SaaS websites. Its
           ability to create custom, fluid animations and layouts is unmatched. However, to truly
-          convert visitors into customers, your beautiful Framer site needs **verified social
-          proof.**
+          convert visitors into customers, your beautiful Framer site needs verified social
+          proof.
         </P>
         <P>
           In this guide, we'll show you how to embed a high-fidelity KudosWall testimonial widget on
@@ -1827,12 +1827,12 @@ export const FRAMER_EMBED_GUIDE = {
       <section className="mb-12">
         <H3>Step 1: Get Your KudosWall Embed Code</H3>
         <P>
-          First, log in to your KudosWall dashboard. Navigate to the **Widgets** section and choose
+          First, log in to your KudosWall dashboard. Navigate to the Widgets section and choose
           the wall you'd like to display. Customize the design—select from Grid, Masonry, or
           Carousel layouts and match the colors to your Framer project's palette.
         </P>
         <P>
-          Once it looks perfect, click **Embed code** and copy the single line of JavaScript
+          Once it looks perfect, click Embed code and copy the single line of JavaScript
           provided.
         </P>
       </section>
@@ -1841,13 +1841,13 @@ export const FRAMER_EMBED_GUIDE = {
         <H3>Step 2: Add an Embed Component in Framer</H3>
         <P>Open your project in Framer and follow these steps:</P>
         <UL>
-          <LI>Click the **Plus (+)** button in the top left to open the Insert menu.</LI>
+          <LI>Click the Plus (+) button in the top left to open the Insert menu.</LI>
           <LI>
-            Search for **Embed** and drag it onto your canvas where you want the testimonials to
+            Search for Embed and drag it onto your canvas where you want the testimonials to
             appear.
           </LI>
-          <LI>In the properties panel on the right, make sure the "Type" is set to **HTML**.</LI>
-          <LI>Paste your KudosWall embed code into the **HTML** box.</LI>
+          <LI>In the properties panel on the right, make sure the "Type" is set to HTML.</LI>
+          <LI>Paste your KudosWall embed code into the HTML box.</LI>
         </UL>
       </section>
 
@@ -1859,7 +1859,7 @@ export const FRAMER_EMBED_GUIDE = {
           automatically adjust to the width of the Framer container.
         </P>
         <P>
-          **Pro Tip:** Set the Embed component's width to "Fill" and the height to "Auto" (or a
+          Pro Tip: Set the Embed component's width to "Fill" and the height to "Auto" (or a
           fixed height if you want a scrollable masonry grid) to ensure it looks great on all
           devices.
         </P>
@@ -1869,7 +1869,7 @@ export const FRAMER_EMBED_GUIDE = {
         <H3>Why KudosWall + Framer is a Winning Combo</H3>
         <P>
           Framer users care deeply about performance and aesthetics. KudosWall widgets are
-          **edge-optimized**, meaning they load near-instantly and won't hurt your Framer site's
+          edge-optimized, meaning they load near-instantly and won't hurt your Framer site's
           Lighthouse scores. Plus, our high-fidelity text and video testimonials match the premium
           feel of a Framer-designed site.
         </P>
@@ -1886,12 +1886,12 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         <P>
           For course creators, testimonials aren't just "nice to have"—they are your most effective
           sales tool. A potential student isn't just buying your content; they are buying a
-          **transformation.** And nothing proves a transformation better than a student sharing
+          transformation. And nothing proves a transformation better than a student sharing
           their results.
         </P>
         <P>
           In 2026, text reviews are no longer enough. To stand out in a crowded market, you need
-          **verified video testimonials** and student success stories that feel authentic. Here is
+          verified video testimonials and student success stories that feel authentic. Here is
           the exact strategy top creators use to collect and display social proof.
         </P>
       </section>
@@ -1900,19 +1900,19 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         <H3>1. The "Moment of Transformation" Ask</H3>
         <P>
           Don't wait until the very end of your course to ask for a testimonial. The best time to
-          ask is at the **Moment of Transformation**—when a student hits a specific milestone or
+          ask is at the Moment of Transformation—when a student hits a specific milestone or
           achieves their first win.
         </P>
         <UL>
           <LI>
-            **Module 1 Win:** Ask for a testimonial right after they complete their first
+            Module 1 Win: Ask for a testimonial right after they complete their first
             assignment.
           </LI>
           <LI>
-            **Mid-Course Check-in:** Use an automated email to ask how their progress is going.
+            Mid-Course Check-in: Use an automated email to ask how their progress is going.
           </LI>
           <LI>
-            **Certification:** Include a collection link on the final success page of your course.
+            Certification: Include a collection link on the final success page of your course.
           </LI>
         </UL>
       </section>
@@ -1926,7 +1926,7 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         <P>
           KudosWall makes this easy by allowing students to record a high-fidelity video directly
           from their phone or laptop, without needing to download any apps. This frictionless
-          experience leads to a **3x higher completion rate** for video requests.
+          experience leads to a 3x higher completion rate for video requests.
         </P>
       </section>
 
@@ -1937,13 +1937,13 @@ export const COURSE_CREATOR_TESTIMONIALS = {
           entire sales funnel:
         </P>
         <UL>
-          <LI>**The Hero Section:** A carousel of 3-5 star students right under your main CTA.</LI>
+          <LI>The Hero Section: A carousel of 3-5 star students right under your main CTA.</LI>
           <LI>
-            **The Pricing Table:** A masonry grid of testimonials next to your checkout button to
+            The Pricing Table: A masonry grid of testimonials next to your checkout button to
             reduce friction.
           </LI>
           <LI>
-            **The FAQ Section:** Use specific testimonials that answer common student objections.
+            The FAQ Section: Use specific testimonials that answer common student objections.
           </LI>
         </UL>
       </section>
@@ -1959,3 +1959,4 @@ export const COURSE_CREATOR_TESTIMONIALS = {
     </>
   ),
 };
+
