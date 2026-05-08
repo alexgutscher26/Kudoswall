@@ -102,4 +102,25 @@ export const BLOG_POSTS = [
     slug: "best-free-testimonial-software",
     date: "2026-05-08",
   },
+  {
+    title: "How to embed testimonials on Carrd in 5 minutes",
+    description:
+      "Learn how to add beautiful, high-converting testimonial widgets to your Carrd site for free. No coding required.",
+    slug: "how-to-embed-testimonials-on-carrd",
+    date: "2026-05-08",
+  },
+  {
+    title: "How to embed testimonials on Beehiiv newsletters",
+    description:
+      "Boost your newsletter trust and conversion rates by adding customer testimonials to your Beehiiv publications.",
+    slug: "how-to-embed-testimonials-on-beehiiv",
+    date: "2026-05-08",
+  },
+  {
+    title: "30 testimonial questions that actually get usable answers",
+    description:
+      "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.",
+    slug: "testimonial-questions-to-ask-customers",
+    date: "2026-05-08",
+  },
 ] as const;

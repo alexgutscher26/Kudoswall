@@ -20,6 +20,9 @@ import {
   FREE_WALL_OF_LOVE,
   COLLECT_TESTIMONIALS_GUIDE,
   BEST_FREE_TOOLS_2026,
+  CARRD_EMBED_GUIDE,
+  BEEHIIV_EMBED_GUIDE,
+  TESTIMONIAL_QUESTIONS_GUIDE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -258,16 +261,64 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   if (slug === "best-free-testimonial-software") {
     return {
-      title: "Best Free Testimonial Software in 2026: The Top 5 Tools Compared",
+      title: "Best Free Testimonial Software in 2026",
       description:
-        "Looking for the best free testimonial tool? We compared KudosWall, Senja, Testimonial.to and more to find the best value for $0 in 2026.",
+        "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.",
       alternates: { canonical: `${baseUrl}/blog/${slug}` },
       openGraph: {
-        title: "Best Free Testimonial Software in 2026",
-        description: "Compare the top 5 testimonial tools with free plans. 50 reviews for $0.",
+        title: "Best Free Testimonial Software Compared",
+        description: "Find the most generous free testimonial software for your business.",
         url: `${baseUrl}/blog/${slug}`,
         type: "article",
-        images: [{ url: `${baseUrl}/og/best-free-tools.png`, width: 1200, height: 630 }],
+        images: [{ url: `${baseUrl}/og/free-tools.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "how-to-embed-testimonials-on-carrd") {
+    return {
+      title: "How to Embed Testimonials on Carrd in 5 Minutes",
+      description:
+        "Learn how to add beautiful, high-converting testimonial widgets to your Carrd site for free. No coding required.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "How to Embed Testimonials on Carrd",
+        description: "Add social proof to your Carrd site in seconds.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/carrd.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "how-to-embed-testimonials-on-beehiiv") {
+    return {
+      title: "How to Embed Testimonials on Beehiiv Newsletters",
+      description:
+        "Boost your newsletter trust and conversion rates by adding customer testimonials to your Beehiiv publications.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "How to Embed Testimonials on Beehiiv",
+        description: "Build trust with your readers using verified social proof.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/beehiiv.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "testimonial-questions-to-ask-customers") {
+    return {
+      title: "30 Testimonial Questions That Actually Get Usable Answers",
+      description:
+        "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "30 Testimonial Questions That Work",
+        description: "Extract the best possible social proof from your customers.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/questions.png`, width: 1200, height: 630 }],
       },
     };
   }
@@ -348,16 +399,29 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = FREE_WALL_OF_LOVE.content;
     title = "Free Wall of Love: How to Build One in 2026";
     description = "Build a beautiful Wall of Love for your website for free.";
-  } else if (slug === "how-to-collect-customer-testimonials") {
-    content = COLLECT_TESTIMONIALS_GUIDE.content;
-    title = "How to collect customer testimonials: the complete guide";
-    description =
-      "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.";
   } else if (slug === "best-free-testimonial-software") {
     content = BEST_FREE_TOOLS_2026.content;
     title = "Best free testimonial software in 2026";
     description =
       "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.";
+  } else if (slug === "how-to-collect-customer-testimonials") {
+    content = COLLECT_TESTIMONIALS_GUIDE.content;
+    title = "How to collect customer testimonials: the complete guide";
+    description =
+      "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.";
+  } else if (slug === "how-to-embed-testimonials-on-carrd") {
+    content = CARRD_EMBED_GUIDE.content;
+    title = "How to embed testimonials on Carrd in 5 minutes";
+    description = "Learn how to add testimonial widgets to your Carrd site.";
+  } else if (slug === "how-to-embed-testimonials-on-beehiiv") {
+    content = BEEHIIV_EMBED_GUIDE.content;
+    title = "How to embed testimonials on Beehiiv newsletters";
+    description = "Boost your newsletter trust by adding testimonials to your Beehiiv publications.";
+  } else if (slug === "testimonial-questions-to-ask-customers") {
+    content = TESTIMONIAL_QUESTIONS_GUIDE.content;
+    title = "30 testimonial questions that actually get usable answers";
+    description =
+      "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.";
   } else {
     return notFound();
   }

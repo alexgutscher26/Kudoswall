@@ -1403,4 +1403,206 @@ export const BEST_FREE_TOOLS_2026 = {
   ),
 };
 
+export const CARRD_EMBED_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>How to Embed Testimonials on Carrd in 5 Minutes</H2>
+        <P>
+          Carrd is the gold standard for minimalist, one-page websites. Whether you're building a
+          personal brand, a landing page for a digital product, or a simple signup form, adding
+          social proof is the fastest way to increase your conversion rate.
+        </P>
+        <P>
+          In this guide, we'll show you exactly how to embed a beautiful "Wall of Love" on your
+          Carrd site using KudosWall.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 1: Create Your KudosWall Widget</H3>
+        <P>
+          First, sign up for KudosWall (the free plan gives you 50 testimonials + video). Create a
+          new "Wall" and start collecting testimonials using your unique collection link. Once you
+          have a few reviews, head to the "Widgets" tab.
+        </P>
+        <P>
+          Customize your widget's colors and fonts to match your Carrd site. Since Carrd is often
+          minimalist, we recommend using our <strong>Grid</strong> or <strong>Masonry</strong>
+          layouts with a subtle background.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 2: Copy Your Embed Code</H3>
+        <P>
+          Once your widget looks perfect, click the "Embed" button. You'll see a single line of
+          JavaScript code. Copy this to your clipboard.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 3: Add an "Embed" Element in Carrd</H3>
+        <P>
+          Open your Carrd editor and follow these steps:
+        </P>
+        <UL>
+          <LI>Click the <strong>+ (Add)</strong> button in the sidebar.</LI>
+          <LI>Select <strong>Embed</strong> from the list of elements.</LI>
+          <LI>In the settings for the Embed element, set the "Style" to <strong>Hidden</strong> (this is usually best for JS scripts).</LI>
+          <LI>Paste your KudosWall embed code into the <strong>Code</strong> box.</LI>
+          <LI>Position the Embed element where you want the testimonials to appear on your page.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Why KudosWall is Perfect for Carrd</H3>
+        <P>
+          Carrd users value speed and simplicity. KudosWall's widgets are edge-optimized and designed
+          to load instantly without causing layout shifts. Plus, with our generous free tier, you
+          don't have to worry about a monthly subscription for your simple one-page site.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const BEEHIIV_EMBED_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>How to Embed Testimonials on Beehiiv Newsletters</H2>
+        <P>
+          Newsletters thrive on trust. When a new reader lands on your Beehiiv subscribe page,
+          seeing testimonials from existing happy readers can be the difference between a bounce
+          and a new subscriber.
+        </P>
+        <P>
+          While email clients (like Gmail or Outlook) don't support interactive JavaScript widgets
+          directly inside the email body, you can still use KudosWall to power your social proof
+          on your Beehiiv website and in your newsletter blasts.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Option 1: Adding Testimonials to Your Beehiiv Website</H3>
+        <P>
+          Beehiiv allows you to customize your publication's website. To add a Wall of Love:
+        </P>
+        <UL>
+          <LI>Go to your Beehiiv Dashboard and select <strong>Settings {"->"} Design Lab</strong>.</LI>
+          <LI>Choose the page where you want to add social proof (e.g., the Home page or a dedicated "Love" page).</LI>
+          <LI>Add a <strong>Custom HTML</strong> block.</LI>
+          <LI>Paste your KudosWall embed code into the block and save.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Option 2: Using Testimonials in Newsletter Emails</H3>
+        <P>
+          Since emails can't run JavaScript, you can't embed the live widget directly. However,
+          KudosWall makes it easy to include social proof in your blasts:
+        </P>
+        <UL>
+          <LI><strong>Screenshot & Link:</strong> Take a high-quality screenshot of your favorite video testimonial or the Wall of Love and embed it as an image in Beehiiv. Link the image to your public KudosWall "Wall of Love" page.</LI>
+          <LI><strong>Direct Link:</strong> Add a "What readers are saying" section in your footer with a link to your verified Wall of Love.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>The Beehiiv + KudosWall Advantage</H3>
+        <P>
+          By using KudosWall, you can collect <strong>video testimonials</strong> from your readers,
+          which carry much more weight than simple text. You can even include these video links
+          directly in your Beehiiv posts to build massive credibility with your audience.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const TESTIMONIAL_QUESTIONS_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>30 Testimonial Questions That Actually Get Usable Answers</H2>
+        <P>
+          "Can you leave us a review?" is the worst way to ask for a testimonial. It's too vague,
+          it puts all the creative work on your customer, and it usually results in "This tool is
+          great, 5 stars!" which does nothing to convince a skeptical prospect.
+        </P>
+        <P>
+          To get high-converting testimonials, you need to ask questions that elicit a <strong>narrative</strong>.
+          You want to hear about the struggle they faced, the moment they decided to switch, and
+           the specific results they've seen.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>The "Before": Understanding the Pain Point</H3>
+        <P>These questions help establish the "villain" of the story — the problem you solved.</P>
+        <UL>
+          <LI>What was the main challenge you were facing before using KudosWall?</LI>
+          <LI>How much time/money were you losing to that problem?</LI>
+          <LI>What other solutions did you try that didn't work?</LI>
+          <LI>What was the "last straw" that made you look for a new tool?</LI>
+          <LI>How were you handling testimonial collection previously?</LI>
+          <LI>What was your biggest frustration with your previous workflow?</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>The "During": The Experience of Using the Product</H3>
+        <P>Focus on ease of use and that "aha" moment.</P>
+        <UL>
+          <LI>How would you describe the setup process in one word?</LI>
+          <LI>What was the first thing that surprised you about the product?</LI>
+          <LI>What is your favorite feature that you use every day?</LI>
+          <LI>Was there a specific moment where you realized this was the right choice?</LI>
+          <LI>How did your team react when you first implemented it?</LI>
+          <LI>How much time did it take to get your first result?</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>The "After": The Results and ROI</H3>
+        <P>This is the most important part for conversions.</P>
+        <UL>
+          <LI>What specific metric has improved since you started using it?</LI>
+          <LI>Can you quantify the time you've saved each week?</LI>
+          <LI>How has this impacted your conversion rate on your landing pages?</LI>
+          <LI>What's the #1 thing you can do now that you couldn't do before?</LI>
+          <LI>How has your customers' feedback changed?</LI>
+          <LI>If you had to put a dollar value on the value we provide, what would it be?</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Handling Objections & Recommendation</H3>
+        <P>Social proof that directly addresses skepticism.</P>
+        <UL>
+          <LI>What was your biggest concern or hesitation before signing up?</LI>
+          <LI>What would you say to someone who thinks this is too expensive?</LI>
+          <LI>If you were to recommend us to a friend, what's the first thing you'd say?</LI>
+          <LI>Who do you think would benefit most from this tool?</LI>
+          <LI>What's the main reason you'd recommend us over competitors?</LI>
+          <LI>Is there anything else you'd like to share that we haven't covered?</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Automate the Asking with KudosWall</H3>
+        <P>
+          You don't have to manually email these questions to every customer. With KudosWall, you
+          can embed these prompts directly into your <strong>Collection Form</strong>.
+        </P>
+        <P>
+          Our high-fidelity recording flow guides your customers through the process, ensuring they
+          give you the specific, results-oriented testimonials that drive sales.
+        </P>
+      </section>
+    </>
+  ),
+};
+
 
