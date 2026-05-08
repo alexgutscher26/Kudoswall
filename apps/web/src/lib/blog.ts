@@ -88,4 +88,18 @@ export const BLOG_POSTS = [
     slug: "free-wall-of-love",
     date: "2026-05-08",
   },
+  {
+    title: "How to collect customer testimonials: the complete guide",
+    description:
+      "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.",
+    slug: "how-to-collect-customer-testimonials",
+    date: "2026-05-08",
+  },
+  {
+    title: "Best free testimonial software in 2026",
+    description:
+      "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.",
+    slug: "best-free-testimonial-software",
+    date: "2026-05-08",
+  },
 ] as const;

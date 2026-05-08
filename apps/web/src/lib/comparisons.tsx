@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 const H2 = ({ children }: { children: React.ReactNode }) => (
   <h2 className="text-foreground mt-12 mb-6 text-3xl font-bold tracking-tight">{children}</h2>
@@ -1047,4 +1048,359 @@ export const FREE_WALL_OF_LOVE = {
     </>
   ),
 };
+
+export const COLLECT_TESTIMONIALS_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <P>
+          In the digital economy, trust is the only currency that truly matters. You can have the
+          best product in the world, but if nobody else is talking about it, your conversion rate
+          will suffer. This is why learning <strong>how to get customer testimonials</strong> is
+          one of the most important skills for any founder, marketer, or creator.
+        </P>
+        <P>
+          Testimonials aren't just "nice to have." They are psychological triggers that reduce
+          the perceived risk of a purchase. When a potential customer sees real people solving real
+          problems with your solution, their brain moves from "Is this a scam?" to "Will this work
+          for me too?"
+        </P>
+        <P>
+          In this guide, we'll walk through the exact framework for collecting high-converting
+          testimonials that don't just look good, but actually drive sales.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>The Psychology of Why Testimonials Work</H2>
+        <P>
+          Before we dive into the "how," we need to understand the "why." Testimonials leverage
+          three powerful psychological principles:
+        </P>
+        <UL>
+          <LI>
+            <strong>Social Proof:</strong> We look to others to determine correct behavior in
+            uncertain situations.
+          </LI>
+          <LI>
+            <strong>Authority:</strong> When someone we respect (or someone like us) praises a
+            product, we transfer that trust to the product itself.
+          </LI>
+          <LI>
+            <strong>Familiarity:</strong> Seeing a person's face and name makes the business feel
+            human and reachable.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step 1: Timing is Everything</H2>
+        <P>
+          The biggest mistake founders make is asking for a testimonial three months after the
+          customer used the product. By then, the "peak delight" has faded.
+        </P>
+        <P>
+          The best time to ask for a testimonial is <strong>immediately after a "Win."</strong>
+        </P>
+        <UL>
+          <LI>For SaaS: Right after they hit a milestone or finish an onboarding flow.</LI>
+          <LI>For Courses: Immediately after they finish the final lesson or submit a project.</LI>
+          <LI>For Services: Right after you deliver the final high-value asset.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step 2: Automate the Ask</H2>
+        <P>
+          If you're manually emailing every customer, you're going to miss opportunities. You need a
+          system that works while you sleep.
+        </P>
+        <P>
+          Using a tool like KudosWall, you can set up a dedicated collection page and link to it in
+          your automated "Success" emails. This ensures every happy customer is given a frictionless
+          way to share their experience.
+        </P>
+        <P>
+          Check out our guide on{" "}
+          <Link href="/blog/free-testimonial-software-with-video" className="text-primary underline">
+            free testimonial software with video
+          </Link>{" "}
+          to see how you can start automating this today for $0.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step 3: Ask the Right Questions</H2>
+        <P>
+          Don't just ask for "a testimonial." That's too vague and leads to boring reviews like "It
+          was great!"
+        </P>
+        <P>Instead, ask three specific questions to get a narrative-driven response:</P>
+        <UL>
+          <LI>1. What was the main problem you were facing before using [Product]?</LI>
+          <LI>2. What was the "Aha!" moment when you realized it was working?</LI>
+          <LI>3. What is the single biggest result you've seen so far?</LI>
+        </UL>
+        <P>
+          This structure creates a "Before vs. After" story that is 10x more compelling to new
+          visitors.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step 4: Text vs. Video (The High-Fidelity Edge)</H2>
+        <P>
+          In 2026, text testimonials are the baseline. <strong>Video testimonials are the gold
+          standard.</strong>
+        </P>
+        <P>
+          Video adds a layer of authenticity that text simply can't match. It's much harder to fake
+          a 30-second video of a real person talking than it is to fake a text quote.
+        </P>
+        <P>
+          However, you should always offer both options. Some people are camera-shy but have
+          incredible results to share. A good system (like KudosWall) lets the customer choose.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step 5: Displaying for Maximum Impact</H2>
+        <P>
+          Once you've collected your testimonials, you need to put them where they'll do the most
+          work.
+        </P>
+        <UL>
+          <LI>
+            <strong>The "Wall of Love":</strong> A dedicated page for all your praise. Learn{" "}
+            <Link href="/blog/free-wall-of-love" className="text-primary underline">
+              how to build a free Wall of Love
+            </Link>{" "}
+            in under 5 minutes.
+          </LI>
+          <LI>
+            <strong>Checkout Pages:</strong> Use a carousel widget right next to the buy button to
+            reduce last-minute anxiety.
+          </LI>
+          <LI>
+            <strong>Hero Sections:</strong> A "social proof bar" below your main headline.
+          </LI>
+        </UL>
+        <P>
+          If you're using a specific platform, we have dedicated guides for you:
+        </P>
+        <UL>
+          <LI>
+            <Link href="/blog/testimonial-widget-for-webflow" className="text-primary underline">
+              Testimonial Widget for Webflow
+            </Link>
+          </LI>
+          <LI>
+            <Link href="/blog/best-testimonial-tools-teachable" className="text-primary underline">
+              Best Social Proof Tools for Teachable
+            </Link>
+          </LI>
+          <LI>
+            <Link href="/blog/best-testimonial-tools-kajabi" className="text-primary underline">
+              Best Social Proof Tools for Kajabi
+            </Link>
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>Choosing the Right Tool</H2>
+        <P>
+          You have options. If you're comparing tools, we've done the deep dives for you:
+        </P>
+        <UL>
+          <LI>
+            <Link href="/blog/kudoswall-vs-senja" className="text-primary underline">
+              KudosWall vs Senja
+            </Link>
+          </LI>
+          <LI>
+            <Link href="/blog/kudoswall-vs-testimonial-to" className="text-primary underline">
+              KudosWall vs Testimonial.to
+            </Link>
+          </LI>
+          <LI>
+            <Link href="/blog/free-senja-alternative" className="text-primary underline">
+              Top Free Senja Alternatives
+            </Link>
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>Summary: Start Today</H2>
+        <P>
+          The best time to start collecting testimonials was when you launched. The second best time
+          is <strong>right now</strong>.
+        </P>
+        <P>
+          Don't wait until you have a "perfect" system. Start by sending your first collection link
+          today. At KudosWall, we make it incredibly easy to get started with a{" "}
+          <strong>50-testimonial free plan</strong> that includes native video support.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const BEST_FREE_TOOLS_2026 = {
+  content: (
+    <>
+      <section className="mb-12">
+        <P>
+          In 2026, social proof is no longer optional—it's a requirement. But if you're just
+          launching a side project, a newsletter, or a new SaaS, you probably don't want to add
+          another $50/month subscription to your burn rate.
+        </P>
+        <P>
+          The good news is that the market for testimonial software has become incredibly
+          competitive. Many tools now offer generous free tiers that actually let you build a
+          business. The bad news? Most "free" plans are designed to lock you in early and force an
+          upgrade the second you see any success.
+        </P>
+        <P>
+          We've analyzed the top 5 tools on the market to find the <strong>best free testimonial tool
+          in 2026</strong>. We looked at three main criteria:
+        </P>
+        <UL>
+          <LI><strong>Testimonial Limits:</strong> How many reviews can you collect before paying?</LI>
+          <LI><strong>Video Support:</strong> Is video recording included or gated behind a paywall?</LI>
+          <LI><strong>Branding:</strong> How intrusive is the "Powered by" badge?</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12 border-l-4 border-primary pl-6 py-2 bg-primary/5 rounded-r-xl">
+        <H2>1. KudosWall (The Best Overall Value)</H2>
+        <P>
+          Yes, we are KudosWall. And yes, we put ourselves at the top. Why? Because we literally
+          built our free tier to be 3x more generous than the next best competitor.
+        </P>
+        <P>
+          KudosWall is the only tool on this list that offers <strong>50 testimonials with video
+          recording</strong> for $0. Most founders find that 50 is more than enough to fill their
+          initial sales pages and social proof walls.
+        </P>
+        <UL>
+          <LI><strong>Free Limit:</strong> 50 Testimonials</LI>
+          <LI><strong>Video Support:</strong> Included (High-Fidelity Recording)</LI>
+          <LI><strong>Performance:</strong> Edge-optimized, zero layout shift</LI>
+        </UL>
+        <P>
+          <strong>The Catch:</strong> Like all free tiers, we include a small "Powered by KudosWall"
+          badge on the widget. You can remove it by upgrading to Pro.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>2. Senja (The Best for Social Imports)</H2>
+        <P>
+          Senja is a powerhouse. If you already have 100+ reviews scattered across Google, G2, and
+          Twitter, Senja's import tools are second to none.
+        </P>
+        <P>
+          However, their free tier is significantly more restrictive than KudosWall's. In 2026,
+          they limit you to 15 testimonials. This is great for a weekend launch, but you'll hit
+          the wall quickly.
+        </P>
+        <UL>
+          <LI><strong>Free Limit:</strong> 15 Testimonials</LI>
+          <LI><strong>Video Support:</strong> Available, but limited on free</LI>
+          <LI><strong>Best for:</strong> Curating social media mentions</LI>
+        </UL>
+        <P>
+          Check out our deep dive:{" "}
+          <Link href="/blog/kudoswall-vs-senja" className="text-primary underline">
+            KudosWall vs Senja Comparison
+          </Link>
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>3. Testimonial.to (The Industry Veteran)</H2>
+        <P>
+          Testimonial.to is the tool that started the video testimonial revolution. It's stable,
+          reliable, and used by massive companies.
+        </P>
+        <P>
+          Their free tier has traditionally been quite tight—usually around 10 testimonials. Their
+          primary focus is on their $50+/month tiers, so the free experience can feel like an
+          extended demo rather than a permanent solution.
+        </P>
+        <UL>
+          <LI><strong>Free Limit:</strong> ~10 Testimonials</LI>
+          <LI><strong>Video Support:</strong> Limited recording time on free</LI>
+          <LI><strong>Best for:</strong> Enterprise-level stability</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>4. Trustmary (Best for Widget Variety)</H2>
+        <P>
+          Trustmary offers a beautiful array of widgets—popups, carousels, and sidebars. Their
+          design language is very clean and professional.
+        </P>
+        <P>
+          The trade-off is the volume. They focus heavily on high-end businesses, so their free
+          tier is designed primarily as a gateway to their expensive automation features.
+        </P>
+        <UL>
+          <LI><strong>Free Limit:</strong> Low (Volume-based)</LI>
+          <LI><strong>Video Support:</strong> Primarily text-focused on lower tiers</LI>
+          <LI><strong>Best for:</strong> Complex widget layouts</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>5. Famewall (The Indie-First Choice)</H2>
+        <P>
+          Famewall is built by a solo founder for solo founders. It's lean, fast, and does exactly
+          what it says on the tin.
+        </P>
+        <P>
+          It's a solid choice if you want to support another indie creator. The feature set is
+          simpler than KudosWall or Senja, but it gets the job done without any bloat.
+        </P>
+        <UL>
+          <LI><strong>Free Limit:</strong> 10-15 Testimonials</LI>
+          <LI><strong>Video Support:</strong> Gated behind paywall/trials</LI>
+          <LI><strong>Best for:</strong> Minimalist indie projects</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>The Verdict: Which Free Tool Should You Choose?</H2>
+        <P>
+          Choosing the <strong>best free testimonial tool in 2026</strong> depends on your goals:
+        </P>
+        <UL>
+          <LI>
+            <strong>Choose KudosWall if:</strong> You want the highest limit (50) and video
+            support without paying a dime.
+          </LI>
+          <LI>
+            <strong>Choose Senja if:</strong> You need to import hundreds of old reviews from
+            Twitter and Google immediately.
+          </LI>
+          <LI>
+            <strong>Choose Famewall if:</strong> You want the simplest possible "Wall of Love"
+            with zero learning curve.
+          </LI>
+        </UL>
+        <P>
+          If you're ready to get your first 50 testimonials for free, including native video support,
+          you can{" "}
+          <Link href="/login" className="text-primary underline">
+            create your KudosWall account here
+          </Link>
+          .
+        </P>
+      </section>
+    </>
+  ),
+};
+
 

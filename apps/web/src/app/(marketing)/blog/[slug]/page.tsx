@@ -18,6 +18,8 @@ import {
   FREE_VIDEO_TESTIMONIAL_SOFTWARE,
   FREE_SENJA_ALTERNATIVE,
   FREE_WALL_OF_LOVE,
+  COLLECT_TESTIMONIALS_GUIDE,
+  BEST_FREE_TOOLS_2026,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -237,6 +239,39 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     };
   }
 
+  if (slug === "how-to-collect-customer-testimonials") {
+    return {
+      title: "How to Collect Customer Testimonials: The Complete Guide",
+      description:
+        "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "How to Collect Customer Testimonials: The Complete Guide",
+        description:
+          "Master the art of social proof. Learn exactly how to get customer testimonials that drive sales.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/collection-guide.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "best-free-testimonial-software") {
+    return {
+      title: "Best Free Testimonial Software in 2026: The Top 5 Tools Compared",
+      description:
+        "Looking for the best free testimonial tool? We compared KudosWall, Senja, Testimonial.to and more to find the best value for $0 in 2026.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Best Free Testimonial Software in 2026",
+        description: "Compare the top 5 testimonial tools with free plans. 50 reviews for $0.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/best-free-tools.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
   return {
     title: "Blog Post Not Found",
   };
@@ -313,6 +348,16 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = FREE_WALL_OF_LOVE.content;
     title = "Free Wall of Love: How to Build One in 2026";
     description = "Build a beautiful Wall of Love for your website for free.";
+  } else if (slug === "how-to-collect-customer-testimonials") {
+    content = COLLECT_TESTIMONIALS_GUIDE.content;
+    title = "How to collect customer testimonials: the complete guide";
+    description =
+      "The ultimate guide on how to get customer testimonials that convert. Learn the psychology, the timing, and the tools you need to build a high-converting Wall of Love.";
+  } else if (slug === "best-free-testimonial-software") {
+    content = BEST_FREE_TOOLS_2026.content;
+    title = "Best free testimonial software in 2026";
+    description =
+      "Looking for the best free testimonial tool for your business? We compared the top 5 tools based on limits, video support, and branding to help you choose the right one.";
   } else {
     return notFound();
   }
