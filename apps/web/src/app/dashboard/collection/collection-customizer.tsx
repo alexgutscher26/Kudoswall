@@ -435,13 +435,24 @@ export function CollectionCustomizer({
                   <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                     Accent Color
                   </label>
-                  <input
-                    className="size-8 cursor-pointer rounded-lg border-0 p-0"
-                    disabled={!isPro}
-                    onChange={(e) => setNestedSetting("accentColor", e.target.value)}
-                    type="color"
-                    value={settings.accentColor}
-                  />
+                  <div
+                    className="relative"
+                    onClick={() => {
+                      if (!isPro) {
+                        toast.error("Pro Feature", {
+                          description: "Upgrade to Pro to use custom accent colors.",
+                        });
+                      }
+                    }}
+                  >
+                    <input
+                      className={`size-8 cursor-pointer rounded-lg border-0 p-0 ${!isPro ? "opacity-50 grayscale" : ""}`}
+                      disabled={!isPro}
+                      onChange={(e) => setNestedSetting("accentColor", e.target.value)}
+                      type="color"
+                      value={settings.accentColor}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/30 p-4">
                   <div className="flex items-center gap-2">
@@ -459,12 +470,20 @@ export function CollectionCustomizer({
                     ].map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => setNestedSetting("background.type", t.id)}
+                        onClick={() => {
+                          if (!isPro && t.id !== "color") {
+                            toast.error("Pro Feature", {
+                              description: "Upgrade to Pro to use premium background designs.",
+                            });
+                            return;
+                          }
+                          setNestedSetting("background.type", t.id);
+                        }}
                         className={`flex flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all ${
                           settings.background?.type === t.id
                             ? "border-pink-500 bg-pink-50 text-pink-500"
                             : "border-neutral-100 bg-white text-neutral-400 hover:bg-neutral-50"
-                        }`}
+                        } ${!isPro && t.id !== "color" ? "opacity-40" : ""}`}
                       >
                         <t.icon className="size-4" />
                         <span className="text-[10px] font-bold">{t.label}</span>
@@ -960,23 +979,40 @@ export function CollectionCustomizer({
                   </label>
                   <div className="flex gap-2">
                     <input
-                      className="flex-1 rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                      className="flex-1 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-sm font-medium outline-none focus:border-pink-500"
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use your own custom domain.",
+                          });
+                        }
+                      }}
                       disabled={!isPro || updateDomainMutation.isPending}
                       onChange={(e) => setDomain(e.target.value.toLowerCase().trim())}
-                      placeholder="testimonials.example.com"
+                      placeholder={
+                        isPro ? "testimonials.example.com" : "Available on Pro plans"
+                      }
                       type="text"
                       value={domain}
                     />
                     <button
-                      className="rounded-xl bg-neutral-900 px-4 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                      className="rounded-xl bg-neutral-900 px-6 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use your own custom domain.",
+                          });
+                          return;
+                        }
+                        updateDomainMutation.mutate({ projectId: project.id, domain });
+                      }}
                       disabled={
-                        !isPro ||
+                        (!isPro && domain === "") ||
                         updateDomainMutation.isPending ||
                         domain === (project.customDomain || "")
                       }
-                      onClick={() => updateDomainMutation.mutate({ projectId: project.id, domain })}
                     >
-                      {updateDomainMutation.isPending ? "Saving..." : "Save"}
+                      {updateDomainMutation.isPending ? "Saving..." : "Save Domain"}
                     </button>
                   </div>
                 </div>

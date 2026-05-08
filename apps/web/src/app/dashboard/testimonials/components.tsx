@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   Sparkles,
   GripVertical,
+  Lock,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -622,57 +623,71 @@ export function TestimonialInbox({
 
               <DropdownMenu>
                 <DropdownMenuTrigger
+                  disabled={!permissions?.features?.tagFiltering}
                   className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
-                    selectedTagId !== null ? "bg-pink-50 text-pink-600" : "text-neutral-600 hover:bg-neutral-100"
-                  } `}
+                    selectedTagId !== null
+                      ? "bg-pink-50 text-pink-600"
+                      : "text-neutral-600 hover:bg-neutral-100"
+                  } ${!permissions?.features?.tagFiltering ? "opacity-60 cursor-not-allowed" : ""}`}
+                  onClick={(e) => {
+                    if (!permissions?.features?.tagFiltering) {
+                      e.preventDefault();
+                      toast.error("Pro Feature", {
+                        description: "Upgrade to Pro to filter testimonials by tags.",
+                      });
+                    }
+                  }}
                 >
                   <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
                   Tag
+                  {!permissions?.features?.tagFiltering && <Lock className="size-2.5 text-neutral-400" />}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
-                >
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                      Filter by Tag
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                    <div className="max-h-60 overflow-y-auto">
-                      <DropdownMenuRadioGroup
-                        value={selectedTagId || "all"}
-                        onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
-                      >
-                        <DropdownMenuRadioItem
-                          value="all"
-                          className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                {permissions?.features?.tagFiltering && (
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+                  >
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                        Filter by Tag
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                      <div className="max-h-60 overflow-y-auto">
+                        <DropdownMenuRadioGroup
+                          value={selectedTagId || "all"}
+                          onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
                         >
-                          All Tags
-                        </DropdownMenuRadioItem>
-                        {tags?.map((tag) => (
                           <DropdownMenuRadioItem
-                            key={tag.id}
-                            value={tag.id}
+                            value="all"
                             className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
                           >
-                            {tag.name}
+                            All Tags
                           </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </div>
-                  </DropdownMenuGroup>
-                  {selectedTagId !== null && (
-                    <>
-                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                      <DropdownMenuItem
-                        onClick={() => setSelectedTagId(null)}
-                        className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
-                      >
-                        Clear Filter
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
+                          {tags?.map((tag) => (
+                            <DropdownMenuRadioItem
+                              key={tag.id}
+                              value={tag.id}
+                              className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                            >
+                              {tag.name}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </div>
+                    </DropdownMenuGroup>
+                    {selectedTagId !== null && (
+                      <>
+                        <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                        <DropdownMenuItem
+                          onClick={() => setSelectedTagId(null)}
+                          className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                        >
+                          Clear Filter
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
 
               <button

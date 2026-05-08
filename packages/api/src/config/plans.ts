@@ -40,6 +40,7 @@ export interface PlanConfig {
     csvExport: boolean;
     analytics: boolean;
     premiumWidgets: boolean;
+    tagFiltering: boolean;
   };
   displayFeatures: string[];
 }
@@ -65,6 +66,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       csvExport: false,
       analytics: false,
       premiumWidgets: false,
+      tagFiltering: false,
     },
     displayFeatures: [
       "Up to 50 testimonials",
@@ -97,6 +99,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       csvExport: true,
       analytics: true,
       premiumWidgets: true,
+      tagFiltering: true,
     },
     displayFeatures: [
       "Unlimited testimonials",
@@ -133,6 +136,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       csvExport: true,
       analytics: true,
       premiumWidgets: true,
+      tagFiltering: true,
     },
     displayFeatures: [
       "Everything in Pro",
@@ -163,6 +167,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       csvExport: true,
       analytics: true,
       premiumWidgets: true,
+      tagFiltering: true,
     },
     displayFeatures: ["Everything in Agency", "Lifetime access", "No monthly fees"],
   },

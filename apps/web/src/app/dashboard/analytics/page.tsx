@@ -101,7 +101,7 @@ async function AnalyticsContentWrapper({
               your workspace to unlock these insights.
             </p>
             <Link
-              href={`/dashboard/settings?workspaceId=${workspaceId}` as any}
+              href={`/dashboard/settings?tab=billing&workspaceId=${workspaceId}` as any}
               className="flex items-center gap-2 rounded-full px-8 py-3 text-[14px] font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
               style={{ backgroundColor: "#171717" }}
             >
