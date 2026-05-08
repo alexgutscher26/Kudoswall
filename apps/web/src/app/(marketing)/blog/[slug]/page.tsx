@@ -23,6 +23,9 @@ import {
   CARRD_EMBED_GUIDE,
   BEEHIIV_EMBED_GUIDE,
   TESTIMONIAL_QUESTIONS_GUIDE,
+  AGENCY_SOFTWARE_GUIDE,
+  AGENCY_PLAYBOOK,
+  VOUCH_ALTERNATIVE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -323,6 +326,54 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     };
   }
 
+  if (slug === "testimonial-software-for-agencies") {
+    return {
+      title: "Best Testimonial Tool for Marketing Agencies in 2026",
+      description:
+        "Scaling a marketing agency requires tools that grow with you. Discover why KudosWall is the top choice for agency social proof.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Best Agency Testimonial Software",
+        description: "Manage multiple clients and scale social proof with KudosWall.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/agency.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "how-to-collect-client-testimonials") {
+    return {
+      title: "How to Collect Client Testimonials at Scale (Agency Playbook)",
+      description:
+        "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "The Agency Testimonial Playbook",
+        description: "Automate your client review collection with this proven strategy.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/playbook.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "vouch-alternative") {
+    return {
+      title: "Best Vouch Alternatives in 2026 (Since the Pivot)",
+      description:
+        "Looking for a Vouch alternative for customer testimonials? Here are the best video-first social proof tools for marketers.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Vouch Alternative: Top 5 Tools for Video Testimonials",
+        description: "Why marketers are switching to KudosWall and Senja after Vouch's pivot.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/vouch-alternative.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
   return {
     title: "Blog Post Not Found",
   };
@@ -393,8 +444,9 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     description = "Compare the best free testimonial tools with video support.";
   } else if (slug === "free-senja-alternative") {
     content = FREE_SENJA_ALTERNATIVE.content;
-    title = "Free Senja Alternative: 5 Tools Compared";
-    description = "Discover the best free Senja alternatives for founders.";
+    title = "Senja alternative: 8 testimonial tools (and the only one with a real free tier)";
+    description =
+      "Looking for a free Senja alternative? Discover why KudosWall is the most generous option in 2026, with 10x more testimonials and native video support on our free plan.";
   } else if (slug === "free-wall-of-love") {
     content = FREE_WALL_OF_LOVE.content;
     title = "Free Wall of Love: How to Build One in 2026";
@@ -422,6 +474,21 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     title = "30 testimonial questions that actually get usable answers";
     description =
       "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.";
+  } else if (slug === "testimonial-software-for-agencies") {
+    content = AGENCY_SOFTWARE_GUIDE.content;
+    title = "Best testimonial tool for marketing agencies in 2026";
+    description =
+      "Scaling a marketing agency requires tools that grow with you. Discover why KudosWall is the top choice for agencies managing multiple client projects.";
+  } else if (slug === "how-to-collect-client-testimonials") {
+    content = AGENCY_PLAYBOOK.content;
+    title = "How to collect client testimonials at scale (agency playbook)";
+    description =
+      "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.";
+  } else if (slug === "vouch-alternative") {
+    content = VOUCH_ALTERNATIVE.content;
+    title = "Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)";
+    description =
+      "Vouch pivoted to talent. If you're looking for a simple, video-first testimonial tool to replace it, here are the top 5 alternatives in 2026.";
   } else {
     return notFound();
   }

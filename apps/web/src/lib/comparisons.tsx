@@ -1279,124 +1279,43 @@ export const BEST_FREE_TOOLS_2026 = {
           Yes, we are KudosWall. And yes, we put ourselves at the top. Why? Because we literally
           built our free tier to be 3x more generous than the next best competitor.
         </P>
-        <P>
-          KudosWall is the only tool on this list that offers <strong>50 testimonials with video
-          recording</strong> for $0. Most founders find that 50 is more than enough to fill their
-          initial sales pages and social proof walls.
-        </P>
         <UL>
-          <LI><strong>Free Limit:</strong> 50 Testimonials</LI>
-          <LI><strong>Video Support:</strong> Included (High-Fidelity Recording)</LI>
-          <LI><strong>Performance:</strong> Edge-optimized, zero layout shift</LI>
-        </UL>
-        <P>
-          <strong>The Catch:</strong> Like all free tiers, we include a small "Powered by KudosWall"
-          badge on the widget. You can remove it by upgrading to Pro.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H2>2. Senja (The Best for Social Imports)</H2>
-        <P>
-          Senja is a powerhouse. If you already have 100+ reviews scattered across Google, G2, and
-          Twitter, Senja's import tools are second to none.
-        </P>
-        <P>
-          However, their free tier is significantly more restrictive than KudosWall's. In 2026,
-          they limit you to 15 testimonials. This is great for a weekend launch, but you'll hit
-          the wall quickly.
-        </P>
-        <UL>
-          <LI><strong>Free Limit:</strong> 15 Testimonials</LI>
-          <LI><strong>Video Support:</strong> Available, but limited on free</LI>
-          <LI><strong>Best for:</strong> Curating social media mentions</LI>
-        </UL>
-        <P>
-          Check out our deep dive:{" "}
-          <Link href="/blog/kudoswall-vs-senja" className="text-primary underline">
-            KudosWall vs Senja Comparison
-          </Link>
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H2>3. Testimonial.to (The Industry Veteran)</H2>
-        <P>
-          Testimonial.to is the tool that started the video testimonial revolution. It's stable,
-          reliable, and used by massive companies.
-        </P>
-        <P>
-          Their free tier has traditionally been quite tight—usually around 10 testimonials. Their
-          primary focus is on their $50+/month tiers, so the free experience can feel like an
-          extended demo rather than a permanent solution.
-        </P>
-        <UL>
-          <LI><strong>Free Limit:</strong> ~10 Testimonials</LI>
-          <LI><strong>Video Support:</strong> Limited recording time on free</LI>
-          <LI><strong>Best for:</strong> Enterprise-level stability</LI>
+          <LI><strong>Free Limit:</strong> 50 Testimonials (10x more than others)</LI>
+          <LI><strong>Video Support:</strong> High-fidelity recording included on free</LI>
+          <LI><strong>Best for:</strong> Founders who want a tool that grows with them</LI>
         </UL>
       </section>
 
       <section className="mb-12">
-        <H2>4. Trustmary (Best for Widget Variety)</H2>
+        <H2>2. Senja</H2>
         <P>
-          Trustmary offers a beautiful array of widgets—popups, carousels, and sidebars. Their
-          design language is very clean and professional.
+          Senja is excellent for importing reviews from social media. However, their 15-testimonial
+          free limit is quite restrictive, and video recording is often gated or limited in the free
+          version.
         </P>
-        <P>
-          The trade-off is the volume. They focus heavily on high-end businesses, so their free
-          tier is designed primarily as a gateway to their expensive automation features.
-        </P>
-        <UL>
-          <LI><strong>Free Limit:</strong> Low (Volume-based)</LI>
-          <LI><strong>Video Support:</strong> Primarily text-focused on lower tiers</LI>
-          <LI><strong>Best for:</strong> Complex widget layouts</LI>
-        </UL>
       </section>
 
       <section className="mb-12">
-        <H2>5. Famewall (The Indie-First Choice)</H2>
+        <H2>3. Testimonial.to</H2>
         <P>
-          Famewall is built by a solo founder for solo founders. It's lean, fast, and does exactly
-          what it says on the tin.
+          The original "Wall of Love" tool. It's robust and trusted, but their free plan is extremely
+          limited (usually only 2 videos) and serves primarily as a demo.
         </P>
-        <P>
-          It's a solid choice if you want to support another indie creator. The feature set is
-          simpler than KudosWall or Senja, but it gets the job done without any bloat.
-        </P>
-        <UL>
-          <LI><strong>Free Limit:</strong> 10-15 Testimonials</LI>
-          <LI><strong>Video Support:</strong> Gated behind paywall/trials</LI>
-          <LI><strong>Best for:</strong> Minimalist indie projects</LI>
-        </UL>
       </section>
 
       <section className="mb-12">
-        <H2>The Verdict: Which Free Tool Should You Choose?</H2>
+        <H2>4. Trustmary</H2>
         <P>
-          Choosing the <strong>best free testimonial tool in 2026</strong> depends on your goals:
+          Great for surveys and NPS, but the testimonial collection side can be complex and expensive
+          once you move past their entry-level free tier.
         </P>
-        <UL>
-          <LI>
-            <strong>Choose KudosWall if:</strong> You want the highest limit (50) and video
-            support without paying a dime.
-          </LI>
-          <LI>
-            <strong>Choose Senja if:</strong> You need to import hundreds of old reviews from
-            Twitter and Google immediately.
-          </LI>
-          <LI>
-            <strong>Choose Famewall if:</strong> You want the simplest possible "Wall of Love"
-            with zero learning curve.
-          </LI>
-        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>5. Famewall</H2>
         <P>
-          If you're ready to get your first 50 testimonials for free, including native video support,
-          you can{" "}
-          <Link href="/login" className="text-primary underline">
-            create your KudosWall account here
-          </Link>
-          .
+          A solid, simple option for building a wall of love. It's fast and focused, but has fewer
+          advanced collection features compared to KudosWall on the free plan.
         </P>
       </section>
     </>
@@ -1599,6 +1518,183 @@ export const TESTIMONIAL_QUESTIONS_GUIDE = {
         <P>
           Our high-fidelity recording flow guides your customers through the process, ensuring they
           give you the specific, results-oriented testimonials that drive sales.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const AGENCY_SOFTWARE_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>Best Testimonial Tool for Marketing Agencies in 2026</H2>
+        <P>
+          As an agency, your needs are different from a single business owner. You're not just
+          collecting testimonials for yourself; you're managing social proof for dozens of clients.
+          You need a tool that is scalable, easy to hand off, and doesn't break the bank.
+        </P>
+        <P>
+          KudosWall was built with agencies in mind. Whether you're a SEO agency, a CRO shop, or a
+          full-service creative house, here is why KudosWall is the best testimonial software for agencies.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>1. Unlimited Projects & High Limits</H3>
+        <P>
+          Most competitors charge you per "space" or per "client". This makes it incredibly expensive
+          to scale. KudosWall's architecture allows you to manage multiple client projects with
+          generous testimonial limits on our free and pro tiers.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>2. Native Video Support (No Extra Cost)</H3>
+        <P>
+          Video testimonials are the highest form of social proof. While other tools charge $50+/mo
+          just to unlock video, KudosWall includes native video recording on our free tier. This
+          allows you to offer high-end video social proof as a standard part of your agency packages.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>3. Lightning-Fast Performance</H3>
+        <P>
+          If you're an SEO agency, you know that slow widgets hurt Core Web Vitals. KudosWall's
+          widgets are edge-optimized and deliver static-like performance, ensuring your clients'
+          sites stay fast and rank high.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>4. Easy Client Handoff</H3>
+        <P>
+          You can set up the collection forms and Walls of Love for your clients, and then simply
+          give them the embed code. The dashboard is intuitive enough that they can manage their own
+          approvals if you want them to, or you can handle it all from your central account.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const AGENCY_PLAYBOOK = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>How to Collect Client Testimonials at Scale (Agency Playbook)</H2>
+        <P>
+          Getting testimonials from your clients (and your clients' customers) shouldn't be a manual
+          chore. If you're still sending "Quick question..." emails once a month, you're leaving
+          money on the table.
+        </P>
+        <P>
+          This is the exact playbook we recommend for agencies to automate testimonial collection at scale.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 1: The Milestone Trigger</H3>
+        <P>
+          Don't wait until the end of a 6-month contract to ask for a review. Ask when the "Value
+          Moment" happens. This could be:
+        </P>
+        <UL>
+          <LI>The first time an ad campaign hits its ROAS target.</LI>
+          <LI>The day a new website goes live.</LI>
+          <LI>After the first monthly report showing 20%+ growth.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 2: Use "Question-First" Collection</H3>
+        <P>
+          Instead of a blank box, use our <strong>Testimonial Questions</strong> feature. Guide the
+          client to talk about the ROI you provided. (Hint: Use our "30 Testimonial Questions" guide
+          for inspiration).
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 3: Offer the "Wall of Love" as a Value-Add</H3>
+        <P>
+          Don't just collect the testimonials; show them off. As part of your service, offer to set up
+          a dedicated "Love" page for your client. It takes you 2 minutes with KudosWall, but it
+          adds massive perceived value to your agency's monthly retainer.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 4: Automate the Follow-up</H3>
+        <P>
+          Set up an automated email sequence that triggers 7 days after a project milestone. Include
+          your KudosWall collection link and a personal note from the account manager.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const VOUCH_ALTERNATIVE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)</H2>
+        <P>
+          Vouch recently shifted its focus toward "Vouch for Talent," an employee-focused video tool.
+          This left many marketers and founders looking for a simple, video-first alternative for
+          collecting customer testimonials.
+        </P>
+        <P>
+          If you loved Vouch for its video quality but need a tool focused on social proof, here are
+          the top 5 alternatives.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>1. KudosWall (Best for Speed & Value)</H3>
+        <P>
+          KudosWall is the most direct replacement for Vouch's original mission: collecting
+          high-quality video testimonials with zero friction. Unlike Vouch, which has moved into
+          HR tech, KudosWall is 100% focused on helping you build trust with your customers.
+        </P>
+        <UL>
+          <LI><strong>Video Support:</strong> High-fidelity, native recording.</LI>
+          <LI><strong>Ease of Use:</strong> One-click recording for customers.</LI>
+          <LI><strong>Pricing:</strong> 50 testimonials (including video) for free.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>2. Senja</H3>
+        <P>
+          Senja is a great all-rounder. While it's not as video-centric as Vouch used to be, its
+          ability to curate and display video alongside social media imports makes it a strong contender.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>3. Testimonial.to</H3>
+        <P>
+          The most established name in video testimonials. It offers many of the features Vouch
+          users liked (like dedicated landing pages for recording) but at a higher price point.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>4. Bonjoro</H3>
+        <P>
+          Bonjoro is unique because it blends personal video messaging with testimonial collection.
+          If you want a more "high-touch" relationship with your clients, this is a great pivot.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>5. VideoPeel</H3>
+        <P>
+          If you need enterprise-grade video permissions and management, VideoPeel is the way to go.
+          It's more expensive, but it offers the robust controls that large marketing teams need.
         </P>
       </section>
     </>

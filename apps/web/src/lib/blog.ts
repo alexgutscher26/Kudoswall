@@ -75,10 +75,17 @@ export const BLOG_POSTS = [
     date: "2026-05-08",
   },
   {
-    title: "Free Senja Alternative: 5 Tools Compared",
+    title: "Senja alternative: 8 testimonial tools (and the only one with a real free tier)",
     description:
-      "Looking for a free Senja alternative? Discover why KudosWall is the most generous option in 2026.",
+      "Looking for a free Senja alternative? Discover why KudosWall is the most generous option in 2026, with 10x more testimonials and native video support on our free plan.",
     slug: "free-senja-alternative",
+    date: "2026-05-08",
+  },
+  {
+    title: "Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)",
+    description:
+      "Vouch pivoted to talent. If you're looking for a simple, video-first testimonial tool to replace it, here are the top 5 alternatives in 2026.",
+    slug: "vouch-alternative",
     date: "2026-05-08",
   },
   {
@@ -121,6 +128,20 @@ export const BLOG_POSTS = [
     description:
       "Stop getting vague reviews. Use these 30 targeted questions to extract high-converting testimonials from your customers.",
     slug: "testimonial-questions-to-ask-customers",
+    date: "2026-05-08",
+  },
+  {
+    title: "Best testimonial tool for marketing agencies in 2026",
+    description:
+      "Scaling a marketing agency requires tools that grow with you. Discover why KudosWall is the top choice for agencies managing multiple client projects.",
+    slug: "testimonial-software-for-agencies",
+    date: "2026-05-08",
+  },
+  {
+    title: "How to collect client testimonials at scale (agency playbook)",
+    description:
+      "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.",
+    slug: "how-to-collect-client-testimonials",
     date: "2026-05-08",
   },
 ] as const;
