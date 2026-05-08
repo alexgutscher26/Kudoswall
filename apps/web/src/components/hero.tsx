@@ -58,7 +58,9 @@ export default function Hero() {
 
         {/* Sub-headline */}
         <p className="max-w-xl px-2 text-base leading-relaxed text-neutral-500 sm:text-lg md:text-xl">
-The fast, no-bloat testimonial tool for founders who just want their wall live. No $29/mo paywalls. No unnecessary complexity. Just trust-building social proof, delivered at the edge.
+          The fast, no-bloat testimonial tool for founders who just want their wall live. No $29/mo
+          paywalls. No unnecessary complexity. Just trust-building social proof, delivered at the
+          edge.
         </p>
 
         {/* CTA Buttons */}

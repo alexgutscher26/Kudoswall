@@ -660,29 +660,29 @@ export default function WidgetCustomizer({
                     </label>
                     {!isPro && <ProBadge />}
                   </div>
-                    <div className="flex gap-2">
-                      {[
-                        { id: "all", label: "All" },
-                        { id: "text", label: "Text Only" },
-                        { id: "video", label: "Video Only" },
-                      ].map((v) => (
-                        <button
-                          key={v.id}
-                          onClick={() => {
-                            if (!isPro && v.id !== "all") {
-                              toast.error("Pro Feature", {
-                                description: "Upgrade to Pro to filter by testimonial type.",
-                              });
-                              return;
-                            }
-                            setSettings((s) => ({ ...s, filterType: v.id as any }));
-                          }}
-                          className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase ${settings.filterType === v.id ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v.id !== "all" ? "opacity-50" : ""}`}
-                        >
-                          {v.label}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="flex gap-2">
+                    {[
+                      { id: "all", label: "All" },
+                      { id: "text", label: "Text Only" },
+                      { id: "video", label: "Video Only" },
+                    ].map((v) => (
+                      <button
+                        key={v.id}
+                        onClick={() => {
+                          if (!isPro && v.id !== "all") {
+                            toast.error("Pro Feature", {
+                              description: "Upgrade to Pro to filter by testimonial type.",
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, filterType: v.id as any }));
+                        }}
+                        className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase ${settings.filterType === v.id ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v.id !== "all" ? "opacity-50" : ""}`}
+                      >
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {tags && tags.length > 0 && (
@@ -697,28 +697,28 @@ export default function WidgetCustomizer({
                       {tags.map((tag) => {
                         const isSelected = (settings.filterTags || []).includes(tag.id);
                         return (
-                            <button
-                              key={tag.id}
-                              onClick={() => {
-                                if (!isPro) {
-                                  toast.error("Pro Feature", {
-                                    description: "Upgrade to Pro to filter your widget by tags.",
-                                  });
-                                  return;
-                                }
-                                setSettings((s) => ({
-                                  ...s,
-                                  filterTags: isSelected
-                                    ? (s.filterTags || []).filter((id) => id !== tag.id)
-                                    : [...(s.filterTags || []), tag.id],
-                                }));
-                              }}
-                              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
-                                isSelected
-                                  ? "border-pink-200 bg-pink-50 text-pink-600"
-                                  : "border-neutral-100 bg-white text-neutral-500 hover:bg-neutral-50"
-                              } ${!isPro ? "opacity-50" : ""}`}
-                            >
+                          <button
+                            key={tag.id}
+                            onClick={() => {
+                              if (!isPro) {
+                                toast.error("Pro Feature", {
+                                  description: "Upgrade to Pro to filter your widget by tags.",
+                                });
+                                return;
+                              }
+                              setSettings((s) => ({
+                                ...s,
+                                filterTags: isSelected
+                                  ? (s.filterTags || []).filter((id) => id !== tag.id)
+                                  : [...(s.filterTags || []), tag.id],
+                              }));
+                            }}
+                            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
+                              isSelected
+                                ? "border-pink-200 bg-pink-50 text-pink-600"
+                                : "border-neutral-100 bg-white text-neutral-500 hover:bg-neutral-50"
+                            } ${!isPro ? "opacity-50" : ""}`}
+                          >
                             <div
                               className="size-2 rounded-full"
                               style={{ backgroundColor: tag.color }}

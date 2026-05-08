@@ -660,12 +660,18 @@ export async function bulkDeleteTestimonials(ids: string[]) {
     if (ids.length === 0) return { success: true };
     const uniqueIds = Array.from(new Set(ids));
 
-    console.log(`[bulkDeleteTestimonials] Attempting to delete ${uniqueIds.length} testimonials`, uniqueIds);
+    console.log(
+      `[bulkDeleteTestimonials] Attempting to delete ${uniqueIds.length} testimonials`,
+      uniqueIds,
+    );
 
     const firstTest = await db.query.testimonial.findFirst({
       where: eq(testimonial.id, uniqueIds[0]),
     });
-    console.log(`[bulkDeleteTestimonials] Debug findFirst for ${uniqueIds[0]}:`, firstTest ? { id: firstTest.id, deletedAt: firstTest.deletedAt } : "NOT FOUND");
+    console.log(
+      `[bulkDeleteTestimonials] Debug findFirst for ${uniqueIds[0]}:`,
+      firstTest ? { id: firstTest.id, deletedAt: firstTest.deletedAt } : "NOT FOUND",
+    );
 
     // Verify ownership
     const testimonials = await db.query.testimonial.findMany({
@@ -679,12 +685,16 @@ export async function bulkDeleteTestimonials(ids: string[]) {
       },
     });
 
-    console.log(`[bulkDeleteTestimonials] Found ${testimonials.length} matching testimonials in DB`);
+    console.log(
+      `[bulkDeleteTestimonials] Found ${testimonials.length} matching testimonials in DB`,
+    );
 
     const unauthorized = testimonials.some((t) => t.project.workspace.ownerId !== session.user.id);
-    
+
     if (unauthorized) {
-      console.error(`[bulkDeleteTestimonials] Forbidden: User ${session.user.id} tried to delete testimonials they don't own.`);
+      console.error(
+        `[bulkDeleteTestimonials] Forbidden: User ${session.user.id} tried to delete testimonials they don't own.`,
+      );
       throw new Error("Forbidden: You do not own some of these testimonials");
     }
 
@@ -703,7 +713,10 @@ export async function bulkDeleteTestimonials(ids: string[]) {
       try {
         await purgeWidgetCache({ db, workspaceId: wsId, env });
       } catch (err) {
-        console.error(`[bulkDeleteTestimonials] Failed to purge widget cache for workspace ${wsId}:`, err);
+        console.error(
+          `[bulkDeleteTestimonials] Failed to purge widget cache for workspace ${wsId}:`,
+          err,
+        );
       }
     }
 
@@ -769,7 +782,9 @@ export async function bulkTagTestimonials(
   } else {
     await db
       .delete(testimonialToTag)
-      .where(and(inArray(testimonialToTag.testimonialId, uniqueIds), eq(testimonialToTag.tagId, tagId)));
+      .where(
+        and(inArray(testimonialToTag.testimonialId, uniqueIds), eq(testimonialToTag.tagId, tagId)),
+      );
   }
 
   try {
@@ -819,9 +834,7 @@ export async function featureTestimonial(id: string, featured: boolean) {
   return { success: true };
 }
 
-export async function reorderFeaturedTestimonials(
-  orders: { id: string; featuredOrder: number }[],
-) {
+export async function reorderFeaturedTestimonials(orders: { id: string; featuredOrder: number }[]) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });

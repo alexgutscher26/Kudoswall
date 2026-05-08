@@ -26,6 +26,8 @@ import {
   AGENCY_SOFTWARE_GUIDE,
   AGENCY_PLAYBOOK,
   VOUCH_ALTERNATIVE,
+  FRAMER_EMBED_GUIDE,
+  COURSE_CREATOR_TESTIMONIALS,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -374,6 +376,38 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     };
   }
 
+  if (slug === "how-to-embed-testimonials-on-framer") {
+    return {
+      title: "How to Embed Testimonials on Framer in 2026",
+      description:
+        "A step-by-step guide to adding high-fidelity testimonial widgets to your Framer site for better conversions.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "How to Embed Testimonials on Framer",
+        description: "Add beautiful social proof to your Framer site in minutes.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/framer.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
+  if (slug === "course-creator-testimonials") {
+    return {
+      title: "Course Creator Testimonials: The Ultimate Strategy",
+      description:
+        "Learn how top course creators collect student success stories and display them to drive massive sales.",
+      alternates: { canonical: `${baseUrl}/blog/${slug}` },
+      openGraph: {
+        title: "Course Creator Testimonial Strategy",
+        description: "Collect and display student results for maximum impact.",
+        url: `${baseUrl}/blog/${slug}`,
+        type: "article",
+        images: [{ url: `${baseUrl}/og/course-creator-strategy.png`, width: 1200, height: 630 }],
+      },
+    };
+  }
+
   return {
     title: "Blog Post Not Found",
   };
@@ -436,8 +470,10 @@ export default async function BlogPostPage({ params }: { params: Params }) {
       "How to add high-converting, edge-optimized testimonial widgets to your Webflow site.";
   } else if (slug === "why-we-made-free-tier-10x-bigger") {
     content = TEN_X_FREE_TIER.content;
-    title = "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)";
-    description = "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video.";
+    title =
+      "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)";
+    description =
+      "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video.";
   } else if (slug === "free-testimonial-software-with-video") {
     content = FREE_VIDEO_TESTIMONIAL_SOFTWARE.content;
     title = "Free Testimonial Software with Video: The 2026 Guide";
@@ -468,7 +504,8 @@ export default async function BlogPostPage({ params }: { params: Params }) {
   } else if (slug === "how-to-embed-testimonials-on-beehiiv") {
     content = BEEHIIV_EMBED_GUIDE.content;
     title = "How to embed testimonials on Beehiiv newsletters";
-    description = "Boost your newsletter trust by adding testimonials to your Beehiiv publications.";
+    description =
+      "Boost your newsletter trust by adding testimonials to your Beehiiv publications.";
   } else if (slug === "testimonial-questions-to-ask-customers") {
     content = TESTIMONIAL_QUESTIONS_GUIDE.content;
     title = "30 testimonial questions that actually get usable answers";
@@ -489,6 +526,16 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     title = "Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)";
     description =
       "Vouch pivoted to talent. If you're looking for a simple, video-first testimonial tool to replace it, here are the top 5 alternatives in 2026.";
+  } else if (slug === "how-to-embed-testimonials-on-framer") {
+    content = FRAMER_EMBED_GUIDE.content;
+    title = "How to embed testimonials on Framer in 2026";
+    description =
+      "A step-by-step guide to adding high-fidelity testimonial widgets to your Framer site for better conversions.";
+  } else if (slug === "course-creator-testimonials") {
+    content = COURSE_CREATOR_TESTIMONIALS.content;
+    title = "Course creator testimonials: how to collect and display social proof";
+    description =
+      "Learn the exact strategy top course creators use to collect student results and display them for maximum impact.";
   } else {
     return notFound();
   }

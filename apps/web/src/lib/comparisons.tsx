@@ -241,10 +241,10 @@ export const TESTIMONIAL_TO_COMPARISON = {
       <section className="mb-12">
         <H3>Summary: The Best Tool for Your Sales Stack</H3>
         <P>
-          By focusing on text and video excellence, we've created a tool that is faster,
-          cheaper, and more visually integrated than Testimonial.to. If you're ready to turn your
-          customers into your best sales tool with video, join the thousands of founders
-          switching to KudosWall.
+          By focusing on text and video excellence, we've created a tool that is faster, cheaper,
+          and more visually integrated than Testimonial.to. If you're ready to turn your customers
+          into your best sales tool with video, join the thousands of founders switching to
+          KudosWall.
         </P>
       </section>
     </>
@@ -587,107 +587,145 @@ export const TEN_X_FREE_TIER = {
   content: (
     <>
       <section className="mb-12">
+        <P>Most SaaS "free tiers" are demos.</P>
         <P>
-          Most SaaS "free tiers" are demos.
+          Senja's free tier gives you 15 testimonials. Testimonial.to gives you ~10. Famewall,
+          Trustmary — they all sit in a similar range. Mine was 5.
         </P>
         <P>
-          Senja's free tier gives you 15 testimonials. Testimonial.to gives you ~10. Famewall, Trustmary — they all sit in a similar range. Mine was 5.
+          We just changed ours to <strong>50 testimonials with video</strong>. Free forever, no
+          credit card.
         </P>
         <P>
-          We just changed ours to <strong>50 testimonials with video</strong>. Free forever, no credit card.
+          Most founders shrink their free tiers as they grow. I went the other direction — and
+          here's the math behind why I think the conventional wisdom is wrong.
         </P>
         <P>
-          Most founders shrink their free tiers as they grow. I went the other direction — and here's the math behind why I think the conventional wisdom is wrong.
-        </P>
-        <P>
-          This isn't a "we listened to feedback!" announcement. This is the result of staring at a churn dashboard for too long and realizing what was actually broken.
+          This isn't a "we listened to feedback!" announcement. This is the result of staring at a
+          churn dashboard for too long and realizing what was actually broken.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>The realization</H3>
         <P>
-          I built KudosWall for solo founders, course creators, and small agencies — people who need testimonials but don't have a marketing department or three hours to wrestle with a clunky tool. The original free tier (5 testimonials, text only) was a marketing decision based on what every other testimonial tool did. Senja, Testimonial.to, Famewall — everyone was at 10–15 max on free. I went tighter to make Pro look more compelling by comparison.
+          I built KudosWall for solo founders, course creators, and small agencies — people who need
+          testimonials but don't have a marketing department or three hours to wrestle with a clunky
+          tool. The original free tier (5 testimonials, text only) was a marketing decision based on
+          what every other testimonial tool did. Senja, Testimonial.to, Famewall — everyone was at
+          10–15 max on free. I went tighter to make Pro look more compelling by comparison.
         </P>
         <P>
-          The result was predictable in retrospect. Users would sign up, create a wall, get 2–3 testimonials, hit the 5-testimonial constraint, and stall. Most never embedded the widget. Most never came back.
+          The result was predictable in retrospect. Users would sign up, create a wall, get 2–3
+          testimonials, hit the 5-testimonial constraint, and stall. Most never embedded the widget.
+          Most never came back.
         </P>
         <P>
-          Here's the honest reframe: <strong>I wasn't running a free tier. I was running a 5-testimonial demo with a "Powered by KudosWall" badge.</strong>
+          Here's the honest reframe:{" "}
+          <strong>
+            I wasn't running a free tier. I was running a 5-testimonial demo with a "Powered by
+            KudosWall" badge.
+          </strong>
         </P>
         <P>
-          The conventional founder wisdom says: free tiers convert through scarcity. Make them want more, then charge for it.
+          The conventional founder wisdom says: free tiers convert through scarcity. Make them want
+          more, then charge for it.
         </P>
         <P>
-          But scarcity only works if customers have already experienced enough value to want more. If they hit the wall before they got value, they don't upgrade — they leave. And I was watching that happen.
+          But scarcity only works if customers have already experienced enough value to want more.
+          If they hit the wall before they got value, they don't upgrade — they leave. And I was
+          watching that happen.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>The data behind the change</H3>
-        <P>
-          Three numbers convinced me:
-        </P>
+        <P>Three numbers convinced me:</P>
         <UL>
-          <LI><strong>Activation rate</strong> (created wall + got 1+ approved testimonial): ~32%</LI>
-          <LI><strong>Embed rate among activated users</strong>: ~45%</LI>
-          <LI><strong>Free → paid conversion among embedded users</strong>: ~3%</LI>
+          <LI>
+            <strong>Activation rate</strong> (created wall + got 1+ approved testimonial): ~32%
+          </LI>
+          <LI>
+            <strong>Embed rate among activated users</strong>: ~45%
+          </LI>
+          <LI>
+            <strong>Free → paid conversion among embedded users</strong>: ~3%
+          </LI>
         </UL>
         <P>
           Numbers in isolation are fine. The problem was the <em>funnel shape</em>.
         </P>
         <P>
-          A typical SaaS funnel narrows gradually. Mine narrowed sharply at the 5-testimonial wall. Of users who hit 5 testimonials, ~70% never came back. They'd churn at the wall.
+          A typical SaaS funnel narrows gradually. Mine narrowed sharply at the 5-testimonial wall.
+          Of users who hit 5 testimonials, ~70% never came back. They'd churn at the wall.
         </P>
         <P>
-          The customers I most wanted — people who'd actually use testimonials in their business — were churning before they could see value. Meanwhile, the customers who <em>did</em> convert to paid were primarily upgrading for the <strong>badge removal</strong>, not because they'd run out of testimonials.
+          The customers I most wanted — people who'd actually use testimonials in their business —
+          were churning before they could see value. Meanwhile, the customers who <em>did</em>{" "}
+          convert to paid were primarily upgrading for the <strong>badge removal</strong>, not
+          because they'd run out of testimonials.
+        </P>
+        <P>That last data point was the giveaway.</P>
+        <P>
+          <strong>Even my paid customers weren't converting because they hit the limit.</strong>{" "}
+          They were converting because they wanted features.
         </P>
         <P>
-          That last data point was the giveaway.
-        </P>
-        <P>
-          <strong>Even my paid customers weren't converting because they hit the limit.</strong> They were converting because they wanted features.
-        </P>
-        <P>
-          If features drive paid conversion, then constraining the free tier doesn't help conversion. It just hurts activation.
+          If features drive paid conversion, then constraining the free tier doesn't help
+          conversion. It just hurts activation.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>Why 50 (not 25, not unlimited)</H3>
-        <P>
-          A few weeks of customer interviews + spreadsheet work told me:
-        </P>
+        <P>A few weeks of customer interviews + spreadsheet work told me:</P>
         <UL>
           <LI>Median testimonials per active wall: 12–18</LI>
           <LI>90th percentile: ~35</LI>
           <LI>99th percentile: 80+</LI>
         </UL>
         <P>
-          50 testimonials covers most real-world use cases for the SMB / solo / agency segments KudosWall serves. Past 50, you're a power user — and that's exactly when Pro features start mattering most (custom domain, custom branding, analytics, tag filtering, multi-collection workflows).
+          50 testimonials covers most real-world use cases for the SMB / solo / agency segments
+          KudosWall serves. Past 50, you're a power user — and that's exactly when Pro features
+          start mattering most (custom domain, custom branding, analytics, tag filtering,
+          multi-collection workflows).
         </P>
         <P>
-          I considered 25. It would have been "less generous than Senja but more than Testimonial.to" — basically splitting the middle. But it doesn't tell a story. 25 vs 15 isn't a number people share. 50 is.
+          I considered 25. It would have been "less generous than Senja but more than
+          Testimonial.to" — basically splitting the middle. But it doesn't tell a story. 25 vs 15
+          isn't a number people share. 50 is.
         </P>
         <P>
-          I considered unlimited. The economics don't work — testimonials with video carry real bandwidth and storage costs at scale, and "unlimited" attracts edge-case abusers (people running enterprise testimonial collection on a free tier indefinitely). The number had to be high enough to delight legitimate users and low enough to deter freeloaders.
+          I considered unlimited. The economics don't work — testimonials with video carry real
+          bandwidth and storage costs at scale, and "unlimited" attracts edge-case abusers (people
+          running enterprise testimonial collection on a free tier indefinitely). The number had to
+          be high enough to delight legitimate users and low enough to deter freeloaders.
         </P>
         <P>
-          50 with video felt right. It's 3.3× Senja's free tier. It's a real product, not a demo. And it gives Pro a clear job to do — premium features for users who care about polish — not artificial scarcity for users who don't.
+          50 with video felt right. It's 3.3× Senja's free tier. It's a real product, not a demo.
+          And it gives Pro a clear job to do — premium features for users who care about polish —
+          not artificial scarcity for users who don't.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>What this actually means for users</H3>
-        <P><strong>Free now (everyone, forever):</strong></P>
+        <P>
+          <strong>Free now (everyone, forever):</strong>
+        </P>
         <UL>
           <LI>50 text + video testimonials per wall</LI>
           <LI>Embed anywhere via a single-line script</LI>
           <LI>Photo proofs from your customers</LI>
-          <LI>All the collection mechanics — share link, customer-submission flow, no account required for submitters</LI>
+          <LI>
+            All the collection mechanics — share link, customer-submission flow, no account required
+            for submitters
+          </LI>
           <LI>"Powered by KudosWall" badge stays on free walls</LI>
         </UL>
-        <P><strong>Pro ($19/mo) is now what it should have been all along:</strong></P>
+        <P>
+          <strong>Pro ($19/mo) is now what it should have been all along:</strong>
+        </P>
         <UL>
           <LI>Remove the KudosWall badge</LI>
           <LI>Custom domain (testimonials.yoursite.com)</LI>
@@ -698,7 +736,9 @@ export const TEN_X_FREE_TIER = {
           <LI>Priority email support</LI>
           <LI>CSV export</LI>
         </UL>
-        <P><strong>Agency ($59/mo) for people managing 5+ client brands:</strong></P>
+        <P>
+          <strong>Agency ($59/mo) for people managing 5+ client brands:</strong>
+        </P>
         <UL>
           <LI>Everything in Pro × 5 client workspaces</LI>
           <LI>White-label everything</LI>
@@ -706,36 +746,62 @@ export const TEN_X_FREE_TIER = {
           <LI>Priority VIP support</LI>
         </UL>
         <P>
-          The math for someone deciding: if you have one website and want clean professional polish, Pro is straightforward — $19/mo to remove a badge and add your custom domain. If you're an agency managing client testimonials, Agency saves you 5 separate tool subscriptions ($95+ value).
+          The math for someone deciding: if you have one website and want clean professional polish,
+          Pro is straightforward — $19/mo to remove a badge and add your custom domain. If you're an
+          agency managing client testimonials, Agency saves you 5 separate tool subscriptions ($95+
+          value).
         </P>
         <P>
-          If you're just collecting testimonials for a Carrd landing page or a Beehiiv newsletter and the badge doesn't bother you — <strong>stay free. Stay free as long as you want.</strong>
+          If you're just collecting testimonials for a Carrd landing page or a Beehiiv newsletter
+          and the badge doesn't bother you —{" "}
+          <strong>stay free. Stay free as long as you want.</strong>
         </P>
       </section>
 
       <section className="mb-12">
         <H3>Why this is hard for incumbents to match</H3>
+        <P>Two reasons.</P>
         <P>
-          Two reasons.
+          <strong>One: the economics are different.</strong> Senja and Testimonial.to are bigger
+          operations with larger teams to feed. Their model relies on conversion-by-friction — most
+          free users hit the wall, a small percentage convert to paid, repeat at scale. If they
+          expand free to 50, conversion craters in the short term and revenue takes a hit until
+          volume catches up.
         </P>
         <P>
-          <strong>One: the economics are different.</strong> Senja and Testimonial.to are bigger operations with larger teams to feed. Their model relies on conversion-by-friction — most free users hit the wall, a small percentage convert to paid, repeat at scale. If they expand free to 50, conversion craters in the short term and revenue takes a hit until volume catches up.
+          KudosWall is bootstrapped. I don't have a sales team or a growth-at-all-costs mandate. My
+          optimization is most-paid-customers-per-marketing-dollar. Counterintuitively, a generous
+          free tier wins this when the alternative is paying for cold acquisition. Free users are
+          billboards (the badge), SEO assets (their public walls), and word-of-mouth referrers — all
+          for $0 of marketing spend.
         </P>
         <P>
-          KudosWall is bootstrapped. I don't have a sales team or a growth-at-all-costs mandate. My optimization is most-paid-customers-per-marketing-dollar. Counterintuitively, a generous free tier wins this when the alternative is paying for cold acquisition. Free users are billboards (the badge), SEO assets (their public walls), and word-of-mouth referrers — all for $0 of marketing spend.
-        </P>
-        <P>
-          <strong>Two: customer-base inertia.</strong> If Senja moves their free tier from 15 to 50 tomorrow, every single 15-using customer notices. Some downgrade ("wait, I'm at 17 testimonials, I could have stayed free?"). The change creates noise across their entire base.
+          <strong>Two: customer-base inertia.</strong> If Senja moves their free tier from 15 to 50
+          tomorrow, every single 15-using customer notices. Some downgrade ("wait, I'm at 17
+          testimonials, I could have stayed free?"). The change creates noise across their entire
+          base.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>What's at risk</H3>
         <UL>
-          <LI><strong>Free → paid conversion drops below 1%.</strong> Probably will. The question is whether total signup volume rises enough to offset it.</LI>
-          <LI><strong>Video bandwidth costs scale faster than MRR.</strong> Possible. If so, video minutes get capped on free.</LI>
-          <LI><strong>Pro doesn't feel like a real upgrade.</strong> If 90% of paid users upgrade only for badge removal, Pro might need repackaging.</LI>
-          <LI><strong>Free users don't churn AND don't convert.</strong> Worst case. They sit on the free tier forever, costing infrastructure dollars without revenue.</LI>
+          <LI>
+            <strong>Free → paid conversion drops below 1%.</strong> Probably will. The question is
+            whether total signup volume rises enough to offset it.
+          </LI>
+          <LI>
+            <strong>Video bandwidth costs scale faster than MRR.</strong> Possible. If so, video
+            minutes get capped on free.
+          </LI>
+          <LI>
+            <strong>Pro doesn't feel like a real upgrade.</strong> If 90% of paid users upgrade only
+            for badge removal, Pro might need repackaging.
+          </LI>
+          <LI>
+            <strong>Free users don't churn AND don't convert.</strong> Worst case. They sit on the
+            free tier forever, costing infrastructure dollars without revenue.
+          </LI>
         </UL>
       </section>
 
@@ -744,12 +810,8 @@ export const TEN_X_FREE_TIER = {
         <P>
           If you've been holding off because every other testimonial tool gates basics — try us.
         </P>
-        <P>
-          50 testimonials, video included, no credit card, no time limit.
-        </P>
-        <P>
-          Five minutes from sign-up to a Wall of Love embedded on your site.
-        </P>
+        <P>50 testimonials, video included, no credit card, no time limit.</P>
+        <P>Five minutes from sign-up to a Wall of Love embedded on your site.</P>
       </section>
     </>
   ),
@@ -830,7 +892,8 @@ export const FREE_VIDEO_TESTIMONIAL_SOFTWARE = {
       <section className="mb-12">
         <H3>What to Look for in Free Video Testimonial Software</H3>
         <P>
-          If you're evaluating other tools, make sure they check these three boxes before you commit:
+          If you're evaluating other tools, make sure they check these three boxes before you
+          commit:
         </P>
         <H4>1. No Credit Card for Video Recording</H4>
         <P>
@@ -928,16 +991,16 @@ export const FREE_SENJA_ALTERNATIVE = {
         <H4>1. Loading Speed & Performance</H4>
         <P>
           Senja uses standard iframes which can sometimes cause layout shifts (CLS). KudosWall uses
-          an edge-optimized, CSS-first rendering engine. This ensures your testimonial widgets
-          load in milliseconds without making your site "jump," which is critical for your Core Web
+          an edge-optimized, CSS-first rendering engine. This ensures your testimonial widgets load
+          in milliseconds without making your site "jump," which is critical for your Core Web
           Vitals and SEO.
         </P>
         <H4>2. Collection Friction</H4>
         <P>
           KudosWall's collection flow is designed to be ultra-lean. We've removed every unnecessary
-          click, resulting in a 30% higher completion rate compared to denser collection forms.
-          When you're looking for a free Senja alternative, you want a tool that actually helps you
-          *get* the reviews, not just display them.
+          click, resulting in a 30% higher completion rate compared to denser collection forms. When
+          you're looking for a free Senja alternative, you want a tool that actually helps you *get*
+          the reviews, not just display them.
         </P>
       </section>
       <section className="mb-12">
@@ -948,8 +1011,8 @@ export const FREE_SENJA_ALTERNATIVE = {
           generous limits without the monthly subscription, KudosWall is the clear winner.
         </P>
         <P>
-          Stop settling for a 15-review limit. Switch to the most powerful free Senja
-          alternative today and start building the trust your brand deserves.
+          Stop settling for a 15-review limit. Switch to the most powerful free Senja alternative
+          today and start building the trust your brand deserves.
         </P>
       </section>
     </>
@@ -981,8 +1044,8 @@ export const FREE_WALL_OF_LOVE = {
       <section className="mb-12">
         <H3>Why You Need a Wall of Love (and Why It Should Be Free)</H3>
         <P>
-          In 2026, visitors are skeptical. They've seen every marketing trick in the book. A Wall
-          of Love works because it's overwhelming. When a visitor sees 20, 30, or 50 positive
+          In 2026, visitors are skeptical. They've seen every marketing trick in the book. A Wall of
+          Love works because it's overwhelming. When a visitor sees 20, 30, or 50 positive
           experiences from real people, their "skepticism wall" breaks down.
         </P>
         <P>
@@ -1002,8 +1065,8 @@ export const FREE_WALL_OF_LOVE = {
         <H4>2. Performance is Non-Negotiable</H4>
         <P>
           A "Wall of Love" is often heavy. If it takes 3 seconds to load, you're losing customers
-          before they even see the praise. KudosWall widgets are edge-optimized, meaning they
-          load almost instantly anywhere in the world, with zero layout shift.
+          before they even see the praise. KudosWall widgets are edge-optimized, meaning they load
+          almost instantly anywhere in the world, with zero layout shift.
         </P>
         <H4>3. Mobile-First Design</H4>
         <P>
@@ -1041,8 +1104,8 @@ export const FREE_WALL_OF_LOVE = {
           shouldn't have to pay a "trust tax" just to show that off.
         </P>
         <P>
-          Start your free Wall of Love today with KudosWall. 50 testimonials, video included,
-          and the best masonry layouts in the business—all for $0.
+          Start your free Wall of Love today with KudosWall. 50 testimonials, video included, and
+          the best masonry layouts in the business—all for $0.
         </P>
       </section>
     </>
@@ -1056,12 +1119,12 @@ export const COLLECT_TESTIMONIALS_GUIDE = {
         <P>
           In the digital economy, trust is the only currency that truly matters. You can have the
           best product in the world, but if nobody else is talking about it, your conversion rate
-          will suffer. This is why learning <strong>how to get customer testimonials</strong> is
-          one of the most important skills for any founder, marketer, or creator.
+          will suffer. This is why learning <strong>how to get customer testimonials</strong> is one
+          of the most important skills for any founder, marketer, or creator.
         </P>
         <P>
-          Testimonials aren't just "nice to have." They are psychological triggers that reduce
-          the perceived risk of a purchase. When a potential customer sees real people solving real
+          Testimonials aren't just "nice to have." They are psychological triggers that reduce the
+          perceived risk of a purchase. When a potential customer sees real people solving real
           problems with your solution, their brain moves from "Is this a scam?" to "Will this work
           for me too?"
         </P>
@@ -1122,7 +1185,10 @@ export const COLLECT_TESTIMONIALS_GUIDE = {
         </P>
         <P>
           Check out our guide on{" "}
-          <Link href="/blog/free-testimonial-software-with-video" className="text-primary underline">
+          <Link
+            href="/blog/free-testimonial-software-with-video"
+            className="text-primary underline"
+          >
             free testimonial software with video
           </Link>{" "}
           to see how you can start automating this today for $0.
@@ -1150,8 +1216,8 @@ export const COLLECT_TESTIMONIALS_GUIDE = {
       <section className="mb-12">
         <H2>Step 4: Text vs. Video (The High-Fidelity Edge)</H2>
         <P>
-          In 2026, text testimonials are the baseline. <strong>Video testimonials are the gold
-          standard.</strong>
+          In 2026, text testimonials are the baseline.{" "}
+          <strong>Video testimonials are the gold standard.</strong>
         </P>
         <P>
           Video adds a layer of authenticity that text simply can't match. It's much harder to fake
@@ -1185,9 +1251,7 @@ export const COLLECT_TESTIMONIALS_GUIDE = {
             <strong>Hero Sections:</strong> A "social proof bar" below your main headline.
           </LI>
         </UL>
-        <P>
-          If you're using a specific platform, we have dedicated guides for you:
-        </P>
+        <P>If you're using a specific platform, we have dedicated guides for you:</P>
         <UL>
           <LI>
             <Link href="/blog/testimonial-widget-for-webflow" className="text-primary underline">
@@ -1209,9 +1273,7 @@ export const COLLECT_TESTIMONIALS_GUIDE = {
 
       <section className="mb-12">
         <H2>Choosing the Right Tool</H2>
-        <P>
-          You have options. If you're comparing tools, we've done the deep dives for you:
-        </P>
+        <P>You have options. If you're comparing tools, we've done the deep dives for you:</P>
         <UL>
           <LI>
             <Link href="/blog/kudoswall-vs-senja" className="text-primary underline">
@@ -1263,26 +1325,38 @@ export const BEST_FREE_TOOLS_2026 = {
           upgrade the second you see any success.
         </P>
         <P>
-          We've analyzed the top 5 tools on the market to find the <strong>best free testimonial tool
-          in 2026</strong>. We looked at three main criteria:
+          We've analyzed the top 5 tools on the market to find the{" "}
+          <strong>best free testimonial tool in 2026</strong>. We looked at three main criteria:
         </P>
         <UL>
-          <LI><strong>Testimonial Limits:</strong> How many reviews can you collect before paying?</LI>
-          <LI><strong>Video Support:</strong> Is video recording included or gated behind a paywall?</LI>
-          <LI><strong>Branding:</strong> How intrusive is the "Powered by" badge?</LI>
+          <LI>
+            <strong>Testimonial Limits:</strong> How many reviews can you collect before paying?
+          </LI>
+          <LI>
+            <strong>Video Support:</strong> Is video recording included or gated behind a paywall?
+          </LI>
+          <LI>
+            <strong>Branding:</strong> How intrusive is the "Powered by" badge?
+          </LI>
         </UL>
       </section>
 
-      <section className="mb-12 border-l-4 border-primary pl-6 py-2 bg-primary/5 rounded-r-xl">
+      <section className="border-primary bg-primary/5 mb-12 rounded-r-xl border-l-4 py-2 pl-6">
         <H2>1. KudosWall (The Best Overall Value)</H2>
         <P>
           Yes, we are KudosWall. And yes, we put ourselves at the top. Why? Because we literally
           built our free tier to be 3x more generous than the next best competitor.
         </P>
         <UL>
-          <LI><strong>Free Limit:</strong> 50 Testimonials (10x more than others)</LI>
-          <LI><strong>Video Support:</strong> High-fidelity recording included on free</LI>
-          <LI><strong>Best for:</strong> Founders who want a tool that grows with them</LI>
+          <LI>
+            <strong>Free Limit:</strong> 50 Testimonials (10x more than others)
+          </LI>
+          <LI>
+            <strong>Video Support:</strong> High-fidelity recording included on free
+          </LI>
+          <LI>
+            <strong>Best for:</strong> Founders who want a tool that grows with them
+          </LI>
         </UL>
       </section>
 
@@ -1298,16 +1372,16 @@ export const BEST_FREE_TOOLS_2026 = {
       <section className="mb-12">
         <H2>3. Testimonial.to</H2>
         <P>
-          The original "Wall of Love" tool. It's robust and trusted, but their free plan is extremely
-          limited (usually only 2 videos) and serves primarily as a demo.
+          The original "Wall of Love" tool. It's robust and trusted, but their free plan is
+          extremely limited (usually only 2 videos) and serves primarily as a demo.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>4. Trustmary</H2>
         <P>
-          Great for surveys and NPS, but the testimonial collection side can be complex and expensive
-          once you move past their entry-level free tier.
+          Great for surveys and NPS, but the testimonial collection side can be complex and
+          expensive once you move past their entry-level free tier.
         </P>
       </section>
 
@@ -1362,24 +1436,33 @@ export const CARRD_EMBED_GUIDE = {
 
       <section className="mb-12">
         <H3>Step 3: Add an "Embed" Element in Carrd</H3>
-        <P>
-          Open your Carrd editor and follow these steps:
-        </P>
+        <P>Open your Carrd editor and follow these steps:</P>
         <UL>
-          <LI>Click the <strong>+ (Add)</strong> button in the sidebar.</LI>
-          <LI>Select <strong>Embed</strong> from the list of elements.</LI>
-          <LI>In the settings for the Embed element, set the "Style" to <strong>Hidden</strong> (this is usually best for JS scripts).</LI>
-          <LI>Paste your KudosWall embed code into the <strong>Code</strong> box.</LI>
-          <LI>Position the Embed element where you want the testimonials to appear on your page.</LI>
+          <LI>
+            Click the <strong>+ (Add)</strong> button in the sidebar.
+          </LI>
+          <LI>
+            Select <strong>Embed</strong> from the list of elements.
+          </LI>
+          <LI>
+            In the settings for the Embed element, set the "Style" to <strong>Hidden</strong> (this
+            is usually best for JS scripts).
+          </LI>
+          <LI>
+            Paste your KudosWall embed code into the <strong>Code</strong> box.
+          </LI>
+          <LI>
+            Position the Embed element where you want the testimonials to appear on your page.
+          </LI>
         </UL>
       </section>
 
       <section className="mb-12">
         <H3>Why KudosWall is Perfect for Carrd</H3>
         <P>
-          Carrd users value speed and simplicity. KudosWall's widgets are edge-optimized and designed
-          to load instantly without causing layout shifts. Plus, with our generous free tier, you
-          don't have to worry about a monthly subscription for your simple one-page site.
+          Carrd users value speed and simplicity. KudosWall's widgets are edge-optimized and
+          designed to load instantly without causing layout shifts. Plus, with our generous free
+          tier, you don't have to worry about a monthly subscription for your simple one-page site.
         </P>
       </section>
     </>
@@ -1393,25 +1476,30 @@ export const BEEHIIV_EMBED_GUIDE = {
         <H2>How to Embed Testimonials on Beehiiv Newsletters</H2>
         <P>
           Newsletters thrive on trust. When a new reader lands on your Beehiiv subscribe page,
-          seeing testimonials from existing happy readers can be the difference between a bounce
-          and a new subscriber.
+          seeing testimonials from existing happy readers can be the difference between a bounce and
+          a new subscriber.
         </P>
         <P>
           While email clients (like Gmail or Outlook) don't support interactive JavaScript widgets
-          directly inside the email body, you can still use KudosWall to power your social proof
-          on your Beehiiv website and in your newsletter blasts.
+          directly inside the email body, you can still use KudosWall to power your social proof on
+          your Beehiiv website and in your newsletter blasts.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>Option 1: Adding Testimonials to Your Beehiiv Website</H3>
-        <P>
-          Beehiiv allows you to customize your publication's website. To add a Wall of Love:
-        </P>
+        <P>Beehiiv allows you to customize your publication's website. To add a Wall of Love:</P>
         <UL>
-          <LI>Go to your Beehiiv Dashboard and select <strong>Settings {"->"} Design Lab</strong>.</LI>
-          <LI>Choose the page where you want to add social proof (e.g., the Home page or a dedicated "Love" page).</LI>
-          <LI>Add a <strong>Custom HTML</strong> block.</LI>
+          <LI>
+            Go to your Beehiiv Dashboard and select <strong>Settings {"->"} Design Lab</strong>.
+          </LI>
+          <LI>
+            Choose the page where you want to add social proof (e.g., the Home page or a dedicated
+            "Love" page).
+          </LI>
+          <LI>
+            Add a <strong>Custom HTML</strong> block.
+          </LI>
           <LI>Paste your KudosWall embed code into the block and save.</LI>
         </UL>
       </section>
@@ -1423,8 +1511,15 @@ export const BEEHIIV_EMBED_GUIDE = {
           KudosWall makes it easy to include social proof in your blasts:
         </P>
         <UL>
-          <LI><strong>Screenshot & Link:</strong> Take a high-quality screenshot of your favorite video testimonial or the Wall of Love and embed it as an image in Beehiiv. Link the image to your public KudosWall "Wall of Love" page.</LI>
-          <LI><strong>Direct Link:</strong> Add a "What readers are saying" section in your footer with a link to your verified Wall of Love.</LI>
+          <LI>
+            <strong>Screenshot & Link:</strong> Take a high-quality screenshot of your favorite
+            video testimonial or the Wall of Love and embed it as an image in Beehiiv. Link the
+            image to your public KudosWall "Wall of Love" page.
+          </LI>
+          <LI>
+            <strong>Direct Link:</strong> Add a "What readers are saying" section in your footer
+            with a link to your verified Wall of Love.
+          </LI>
         </UL>
       </section>
 
@@ -1446,14 +1541,14 @@ export const TESTIMONIAL_QUESTIONS_GUIDE = {
       <section className="mb-12">
         <H2>30 Testimonial Questions That Actually Get Usable Answers</H2>
         <P>
-          "Can you leave us a review?" is the worst way to ask for a testimonial. It's too vague,
-          it puts all the creative work on your customer, and it usually results in "This tool is
+          "Can you leave us a review?" is the worst way to ask for a testimonial. It's too vague, it
+          puts all the creative work on your customer, and it usually results in "This tool is
           great, 5 stars!" which does nothing to convince a skeptical prospect.
         </P>
         <P>
-          To get high-converting testimonials, you need to ask questions that elicit a <strong>narrative</strong>.
-          You want to hear about the struggle they faced, the moment they decided to switch, and
-           the specific results they've seen.
+          To get high-converting testimonials, you need to ask questions that elicit a{" "}
+          <strong>narrative</strong>. You want to hear about the struggle they faced, the moment
+          they decided to switch, and the specific results they've seen.
         </P>
       </section>
 
@@ -1536,16 +1631,17 @@ export const AGENCY_SOFTWARE_GUIDE = {
         </P>
         <P>
           KudosWall was built with agencies in mind. Whether you're a SEO agency, a CRO shop, or a
-          full-service creative house, here is why KudosWall is the best testimonial software for agencies.
+          full-service creative house, here is why KudosWall is the best testimonial software for
+          agencies.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>1. Unlimited Projects & High Limits</H3>
         <P>
-          Most competitors charge you per "space" or per "client". This makes it incredibly expensive
-          to scale. KudosWall's architecture allows you to manage multiple client projects with
-          generous testimonial limits on our free and pro tiers.
+          Most competitors charge you per "space" or per "client". This makes it incredibly
+          expensive to scale. KudosWall's architecture allows you to manage multiple client projects
+          with generous testimonial limits on our free and pro tiers.
         </P>
       </section>
 
@@ -1554,7 +1650,8 @@ export const AGENCY_SOFTWARE_GUIDE = {
         <P>
           Video testimonials are the highest form of social proof. While other tools charge $50+/mo
           just to unlock video, KudosWall includes native video recording on our free tier. This
-          allows you to offer high-end video social proof as a standard part of your agency packages.
+          allows you to offer high-end video social proof as a standard part of your agency
+          packages.
         </P>
       </section>
 
@@ -1590,7 +1687,8 @@ export const AGENCY_PLAYBOOK = {
           money on the table.
         </P>
         <P>
-          This is the exact playbook we recommend for agencies to automate testimonial collection at scale.
+          This is the exact playbook we recommend for agencies to automate testimonial collection at
+          scale.
         </P>
       </section>
 
@@ -1619,8 +1717,8 @@ export const AGENCY_PLAYBOOK = {
       <section className="mb-12">
         <H3>Step 3: Offer the "Wall of Love" as a Value-Add</H3>
         <P>
-          Don't just collect the testimonials; show them off. As part of your service, offer to set up
-          a dedicated "Love" page for your client. It takes you 2 minutes with KudosWall, but it
+          Don't just collect the testimonials; show them off. As part of your service, offer to set
+          up a dedicated "Love" page for your client. It takes you 2 minutes with KudosWall, but it
           adds massive perceived value to your agency's monthly retainer.
         </P>
       </section>
@@ -1642,9 +1740,9 @@ export const VOUCH_ALTERNATIVE = {
       <section className="mb-12">
         <H2>Vouch alternative: 5 testimonial tools (since Vouch pivoted to talent)</H2>
         <P>
-          Vouch recently shifted its focus toward "Vouch for Talent," an employee-focused video tool.
-          This left many marketers and founders looking for a simple, video-first alternative for
-          collecting customer testimonials.
+          Vouch recently shifted its focus toward "Vouch for Talent," an employee-focused video
+          tool. This left many marketers and founders looking for a simple, video-first alternative
+          for collecting customer testimonials.
         </P>
         <P>
           If you loved Vouch for its video quality but need a tool focused on social proof, here are
@@ -1656,13 +1754,19 @@ export const VOUCH_ALTERNATIVE = {
         <H3>1. KudosWall (Best for Speed & Value)</H3>
         <P>
           KudosWall is the most direct replacement for Vouch's original mission: collecting
-          high-quality video testimonials with zero friction. Unlike Vouch, which has moved into
-          HR tech, KudosWall is 100% focused on helping you build trust with your customers.
+          high-quality video testimonials with zero friction. Unlike Vouch, which has moved into HR
+          tech, KudosWall is 100% focused on helping you build trust with your customers.
         </P>
         <UL>
-          <LI><strong>Video Support:</strong> High-fidelity, native recording.</LI>
-          <LI><strong>Ease of Use:</strong> One-click recording for customers.</LI>
-          <LI><strong>Pricing:</strong> 50 testimonials (including video) for free.</LI>
+          <LI>
+            <strong>Video Support:</strong> High-fidelity, native recording.
+          </LI>
+          <LI>
+            <strong>Ease of Use:</strong> One-click recording for customers.
+          </LI>
+          <LI>
+            <strong>Pricing:</strong> 50 testimonials (including video) for free.
+          </LI>
         </UL>
       </section>
 
@@ -1670,7 +1774,8 @@ export const VOUCH_ALTERNATIVE = {
         <H3>2. Senja</H3>
         <P>
           Senja is a great all-rounder. While it's not as video-centric as Vouch used to be, its
-          ability to curate and display video alongside social media imports makes it a strong contender.
+          ability to curate and display video alongside social media imports makes it a strong
+          contender.
         </P>
       </section>
 
@@ -1701,4 +1806,156 @@ export const VOUCH_ALTERNATIVE = {
   ),
 };
 
+export const FRAMER_EMBED_GUIDE = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>How to Embed Testimonials on Framer in 2026</H2>
+        <P>
+          Framer has become the go-to design tool for high-end landing pages and SaaS websites. Its
+          ability to create custom, fluid animations and layouts is unmatched. However, to truly
+          convert visitors into customers, your beautiful Framer site needs **verified social
+          proof.**
+        </P>
+        <P>
+          In this guide, we'll show you how to embed a high-fidelity KudosWall testimonial widget on
+          your Framer site in just a few clicks, without slowing down your site or breaking your
+          design.
+        </P>
+      </section>
 
+      <section className="mb-12">
+        <H3>Step 1: Get Your KudosWall Embed Code</H3>
+        <P>
+          First, log in to your KudosWall dashboard. Navigate to the **Widgets** section and choose
+          the wall you'd like to display. Customize the design—select from Grid, Masonry, or
+          Carousel layouts and match the colors to your Framer project's palette.
+        </P>
+        <P>
+          Once it looks perfect, click **Embed code** and copy the single line of JavaScript
+          provided.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 2: Add an Embed Component in Framer</H3>
+        <P>Open your project in Framer and follow these steps:</P>
+        <UL>
+          <LI>Click the **Plus (+)** button in the top left to open the Insert menu.</LI>
+          <LI>
+            Search for **Embed** and drag it onto your canvas where you want the testimonials to
+            appear.
+          </LI>
+          <LI>In the properties panel on the right, make sure the "Type" is set to **HTML**.</LI>
+          <LI>Paste your KudosWall embed code into the **HTML** box.</LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>Step 3: Styling and Responsive Design</H3>
+        <P>
+          Framer's Embed component is fully responsive. You can resize the embed box directly on the
+          canvas to fit your layout. KudosWall's widgets are designed to be fluid, so they will
+          automatically adjust to the width of the Framer container.
+        </P>
+        <P>
+          **Pro Tip:** Set the Embed component's width to "Fill" and the height to "Auto" (or a
+          fixed height if you want a scrollable masonry grid) to ensure it looks great on all
+          devices.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>Why KudosWall + Framer is a Winning Combo</H3>
+        <P>
+          Framer users care deeply about performance and aesthetics. KudosWall widgets are
+          **edge-optimized**, meaning they load near-instantly and won't hurt your Framer site's
+          Lighthouse scores. Plus, our high-fidelity text and video testimonials match the premium
+          feel of a Framer-designed site.
+        </P>
+      </section>
+    </>
+  ),
+};
+
+export const COURSE_CREATOR_TESTIMONIALS = {
+  content: (
+    <>
+      <section className="mb-12">
+        <H2>Course Creator Testimonials: The Strategy for Maximum Impact</H2>
+        <P>
+          For course creators, testimonials aren't just "nice to have"—they are your most effective
+          sales tool. A potential student isn't just buying your content; they are buying a
+          **transformation.** And nothing proves a transformation better than a student sharing
+          their results.
+        </P>
+        <P>
+          In 2026, text reviews are no longer enough. To stand out in a crowded market, you need
+          **verified video testimonials** and student success stories that feel authentic. Here is
+          the exact strategy top creators use to collect and display social proof.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>1. The "Moment of Transformation" Ask</H3>
+        <P>
+          Don't wait until the very end of your course to ask for a testimonial. The best time to
+          ask is at the **Moment of Transformation**—when a student hits a specific milestone or
+          achieves their first win.
+        </P>
+        <UL>
+          <LI>
+            **Module 1 Win:** Ask for a testimonial right after they complete their first
+            assignment.
+          </LI>
+          <LI>
+            **Mid-Course Check-in:** Use an automated email to ask how their progress is going.
+          </LI>
+          <LI>
+            **Certification:** Include a collection link on the final success page of your course.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>2. Use Video to Build Absolute Trust</H3>
+        <P>
+          Text can be faked; video cannot. Seeing a student's face and hearing the emotion in their
+          voice as they describe how your course changed their life is incredibly powerful.
+        </P>
+        <P>
+          KudosWall makes this easy by allowing students to record a high-fidelity video directly
+          from their phone or laptop, without needing to download any apps. This frictionless
+          experience leads to a **3x higher completion rate** for video requests.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H3>3. Display Your "Wall of Love" Strategically</H3>
+        <P>
+          Don't just hide your testimonials on a separate page. Integrate them throughout your
+          entire sales funnel:
+        </P>
+        <UL>
+          <LI>**The Hero Section:** A carousel of 3-5 star students right under your main CTA.</LI>
+          <LI>
+            **The Pricing Table:** A masonry grid of testimonials next to your checkout button to
+            reduce friction.
+          </LI>
+          <LI>
+            **The FAQ Section:** Use specific testimonials that answer common student objections.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H3>4. Leverage "Social Proof as Education"</H3>
+        <P>
+          Turn your best student success stories into content. Share their video testimonials on
+          Instagram, LinkedIn, or in your email newsletters. This not only builds trust with
+          prospects but also celebrates your students and builds community.
+        </P>
+      </section>
+    </>
+  ),
+};

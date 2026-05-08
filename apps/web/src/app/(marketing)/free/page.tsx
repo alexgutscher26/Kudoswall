@@ -7,7 +7,8 @@ import { Check, Zap, Video, Globe, Smartphone, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Free Testimonial Software with Video: 50 Reviews Forever",
-  description: "Most 'free' testimonial tools are demos. KudosWall's free tier is a real product: 50 testimonials, video included, custom widget, embed anywhere. Free forever.",
+  description:
+    "Most 'free' testimonial tools are demos. KudosWall's free tier is a real product: 50 testimonials, video included, custom widget, embed anywhere. Free forever.",
   alternates: {
     canonical: "https://kudoswall.org/free",
   },
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 const FEATURES = [
   {
     title: "50 Testimonials",
-    description: "3.3x more than Senja, 5x more than Testimonial.to. A real limit for real businesses.",
+    description:
+      "3.3x more than Senja, 5x more than Testimonial.to. A real limit for real businesses.",
     icon: Zap,
   },
   {
@@ -99,11 +101,15 @@ export default function FreePage() {
       {/* Social Proof Section (Simplified) */}
       <section className="bg-neutral-50 py-24">
         <div className="container mx-auto max-w-4xl px-4 text-center">
-          <h2 className="mb-12 text-3xl font-bold md:text-5xl tracking-tight">Why founders are switching</h2>
+          <h2 className="mb-12 text-3xl font-bold tracking-tight md:text-5xl">
+            Why founders are switching
+          </h2>
           <div className="grid gap-8">
             <div className="rounded-3xl border bg-white p-8 shadow-sm">
               <p className="mb-6 text-xl leading-relaxed font-medium">
-                "I was using Senja's free tier and hit the 15-testimonial limit in two weeks. KudosWall's 50-testimonial limit is a game-changer for early-stage products. The video quality is incredible."
+                "I was using Senja's free tier and hit the 15-testimonial limit in two weeks.
+                KudosWall's 50-testimonial limit is a game-changer for early-stage products. The
+                video quality is incredible."
               </p>
               <div className="font-bold text-neutral-900">— Sarah J., Founder at CleanFlow</div>
             </div>
@@ -116,7 +122,8 @@ export default function FreePage() {
         <div className="container mx-auto max-w-4xl px-4 text-center">
           <h2 className="mb-6 text-3xl font-bold">Stop overpaying for social proof.</h2>
           <p className="text-muted-foreground mb-10 text-lg md:text-xl">
-            We don't believe in "Growth Penalties." KudosWall provides 3× the free tier of Senja and 5× Testimonial.to because we want you to succeed before you pay us.
+            We don't believe in "Growth Penalties." KudosWall provides 3× the free tier of Senja and
+            5× Testimonial.to because we want you to succeed before you pay us.
           </p>
           <Link href="/vs/senja" className="text-primary font-bold hover:underline">
             Read the full Senja vs KudosWall comparison →
@@ -127,15 +134,15 @@ export default function FreePage() {
       {/* Final CTA */}
       <section className="py-32">
         <div className="container mx-auto px-4 text-center">
-          <div className="bg-neutral-900 text-white relative mx-auto max-w-4xl overflow-hidden rounded-[3rem] p-12 shadow-2xl">
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[3rem] bg-neutral-900 p-12 text-white shadow-2xl">
             <h2 className="mb-6 text-3xl font-bold md:text-5xl">Ready to collect your first 50?</h2>
-            <p className="text-neutral-400 mb-10 text-lg md:text-xl">
+            <p className="mb-10 text-lg text-neutral-400 md:text-xl">
               Free forever. Pay only when you outgrow it.
             </p>
             <Link href="/login">
               <Button
                 size="lg"
-                className="bg-white text-neutral-900 hover:bg-neutral-100 h-16 rounded-full px-10 text-xl font-bold"
+                className="h-16 rounded-full bg-white px-10 text-xl font-bold text-neutral-900 hover:bg-neutral-100"
               >
                 Get Started Now
               </Button>

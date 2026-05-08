@@ -61,7 +61,8 @@ export const BLOG_POSTS = [
     date: "2026-04-23",
   },
   {
-    title: "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)",
+    title:
+      "Why we just made KudosWall's free tier 10× bigger (50 testimonials + video, no asterisk)",
     description:
       "Most SaaS free tiers are demos. We just changed ours to 50 testimonials with video. Free forever, no credit card.",
     slug: "why-we-made-free-tier-10x-bigger",
@@ -142,6 +143,20 @@ export const BLOG_POSTS = [
     description:
       "The definitive playbook for marketing agencies to collect high-quality client testimonials without the manual back-and-forth.",
     slug: "how-to-collect-client-testimonials",
+    date: "2026-05-08",
+  },
+  {
+    title: "How to embed testimonials on Framer in 2026",
+    description:
+      "A step-by-step guide to adding high-fidelity testimonial widgets to your Framer site for better conversions.",
+    slug: "how-to-embed-testimonials-on-framer",
+    date: "2026-05-08",
+  },
+  {
+    title: "Course creator testimonials: how to collect and display social proof",
+    description:
+      "Learn the exact strategy top course creators use to collect student results and display them for maximum impact.",
+    slug: "course-creator-testimonials",
     date: "2026-05-08",
   },
 ] as const;

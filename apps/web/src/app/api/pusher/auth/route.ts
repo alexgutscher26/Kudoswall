@@ -51,7 +51,9 @@ export async function POST(req: Request) {
     });
 
     if (!membership) {
-      console.warn(`[PusherAuth] Forbidden: User ${session.user.id} not in workspace ${workspaceId}`);
+      console.warn(
+        `[PusherAuth] Forbidden: User ${session.user.id} not in workspace ${workspaceId}`,
+      );
       return new Response("Forbidden", { status: 403 });
     }
 

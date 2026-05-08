@@ -113,9 +113,9 @@ export function TestimonialInbox({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived" | "featured">(
-    "pending",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "all" | "pending" | "approved" | "archived" | "featured"
+  >("pending");
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
@@ -510,7 +510,7 @@ export function TestimonialInbox({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="h-8 w-px bg-neutral-100 mx-2 hidden sm:block" />
+            <div className="mx-2 hidden h-8 w-px bg-neutral-100 sm:block" />
 
             {/* Subtle Copy Link */}
             <button
@@ -559,7 +559,9 @@ export function TestimonialInbox({
               <DropdownMenu>
                 <DropdownMenuTrigger
                   className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
-                    minRating !== null ? "bg-pink-50 text-pink-600" : "text-neutral-600 hover:bg-neutral-100"
+                    minRating !== null
+                      ? "bg-pink-50 text-pink-600"
+                      : "text-neutral-600 hover:bg-neutral-100"
                   } `}
                 >
                   <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
@@ -628,7 +630,7 @@ export function TestimonialInbox({
                     selectedTagId !== null
                       ? "bg-pink-50 text-pink-600"
                       : "text-neutral-600 hover:bg-neutral-100"
-                  } ${!permissions?.features?.tagFiltering ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${!permissions?.features?.tagFiltering ? "cursor-not-allowed opacity-60" : ""}`}
                   onClick={(e) => {
                     if (!permissions?.features?.tagFiltering) {
                       e.preventDefault();
@@ -640,7 +642,9 @@ export function TestimonialInbox({
                 >
                   <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
                   Tag
-                  {!permissions?.features?.tagFiltering && <Lock className="size-2.5 text-neutral-400" />}
+                  {!permissions?.features?.tagFiltering && (
+                    <Lock className="size-2.5 text-neutral-400" />
+                  )}
                 </DropdownMenuTrigger>
                 {permissions?.features?.tagFiltering && (
                   <DropdownMenuContent
@@ -765,7 +769,11 @@ export function TestimonialInbox({
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="testimonials">
               {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="grid grid-cols-1 gap-4">
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="grid grid-cols-1 gap-4"
+                >
                   {sortedTestimonials.map((t, index) => (
                     <Draggable key={t.id} draggableId={t.id} index={index}>
                       {(provided) => (
@@ -1247,7 +1255,7 @@ function TestimonialCard({
                 className={`flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-[13px] font-bold transition-all ${
                   t.featured
                     ? "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100"
-                    : "border-neutral-100 bg-white text-neutral-400 hover:border-neutral-200 hover:text-neutral-900 shadow-sm"
+                    : "border-neutral-100 bg-white text-neutral-400 shadow-sm hover:border-neutral-200 hover:text-neutral-900"
                 }`}
               >
                 <Sparkles className={`size-4 ${t.featured ? "fill-pink-500" : ""}`} />

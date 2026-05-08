@@ -139,7 +139,9 @@ export const widgetRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { db, session, workspaceId } = ctx;
 
-      console.log(`[WIDGET_UPDATE] User ${session.user.id} updating widget ${input.id} in workspace ${workspaceId}`);
+      console.log(
+        `[WIDGET_UPDATE] User ${session.user.id} updating widget ${input.id} in workspace ${workspaceId}`,
+      );
 
       try {
         const w = await db.query.widget.findFirst({
@@ -216,7 +218,7 @@ export const widgetRouter = router({
         return { success: true };
       } catch (error) {
         if (error instanceof TRPCError) throw error;
-        
+
         console.error("[WIDGET_UPDATE] Unexpected error:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

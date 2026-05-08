@@ -989,9 +989,7 @@ export function CollectionCustomizer({
                       }}
                       disabled={!isPro || updateDomainMutation.isPending}
                       onChange={(e) => setDomain(e.target.value.toLowerCase().trim())}
-                      placeholder={
-                        isPro ? "testimonials.example.com" : "Available on Pro plans"
-                      }
+                      placeholder={isPro ? "testimonials.example.com" : "Available on Pro plans"}
                       type="text"
                       value={domain}
                     />

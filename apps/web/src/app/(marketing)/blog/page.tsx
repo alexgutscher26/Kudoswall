@@ -22,28 +22,28 @@ export default function BlogPage() {
           {[...BLOG_POSTS]
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
-              <Card className="dark:hover:shadow-primary/5 group-hover:border-primary/50 transition-all hover:shadow-lg">
-                <CardContent className="p-8">
-                  <div className="mb-4 flex items-start justify-between">
-                    <span className="text-muted-foreground text-sm">
-                      {new Date(post.date).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                  <h2 className="group-hover:text-primary text-foreground mb-4 text-2xl font-bold transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
-                    {post.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
+                <Card className="dark:hover:shadow-primary/5 group-hover:border-primary/50 transition-all hover:shadow-lg">
+                  <CardContent className="p-8">
+                    <div className="mb-4 flex items-start justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        {new Date(post.date).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <h2 className="group-hover:text-primary text-foreground mb-4 text-2xl font-bold transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="text-muted-foreground text-lg leading-relaxed">
+                      {post.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
         </div>
       </div>
       <Footer />

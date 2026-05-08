@@ -7,7 +7,8 @@ import { Users, Layout, ShieldCheck, Zap, BarChart, Settings, Check } from "luci
 
 export const metadata: Metadata = {
   title: "The Best Testimonial Tool for Agencies: Manage 5 Brands for $59/mo",
-  description: "Manage 5 client brands, white-label everything, $59/mo flat. Built for agencies that collect testimonials for clients — not just themselves.",
+  description:
+    "Manage 5 client brands, white-label everything, $59/mo flat. Built for agencies that collect testimonials for clients — not just themselves.",
   alternates: {
     canonical: "https://kudoswall.org/agencies",
   },
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 const AGENCY_FEATURES = [
   {
     title: "5 Client Workspaces",
-    description: "Manage multiple brands from a single login. No more juggling different subscriptions.",
+    description:
+      "Manage multiple brands from a single login. No more juggling different subscriptions.",
     icon: Users,
   },
   {
@@ -26,7 +28,8 @@ const AGENCY_FEATURES = [
   },
   {
     title: "Team Collaboration",
-    description: "Invite your team members to manage testimonials and widgets without extra per-seat costs.",
+    description:
+      "Invite your team members to manage testimonials and widgets without extra per-seat costs.",
     icon: ShieldCheck,
   },
   {
@@ -63,7 +66,8 @@ export default function AgenciesPage() {
             <span style={{ color: "#e8527a" }}>testimonial tool.</span>
           </h1>
           <p className="text-muted-foreground mb-10 text-xl leading-relaxed md:text-2xl">
-            Manage 5 client brands, white-label everything, $59/mo flat. Built for agencies that collect testimonials for clients — not just themselves.
+            Manage 5 client brands, white-label everything, $59/mo flat. Built for agencies that
+            collect testimonials for clients — not just themselves.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/login">
@@ -98,12 +102,15 @@ export default function AgenciesPage() {
       {/* Value Proposition */}
       <section className="bg-neutral-50 py-24">
         <div className="container mx-auto max-w-4xl px-4 text-center">
-          <h2 className="mb-6 text-3xl font-bold md:text-5xl tracking-tight">One flat price. Five client brands.</h2>
+          <h2 className="mb-6 text-3xl font-bold tracking-tight md:text-5xl">
+            One flat price. Five client brands.
+          </h2>
           <p className="text-muted-foreground mb-12 text-lg md:text-xl">
-            Stop paying per-seat and per-project fees. KudosWall's Agency plan is designed to be the most cost-effective solution for multi-client management.
+            Stop paying per-seat and per-project fees. KudosWall's Agency plan is designed to be the
+            most cost-effective solution for multi-client management.
           </p>
           <div className="grid gap-8">
-            <div className="rounded-3xl border bg-white p-12 shadow-sm text-left">
+            <div className="rounded-3xl border bg-white p-12 text-left shadow-sm">
               <div className="mb-8 flex items-center justify-between">
                 <div>
                   <h3 className="text-2xl font-black">Agency Plan</h3>
@@ -116,27 +123,27 @@ export default function AgenciesPage() {
               </div>
               <ul className="grid gap-4 md:grid-cols-2">
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>5 Client Workspaces</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>White-label Everything</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>Unlimited Testimonials</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>Priority VIP Support</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>Team Collaboration</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="text-green-500 h-5 w-5" />
+                  <Check className="h-5 w-5 text-green-500" />
                   <span>All Widget Layouts</span>
                 </li>
               </ul>
@@ -148,15 +155,15 @@ export default function AgenciesPage() {
       {/* Final CTA */}
       <section className="py-32">
         <div className="container mx-auto px-4 text-center">
-          <div className="bg-neutral-900 text-white relative mx-auto max-w-4xl overflow-hidden rounded-[3rem] p-12 shadow-2xl">
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[3rem] bg-neutral-900 p-12 text-white shadow-2xl">
             <h2 className="mb-6 text-3xl font-bold md:text-5xl">Ready to look like a pro?</h2>
-            <p className="text-neutral-400 mb-10 text-lg md:text-xl">
+            <p className="mb-10 text-lg text-neutral-400 md:text-xl">
               Start your agency workspace in under 5 minutes.
             </p>
             <Link href="/login">
               <Button
                 size="lg"
-                className="bg-white text-neutral-900 hover:bg-neutral-100 h-16 rounded-full px-10 text-xl font-bold"
+                className="h-16 rounded-full bg-white px-10 text-xl font-bold text-neutral-900 hover:bg-neutral-100"
               >
                 Get Started Now
               </Button>
