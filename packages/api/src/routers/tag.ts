@@ -1,5 +1,5 @@
 import { workspaceProcedure, router } from "../index";
-import { tag, testimonialToTag } from "@my-better-t-app/db/schema";
+import { tag, testimonialToTag, workspace } from "@my-better-t-app/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
@@ -28,6 +28,32 @@ export const tagRouter = router({
         name: input.name,
         color: input.color,
       });
+
+      // Trigger upgrade prompt email for tag filtering
+      try {
+        const { getWorkspacePermissions } = await import("../logic/billing");
+        const ws = await db.query.workspace.findFirst({
+          where: eq(workspace.id, ctx.workspaceId),
+          with: { organization: true },
+        });
+        const permissions = getWorkspacePermissions({
+          plan: ws?.plan || "free",
+          organization: (ws as any)?.organization,
+        });
+
+        if (!permissions.features.tagFiltering) {
+          const { triggerUpgradePrompt } = await import("../utils/upgrade-prompts");
+          await triggerUpgradePrompt({
+            db,
+            workspaceId: ctx.workspaceId,
+            userName: session.user.name || "there",
+            userEmail: session.user.email || "",
+            type: "tag-filtering",
+          });
+        }
+      } catch (e) {
+        console.error("[TAG_CREATE] Failed to trigger upgrade prompt:", e);
+      }
 
       await recordAuditLog({
         userId: session.user.id,

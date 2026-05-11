@@ -521,21 +521,28 @@ export async function updateTestimonialStatus(
       }
     }
 
-    // (Paid Plan) 5th Testimonial Upgrade Prompt
+    // (Paid Plan) 10th Testimonial Upgrade Prompt (Feature-Want: Custom Domain)
     const effectivePlan = t.project.workspace.organization?.plan || t.project.workspace.plan;
-    if (effectivePlan === "free" && approvedCount === 5) {
+    if (effectivePlan === "free" && approvedCount >= 10) {
       try {
         const u = await db.query.user.findFirst({
           where: eq(user.id, t.project.workspace.ownerId),
         });
         if (u?.email) {
-          const emailService = new EmailService(env.RESEND_API_KEY || "");
-          await emailService.sendUpgradePrompt(u.email, u.name || "there", approvedCount);
+          const { triggerUpgradePrompt } = await import("@my-better-t-app/api/utils/upgrade-prompts");
+          await triggerUpgradePrompt({
+            db,
+            workspaceId: t.project.workspaceId,
+            userName: u.name || "there",
+            userEmail: u.email,
+            type: "testimonial-milestone",
+          });
         }
       } catch (err) {
         console.error("Failed to send upgrade prompt email:", err);
       }
     }
+
   }
 
   try {

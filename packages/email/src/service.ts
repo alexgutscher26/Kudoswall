@@ -59,14 +59,40 @@ export class EmailService {
     });
   }
 
-  async sendUpgradePrompt(to: string, userName: string, approvedCount: number) {
+  async sendUpgradePrompt(
+    to: string,
+    userName: string,
+    type:
+      | "limit-hit"
+      | "badge-removal"
+      | "testimonial-milestone"
+      | "analytics-access"
+      | "tag-filtering" = "limit-hit",
+    approvedCount?: number,
+  ) {
+    const getSubject = () => {
+      switch (type) {
+        case "badge-removal":
+          return "Want to remove the KudosWall badge? 🎨";
+        case "testimonial-milestone":
+          return "10 testimonials! Time for a custom domain? 🌐";
+        case "analytics-access":
+          return "Unlock your Wall of Love analytics 📈";
+        case "tag-filtering":
+          return "Filter testimonials by tag? Here's how 🏷️";
+        default:
+          return "You're crushing it! (And hitting your limit) 🚀";
+      }
+    };
+
     return this.resend.emails.send({
       from: this.from,
       to,
-      subject: "You're crushing it! (And hitting your limit) 🚀",
-      react: React.createElement(UpgradePromptEmail, { userName, approvedCount }),
+      subject: getSubject(),
+      react: React.createElement(UpgradePromptEmail, { userName, type, approvedCount }),
     });
   }
+
 
   async sendWeeklyDigest(
     to: string,

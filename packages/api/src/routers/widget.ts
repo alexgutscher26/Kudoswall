@@ -186,12 +186,23 @@ export const widgetRouter = router({
         const isBadgeRemoved = badgeRemovedUntil ? new Date(badgeRemovedUntil) > new Date() : false;
 
         if (input.settings.hideBadge && !planConfig.features.whiteLabel && !isBadgeRemoved) {
+          // Trigger upgrade prompt email
+          const { triggerUpgradePrompt } = await import("../utils/upgrade-prompts");
+          await triggerUpgradePrompt({
+            db,
+            workspaceId,
+            userName: session.user.name || "there",
+            userEmail: session.user.email || "",
+            type: "badge-removal",
+          });
+
           throw new TRPCError({
             code: "FORBIDDEN",
             message:
               "Removing the KudosWall badge is a premium feature. Please upgrade to Pro or refer a friend to unlock it for free!",
           });
         }
+
 
         await db
           .update(widget)

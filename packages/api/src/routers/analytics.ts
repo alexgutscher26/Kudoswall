@@ -147,8 +147,19 @@ export const analyticsRouter = router({
       });
 
       if (!permissions.features.analytics) {
+        // Trigger upgrade prompt email
+        const { triggerUpgradePrompt } = await import("../utils/upgrade-prompts");
+        await triggerUpgradePrompt({
+          db,
+          workspaceId: ws.id,
+          userName: session.user.name || "there",
+          userEmail: session.user.email || "",
+          type: "analytics-access",
+        });
+
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
       }
+
 
       const daysNum =
         input.timeframe === "30d"
