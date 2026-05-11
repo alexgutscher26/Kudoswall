@@ -226,10 +226,14 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
   // SEO: Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: projectData.workspace.name,
-    logo: projectData.workspace.logoUrl,
-    url: `${BASE_URL}/collect/${slug}`,
+    "@type": "Product",
+    name: projectData.name,
+    description: projectData.description || subheading,
+    image: projectData.workspace.logoUrl || logoUrl,
+    brand: {
+      "@type": "Brand",
+      name: projectData.workspace.name,
+    },
     aggregateRating:
       projectData.testimonials.length > 0
         ? {
@@ -243,11 +247,55 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
             worstRating: "1",
           }
         : undefined,
+    review: projectData.testimonials.map((t) => ({
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: t.authorName || "Anonymous",
+      },
+      datePublished: t.createdAt.toISOString(),
+      reviewBody: t.content || "",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: t.rating || 5,
+        bestRating: "5",
+        worstRating: "1",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: projectData.workspace.name,
+      },
+    })),
+  };
+
+  // Also provide an ItemList for the page itself
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    numberOfItems: projectData.testimonials.length,
+    itemListElement: projectData.testimonials.map((t, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Review",
+        author: {
+          "@type": "Person",
+          name: t.authorName || "Anonymous",
+        },
+        datePublished: t.createdAt.toISOString(),
+        reviewBody: t.content || "",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: t.rating || 5,
+        },
+      },
+    })),
   };
 
   return (
     <>
       <JsonLd data={jsonLd} />
+      <JsonLd data={itemListJsonLd} />
       {projectData.customCss && (
         <style dangerouslySetInnerHTML={{ __html: projectData.customCss }} />
       )}

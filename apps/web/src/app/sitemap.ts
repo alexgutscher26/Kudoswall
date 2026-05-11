@@ -15,9 +15,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const collectionUrls: MetadataRoute.Sitemap = projects.map((p) => ({
     url: `${baseUrl}/collect/${p.collectionSlug}`,
-    lastModified: new Date(),
+    lastModified: p.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,
+  }));
+
+  const wallUrls: MetadataRoute.Sitemap = projects.map((p) => ({
+    url: `${baseUrl}/wall/${p.collectionSlug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "daily",
+    priority: 0.9,
   }));
 
   const blogUrls: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({

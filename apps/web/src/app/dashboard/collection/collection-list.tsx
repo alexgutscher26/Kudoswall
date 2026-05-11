@@ -126,11 +126,20 @@ export default function CollectionList({ projects }: CollectionListProps) {
                     <Trash2 className="size-4" />
                   </button>
                   <a
+                    href={`/wall/${p.collectionSlug || p.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex size-8 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-neutral-50 hover:text-neutral-600"
+                    title="Public Wall of Love"
+                  >
+                    <MessageSquare className="size-3.5" />
+                  </a>
+                  <a
                     href={`/collect/${p.collectionSlug || p.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex size-8 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-neutral-50 hover:text-neutral-600"
-                    title="Live Preview"
+                    title="Collection Page Preview"
                   >
                     <ExternalLink className="size-3.5" />
                   </a>
