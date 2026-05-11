@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { user, workspace } from "@my-better-t-app/db/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count, sql, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { differenceInDays } from "date-fns";
 
@@ -38,7 +38,7 @@ export const referralRouter = router({
       .where(
         and(
           eq(user.referredById, userId),
-          sql`${user.referralActivatedAt} IS NOT NULL`
+          isNotNull(user.referralActivatedAt)
         )
       );
 

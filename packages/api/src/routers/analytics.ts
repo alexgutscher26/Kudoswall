@@ -62,39 +62,55 @@ export const analyticsRouter = router({
               where: eq(user.id, ws.ownerId),
             });
 
+            // Only activate if they have a referrer and haven't been activated yet
             if (owner?.referredById && !owner.referralActivatedAt) {
-              console.log(`[REFERRAL] Activating referral for user ${owner.id}, referred by ${owner.referredById}`);
+              console.log(`[REFERRAL] Activation Triggered: User ${owner.id} (referred by ${owner.referredById})`);
               
               const now = new Date();
               
               await db.transaction(async (tx) => {
-                // 1. Mark as activated
-                await tx.update(user).set({ referralActivatedAt: now }).where(eq(user.id, owner.id));
+                // 1. Mark the referred user as activated
+                await tx.update(user)
+                  .set({ referralActivatedAt: now })
+                  .where(eq(user.id, owner.id));
 
-                // 2. Reward the Referrer (Stacking)
+                // 2. Reward the Referrer (Find their primary workspace)
                 const referrerWorkspace = await tx.query.workspace.findFirst({
                   where: eq(workspace.ownerId, owner.referredById!),
                 });
 
                 if (referrerWorkspace) {
                   const currentBadgeEnd = referrerWorkspace.badgeRemovedUntil;
-                  const baseDate = currentBadgeEnd && currentBadgeEnd > now ? currentBadgeEnd : now;
+                  // If they already have an active reward, stack it. Otherwise, start from now.
+                  const baseDate = currentBadgeEnd && new Date(currentBadgeEnd) > now 
+                    ? new Date(currentBadgeEnd) 
+                    : now;
                   const newBadgeEnd = addDays(baseDate, 30);
                   
                   await tx.update(workspace)
                     .set({ badgeRemovedUntil: newBadgeEnd })
                     .where(eq(workspace.id, referrerWorkspace.id));
+                    
+                  console.log(`[REFERRAL] Referrer ${owner.referredById} rewarded until ${newBadgeEnd.toISOString()}`);
                 }
 
                 // 3. Reward the Referred User (Initial 30 days)
+                const currentUserBadgeEnd = ws.badgeRemovedUntil;
+                const referredBaseDate = currentUserBadgeEnd && new Date(currentUserBadgeEnd) > now
+                  ? new Date(currentUserBadgeEnd)
+                  : now;
+                const referredNewBadgeEnd = addDays(referredBaseDate, 30);
+
                 await tx.update(workspace)
-                  .set({ badgeRemovedUntil: addDays(now, 30) })
+                  .set({ badgeRemovedUntil: referredNewBadgeEnd })
                   .where(eq(workspace.id, ws.id));
+                  
+                console.log(`[REFERRAL] Referred User ${owner.id} rewarded until ${referredNewBadgeEnd.toISOString()}`);
               });
             }
           }
         } catch (error) {
-          console.error("[REFERRAL] Error during activation trigger:", error);
+          console.error("[REFERRAL] Critical Error during activation:", error);
         }
       }
 
