@@ -2,7 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@my-better-t-app/ui/components/button";
 import Link from "next/link";
-import { Check, Zap, PlayCircle, X, X } from "lucide-react";
+import { Check, Zap, PlayCircle, X } from "lucide-react";
 import type { PlatformPageData } from "@/lib/platform-pages";
 
 interface FreePlatformTemplateProps {

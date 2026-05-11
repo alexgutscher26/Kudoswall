@@ -6,17 +6,17 @@ import {
   testimonial,
   widget,
   analyticsEvent,
+  user,
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, sql, gte, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { subDays, startOfDay, eachDayOfInterval, format, differenceInDays } from "date-fns";
+import { subDays, startOfDay, eachDayOfInterval, format, differenceInDays, addDays } from "date-fns";
 
 const timeframeSchema = z.enum(["7d", "30d", "90d", "all"]).optional();
 
 const getTimefilter = (timeframe?: string) => {
   if (!timeframe || timeframe === "all") return null;
-  const days = parseInt(timeframe);
-  if (isNaN(days)) return null;
+  const days = timeframe === "7d" ? 7 : timeframe === "30d" ? 30 : 90;
   return subDays(new Date(), days);
 };
 
@@ -49,6 +49,55 @@ export const analyticsRouter = router({
         eventType: input.eventType,
         metadataJson: input.metadataJson,
       });
+
+      // --- Referral Activation Trigger ---
+      if (input.eventType === "view" && input.widgetId) {
+        try {
+          const ws = await db.query.workspace.findFirst({
+            where: eq(workspace.id, input.workspaceId),
+          });
+
+          if (ws) {
+            const owner = await db.query.user.findFirst({
+              where: eq(user.id, ws.ownerId),
+            });
+
+            if (owner?.referredById && !owner.referralActivatedAt) {
+              console.log(`[REFERRAL] Activating referral for user ${owner.id}, referred by ${owner.referredById}`);
+              
+              const now = new Date();
+              
+              await db.transaction(async (tx) => {
+                // 1. Mark as activated
+                await tx.update(user).set({ referralActivatedAt: now }).where(eq(user.id, owner.id));
+
+                // 2. Reward the Referrer (Stacking)
+                const referrerWorkspace = await tx.query.workspace.findFirst({
+                  where: eq(workspace.ownerId, owner.referredById!),
+                });
+
+                if (referrerWorkspace) {
+                  const currentBadgeEnd = referrerWorkspace.badgeRemovedUntil;
+                  const baseDate = currentBadgeEnd && currentBadgeEnd > now ? currentBadgeEnd : now;
+                  const newBadgeEnd = addDays(baseDate, 30);
+                  
+                  await tx.update(workspace)
+                    .set({ badgeRemovedUntil: newBadgeEnd })
+                    .where(eq(workspace.id, referrerWorkspace.id));
+                }
+
+                // 3. Reward the Referred User (Initial 30 days)
+                await tx.update(workspace)
+                  .set({ badgeRemovedUntil: addDays(now, 30) })
+                  .where(eq(workspace.id, ws.id));
+              });
+            }
+          }
+        } catch (error) {
+          console.error("[REFERRAL] Error during activation trigger:", error);
+        }
+      }
+
       return { success: true };
     }),
 

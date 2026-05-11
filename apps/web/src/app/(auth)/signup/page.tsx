@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Github, Chrome, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
@@ -18,15 +18,25 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
 
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref && typeof document !== "undefined") {
+      const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
+      document.cookie = `kudoswall-ref=${ref}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+  }, [searchParams]);
+
   const handleSignup = async () => {
     if (!name || !email || !password) return toast.error("Please fill in all fields");
+    const ref = searchParams.get("ref");
     setLoading(true);
     const { error } = await authClient.signUp.email({
       email,
       password,
       name,
       callbackURL: redirect,
-    });
+      referralCode: ref || undefined, // Pass the referrer's code temporarily
+    } as any);
     setLoading(false);
     if (error) {
       toast.error(error.message ?? "Failed to create account");

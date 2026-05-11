@@ -9,6 +9,14 @@ import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import VideoPlayer from "./video-player";
 
+const BADGE_VARIANTS = [
+  "Powered by KudosWall",
+  "Get a wall like this",
+  "Social proof by KudosWall",
+  "Free Testimonial Wall",
+  "Love this? Get yours free",
+];
+
 interface WidgetProps {
   data: {
     id: string;
@@ -48,6 +56,7 @@ interface WidgetProps {
       hideHeader?: boolean;
     };
     isPro: boolean;
+    isBadgeRemoved?: boolean;
     workspaceId: string;
   };
   testimonials: Array<{
@@ -70,6 +79,11 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
+
+  // Deterministic badge variant selection based on widget ID
+  const badgeText = BADGE_VARIANTS[
+    data.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BADGE_VARIANTS.length
+  ];
 
   // Track View and Handle Height Reporting
   const containerRef = useRef<HTMLDivElement>(null);
@@ -422,7 +436,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                     </span>
                   </div>
                 </div>
-                {(!settings.hideBadge || !isPro) && (
+                {(!settings.hideBadge || (!isPro && !data.isBadgeRemoved)) && (
                   <a
                     href="https://kudoswall.org"
                     target="_blank"
@@ -431,13 +445,16 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                         workspaceId: data.workspaceId,
                         widgetId: data.id,
                         eventType: "click",
-                        metadataJson: JSON.stringify({ action: "click_powered_by" }),
+                        metadataJson: JSON.stringify({ 
+                          action: "click_powered_by",
+                          variant: badgeText 
+                        }),
                       });
                     }}
                     className="inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold transition-all hover:opacity-80"
                     style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
                   >
-                    Powered by KudosWall
+                    {badgeText}
                   </a>
                 )}
               </div>
@@ -588,20 +605,42 @@ export default function Widget({ data, testimonials }: WidgetProps) {
               </div>
             )}
 
-            {(!settings.hideBadge || !isPro) && settings.hideHeader && (
+            {(!settings.hideBadge || (!isPro && !data.isBadgeRemoved)) && settings.hideHeader && (
               <div className="mt-8 flex justify-center">
                 <a
                   href="https://kudoswall.org"
                   target="_blank"
+                  onClick={() => {
+                    trackEvent.mutate({
+                      workspaceId: data.workspaceId,
+                      widgetId: data.id,
+                      eventType: "click",
+                      metadataJson: JSON.stringify({ 
+                        action: "click_powered_by",
+                        variant: badgeText 
+                      }),
+                    });
+                  }}
                   className="flex items-center gap-1.5 rounded-full border border-neutral-100 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-400 shadow-sm transition-all hover:border-pink-100 hover:text-neutral-600"
                 >
-                  Powered by{" "}
-                  <span
-                    className="font-extrabold text-neutral-900"
-                    style={{ color: settings.accentColor }}
-                  >
-                    KudosWall
-                  </span>
+                  {badgeText.startsWith("Powered by") ? (
+                    <>
+                      Powered by{" "}
+                      <span
+                        className="font-extrabold text-neutral-900"
+                        style={{ color: settings.accentColor }}
+                      >
+                        KudosWall
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      className="font-extrabold text-neutral-900"
+                      style={{ color: settings.accentColor }}
+                    >
+                      {badgeText}
+                    </span>
+                  )}
                 </a>
               </div>
             )}

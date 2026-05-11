@@ -25,6 +25,13 @@ export function createAuth() {
         trustedDevice: schema.trustedDevice,
       },
     }),
+    user: {
+      additionalFields: {
+        referralCode: { type: "string", required: false },
+        referredById: { type: "string", required: false },
+        referralActivatedAt: { type: "date", required: false },
+      },
+    },
     trustedOrigins: [
       env.CORS_ORIGIN,
       env.BETTER_AUTH_URL,
@@ -133,7 +140,39 @@ export function createAuth() {
             try {
               const { workspace, workspaceMember, organization } =
                 await import("@my-better-t-app/db/schema/app");
+              const { user: userTable } = await import("@my-better-t-app/db/schema/auth");
               const { eq } = await import("drizzle-orm");
+
+              // --- Referral Resolution ---
+              const currentRefCode = (user as any).referralCode;
+              const newReferralCode = `${user.name?.split(" ")[0]?.toUpperCase() || "USER"}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+              if (currentRefCode) {
+                const referrer = await db.query.user.findFirst({
+                  where: eq(userTable.referralCode, currentRefCode),
+                });
+
+                if (referrer && referrer.id !== user.id) {
+                  console.log(`[REFERRAL] Linking user ${user.id} to referrer ${referrer.id}`);
+                  await db
+                    .update(userTable)
+                    .set({
+                      referredById: referrer.id,
+                      referralCode: newReferralCode,
+                    })
+                    .where(eq(userTable.id, user.id));
+                } else {
+                  await db
+                    .update(userTable)
+                    .set({ referralCode: newReferralCode })
+                    .where(eq(userTable.id, user.id));
+                }
+              } else {
+                await db
+                  .update(userTable)
+                  .set({ referralCode: newReferralCode })
+                  .where(eq(userTable.id, user.id));
+              }
 
               // Ensure workspace exists
               const existing = await db.query.workspace.findFirst({

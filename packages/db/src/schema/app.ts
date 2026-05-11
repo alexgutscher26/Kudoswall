@@ -100,6 +100,7 @@ export const workspace = pgTable(
     retentionEnabled: boolean("retention_enabled").default(false).notNull(),
     retentionDays: integer("retention_days").default(365), // Default to 1 year if enabled
     trialEndsAt: timestamp("trial_ends_at"),
+    badgeRemovedUntil: timestamp("badge_removed_until"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())

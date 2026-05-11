@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   Lock,
+  Gift,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
@@ -40,6 +41,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/collection", icon: Globe, label: "Collection Page" },
   { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics", feature: "analytics" },
   { href: "/dashboard/embed", icon: Code2, label: "Embed Widget" },
+  { href: "/dashboard/rewards", icon: Gift, label: "Rewards" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ] as const;
 
@@ -64,6 +66,14 @@ function setCookie(name: string, value: string, days = 7) {
   if (typeof document === "undefined") return;
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name: string) {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+  return null;
 }
 
 // ─── Nav content (shared between sidebar + mobile drawer) ─────────────────────
@@ -576,9 +586,31 @@ export default function DashboardShell({
   }, [urlWorkspaceId, activeWorkspaceId]);
 
   const [isMounted, setIsMounted] = useState(false);
+  const claimReferral = useMutation(trpc.referral.claim.mutationOptions());
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Claim referral if code exists in cookies
+  useEffect(() => {
+    if (isMounted) {
+      const refCode = getCookie("kudoswall-ref");
+      if (refCode) {
+        claimReferral.mutate(
+          { code: refCode },
+          {
+            onSuccess: () => {
+              // Clear cookie
+              document.cookie =
+                "kudoswall-ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              toast.success("Referral linked! Embed a wall to unlock your 30-day reward.");
+            },
+          },
+        );
+      }
+    }
+  }, [isMounted]);
 
   // Synchronize state with initialData from server
   useEffect(() => {

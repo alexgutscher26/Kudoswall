@@ -182,10 +182,14 @@ export const widgetRouter = router({
         }
 
         // Enforce Branding restrictions
-        if (input.settings.hideBadge && !planConfig.features.whiteLabel) {
+        const badgeRemovedUntil = (w.workspace as any).badgeRemovedUntil;
+        const isBadgeRemoved = badgeRemovedUntil ? new Date(badgeRemovedUntil) > new Date() : false;
+
+        if (input.settings.hideBadge && !planConfig.features.whiteLabel && !isBadgeRemoved) {
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Removing the KudosWall badge is a premium feature. Please upgrade to Pro.",
+            message:
+              "Removing the KudosWall badge is a premium feature. Please upgrade to Pro or refer a friend to unlock it for free!",
           });
         }
 
@@ -334,10 +338,14 @@ export const widgetRouter = router({
         },
       });
 
+      const badgeRemovedUntil = (w.workspace as any).badgeRemovedUntil;
+      const isBadgeRemoved = badgeRemovedUntil ? new Date(badgeRemovedUntil) > new Date() : false;
+
       return {
         widget: {
           ...w,
           settings,
+          isBadgeRemoved,
         },
         testimonials,
       };

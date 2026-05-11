@@ -15,6 +15,9 @@ export const user = pgTable("user", {
   lastLoginMethod: text("last_login_method"),
   deletedAt: timestamp("deleted_at"),
   plan: text("plan").default("free").notNull(),
+  referralCode: text("referral_code"),
+  referredById: text("referred_by_id"),
+  referralActivatedAt: timestamp("referral_activated_at"),
 });
 
 export const session = pgTable(

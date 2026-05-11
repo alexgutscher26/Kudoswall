@@ -6,6 +6,7 @@ import { analyticsRouter } from "./analytics";
 import { teamRouter } from "./team";
 import { billingRouter } from "./billing";
 import { authRouter } from "./auth";
+import { referralRouter } from "./referral";
 
 export const appRouter = router({
   dashboard: dashboardRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   team: teamRouter,
   billing: billingRouter,
   auth: authRouter,
+  referral: referralRouter,
   healthCheck: publicProcedure.query(() => {
     return "OK";
   }),

@@ -1,36 +1,41 @@
-# Video Collection Implementation Plan
+# PLAN: Viral Badge Copy Optimization
 
-## Problem Statement
+## Goal
+Optimize the viral "Powered by" badge on embedded widgets to increase click-through rates (CTR) and viral signups. We will transition from a static "Powered by KudosWall" to a dynamic system that rotates between high-performing copy variants.
 
-The current implementation of video collection in the widget (`collection-wizard.tsx`) encodes the captured video as a base64 Data URL and submits it directly to the Next.js server action `submitTestimonial`. This is broken because:
+## Target File
+- `apps/web/src/components/widget.tsx`
 
-1. Videos are too large to be encoded as base64 strings and sent in JSON payloads.
-2. PostgreSQL `text` columns shouldn't be used to store massive base64 video payloads.
-3. This approach crashes the application or hits server payload limits immediately.
+## Proposed Copy Variants
+1. **Control**: "Powered by KudosWall"
+2. **Action-Oriented**: "Get a wall like this"
+3. **Benefit-Oriented**: "Social proof by KudosWall"
+4. **Direct Utility**: "Free Testimonial Wall"
+5. **Emotional/Viral**: "Love this? Get yours free"
 
-## Proposed Architecture
+## Implementation Steps
 
-We will introduce Cloudflare R2 as our Object Storage provider using our existing Alchemy infrastructure.
+### 1. Define Badge Constants
+Create a `BADGE_VARIANTS` array near the top of `widget.tsx` containing these strings.
 
-### Phase 2: Implementation (Required Agents)
+### 2. Selection Logic
+In the `Widget` component:
+- Use the `data.id` (widgetId) to deterministically select a variant.
+- *Logic*: `BADGE_VARIANTS[hash(data.id) % BADGE_VARIANTS.length]` or a simple character code sum.
 
-**1. `database-architect` & `devops-engineer` (Data & Ops)**
+### 3. UI Update
+Update the badge rendering logic (found in both the header and footer sections of `widget.tsx`) to use the selected variant.
 
-- Add `alchemy.bucket("videos")` to `packages/infra/alchemy.run.ts`.
-- Expose the bucket in the Next.js bindings.
+### 4. Tracking & Analytics
+Ensure the `trackEvent` call for `click_powered_by` includes the `variant` text in its metadata so we can analyze performance in the database.
 
-**2. `backend-specialist` (Server & API)**
+## Verification Criteria
+- [ ] Badge renders with one of the new variants.
+- [ ] Variant is consistent for the same widget ID across refreshes.
+- [ ] Clicks are tracked with the variant name in metadata.
+- [ ] Layout remains aesthetic and doesn't break on longer variants.
 
-- Create a dedicated API route/tRPC endpoint (e.g., `/api/upload/presign`) to generate S3/R2 presigned upload URLs (or handle the upload using `@aws-sdk/client-s3` or Cloudflare Worker bindings).
-- Update `packages/db/src/schema/app.ts` if any tracking fields are needed for video metadata (optional, since `videoUrl` already exists).
-
-**3. `frontend-specialist` (UI/UX)**
-
-- Update `collection-wizard.tsx` and `video-recorder.tsx` to handle the upload flow.
-- The flow: Instead of encoding to base64, the client requests a presigned URL, PUTs the video blob to that URL, and then passes the resulting public URL to the `submitTestimonial` action.
-- Enhance loading states to show upload progress.
-
-**4. `test-engineer` (Verification)**
-
-- Run `security_scan.py` to ensure upload URLs are secured and rate-limited.
-- Verify linting and TypeScript checks pass.
+## Agents
+- **Frontend Specialist**: Implement logic and UI changes.
+- **SEO Specialist**: Refine variants for maximum conversion.
+- **Test Engineer**: Verify tracking and rendering.
