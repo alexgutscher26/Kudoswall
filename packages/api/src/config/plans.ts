@@ -41,6 +41,7 @@ export interface PlanConfig {
     analytics: boolean;
     premiumWidgets: boolean;
     tagFiltering: boolean;
+    singleTestimonialShare: boolean;
   };
   displayFeatures: string[];
 }
@@ -67,6 +68,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       analytics: false,
       premiumWidgets: false,
       tagFiltering: false,
+      singleTestimonialShare: false,
     },
     displayFeatures: [
       "Up to 50 testimonials",
@@ -100,6 +102,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       analytics: true,
       premiumWidgets: true,
       tagFiltering: true,
+      singleTestimonialShare: false,
     },
     displayFeatures: [
       "Unlimited testimonials",
@@ -137,6 +140,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       analytics: true,
       premiumWidgets: true,
       tagFiltering: true,
+      singleTestimonialShare: true,
     },
     displayFeatures: [
       "Everything in Pro",
@@ -168,6 +172,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       analytics: true,
       premiumWidgets: true,
       tagFiltering: true,
+      singleTestimonialShare: true,
     },
     displayFeatures: ["Everything in Agency", "Lifetime access", "No monthly fees"],
   },

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq, and, desc, count, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-import { protectedProcedure, router, workspaceProcedure } from "../index";
+import { protectedProcedure, router, workspaceProcedure, publicProcedure } from "../index";
 import {
   workspace,
   project,
@@ -1120,5 +1120,40 @@ export const dashboardRouter = router({
       });
 
       return { success: true };
+    }),
+
+  getPublicTestimonial: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const t = await db.query.testimonial.findFirst({
+        where: and(
+          eq(testimonial.id, input.id),
+          isNull(testimonial.deletedAt),
+          eq(testimonial.status, "approved"),
+        ),
+        with: {
+          project: {
+            with: {
+              workspace: true,
+            },
+          },
+          testimonialToTags: {
+            with: {
+              tag: true,
+            },
+          },
+        },
+      });
+
+      if (!t) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Testimonial not found or is not publicly shared.",
+        });
+      }
+
+      const signed = await signTestimonials([t]);
+      return signed[0];
     }),
 });
