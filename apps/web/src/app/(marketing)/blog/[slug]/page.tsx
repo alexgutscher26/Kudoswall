@@ -31,6 +31,7 @@ import {
   VIDEO_TESTIMONIALS_GUIDE,
   COURSE_TESTIMONIALS_GUIDE,
   TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE,
+  SAAS_TESTIMONIALS_GUIDE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -138,6 +139,8 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = COURSE_TESTIMONIALS_GUIDE.content;
   } else if (slug === "testimonial-collection-software") {
     content = TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE.content;
+  } else if (slug === "saas-testimonials") {
+    content = SAAS_TESTIMONIALS_GUIDE.content;
   } else {
     return notFound();
   }

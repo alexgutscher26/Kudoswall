@@ -4,6 +4,7 @@ const PRODUCT_LINKS = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
   { label: "Free Plan", href: "/free" },
+  { label: "Questions Generator", href: "/testimonial-questions" },
   { label: "Docs", href: "https://kudoswall.mintlify.app/introduction" },
 ] as const;
 

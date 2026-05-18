@@ -180,4 +180,12 @@ export const BLOG_POSTS = [
     slug: "testimonial-collection-software",
     date: "2026-05-18",
   },
+  {
+    title:
+      "SaaS Testimonials: The Ultimate Guide to Collecting and Displaying SaaS Social Proof (2026)",
+    description:
+      "Struggling to convert SaaS visitors? Learn how top-tier SaaS companies collect and leverage video & text testimonials to crush objections, show ROI, and boost sales page conversions by 34%.",
+    slug: "saas-testimonials",
+    date: "2026-05-18",
+  },
 ] as const;
