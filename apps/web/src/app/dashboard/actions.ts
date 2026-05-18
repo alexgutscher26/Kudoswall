@@ -529,7 +529,8 @@ export async function updateTestimonialStatus(
           where: eq(user.id, t.project.workspace.ownerId),
         });
         if (u?.email) {
-          const { triggerUpgradePrompt } = await import("@my-better-t-app/api/utils/upgrade-prompts");
+          const { triggerUpgradePrompt } =
+            await import("@my-better-t-app/api/utils/upgrade-prompts");
           await triggerUpgradePrompt({
             db,
             workspaceId: t.project.workspaceId,
@@ -542,7 +543,6 @@ export async function updateTestimonialStatus(
         console.error("Failed to send upgrade prompt email:", err);
       }
     }
-
   }
 
   try {

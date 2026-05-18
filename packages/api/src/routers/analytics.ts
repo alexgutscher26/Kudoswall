@@ -10,7 +10,14 @@ import {
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, sql, gte, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { subDays, startOfDay, eachDayOfInterval, format, differenceInDays, addDays } from "date-fns";
+import {
+  subDays,
+  startOfDay,
+  eachDayOfInterval,
+  format,
+  differenceInDays,
+  addDays,
+} from "date-fns";
 
 const timeframeSchema = z.enum(["7d", "30d", "90d", "all"]).optional();
 
@@ -64,13 +71,16 @@ export const analyticsRouter = router({
 
             // Only activate if they have a referrer and haven't been activated yet
             if (owner?.referredById && !owner.referralActivatedAt) {
-              console.log(`[REFERRAL] Activation Triggered: User ${owner.id} (referred by ${owner.referredById})`);
-              
+              console.log(
+                `[REFERRAL] Activation Triggered: User ${owner.id} (referred by ${owner.referredById})`,
+              );
+
               const now = new Date();
-              
+
               await db.transaction(async (tx) => {
                 // 1. Mark the referred user as activated
-                await tx.update(user)
+                await tx
+                  .update(user)
                   .set({ referralActivatedAt: now })
                   .where(eq(user.id, owner.id));
 
@@ -82,30 +92,38 @@ export const analyticsRouter = router({
                 if (referrerWorkspace) {
                   const currentBadgeEnd = referrerWorkspace.badgeRemovedUntil;
                   // If they already have an active reward, stack it. Otherwise, start from now.
-                  const baseDate = currentBadgeEnd && new Date(currentBadgeEnd) > now 
-                    ? new Date(currentBadgeEnd) 
-                    : now;
+                  const baseDate =
+                    currentBadgeEnd && new Date(currentBadgeEnd) > now
+                      ? new Date(currentBadgeEnd)
+                      : now;
                   const newBadgeEnd = addDays(baseDate, 30);
-                  
-                  await tx.update(workspace)
+
+                  await tx
+                    .update(workspace)
                     .set({ badgeRemovedUntil: newBadgeEnd })
                     .where(eq(workspace.id, referrerWorkspace.id));
-                    
-                  console.log(`[REFERRAL] Referrer ${owner.referredById} rewarded until ${newBadgeEnd.toISOString()}`);
+
+                  console.log(
+                    `[REFERRAL] Referrer ${owner.referredById} rewarded until ${newBadgeEnd.toISOString()}`,
+                  );
                 }
 
                 // 3. Reward the Referred User (Initial 30 days)
                 const currentUserBadgeEnd = ws.badgeRemovedUntil;
-                const referredBaseDate = currentUserBadgeEnd && new Date(currentUserBadgeEnd) > now
-                  ? new Date(currentUserBadgeEnd)
-                  : now;
+                const referredBaseDate =
+                  currentUserBadgeEnd && new Date(currentUserBadgeEnd) > now
+                    ? new Date(currentUserBadgeEnd)
+                    : now;
                 const referredNewBadgeEnd = addDays(referredBaseDate, 30);
 
-                await tx.update(workspace)
+                await tx
+                  .update(workspace)
                   .set({ badgeRemovedUntil: referredNewBadgeEnd })
                   .where(eq(workspace.id, ws.id));
-                  
-                console.log(`[REFERRAL] Referred User ${owner.id} rewarded until ${referredNewBadgeEnd.toISOString()}`);
+
+                console.log(
+                  `[REFERRAL] Referred User ${owner.id} rewarded until ${referredNewBadgeEnd.toISOString()}`,
+                );
               });
             }
           }
@@ -159,7 +177,6 @@ export const analyticsRouter = router({
 
         throw new Error("Analytics is not available on your current plan. Please upgrade.");
       }
-
 
       const daysNum =
         input.timeframe === "30d"
@@ -426,17 +443,26 @@ export const analyticsRouter = router({
               inArray(analyticsEvent.widgetId, widgetIds),
               inArray(analyticsEvent.eventType, ["view", "click"]),
               start ? gte(analyticsEvent.createdAt, start) : undefined,
-            )
+            ),
           )
           .groupBy(analyticsEvent.widgetId, analyticsEvent.eventType);
       }
 
-      const statsMap = stats.reduce((acc, row) => {
-        if (!row.widgetId) return acc;
-        if (!acc[row.widgetId]) acc[row.widgetId] = { view: 0, click: 0 };
-        acc[row.widgetId][row.eventType] = Number(row.value);
-        return acc;
-      }, {} as Record<string, Record<string, number>>);
+      const statsMap = stats.reduce(
+        (acc, row) => {
+          if (!row.widgetId || !row.eventType) return acc;
+          let entry = acc[row.widgetId];
+          if (!entry) {
+            entry = { view: 0, click: 0 };
+            acc[row.widgetId] = entry;
+          }
+          if (row.eventType === "view" || row.eventType === "click") {
+            entry[row.eventType] = Number(row.value);
+          }
+          return acc;
+        },
+        {} as Record<string, { view: number; click: number }>,
+      );
 
       const performance = widgets.map((w) => {
         const v = statsMap[w.id]?.view || 0;
@@ -509,17 +535,26 @@ export const analyticsRouter = router({
               inArray(analyticsEvent.widgetId, widgetIds),
               inArray(analyticsEvent.eventType, ["view", "click"]),
               start ? gte(analyticsEvent.createdAt, start) : undefined,
-            )
+            ),
           )
           .groupBy(analyticsEvent.widgetId, analyticsEvent.eventType);
       }
 
-      const statsMap = stats.reduce((acc, row) => {
-        if (!row.widgetId) return acc;
-        if (!acc[row.widgetId]) acc[row.widgetId] = { view: 0, click: 0 };
-        acc[row.widgetId][row.eventType] = Number(row.value);
-        return acc;
-      }, {} as Record<string, Record<string, number>>);
+      const statsMap = stats.reduce(
+        (acc, row) => {
+          if (!row.widgetId || !row.eventType) return acc;
+          let entry = acc[row.widgetId];
+          if (!entry) {
+            entry = { view: 0, click: 0 };
+            acc[row.widgetId] = entry;
+          }
+          if (row.eventType === "view" || row.eventType === "click") {
+            entry[row.eventType] = Number(row.value);
+          }
+          return acc;
+        },
+        {} as Record<string, { view: number; click: number }>,
+      );
 
       const performance = widgets.map((w) => {
         const v = statsMap[w.id]?.view || 0;

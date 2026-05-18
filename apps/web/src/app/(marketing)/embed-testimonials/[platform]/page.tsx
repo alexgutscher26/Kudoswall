@@ -12,7 +12,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { platform: slug } = await params;
   const integration = INTEGRATIONS.find((i) => i.slug === slug);
-  
+
   if (!integration) return {};
 
   const baseUrl = "https://kudoswall.org";

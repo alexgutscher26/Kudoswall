@@ -12,7 +12,8 @@ export const INTEGRATIONS: IntegrationPageData[] = [
     name: "Carrd",
     slug: "carrd",
     heroTitle: "How to embed testimonials on Carrd (2026 Guide)",
-    heroDescription: "The definitive guide to adding a Wall of Love to your Carrd site. Lightweight, responsive, and edge-optimized.",
+    heroDescription:
+      "The definitive guide to adding a Wall of Love to your Carrd site. Lightweight, responsive, and edge-optimized.",
     dataPoints: [
       "Zero layout shift (CLS) for Carrd sites",
       "5-minute copy-paste installation",
@@ -25,18 +26,27 @@ export const INTEGRATIONS: IntegrationPageData[] = [
       "Multiple widget styles",
       "Automated review collection",
       "Spam protection (reCAPTCHA)",
-      "Dark mode support"
+      "Dark mode support",
     ],
     sections: [
-      { title: "Why social proof matters for Carrd", content: "Carrd sites are often minimalist. A single Wall of Love can double your conversion rate by adding necessary trust without clutter." },
-      { title: "Preparation", content: "Before you start, make sure you have at least 3-5 testimonials collected in your KudosWall dashboard." }
-    ]
+      {
+        title: "Why social proof matters for Carrd",
+        content:
+          "Carrd sites are often minimalist. A single Wall of Love can double your conversion rate by adding necessary trust without clutter.",
+      },
+      {
+        title: "Preparation",
+        content:
+          "Before you start, make sure you have at least 3-5 testimonials collected in your KudosWall dashboard.",
+      },
+    ],
   },
   {
     name: "Webflow",
     slug: "webflow",
     heroTitle: "How to embed testimonials on Webflow (2026 Guide)",
-    heroDescription: "Pixel-perfect testimonial widgets for Webflow designers. Match your style, maintain your speed.",
+    heroDescription:
+      "Pixel-perfect testimonial widgets for Webflow designers. Match your style, maintain your speed.",
     dataPoints: [
       "Works with Webflow HTML Embed",
       "No external script heavy-lifting",
@@ -49,12 +59,19 @@ export const INTEGRATIONS: IntegrationPageData[] = [
       "Video play-on-hover",
       "Social platform imports",
       "Trust badges included",
-      "Priority loading for LCP"
+      "Priority loading for LCP",
     ],
     sections: [
-      { title: "Webflow & Performance", content: "Don't let clunky plugins slow down your Webflow site. KudosWall is built for performance." },
-      { title: "Installation Steps", content: "1. Copy code. 2. Drag Embed. 3. Paste. 4. Publish. Done." }
-    ]
-  }
+      {
+        title: "Webflow & Performance",
+        content:
+          "Don't let clunky plugins slow down your Webflow site. KudosWall is built for performance.",
+      },
+      {
+        title: "Installation Steps",
+        content: "1. Copy code. 2. Drag Embed. 3. Paste. 4. Publish. Done.",
+      },
+    ],
+  },
   // ... others would be added similarly
 ];

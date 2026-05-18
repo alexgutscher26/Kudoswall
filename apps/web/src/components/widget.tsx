@@ -81,9 +81,10 @@ export default function Widget({ data, testimonials }: WidgetProps) {
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
   // Deterministic badge variant selection based on widget ID
-  const badgeText = BADGE_VARIANTS[
-    data.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BADGE_VARIANTS.length
-  ];
+  const badgeText =
+    BADGE_VARIANTS[
+      data.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BADGE_VARIANTS.length
+    ];
 
   // Track View and Handle Height Reporting
   const containerRef = useRef<HTMLDivElement>(null);
@@ -445,9 +446,9 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                         workspaceId: data.workspaceId,
                         widgetId: data.id,
                         eventType: "click",
-                        metadataJson: JSON.stringify({ 
+                        metadataJson: JSON.stringify({
                           action: "click_powered_by",
-                          variant: badgeText 
+                          variant: badgeText,
                         }),
                       });
                     }}
@@ -615,9 +616,9 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                       workspaceId: data.workspaceId,
                       widgetId: data.id,
                       eventType: "click",
-                      metadataJson: JSON.stringify({ 
+                      metadataJson: JSON.stringify({
                         action: "click_powered_by",
-                        variant: badgeText 
+                        variant: badgeText,
                       }),
                     });
                   }}

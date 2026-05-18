@@ -1,6 +1,6 @@
 import { db } from "@/lib/server-db";
 import { widget, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray, gte } from "drizzle-orm";
+import { eq, and, desc, inArray, gte, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Widget from "@/components/widget";
 import ErrorBoundary from "@/components/error-boundary";
@@ -99,7 +99,14 @@ export default async function EmbedPage({
 
     testimonialsList = await db.query.testimonial.findMany({
       where: and(...whereConditions),
-      orderBy: desc(testimonial.createdAt),
+      orderBy:
+        settings.pinTopTestimonials !== false
+          ? [
+              desc(testimonial.featured),
+              asc(testimonial.featuredOrder),
+              desc(testimonial.createdAt),
+            ]
+          : [desc(testimonial.createdAt)],
       limit: settings.maxItems || 20,
     });
   }

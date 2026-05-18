@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const competitor = COMPETITORS.find((c) => c.slug === slug);
-  
+
   if (!competitor) return {};
 
   const baseUrl = "https://kudoswall.org";

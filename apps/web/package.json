@@ -43,7 +43,7 @@
     "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.2",
+    "drizzle-orm": "catalog:",
     "framer-motion": "^12.38.0",
     "goey-toast": "catalog:",
     "lucide-react": "catalog:",

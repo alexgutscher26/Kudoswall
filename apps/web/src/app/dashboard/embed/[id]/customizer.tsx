@@ -60,6 +60,7 @@ export interface WidgetSettings {
   filterTags: string[];
   filterMinRating: number;
   filterType: "all" | "text" | "video";
+  pinTopTestimonials?: boolean;
 
   // Branding
   accentColor: string;
@@ -116,6 +117,7 @@ export default function WidgetCustomizer({
     filterTags: [],
     filterMinRating: 0,
     filterType: "all",
+    pinTopTestimonials: true,
     accentColor: "#e8527a",
     backgroundColor: "transparent",
     textColor: null,
@@ -632,7 +634,33 @@ export default function WidgetCustomizer({
 
             {activeTab === "filtering" && (
               <div className="space-y-8">
-                <div className="space-y-4">
+                {/* Pin Featured Testimonials Toggle */}
+                <div className="flex items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
+                  <div className="space-y-0.5">
+                    <span className="text-[13px] font-medium text-neutral-700">
+                      Pin Featured Testimonials
+                    </span>
+                    <p className="text-[11px] text-neutral-400">
+                      Keep featured testimonials pinned at the top
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettings((s) => ({
+                        ...s,
+                        pinTopTestimonials: s.pinTopTestimonials !== false ? false : true,
+                      }))
+                    }
+                    className={`relative flex h-5 w-10 shrink-0 items-center rounded-full transition-all duration-300 ${settings.pinTopTestimonials !== false ? "bg-emerald-500" : "bg-neutral-200"}`}
+                  >
+                    <div
+                      className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${settings.pinTopTestimonials !== false ? "translate-x-5.5" : "translate-x-1"}`}
+                    />
+                  </button>
+                </div>
+
+                <div className="space-y-4 border-t border-neutral-50 pt-6">
                   <div className="flex items-center justify-between">
                     <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                       Min. Star Rating

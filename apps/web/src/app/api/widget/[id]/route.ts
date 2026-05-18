@@ -1,6 +1,6 @@
 import { db } from "@/lib/server-db";
 import { widget, project, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, asc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getEnvAsync } from "@my-better-t-app/env/server";
 import { withCoalescing } from "@/lib/coalesce";
@@ -56,7 +56,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             inArray(testimonial.projectId, projectIds),
             eq(testimonial.status, "approved"),
           ),
-          orderBy: desc(testimonial.createdAt),
+          orderBy:
+            settings.pinTopTestimonials !== false
+              ? [
+                  desc(testimonial.featured),
+                  asc(testimonial.featuredOrder),
+                  desc(testimonial.createdAt),
+                ]
+              : [desc(testimonial.createdAt)],
           limit: settings.maxItems || 20,
           with: {
             testimonialToTags: {

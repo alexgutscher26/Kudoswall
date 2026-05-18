@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { user, workspace } from "@my-better-t-app/db/schema";
-import { eq, and, count, sql, isNotNull } from "drizzle-orm";
+import { eq, and, count, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { differenceInDays } from "date-fns";
 
@@ -31,16 +31,11 @@ export const referralRouter = router({
       .select({ count: count() })
       .from(user)
       .where(eq(user.referredById, userId));
-    
+
     const activated = await db
       .select({ count: count() })
       .from(user)
-      .where(
-        and(
-          eq(user.referredById, userId),
-          isNotNull(user.referralActivatedAt)
-        )
-      );
+      .where(and(eq(user.referredById, userId), isNotNull(user.referralActivatedAt)));
 
     // 4. Get badge removal status from primary workspace
     const ws = await db.query.workspace.findFirst({
@@ -49,9 +44,8 @@ export const referralRouter = router({
 
     const badgeRemovedUntil = ws?.badgeRemovedUntil;
     const isBadgeRemoved = badgeRemovedUntil ? badgeRemovedUntil > new Date() : false;
-    const daysRemaining = badgeRemovedUntil && isBadgeRemoved 
-      ? differenceInDays(badgeRemovedUntil, new Date()) 
-      : 0;
+    const daysRemaining =
+      badgeRemovedUntil && isBadgeRemoved ? differenceInDays(badgeRemovedUntil, new Date()) : 0;
 
     return {
       referralCode: userData.referralCode,
@@ -66,7 +60,7 @@ export const referralRouter = router({
 
   getReferralList: protectedProcedure.query(async ({ ctx }) => {
     const { db, session } = ctx;
-    
+
     const list = await db.query.user.findMany({
       where: eq(user.referredById, session.user.id),
       columns: {
@@ -79,7 +73,7 @@ export const referralRouter = router({
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
 
-    return list.map(u => ({
+    return list.map((u) => ({
       ...u,
       status: u.referralActivatedAt ? "Activated" : "Pending",
     }));
@@ -106,9 +100,7 @@ export const referralRouter = router({
         return { success: false, message: "Invalid referral code" };
       }
 
-      await db.update(user)
-        .set({ referredById: referrer.id })
-        .where(eq(user.id, userId));
+      await db.update(user).set({ referredById: referrer.id }).where(eq(user.id, userId));
 
       return { success: true };
     }),

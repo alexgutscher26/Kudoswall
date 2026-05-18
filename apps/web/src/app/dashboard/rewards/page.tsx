@@ -1,16 +1,7 @@
 "use client";
 
 import { trpc } from "@/utils/trpc";
-import { 
-  Gift, 
-  Copy, 
-  Check, 
-  Users, 
-  Zap, 
-  ArrowRight,
-  ShieldCheck,
-  Star
-} from "lucide-react";
+import { Gift, Copy, Check, Users, Zap, ArrowRight, ShieldCheck, Star } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
@@ -47,25 +38,24 @@ export default function RewardsPage() {
           {/* Decorative elements */}
           <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-pink-500/5 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-pink-500/5 blur-3xl" />
-          
-          <div className="relative flex flex-col items-center text-center lg:flex-row lg:text-left lg:items-start lg:justify-between">
+
+          <div className="relative flex flex-col items-center text-center lg:flex-row lg:items-start lg:justify-between lg:text-left">
             <div className="max-w-xl space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-[11px] font-black tracking-widest text-pink-500 uppercase shadow-sm">
                 <Star className="size-3 fill-pink-500" />
                 Growth Engine
               </div>
-              
+
               <h1 className="text-4xl font-black tracking-tight text-neutral-900 sm:text-5xl">
                 Refer a friend, <br />
                 <span className="text-pink-500">Remove the badge.</span>
               </h1>
-              
-              <p className="text-lg font-medium leading-relaxed text-neutral-500">
-                Help another founder build social proof. When they embed their first wall, 
-                <span className="font-bold text-neutral-900"> both of you </span> 
+
+              <p className="text-lg leading-relaxed font-medium text-neutral-500">
+                Help another founder build social proof. When they embed their first wall,
+                <span className="font-bold text-neutral-900"> both of you </span>
                 get 30 days of badge-free embedding (a Pro feature).
               </p>
-
             </div>
 
             <div className="mt-12 w-full max-w-sm lg:mt-0">
@@ -76,10 +66,10 @@ export default function RewardsPage() {
                       Your Unique Invite Link
                     </label>
                     <div className="flex items-center gap-2 rounded-2xl border-2 border-neutral-50 bg-neutral-50 p-1.5 transition-all focus-within:border-pink-500/20 focus-within:bg-white">
-                      <div className="flex-1 px-3 py-1 font-mono text-xs font-bold text-neutral-500 truncate">
+                      <div className="flex-1 truncate px-3 py-1 font-mono text-xs font-bold text-neutral-500">
                         {isLoading ? "Generating..." : stats?.referralLink}
                       </div>
-                      <Button 
+                      <Button
                         onClick={handleCopy}
                         disabled={isLoading}
                         className="h-10 rounded-xl bg-neutral-900 px-4 text-[11px] font-black tracking-widest text-white uppercase transition-all hover:bg-neutral-800 active:scale-95"
@@ -89,8 +79,8 @@ export default function RewardsPage() {
                       </Button>
                     </div>
                   </div>
-                  
-                  <p className="text-center text-[10px] font-medium text-neutral-400 leading-tight">
+
+                  <p className="text-center text-[10px] leading-tight font-medium text-neutral-400">
                     Share this link with founders on Twitter, Slack, or via Email.
                   </p>
                 </div>
@@ -107,7 +97,9 @@ export default function RewardsPage() {
             </div>
             <div>
               <p className="text-3xl font-black text-neutral-900">{stats?.totalReferred || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Founders Referred</p>
+              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                Founders Referred
+              </p>
             </div>
           </Card>
 
@@ -117,7 +109,9 @@ export default function RewardsPage() {
             </div>
             <div>
               <p className="text-3xl font-black text-neutral-900">{stats?.totalActivated || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Activations</p>
+              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                Activations
+              </p>
             </div>
           </Card>
 
@@ -127,7 +121,9 @@ export default function RewardsPage() {
             </div>
             <div>
               <p className="text-3xl font-black">{stats?.daysRemaining || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-white/70 uppercase">Days of Badge-Free remaining</p>
+              <p className="text-[10px] font-bold tracking-widest text-white/70 uppercase">
+                Days of Badge-Free remaining
+              </p>
             </div>
           </Card>
         </div>
@@ -136,28 +132,28 @@ export default function RewardsPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="space-y-6">
             <h2 className="text-2xl font-black tracking-tight text-neutral-900">How it works</h2>
-            
+
             <div className="space-y-4">
               {[
-                { 
-                  step: 1, 
-                  title: "Invite a Founder", 
-                  desc: "Send your link to someone who needs to showcase testimonials." 
+                {
+                  step: 1,
+                  title: "Invite a Founder",
+                  desc: "Send your link to someone who needs to showcase testimonials.",
                 },
-                { 
-                  step: 2, 
-                  title: "They setup their wall", 
-                  desc: "They get 50 testimonials free and their first 30 days are badge-free immediately." 
+                {
+                  step: 2,
+                  title: "They setup their wall",
+                  desc: "They get 50 testimonials free and their first 30 days are badge-free immediately.",
                 },
-                { 
-                  step: 3, 
-                  title: "They embed it", 
-                  desc: "Once they embed their first widget and it gets 1 view, your reward activates." 
+                {
+                  step: 3,
+                  title: "They embed it",
+                  desc: "Once they embed their first widget and it gets 1 view, your reward activates.",
                 },
-                { 
-                  step: 4, 
-                  title: "Rewards Stack", 
-                  desc: "Refer 10 people? That's 300 days of Pro-tier branding for free." 
+                {
+                  step: 4,
+                  title: "Rewards Stack",
+                  desc: "Refer 10 people? That's 300 days of Pro-tier branding for free.",
                 },
               ].map((item) => (
                 <div key={item.step} className="flex gap-4">
@@ -185,19 +181,19 @@ export default function RewardsPage() {
             <div className="inline-flex items-center gap-2 rounded-full bg-pink-500 px-3 py-1 text-[9px] font-black tracking-widest text-white uppercase">
               Pro Feature Preview
             </div>
-            <h3 className="text-2xl font-black leading-tight">
+            <h3 className="text-2xl leading-tight font-black">
               Get a taste of <br />
               the Pro Life.
             </h3>
-            <p className="text-sm font-medium leading-relaxed text-neutral-400">
-              Removing the "Powered by KudosWall" badge is usually reserved for our Pro customers. 
+            <p className="text-sm leading-relaxed font-medium text-neutral-400">
+              Removing the "Powered by KudosWall" badge is usually reserved for our Pro customers.
               We're letting you earn it so you can see how much cleaner your site looks.
             </p>
           </div>
-          
+
           <div className="relative z-10 pt-8">
-            <Button 
-              onClick={() => window.location.href = "/dashboard/settings?tab=billing"}
+            <Button
+              onClick={() => (window.location.href = "/dashboard/settings?tab=billing")}
               className="group flex h-12 items-center justify-center gap-2 rounded-2xl bg-white px-8 text-[12px] font-black tracking-widest text-neutral-900 uppercase transition-all hover:bg-neutral-100 active:scale-[0.98]"
             >
               Skip the wait, Go Pro
@@ -206,7 +202,7 @@ export default function RewardsPage() {
           </div>
 
           {/* Background Glow */}
-          <div className="pointer-events-none absolute -bottom-20 -right-20 size-64 rounded-full bg-pink-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -bottom-20 size-64 rounded-full bg-pink-500/20 blur-3xl" />
         </Card>
       </div>
     </DashboardShell>
@@ -233,7 +229,9 @@ function ReferralList() {
           <Users className="size-6" />
         </div>
         <p className="text-sm font-bold text-neutral-400">No referrals yet.</p>
-        <p className="mt-1 text-[11px] font-medium text-neutral-300">Share your link to get started!</p>
+        <p className="mt-1 text-[11px] font-medium text-neutral-300">
+          Share your link to get started!
+        </p>
       </Card>
     );
   }
@@ -241,7 +239,10 @@ function ReferralList() {
   return (
     <div className="space-y-3">
       {list.map((u) => (
-        <Card key={u.id} className="flex items-center justify-between rounded-2xl border-2 border-neutral-50 bg-white p-4 transition-all hover:border-pink-100">
+        <Card
+          key={u.id}
+          className="flex items-center justify-between rounded-2xl border-2 border-neutral-50 bg-white p-4 transition-all hover:border-pink-100"
+        >
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-50 text-[10px] font-black text-neutral-400">
               {u.name?.charAt(0).toUpperCase()}
@@ -252,15 +253,17 @@ function ReferralList() {
             </div>
           </div>
           <div className="text-right">
-            <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black tracking-widest uppercase ${
-              u.status === "Activated" 
-                ? "bg-emerald-50 text-emerald-500" 
-                : "bg-neutral-50 text-neutral-400"
-            }`}>
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black tracking-widest uppercase ${
+                u.status === "Activated"
+                  ? "bg-emerald-50 text-emerald-500"
+                  : "bg-neutral-50 text-neutral-400"
+              }`}
+            >
               {u.status === "Activated" && <Check className="size-2.5" />}
               {u.status}
             </div>
-            <p className="mt-1 text-[9px] font-bold text-neutral-300 uppercase tracking-widest">
+            <p className="mt-1 text-[9px] font-bold tracking-widest text-neutral-300 uppercase">
               Joined {new Date(u.createdAt).toLocaleDateString()}
             </p>
           </div>

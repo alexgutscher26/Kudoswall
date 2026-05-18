@@ -25,7 +25,8 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
             {platform.heroTitle}
           </h1>
           <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-xl leading-relaxed md:text-2xl">
-            The most generous testimonial tool for {platform.name} users. Collect 50 testimonials for free, including high-fidelity video recording.
+            The most generous testimonial tool for {platform.name} users. Collect 50 testimonials
+            for free, including high-fidelity video recording.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/login">
@@ -44,15 +45,19 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
       {/* 2. What's actually free + what unlocks Pro */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl rounded-3xl border bg-muted/10 p-12">
+          <div className="bg-muted/10 mx-auto max-w-4xl rounded-3xl border p-12">
             <div className="mb-12 text-center">
               <h2 className="text-3xl font-bold">Transparent Pricing</h2>
-              <p className="text-muted-foreground">We believe in activation-led growth, not paywalls.</p>
+              <p className="text-muted-foreground">
+                We believe in activation-led growth, not paywalls.
+              </p>
             </div>
             <div className="grid gap-12 md:grid-cols-2">
               <div>
-                <h3 className="mb-6 text-xl font-bold flex items-center gap-2"><Check className="text-green-500" /> What's actually free</h3>
-                <ul className="space-y-4 text-muted-foreground">
+                <h3 className="mb-6 flex items-center gap-2 text-xl font-bold">
+                  <Check className="text-green-500" /> What's actually free
+                </h3>
+                <ul className="text-muted-foreground space-y-4">
                   <li>50 Testimonials (Text + Video)</li>
                   <li>Native Video Recording Flow</li>
                   <li>Masonry Grid Layout</li>
@@ -61,8 +66,10 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
                 </ul>
               </div>
               <div>
-                <h3 className="mb-6 text-xl font-bold flex items-center gap-2"><Zap className="text-primary" /> What unlocks Pro</h3>
-                <ul className="space-y-4 text-muted-foreground">
+                <h3 className="mb-6 flex items-center gap-2 text-xl font-bold">
+                  <Zap className="text-primary" /> What unlocks Pro
+                </h3>
+                <ul className="text-muted-foreground space-y-4">
                   <li>Remove KudosWall Branding</li>
                   <li>Custom Domains</li>
                   <li>All 4 Layouts (Carousel, etc.)</li>
@@ -79,7 +86,9 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
       <section className="bg-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-16 text-center text-3xl font-bold">5-Minute Setup on {platform.name}</h2>
+            <h2 className="mb-16 text-center text-3xl font-bold">
+              5-Minute Setup on {platform.name}
+            </h2>
             <div className="grid gap-8">
               {platform.setupSteps.map((step, i) => (
                 <div key={i} className="bg-background flex gap-6 rounded-3xl border p-8 shadow-sm">
@@ -101,9 +110,7 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
       <section className="py-24">
         <div className="container mx-auto max-w-4xl px-4 text-center">
           <h2 className="mb-8 text-3xl font-bold">Why {platform.name} Users Choose KudosWall</h2>
-          <p className="text-muted-foreground text-xl leading-relaxed">
-            {platform.useCaseFraming}
-          </p>
+          <p className="text-muted-foreground text-xl leading-relaxed">{platform.useCaseFraming}</p>
         </div>
       </section>
 
@@ -112,12 +119,14 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
         <div className="container mx-auto px-4 text-center">
           <h2 className="mb-12 text-3xl font-bold">See it in Action</h2>
           <div className="bg-muted mx-auto aspect-video max-w-4xl overflow-hidden rounded-3xl border-8 shadow-2xl">
-             <div className="flex h-full items-center justify-center text-muted-foreground flex-col gap-4">
-                <PlayCircle className="h-16 w-16 opacity-20" />
-                <p className="font-medium">Live Widget Preview on {platform.name}</p>
-             </div>
+            <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-4">
+              <PlayCircle className="h-16 w-16 opacity-20" />
+              <p className="font-medium">Live Widget Preview on {platform.name}</p>
+            </div>
           </div>
-          <p className="mt-8 text-sm text-muted-foreground italic">Captured from a real customer wall on {platform.name}</p>
+          <p className="text-muted-foreground mt-8 text-sm italic">
+            Captured from a real customer wall on {platform.name}
+          </p>
         </div>
       </section>
 
@@ -125,39 +134,51 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-5xl">
-             <h2 className="mb-12 text-center text-3xl font-bold">How we compare</h2>
-             <div className="bg-background overflow-hidden rounded-3xl border">
-                <table className="w-full border-collapse">
-                  <thead className="bg-muted/50 border-b">
-                    <tr>
-                      <th className="p-6 text-left">Feature</th>
-                      <th className="p-6 text-center">{platform.name} Native</th>
-                      <th className="p-6 text-center">Other Tools</th>
-                      <th className="bg-primary/5 text-primary p-6 text-center font-bold">KudosWall</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-6 font-medium">Free Limit</td>
-                      <td className="p-6 text-center text-muted-foreground">Very Limited</td>
-                      <td className="p-6 text-center text-muted-foreground">10-15</td>
-                      <td className="bg-primary/5 p-6 text-center font-bold text-primary italic">50 + Video</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-6 font-medium">Video Recording</td>
-                      <td className="p-6 text-center flex justify-center"><X className="text-destructive" /></td>
-                      <td className="p-6 text-center flex justify-center"><X className="text-destructive" /></td>
-                      <td className="bg-primary/5 p-6 text-center flex justify-center"><Check className="text-primary" /></td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-6 font-medium">Setup Time</td>
-                      <td className="p-6 text-center text-muted-foreground">Manual</td>
-                      <td className="p-6 text-center text-muted-foreground">15 mins</td>
-                      <td className="bg-primary/5 p-6 text-center font-bold text-primary italic">5 mins</td>
-                    </tr>
-                  </tbody>
-                </table>
-             </div>
+            <h2 className="mb-12 text-center text-3xl font-bold">How we compare</h2>
+            <div className="bg-background overflow-hidden rounded-3xl border">
+              <table className="w-full border-collapse">
+                <thead className="bg-muted/50 border-b">
+                  <tr>
+                    <th className="p-6 text-left">Feature</th>
+                    <th className="p-6 text-center">{platform.name} Native</th>
+                    <th className="p-6 text-center">Other Tools</th>
+                    <th className="bg-primary/5 text-primary p-6 text-center font-bold">
+                      KudosWall
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="p-6 font-medium">Free Limit</td>
+                    <td className="text-muted-foreground p-6 text-center">Very Limited</td>
+                    <td className="text-muted-foreground p-6 text-center">10-15</td>
+                    <td className="bg-primary/5 text-primary p-6 text-center font-bold italic">
+                      50 + Video
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-6 font-medium">Video Recording</td>
+                    <td className="flex justify-center p-6 text-center">
+                      <X className="text-destructive" />
+                    </td>
+                    <td className="flex justify-center p-6 text-center">
+                      <X className="text-destructive" />
+                    </td>
+                    <td className="bg-primary/5 flex justify-center p-6 text-center">
+                      <Check className="text-primary" />
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-6 font-medium">Setup Time</td>
+                    <td className="text-muted-foreground p-6 text-center">Manual</td>
+                    <td className="text-muted-foreground p-6 text-center">15 mins</td>
+                    <td className="bg-primary/5 text-primary p-6 text-center font-bold italic">
+                      5 mins
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

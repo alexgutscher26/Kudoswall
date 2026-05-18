@@ -602,8 +602,7 @@ export default function DashboardShell({
           {
             onSuccess: () => {
               // Clear cookie
-              document.cookie =
-                "kudoswall-ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              document.cookie = "kudoswall-ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
               toast.success("Referral linked! Embed a wall to unlock your 30-day reward.");
             },
           },

@@ -73,7 +73,7 @@ const getProjectByCollectionSlug = unstable_cache(
 
     const effectivePlan = result.workspace.organization?.plan || result.workspace.plan;
     const isPro = effectivePlan !== "free" && effectivePlan !== null;
-    
+
     const badgeRemovedUntil = (result.workspace as any).badgeRemovedUntil;
     const isBadgeRemoved = badgeRemovedUntil ? new Date(badgeRemovedUntil) > new Date() : false;
 
@@ -213,8 +213,8 @@ export default async function WallPage({ params }: WallPageProps) {
     <>
       <JsonLd data={jsonLd} />
       <JsonLd data={itemListJsonLd} />
-      
-      <main className="min-h-screen bg-[#fafafa] py-12 px-4 sm:px-6 lg:px-8">
+
+      <main className="min-h-screen bg-[#fafafa] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
           <div className="mb-16 text-center">
@@ -239,7 +239,7 @@ export default async function WallPage({ params }: WallPageProps) {
           <div className="rounded-[40px] border border-neutral-100 bg-white p-8 shadow-xl shadow-neutral-100/50 sm:p-12">
             <Widget data={widgetData as any} testimonials={testimonials as any} />
           </div>
-          
+
           {/* Footer */}
           <div className="mt-12 text-center">
             <p className="text-sm font-medium text-neutral-400">

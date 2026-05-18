@@ -93,7 +93,6 @@ export class EmailService {
     });
   }
 
-
   async sendWeeklyDigest(
     to: string,
     userName: string,

@@ -118,27 +118,42 @@ export default function FreePage() {
       </section>
 
       {/* Platform Hub Hook */}
-      <section className="bg-muted/30 py-24 border-y">
+      <section className="bg-muted/30 border-y py-24">
         <div className="container mx-auto max-w-6xl px-4">
           <h2 className="mb-12 text-center text-3xl font-bold">Free for your favorite platforms</h2>
           <div className="grid gap-6 md:grid-cols-3">
-             <Link href="/free-testimonials-for/carrd" className="bg-background p-6 rounded-2xl border hover:border-primary transition-all">
-                <h3 className="font-bold text-lg mb-2">Free for Carrd →</h3>
-                <p className="text-muted-foreground text-sm">Lightweight social proof for minimalist one-page sites.</p>
-             </Link>
-             <Link href="/free-testimonials-for/beehiiv" className="bg-background p-6 rounded-2xl border hover:border-primary transition-all">
-                <h3 className="font-bold text-lg mb-2">Free for Beehiiv →</h3>
-                <p className="text-muted-foreground text-sm">Grow your newsletter with automated reader praise.</p>
-             </Link>
-             <Link href="/free-testimonials-for/webflow" className="bg-background p-6 rounded-2xl border hover:border-primary transition-all">
-                <h3 className="font-bold text-lg mb-2">Free for Webflow →</h3>
-                <p className="text-muted-foreground text-sm">Pixel-perfect widgets that match your design tokens.</p>
-             </Link>
+            <Link
+              href="/free-testimonials-for/carrd"
+              className="bg-background hover:border-primary rounded-2xl border p-6 transition-all"
+            >
+              <h3 className="mb-2 text-lg font-bold">Free for Carrd →</h3>
+              <p className="text-muted-foreground text-sm">
+                Lightweight social proof for minimalist one-page sites.
+              </p>
+            </Link>
+            <Link
+              href="/free-testimonials-for/beehiiv"
+              className="bg-background hover:border-primary rounded-2xl border p-6 transition-all"
+            >
+              <h3 className="mb-2 text-lg font-bold">Free for Beehiiv →</h3>
+              <p className="text-muted-foreground text-sm">
+                Grow your newsletter with automated reader praise.
+              </p>
+            </Link>
+            <Link
+              href="/free-testimonials-for/webflow"
+              className="bg-background hover:border-primary rounded-2xl border p-6 transition-all"
+            >
+              <h3 className="mb-2 text-lg font-bold">Free for Webflow →</h3>
+              <p className="text-muted-foreground text-sm">
+                Pixel-perfect widgets that match your design tokens.
+              </p>
+            </Link>
           </div>
           <div className="mt-12 text-center">
-             <Link href="/free-testimonials-for" className="text-primary font-bold hover:underline">
-                View all 5+ platform guides →
-             </Link>
+            <Link href="/free-testimonials-for" className="text-primary font-bold hover:underline">
+              View all 5+ platform guides →
+            </Link>
           </div>
         </div>
       </section>
@@ -155,7 +170,7 @@ export default function FreePage() {
             <Link href="/vs/senja" className="text-primary font-bold hover:underline">
               Read the full Senja vs KudosWall comparison →
             </Link>
-            <Link href="/vs" className="text-muted-foreground font-medium hover:underline text-sm">
+            <Link href="/vs" className="text-muted-foreground text-sm font-medium hover:underline">
               View all competitor comparisons →
             </Link>
           </div>

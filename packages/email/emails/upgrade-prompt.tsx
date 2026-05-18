@@ -3,7 +3,12 @@ import { BaseLayout } from "./components/base-layout";
 
 interface UpgradePromptEmailProps {
   userName: string;
-  type?: "limit-hit" | "badge-removal" | "testimonial-milestone" | "analytics-access" | "tag-filtering";
+  type?:
+    | "limit-hit"
+    | "badge-removal"
+    | "testimonial-milestone"
+    | "analytics-access"
+    | "tag-filtering";
   approvedCount?: number;
 }
 

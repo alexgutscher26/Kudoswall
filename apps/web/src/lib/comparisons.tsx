@@ -159,8 +159,8 @@ export const SENJA_COMPARISON = {
           AI-generated video sizzle reels.
         </P>
         <P>
-          Choose KudosWall if: You want the most generous free tier in the market (3× Senja's)
-          to get your Wall of Love live in 5 minutes without the $29/mo paywall.
+          Choose KudosWall if: You want the most generous free tier in the market (3× Senja's) to
+          get your Wall of Love live in 5 minutes without the $29/mo paywall.
         </P>
       </section>
     </>
@@ -210,8 +210,8 @@ export const TESTIMONIAL_TO_COMPARISON = {
         <H3>Deep Customization without the Complexity</H3>
         <P>
           Testimonial.to widgets are recognizable—and often look like "plugins." KudosWall uses
-          CSS-first design tokens and a library of 35+ Google Fonts to ensure your widget
-          matches your brand's exact typography and spacing.
+          CSS-first design tokens and a library of 35+ Google Fonts to ensure your widget matches
+          your brand's exact typography and spacing.
         </P>
         <UL>
           <LI>
@@ -306,8 +306,8 @@ export const COURSE_CREATORS_COMPARISON = {
         <H3>Verified Results = Higher Sales</H3>
         <P>
           In the "fake guru" era, skepticism is at an all-time high. A simple text quote isn't
-          enough anymore. KudosWall's LinkedIn Verification allows potential students to see
-          that the testimonial comes from a real professional with a verifiable profile.
+          enough anymore. KudosWall's LinkedIn Verification allows potential students to see that
+          the testimonial comes from a real professional with a verifiable profile.
         </P>
       </section>
 
@@ -315,9 +315,9 @@ export const COURSE_CREATORS_COMPARISON = {
         <H3>Seamless Integration with Your Stake</H3>
         <P>
           Whether you use Kajabi, Teachable, or a custom Next.js stack, KudosWall fits in perfectly.
-          Our Custom CSS override engine allows you to match the exact aesthetic of your sales
-          page, making the social proof feel like a core part of the experience rather than a
-          third-party plugin.
+          Our Custom CSS override engine allows you to match the exact aesthetic of your sales page,
+          making the social proof feel like a core part of the experience rather than a third-party
+          plugin.
         </P>
       </section>
     </>
@@ -350,9 +350,9 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
       <section className="mb-12">
         <H2>Affordable Senja Alternatives: Why KudosWall is the Best Value</H2>
         <P>
-          Social proof is essential, but it shouldn't cost as much as your server bill. While
-          Senja has moved toward Enterprise-level pricing with a $29/mo entry point, KudosWall
-          remains committed to the indie founder and solo creator market.
+          Social proof is essential, but it shouldn't cost as much as your server bill. While Senja
+          has moved toward Enterprise-level pricing with a $29/mo entry point, KudosWall remains
+          committed to the indie founder and solo creator market.
         </P>
       </section>
 
@@ -360,8 +360,8 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         <H3>The End of Subscription Fatigue</H3>
         <P>
           Why pay every month for a tool that simply displays text on your site? KudosWall offers a
-          Lifetime Deal (LTD) for a limited time, allowing you to pay once and own your social
-          proof engine forever.
+          Lifetime Deal (LTD) for a limited time, allowing you to pay once and own your social proof
+          engine forever.
         </P>
         <UL>
           <LI>
@@ -382,8 +382,8 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
         <H3>90% of the Value, 20% of the Cost</H3>
         <P>
           Unless you need enterprise-level automations and deep CRM integrations, you're likely
-          overpaying with other tools. KudosWall gives you the premium widget layouts,
-          automations, and verification tools you actually use, without the "enterprise tax."
+          overpaying with other tools. KudosWall gives you the premium widget layouts, automations,
+          and verification tools you actually use, without the "enterprise tax."
         </P>
       </section>
 
@@ -595,15 +595,15 @@ export const TEN_X_FREE_TIER = {
           make you feel the pain of a paywall as quickly as possible.
         </P>
         <P>
-          You know the drill: You spend 20 minutes setting up a tool, you send out a collection link,
-          you get 10 excited customers to leave a review, and suddenly—<em>click</em>. The dashboard
-          locks. You're told that "to see your 11th testimonial, please enter your credit card and
-          pay $29/month."
+          You know the drill: You spend 20 minutes setting up a tool, you send out a collection
+          link, you get 10 excited customers to leave a review, and suddenly—<em>click</em>. The
+          dashboard locks. You're told that "to see your 11th testimonial, please enter your credit
+          card and pay $29/month."
         </P>
         <P>
           Senja's free tier gives you 15 testimonials. Testimonial.to gives you 10. Famewall,
-          Trustmary, and almost every other incumbent in the space sits in that same 10–15 range. For
-          a long time, KudosWall was even tighter. We offered 5.
+          Trustmary, and almost every other incumbent in the space sits in that same 10–15 range.
+          For a long time, KudosWall was even tighter. We offered 5.
         </P>
         <P>
           <strong>We just changed ours to 50 testimonials with video.</strong> Free forever, no
@@ -612,8 +612,8 @@ export const TEN_X_FREE_TIER = {
         <P>
           This isn't a "we listened to feedback" announcement. This is a fundamental pivot in how we
           think about growth. Most founders shrink their free tiers as they scale. I'm going the
-          other direction—and here is the math and the philosophy behind why I think the conventional
-          SaaS wisdom is costing you (and me) more than it's making.
+          other direction—and here is the math and the philosophy behind why I think the
+          conventional SaaS wisdom is costing you (and me) more than it's making.
         </P>
       </section>
 
@@ -621,28 +621,31 @@ export const TEN_X_FREE_TIER = {
         <H3>The Realization: Marketing Signaling vs. Customer Value</H3>
         <P>
           When I first built KudosWall, I did what every first-time founder does: I looked at the
-          competitors and "benchmarked" my pricing. I saw Senja at 15 and Testimonial.to at 10, and I
-          thought, "I'll go to 5. That way, users will feel the need to upgrade even faster."
+          competitors and "benchmarked" my pricing. I saw Senja at 15 and Testimonial.to at 10, and
+          I thought, "I'll go to 5. That way, users will feel the need to upgrade even faster."
         </P>
         <P>
-          It was a marketing decision based on competitor signaling, not customer value. I was trying
-          to force conversion through scarcity before I had even proven that the product worked for
-          the user.
+          It was a marketing decision based on competitor signaling, not customer value. I was
+          trying to force conversion through scarcity before I had even proven that the product
+          worked for the user.
         </P>
         <P>
-          The result was a classic activation disaster. Users would sign up, set up a "Wall of Love,"
-          get their first 2 or 3 testimonials, and then… they'd stall. They hadn't embedded the widget
-          yet because 3 testimonials don't make a "wall." They hadn't seen the conversion lift yet.
-          They hadn't experienced the "A-ha" moment where social proof actually moves the needle.
+          The result was a classic activation disaster. Users would sign up, set up a "Wall of
+          Love," get their first 2 or 3 testimonials, and then… they'd stall. They hadn't embedded
+          the widget yet because 3 testimonials don't make a "wall." They hadn't seen the conversion
+          lift yet. They hadn't experienced the "A-ha" moment where social proof actually moves the
+          needle.
         </P>
         <P>
-          And then they'd hit the 5-testimonial limit. At that moment, they didn't think "I should pay
-          $19 to unlock more." They thought, "I guess I'm done with this experiment."
+          And then they'd hit the 5-testimonial limit. At that moment, they didn't think "I should
+          pay $19 to unlock more." They thought, "I guess I'm done with this experiment."
         </P>
         <P>
-          <strong>Hiting the limit too early doesn't lead to upgrading; it leads to leaving.</strong>{" "}
-          I was running a 5-testimonial demo with a "Powered by KudosWall" badge, and I was calling it
-          a free tier. I was wrong.
+          <strong>
+            Hiting the limit too early doesn't lead to upgrading; it leads to leaving.
+          </strong>{" "}
+          I was running a 5-testimonial demo with a "Powered by KudosWall" badge, and I was calling
+          it a free tier. I was wrong.
         </P>
       </section>
 
@@ -670,15 +673,16 @@ export const TEN_X_FREE_TIER = {
           subscription) before the first date (embedding the widget) was even finished.
         </P>
         <P>
-          By capping the free tier at 5, I was preventing users from reaching the "Embed Threshold"—the
-          point where the widget actually looks good enough to put on a sales page. A "Wall of Love"
-          with 3 entries looks like a mistake. A "Wall of Love" with 15-20 entries looks like a
-          movement.
+          By capping the free tier at 5, I was preventing users from reaching the "Embed
+          Threshold"—the point where the widget actually looks good enough to put on a sales page. A
+          "Wall of Love" with 3 entries looks like a mistake. A "Wall of Love" with 15-20 entries
+          looks like a movement.
         </P>
         <P>
-          Furthermore, our paid conversion data showed something even more interesting. Our Pro users
-          weren't upgrading because they ran out of slots. They were upgrading for <strong>control</strong>. They
-          wanted to remove the badge. They wanted custom domains. They wanted tag filtering.
+          Furthermore, our paid conversion data showed something even more interesting. Our Pro
+          users weren't upgrading because they ran out of slots. They were upgrading for{" "}
+          <strong>control</strong>. They wanted to remove the badge. They wanted custom domains.
+          They wanted tag filtering.
         </P>
         <P>
           If features drive paid conversion, then constraining the volume of the free tier doesn't
@@ -698,34 +702,35 @@ export const TEN_X_FREE_TIER = {
           <LI>99th percentile (Power Users): 80+</LI>
         </UL>
         <P>
-          Setting the limit at 50 covers 95% of real-world use cases for the people KudosWall is built
-          for: course creators launching their first big cohort, indie hackers building in public, and
-          small agencies showing off their portfolio.
+          Setting the limit at 50 covers 95% of real-world use cases for the people KudosWall is
+          built for: course creators launching their first big cohort, indie hackers building in
+          public, and small agencies showing off their portfolio.
         </P>
         <P>
-          <strong>Why not 25?</strong> Because 25 feels like a compromise. "We're slightly better than
-          Senja" isn't a story people tell. "We are 10x bigger than the old limit and 3x bigger than
-          the market leader" is a story people share on X, Reddit, and Indie Hackers.
+          <strong>Why not 25?</strong> Because 25 feels like a compromise. "We're slightly better
+          than Senja" isn't a story people tell. "We are 10x bigger than the old limit and 3x bigger
+          than the market leader" is a story people share on X, Reddit, and Indie Hackers.
         </P>
         <P>
           <strong>Why not unlimited?</strong> Economics matter. Testimonials—especially with native
           video—carry real costs. There's storage, CDN bandwidth, and the infrastructure to process
-          high-fidelity video. Unlimited plans attract "edge-case abusers"—enterprise-level operations
-          trying to run 1,000+ testimonials on a free tool. By capping at 50, we protect our
-          infrastructure while delighting legitimate users.
+          high-fidelity video. Unlimited plans attract "edge-case abusers"—enterprise-level
+          operations trying to run 1,000+ testimonials on a free tool. By capping at 50, we protect
+          our infrastructure while delighting legitimate users.
         </P>
         <P>
-          50 with video is the "Sweet Spot." It's high enough that you'll never feel "nickel-and-dimed"
-          as you grow, but it gives us a clear path to Pro for users who reach a level of scale where
-          they need advanced management and branding.
+          50 with video is the "Sweet Spot." It's high enough that you'll never feel
+          "nickel-and-dimed" as you grow, but it gives us a clear path to Pro for users who reach a
+          level of scale where they need advanced management and branding.
         </P>
       </section>
 
       <section className="mb-12">
         <H3>What This Means for Users: An Honest ROI Framing</H3>
         <P>
-          We've redesigned our tiers to be based on <strong>Value</strong>, not <strong>Scarcity</strong>. Here is the new
-          deal, and we're being completely transparent about who should pay and who shouldn't.
+          We've redesigned our tiers to be based on <strong>Value</strong>, not{" "}
+          <strong>Scarcity</strong>. Here is the new deal, and we're being completely transparent
+          about who should pay and who shouldn't.
         </P>
         <H4>The Free Plan: For Builders</H4>
         <UL>
@@ -737,7 +742,8 @@ export const TEN_X_FREE_TIER = {
         </UL>
         <P>
           <em>Who it's for:</em> If you are just starting out, or if you're a solo builder on a
-          budget and you don't mind a small, tasteful badge at the bottom of your wall—<strong>stay free.</strong>
+          budget and you don't mind a small, tasteful badge at the bottom of your wall—
+          <strong>stay free.</strong>
           Stay free forever. We would rather have you as a happy, active free user than a churned
           paid user.
         </P>
@@ -795,13 +801,11 @@ export const TEN_X_FREE_TIER = {
 
       <section className="mb-12">
         <H3>What We've Learned About "Free" Users</H3>
-        <P>
-          There is a myth in SaaS that "Free users are just a drain on resources."
-        </P>
+        <P>There is a myth in SaaS that "Free users are just a drain on resources."</P>
         <P>
           In the testimonial space, that couldn't be further from the truth. Every free wall is a
-          billboard for KudosWall. Every customer who submits a testimonial through our flow sees how
-          smooth the experience is. Every "Powered by KudosWall" badge is an SEO asset and a
+          billboard for KudosWall. Every customer who submits a testimonial through our flow sees
+          how smooth the experience is. Every "Powered by KudosWall" badge is an SEO asset and a
           word-of-mouth seed.
         </P>
         <P>
@@ -823,8 +827,8 @@ export const TEN_X_FREE_TIER = {
         </P>
         <P>
           Go to our dashboard, create your first wall, and send the link to your favorite customer.
-          You can have your first video testimonial and a live "Wall of Love" on your site in exactly
-          five minutes.
+          You can have your first video testimonial and a live "Wall of Love" on your site in
+          exactly five minutes.
         </P>
         <P>
           Social proof shouldn't be a luxury. It should be the foundation of your business. We're
@@ -1832,8 +1836,7 @@ export const FRAMER_EMBED_GUIDE = {
         <P>
           Framer has become the go-to design tool for high-end landing pages and SaaS websites. Its
           ability to create custom, fluid animations and layouts is unmatched. However, to truly
-          convert visitors into customers, your beautiful Framer site needs verified social
-          proof.
+          convert visitors into customers, your beautiful Framer site needs verified social proof.
         </P>
         <P>
           In this guide, we'll show you how to embed a high-fidelity KudosWall testimonial widget on
@@ -1845,13 +1848,12 @@ export const FRAMER_EMBED_GUIDE = {
       <section className="mb-12">
         <H3>Step 1: Get Your KudosWall Embed Code</H3>
         <P>
-          First, log in to your KudosWall dashboard. Navigate to the Widgets section and choose
-          the wall you'd like to display. Customize the design—select from Grid, Masonry, or
-          Carousel layouts and match the colors to your Framer project's palette.
+          First, log in to your KudosWall dashboard. Navigate to the Widgets section and choose the
+          wall you'd like to display. Customize the design—select from Grid, Masonry, or Carousel
+          layouts and match the colors to your Framer project's palette.
         </P>
         <P>
-          Once it looks perfect, click Embed code and copy the single line of JavaScript
-          provided.
+          Once it looks perfect, click Embed code and copy the single line of JavaScript provided.
         </P>
       </section>
 
@@ -1861,8 +1863,7 @@ export const FRAMER_EMBED_GUIDE = {
         <UL>
           <LI>Click the Plus (+) button in the top left to open the Insert menu.</LI>
           <LI>
-            Search for Embed and drag it onto your canvas where you want the testimonials to
-            appear.
+            Search for Embed and drag it onto your canvas where you want the testimonials to appear.
           </LI>
           <LI>In the properties panel on the right, make sure the "Type" is set to HTML.</LI>
           <LI>Paste your KudosWall embed code into the HTML box.</LI>
@@ -1877,9 +1878,8 @@ export const FRAMER_EMBED_GUIDE = {
           automatically adjust to the width of the Framer container.
         </P>
         <P>
-          Pro Tip: Set the Embed component's width to "Fill" and the height to "Auto" (or a
-          fixed height if you want a scrollable masonry grid) to ensure it looks great on all
-          devices.
+          Pro Tip: Set the Embed component's width to "Fill" and the height to "Auto" (or a fixed
+          height if you want a scrollable masonry grid) to ensure it looks great on all devices.
         </P>
       </section>
 
@@ -1904,13 +1904,13 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         <P>
           For course creators, testimonials aren't just "nice to have"—they are your most effective
           sales tool. A potential student isn't just buying your content; they are buying a
-          transformation. And nothing proves a transformation better than a student sharing
-          their results.
+          transformation. And nothing proves a transformation better than a student sharing their
+          results.
         </P>
         <P>
           In 2026, text reviews are no longer enough. To stand out in a crowded market, you need
-          verified video testimonials and student success stories that feel authentic. Here is
-          the exact strategy top creators use to collect and display social proof.
+          verified video testimonials and student success stories that feel authentic. Here is the
+          exact strategy top creators use to collect and display social proof.
         </P>
       </section>
 
@@ -1923,12 +1923,9 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         </P>
         <UL>
           <LI>
-            Module 1 Win: Ask for a testimonial right after they complete their first
-            assignment.
+            Module 1 Win: Ask for a testimonial right after they complete their first assignment.
           </LI>
-          <LI>
-            Mid-Course Check-in: Use an automated email to ask how their progress is going.
-          </LI>
+          <LI>Mid-Course Check-in: Use an automated email to ask how their progress is going.</LI>
           <LI>
             Certification: Include a collection link on the final success page of your course.
           </LI>
@@ -1957,12 +1954,10 @@ export const COURSE_CREATOR_TESTIMONIALS = {
         <UL>
           <LI>The Hero Section: A carousel of 3-5 star students right under your main CTA.</LI>
           <LI>
-            The Pricing Table: A masonry grid of testimonials next to your checkout button to
-            reduce friction.
+            The Pricing Table: A masonry grid of testimonials next to your checkout button to reduce
+            friction.
           </LI>
-          <LI>
-            The FAQ Section: Use specific testimonials that answer common student objections.
-          </LI>
+          <LI>The FAQ Section: Use specific testimonials that answer common student objections.</LI>
         </UL>
       </section>
 
@@ -1977,4 +1972,3 @@ export const COURSE_CREATOR_TESTIMONIALS = {
     </>
   ),
 };
-

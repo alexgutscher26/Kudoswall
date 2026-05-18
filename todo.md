@@ -190,7 +190,7 @@
 - [x] Filter tabs: All / Pending / Approved / Rejected / Featured / Archived
 - [x] Bulk actions: Approve all, Reject all, Tag selected, Export selected, Delete selected
 - [x] Drag-and-drop reordering of featured testimonials
-- [ ] "Feature" toggle to pin top testimonials in widgets
+- [x] "Feature" toggle to pin top testimonials in widgets
 - [ ] External public link to share a single testimonial (for sales teams)
 - [ ] Testimonial preview modal with full card render
 - [ ] Keyboard shortcuts: `A` to approve, `R` to reject, `J/K` to navigate

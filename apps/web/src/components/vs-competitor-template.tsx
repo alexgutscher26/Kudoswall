@@ -49,7 +49,8 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
             {competitor.headline}
           </h1>
           <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-xl leading-relaxed md:text-2xl">
-            Stop overpaying for social proof. Get KudosWall's industry-leading 50-testimonial free tier and have your wall live in 5 minutes.
+            Stop overpaying for social proof. Get KudosWall's industry-leading 50-testimonial free
+            tier and have your wall live in 5 minutes.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/login">
@@ -76,31 +77,39 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
                   <tr className="bg-muted/50 border-b">
                     <th className="p-6 text-left font-bold">Feature</th>
                     <th className="p-6 text-center font-bold">{competitor.name}</th>
-                    <th className="bg-primary/5 text-primary p-6 text-center font-bold">KudosWall</th>
+                    <th className="bg-primary/5 text-primary p-6 text-center font-bold">
+                      KudosWall
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b transition-colors hover:bg-muted/30">
-                    <td className="p-6 font-bold text-primary italic">Free Testimonials</td>
+                  <tr className="hover:bg-muted/30 border-b transition-colors">
+                    <td className="text-primary p-6 font-bold italic">Free Testimonials</td>
                     <td className="p-6 text-center">{competitor.freeTier}</td>
                     <td className="bg-primary/5 p-6 text-center font-bold">{kudoswallFreeTier}</td>
                   </tr>
-                  <tr className="border-b transition-colors hover:bg-muted/30">
+                  <tr className="hover:bg-muted/30 border-b transition-colors">
                     <td className="p-6 font-medium">Video on Free Tier</td>
-                    <td className="p-6 text-center flex justify-center">
-                       {competitor.freeTier.toLowerCase().includes("video") ? <Check className="text-green-500" /> : <X className="text-destructive" />}
+                    <td className="flex justify-center p-6 text-center">
+                      {competitor.freeTier.toLowerCase().includes("video") ? (
+                        <Check className="text-green-500" />
+                      ) : (
+                        <X className="text-destructive" />
+                      )}
                     </td>
-                    <td className="bg-primary/5 p-6 text-center flex justify-center"><Check className="text-primary" /></td>
+                    <td className="bg-primary/5 flex justify-center p-6 text-center">
+                      <Check className="text-primary" />
+                    </td>
                   </tr>
-                  <tr className="border-b transition-colors hover:bg-muted/30">
+                  <tr className="hover:bg-muted/30 border-b transition-colors">
                     <td className="p-6 font-medium">Starting Paid Price</td>
                     <td className="p-6 text-center">{competitor.startingPaidPrice}</td>
                     <td className="bg-primary/5 p-6 text-center font-bold">{kudoswallPaidPrice}</td>
                   </tr>
-                  <tr className="border-b transition-colors hover:bg-muted/30">
+                  <tr className="hover:bg-muted/30 border-b transition-colors">
                     <td className="p-6 font-medium">Setup Time</td>
                     <td className="p-6 text-center">15-20 mins</td>
-                    <td className="bg-primary/5 p-6 text-center font-bold text-primary">5 mins</td>
+                    <td className="bg-primary/5 text-primary p-6 text-center font-bold">5 mins</td>
                   </tr>
                 </tbody>
               </table>
@@ -115,33 +124,58 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-4xl font-bold">The Free-Tier Difference ⭐</h2>
-              <p className="text-muted-foreground text-xl">Why wait for a paywall when you can start winning today?</p>
+              <p className="text-muted-foreground text-xl">
+                Why wait for a paywall when you can start winning today?
+              </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2">
               <div className="bg-background rounded-3xl border p-8 shadow-sm">
                 <h3 className="mb-6 text-2xl font-bold">{competitor.name} Free Tier</h3>
-                <div className="mb-8 text-4xl font-bold text-muted-foreground opacity-50">{competitor.freeTier}</div>
+                <div className="text-muted-foreground mb-8 text-4xl font-bold opacity-50">
+                  {competitor.freeTier}
+                </div>
                 <p className="text-muted-foreground mb-6">
-                  Most tools use their free tier as a "bait-and-switch" demo. You hit the limit just as your wall starts looking good.
+                  Most tools use their free tier as a "bait-and-switch" demo. You hit the limit just
+                  as your wall starts looking good.
                 </p>
                 <ul className="space-y-3">
-                  <li className="flex items-center gap-2 text-muted-foreground"><X className="h-4 w-4 text-destructive" /> Limited social proof volume</li>
-                  <li className="flex items-center gap-2 text-muted-foreground"><X className="h-4 w-4 text-destructive" /> Often gates video recording</li>
-                  <li className="flex items-center gap-2 text-muted-foreground"><X className="h-4 w-4 text-destructive" /> Designed for 14-day activation</li>
+                  <li className="text-muted-foreground flex items-center gap-2">
+                    <X className="text-destructive h-4 w-4" /> Limited social proof volume
+                  </li>
+                  <li className="text-muted-foreground flex items-center gap-2">
+                    <X className="text-destructive h-4 w-4" /> Often gates video recording
+                  </li>
+                  <li className="text-muted-foreground flex items-center gap-2">
+                    <X className="text-destructive h-4 w-4" /> Designed for 14-day activation
+                  </li>
                 </ul>
               </div>
               <div className="border-primary/50 ring-primary/20 bg-background relative rounded-3xl border-2 p-8 shadow-2xl ring-8">
-                <div className="bg-primary text-primary-foreground absolute -top-4 left-8 rounded-full px-4 py-1 text-sm font-bold uppercase tracking-widest">Most Generous</div>
+                <div className="bg-primary text-primary-foreground absolute -top-4 left-8 rounded-full px-4 py-1 text-sm font-bold tracking-widest uppercase">
+                  Most Generous
+                </div>
                 <h3 className="mb-6 text-2xl font-bold">KudosWall Free Tier</h3>
                 <div className="text-primary mb-8 text-4xl font-extrabold">{kudoswallFreeTier}</div>
                 <p className="text-muted-foreground mb-6 font-medium">
-                  We built our free tier to be a real product, not a demo. It's designed to get your Wall of Love live and converting.
+                  We built our free tier to be a real product, not a demo. It's designed to get your
+                  Wall of Love live and converting.
                 </p>
                 <ul className="space-y-3">
-                  <li className="flex items-center gap-2 font-bold"><Check className="h-5 w-5 text-green-500" /> 50 high-fidelity testimonials</li>
-                  <li className="flex items-center gap-2 font-bold"><Check className="h-5 w-5 text-green-500" /> Native video recording included</li>
-                  <li className="flex items-center gap-2 font-bold"><Check className="h-5 w-5 text-green-500" /> Free forever, no credit card</li>
-                  {competitor.multiplier && <li className="text-primary mt-4 font-extrabold flex items-center gap-2"><Zap className="fill-primary h-5 w-5" /> {competitor.multiplier} more free testimonials</li>}
+                  <li className="flex items-center gap-2 font-bold">
+                    <Check className="h-5 w-5 text-green-500" /> 50 high-fidelity testimonials
+                  </li>
+                  <li className="flex items-center gap-2 font-bold">
+                    <Check className="h-5 w-5 text-green-500" /> Native video recording included
+                  </li>
+                  <li className="flex items-center gap-2 font-bold">
+                    <Check className="h-5 w-5 text-green-500" /> Free forever, no credit card
+                  </li>
+                  {competitor.multiplier && (
+                    <li className="text-primary mt-4 flex items-center gap-2 font-extrabold">
+                      <Zap className="fill-primary h-5 w-5" /> {competitor.multiplier} more free
+                      testimonials
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -167,9 +201,18 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
             <h2 className="mb-16 text-center text-3xl font-bold">Where KudosWall Wins</h2>
             <div className="grid gap-8 md:grid-cols-3">
               {competitor.wedges.map((wedge, i) => (
-                <div key={i} className="bg-background group rounded-3xl border p-8 transition-all hover:shadow-xl">
-                  <div className="bg-primary/10 text-primary mb-6 flex h-12 w-12 items-center justify-center rounded-2xl group-hover:scale-110 transition-transform">
-                    {i === 0 ? <Zap className="h-6 w-6" /> : i === 1 ? <Shield className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
+                <div
+                  key={i}
+                  className="bg-background group rounded-3xl border p-8 transition-all hover:shadow-xl"
+                >
+                  <div className="bg-primary/10 text-primary mb-6 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
+                    {i === 0 ? (
+                      <Zap className="h-6 w-6" />
+                    ) : i === 1 ? (
+                      <Shield className="h-6 w-6" />
+                    ) : (
+                      <Sparkles className="h-6 w-6" />
+                    )}
                   </div>
                   <h3 className="mb-4 text-xl font-bold">{wedge.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{wedge.description}</p>
@@ -183,15 +226,20 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
       {/* 6. Where Competitor Still Wins */}
       <section className="py-24">
         <div className="container mx-auto max-w-4xl px-4">
-          <div className="rounded-3xl border bg-muted/10 p-12">
-            <h2 className="mb-6 text-2xl font-bold">Being Fair: Where {competitor.name} Still Wins</h2>
+          <div className="bg-muted/10 rounded-3xl border p-12">
+            <h2 className="mb-6 text-2xl font-bold">
+              Being Fair: Where {competitor.name} Still Wins
+            </h2>
             <p className="text-muted-foreground mb-8 text-lg">
-              KudosWall isn't for everyone. {competitor.name} is a powerful tool and might be the better choice if you need:
+              KudosWall isn't for everyone. {competitor.name} is a powerful tool and might be the
+              better choice if you need:
             </p>
             <ul className="grid gap-4 md:grid-cols-2">
               {competitor.concessions.map((concession, i) => (
-                <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                  <div className="mt-1 flex-shrink-0"><Check className="h-4 w-4 text-primary" /></div>
+                <li key={i} className="text-muted-foreground flex items-start gap-3">
+                  <div className="mt-1 flex-shrink-0">
+                    <Check className="text-primary h-4 w-4" />
+                  </div>
                   <span>{concession}</span>
                 </li>
               ))}
@@ -206,14 +254,20 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
           <h2 className="mb-12 text-3xl font-bold">Pricing Comparison</h2>
           <div className="grid gap-8 md:grid-cols-2">
             <div className="bg-background rounded-3xl border p-8">
-              <h3 className="mb-4 text-xl font-bold font-mono uppercase tracking-tight">{competitor.name} Starter</h3>
+              <h3 className="mb-4 font-mono text-xl font-bold tracking-tight uppercase">
+                {competitor.name} Starter
+              </h3>
               <div className="mb-4 text-4xl font-bold">{competitor.startingPaidPrice}</div>
               <p className="text-muted-foreground">Standard pricing for early-stage teams</p>
             </div>
             <div className="border-primary/50 bg-background rounded-3xl border-2 p-8 shadow-lg">
-              <h3 className="text-primary mb-4 text-xl font-bold font-mono uppercase tracking-tight">KudosWall Pro</h3>
+              <h3 className="text-primary mb-4 font-mono text-xl font-bold tracking-tight uppercase">
+                KudosWall Pro
+              </h3>
               <div className="text-primary mb-4 text-4xl font-extrabold">{kudoswallPaidPrice}</div>
-              <p className="text-muted-foreground">More features, lower cost, zero growth penalties.</p>
+              <p className="text-muted-foreground">
+                More features, lower cost, zero growth penalties.
+              </p>
             </div>
           </div>
         </div>
@@ -225,12 +279,15 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
           <div className="bg-foreground text-background rounded-3xl p-12 shadow-2xl">
             <h2 className="mb-6 text-3xl font-bold">Moving from {competitor.name} to KudosWall</h2>
             <p className="mb-8 text-lg opacity-80">
-              Ready to make the switch? We've made the migration process as painless as possible. Most users are fully moved in under 10 minutes.
+              Ready to make the switch? We've made the migration process as painless as possible.
+              Most users are fully moved in under 10 minutes.
             </p>
             <div className="space-y-4">
-              {competitor.migrationGuide.split('\n').map((step, i) => (
+              {competitor.migrationGuide.split("\n").map((step, i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <div className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">{i + 1}</div>
+                  <div className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+                    {i + 1}
+                  </div>
                   <p className="text-lg">{step}</p>
                 </div>
               ))}
@@ -293,7 +350,9 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
         <div className="container mx-auto px-4 text-center">
           <div className="bg-foreground text-background relative mx-auto max-w-3xl overflow-hidden rounded-[3rem] p-12 shadow-2xl">
             <div className="bg-primary/20 absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
-            <h2 className="mb-6 text-3xl font-bold md:text-5xl">Try free — 50 testimonials, no credit card</h2>
+            <h2 className="mb-6 text-3xl font-bold md:text-5xl">
+              Try free — 50 testimonials, no credit card
+            </h2>
             <p className="text-muted-foreground mb-10 text-lg md:text-xl">
               Join hundreds of high-growth founders who moved to KudosWall for better social proof.
             </p>

@@ -58,7 +58,7 @@ describe("EmailService", () => {
       "John",
       "Alice",
       "Great product!",
-      5
+      5,
     );
 
     expect(mockSend).toHaveBeenCalledWith({

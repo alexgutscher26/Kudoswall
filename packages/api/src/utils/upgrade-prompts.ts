@@ -28,7 +28,7 @@ export async function triggerUpgradePrompt({
   } catch (e) {
     settings = {};
   }
-  
+
   const promptsSent = settings.promptsSent || [];
 
   if (promptsSent.includes(type)) return;
@@ -48,7 +48,7 @@ export async function triggerUpgradePrompt({
         }),
       })
       .where(eq(workspace.id, workspaceId));
-      
+
     console.log(`[UPGRADE_PROMPT] Sent ${type} prompt to ${userEmail}`);
   } catch (err) {
     console.error(`[UPGRADE_PROMPT] Failed to send ${type} prompt:`, err);

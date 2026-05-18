@@ -36,8 +36,8 @@ describe("cn utility", () => {
         { "object-class": true, "ignored-class": false },
         ["array-class1", "array-class2"],
         "px-2",
-        "px-4"
-      )
+        "px-4",
+      ),
     ).toBe("base-class conditional-class object-class array-class1 array-class2 px-4");
   });
 

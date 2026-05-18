@@ -1,7 +1,7 @@
 import { workspaceProcedure, router, publicProcedure } from "../index";
 import { TRPCError } from "@trpc/server";
 import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray, gte, isNull, exists } from "drizzle-orm";
+import { eq, and, desc, inArray, gte, isNull, exists, asc } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 import { purgeWidgetCache } from "../utils/purge";
@@ -33,6 +33,7 @@ const widgetSettingsSchema = z.object({
   filterProjectIds: z.array(z.string()).optional(),
   pinnedIds: z.array(z.string()).optional(),
   excludedIds: z.array(z.string()).optional(),
+  pinTopTestimonials: z.boolean().default(true).optional(),
 
   // Branding
   accentColor: z.string().default("#e8527a"),
@@ -203,7 +204,6 @@ export const widgetRouter = router({
           });
         }
 
-
         await db
           .update(widget)
           .set({
@@ -338,7 +338,14 @@ export const widgetRouter = router({
               )
             : undefined,
         ),
-        orderBy: desc(testimonial.createdAt),
+        orderBy:
+          settings.pinTopTestimonials !== false
+            ? [
+                desc(testimonial.featured),
+                asc(testimonial.featuredOrder),
+                desc(testimonial.createdAt),
+              ]
+            : [desc(testimonial.createdAt)],
         limit: settings.maxItems || 20,
         with: {
           testimonialToTags: {

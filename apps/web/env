@@ -1,0 +1,83 @@
+# Database
+DATABASE_URL="postgresql://neondb_owner:npg_HXw6b9TAFqzi@ep-frosty-breeze-ango64qr-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+# Authentication (Better-Auth)
+# Generate a secret: openssl rand -base64 32
+BETTER_AUTH_SECRET="xPinU9uFeRiXTlRhrM0UoVlefwm1o4Cu"
+BETTER_AUTH_URL="http://localhost:3001"
+
+# OAuth Providers
+GITHUB_CLIENT_ID=Ov23liyAjl9pdT3M9RdO
+GITHUB_CLIENT_SECRET=89b7d63a4da6adebe1b4aeed72e5d17741214e50
+GOOGLE_CLIENT_ID=375198995841-ganuk4dlbkil0aqjbag8sjgqvj4petqf.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+LINKEDIN_CLIENT_ID=78ithax5b7tm01
+LINKEDIN_CLIENT_SECRET=WPL_AP1.M96wAiDdKPMbdK2J.08RSzw==
+
+# AI Integration (OpenRouter)
+OPENROUTER_API_KEY="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"
+
+# Email Service (Resend)
+RESEND_API_KEY="re_56kFXyLH_FXqNAi1d6h5CkMLddz4wL66x"
+EMAIL_FROM="alex@kudoswall.org"
+
+# Storage (UploadThing)
+UPLOADTHING_TOKEN="eyJhcGlLZXkiOiJza19saXZlX2E4N2M0Y2RhOTU0MjY0YWViZWNmOGEzYzVkNTg1MWVkZjc0YzZhY2QyMTViNjM5MTEwNmUwMjQwNGI5YWJiYTYiLCJhcHBJZCI6Imx3bmwzZ2pleHoiLCJyZWdpb25zIjpbInNlYTEiXX0="
+
+# Error Tracking & Monitoring (Sentry)
+SENTRY_DSN="https://your_sentry_dsn"
+NEXT_PUBLIC_SENTRY_DSN="https://your_sentry_dsn"
+SENTRY_AUTH_TOKEN="your_sentry_auth_token"
+SENTRY_ORG="your_sentry_org"
+SENTRY_PROJECT="your_sentry_project"
+
+# Performance & Rate Limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL="https://settled-hamster-98301.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="gQAAAAAAAX_9AAIncDJmN2YzNTIzZjgyMjU0YmE2OGRiMmFkNzc3MDZiOTc2OXAyOTgzMDE"
+
+# Infrastructure & Deployment
+CORS_ORIGIN="http://localhost:3001"
+NEXT_PUBLIC_APP_URL="http://localhost:3001"
+CRON_SECRET="7ILCPDI7CBTODaya1ldsKQGaaAYbVCGL9qnQcc/5ZAc="
+
+# Observability (OpenTelemetry)
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+
+# Stripe Billing
+STRIPE_SECRET_KEY="sk_test_51TMjnNLxspWmATptsGLI41pw7L737oYXeYRNh2rBMND5OGUbVa20mACFA6bAZOS3pP1bT8hnvjiVSoLzfQMaDTXn00EDTNExky"
+STRIPE_WEBHOOK_SECRET="whsec_178e396b284b47661c647cd7b698e353e943fc4a54bc497810f4da3b112b1849"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_51TMjnNLxspWmATptSfJEKpTfiSD3kgDYyO0d1AWbnaARiAscuc1sR9cfxyOH5v5dQj0ibGTXkGBKQkO4RgMmr5Cp00bU5wwweQ"
+
+# Stripe Plan Price IDs
+NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID="price_1TMjpSLxspWmATptxKvDASlN"
+NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID="price_1TMjqCLxspWmATptm4tZBX1v"
+NEXT_PUBLIC_STRIPE_LTD_PRICE_ID="price_1TN7rDLxspWmATptY1QXiWro"
+NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID="price_1TN7p2LxspWmATptrx3d8bSi"
+NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID="price_1TN7q6LxspWmATptLd2bQV3T" 
+
+STRIPE_PLAN_1_PRICE_ID="price_1TMjpSLxspWmATptxKvDASlN"
+STRIPE_PLAN_2_PRICE_ID="price_1TMjqCLxspWmATptm4tZBX1v"
+STRIPE_LTD_PRICE_ID="price_1TN7rDLxspWmATptY1QXiWro"
+STRIPE_PLAN_1_YEARLY_PRICE_ID="price_1TN7p2LxspWmATptrx3d8bSi" 
+STRIPE_PLAN_2_YEARLY_PRICE_ID="price_1TN7q6LxspWmATptLd2bQV3T" 
+
+# Asset Storage Pipeline (R2)
+# Cryptographically secure 32-byte string for signing video URLs
+R2_SIGNING_SECRET="M+Z0CdYFL9fqNfKprymjHpk3lTAhiRAA4CpNiAK4cGA="
+
+# Security Scanning
+# Obtain from VirusTotal for scanning uploads
+VIRUSTOTAL_API_KEY="c44d9c4244de8faa24e7998ba0f0039817a47fc7c38b9ca3ef50558bcd61c6d3"
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_VIDEO="true"
+
+# Pusher Credentials
+PUSHER_APP_ID="1943969"
+PUSHER_KEY="3fb67c5132ea99a6eb52"
+PUSHER_SECRET="c7bee61ccc9af7a4d530"
+PUSHER_CLUSTER="us2"
+
+# Public keys for the frontend
+NEXT_PUBLIC_PUSHER_KEY="3fb67c5132ea99a6eb52"
+NEXT_PUBLIC_PUSHER_CLUSTER="us2"
