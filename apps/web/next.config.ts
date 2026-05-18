@@ -1,6 +1,11 @@
 import "@my-better-t-app/env/web";
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import type { NextConfig } from "next";
+
+if (process.env.NODE_ENV === "development") {
+  import("@opennextjs/cloudflare").then(({ initOpenNextCloudflareForDev }) => {
+    initOpenNextCloudflareForDev();
+  });
+}
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
@@ -10,6 +15,7 @@ const nextConfig: NextConfig = {
     "@my-better-t-app/db",
     "@my-better-t-app/auth",
     "@my-better-t-app/env",
+    "@my-better-t-app/stripe",
   ],
   images: {
     formats: ["image/webp", "image/avif"],
@@ -26,19 +32,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+      },
     ],
   },
   async headers() {
     return [
-      {
-        source: "/((?!embed/).*)",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-        ],
-      },
       {
         source: "/(.*)",
         headers: [
@@ -60,12 +61,38 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/((?!embed/).*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://rankinpublic.xyz",
+          },
+        ],
+      },
+      {
+        source: "/((?!collect/).*)",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+      {
+        source: "/collect/:path*",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
     ];
+  },
+  async rewrites() {
+    return [];
   },
 };
 
 export default nextConfig;
-
-if (process.env.NODE_ENV === "development") {
-  initOpenNextCloudflareForDev();
-}

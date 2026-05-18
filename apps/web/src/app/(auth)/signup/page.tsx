@@ -1,51 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { Github, Chrome, Zap, ShieldCheck, Mail, ArrowRight, Check, Timer } from "lucide-react";
+import { Suspense, useState, useEffect } from "react";
+import { Github, Chrome, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
 
-export default function SignupPage() {
+function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref && typeof document !== "undefined") {
+      const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
+      document.cookie = `kudoswall-ref=${ref}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+  }, [searchParams]);
 
   const handleSignup = async () => {
     if (!name || !email || !password) return toast.error("Please fill in all fields");
+    const ref = searchParams.get("ref");
     setLoading(true);
-    try {
-      await authClient.signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: "/",
-      });
+    const { error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+      callbackURL: redirect,
+      referralCode: ref || undefined, // Pass the referrer's code temporarily
+    } as any);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message ?? "Failed to create account");
+    } else {
       toast.success("Account created! Welcome to KudosWall.");
-    } catch (e: any) {
-      toast.error(e.message || "Failed to create account");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
-    try {
-      await authClient.signIn.social({ provider, callbackURL: "/" });
-    } catch (e: any) {
-      toast.error(e.message || "Social signup failed");
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await authClient.signIn.social({ provider, callbackURL: redirect });
+    setLoading(false);
+    if (error) toast.error(error.message ?? "Social signup failed");
   };
 
   return (
-    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 !pt-4 shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
+    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 pt-4! shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
       {/* Decorative Glow */}
       <div className="pointer-events-none absolute top-0 right-0 h-24 w-24 bg-pink-500/5 blur-3xl" />
 
@@ -92,11 +100,11 @@ export default function SignupPage() {
 
         {/* Divider */}
         <div className="relative flex items-center gap-3">
-          <div className="h-[1px] flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-neutral-100" />
           <span className="text-[9px] font-black tracking-widest whitespace-nowrap text-neutral-300 uppercase">
             Or email
           </span>
-          <div className="h-[1px] flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-neutral-100" />
         </div>
 
         {/* Signup Form */}
@@ -193,5 +201,13 @@ export default function SignupPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }

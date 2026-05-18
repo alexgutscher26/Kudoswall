@@ -50,7 +50,12 @@ def detect_project_type(project_path: Path) -> dict:
             
             # Check for TypeScript
             if "typescript" in deps or (project_path / "tsconfig.json").exists():
-                result["linters"].append({"name": "tsc", "cmd": ["npx", "tsc", "--noEmit"]})
+                if "check-types" in scripts:
+                    # Prefer the project's own check-types script (likely using turbo)
+                    pm = "bun" if "bun" in pkg.get("packageManager", "") or shutil.which("bun") else "npm"
+                    result["linters"].append({"name": "check-types", "cmd": [pm, "run", "check-types"]})
+                else:
+                    result["linters"].append({"name": "tsc", "cmd": ["npx", "tsc", "--noEmit"]})
                 
         except:
             pass

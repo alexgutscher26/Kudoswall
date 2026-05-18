@@ -1,13 +1,18 @@
 /// <reference path="../env.d.ts" />
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-
 function getNodeEnvValue(key: string) {
   return process.env[key];
 }
 
 function getCloudflareEnvSync() {
   try {
-    return getCloudflareContext().env as Env;
+    // In production, env vars are usually available on process.env via shims.
+    // We only attempt to load the Cloudflare context if we're not in a standard Node environment.
+    if (process.env.NEXT_RUNTIME === "edge") {
+      // @ts-ignore - dynamic resolution to avoid bundler pulling in wrangler
+      const { getCloudflareContext } = require("@opennextjs/cloudflare");
+      return getCloudflareContext().env as Env;
+    }
+    return undefined;
   } catch {
     return undefined;
   }
@@ -41,7 +46,13 @@ function resolveEnvValue(key: keyof Env & string): EnvValue | undefined {
 // For static routes (ISR/SSG), use getEnvAsync() so OpenNext can resolve bindings
 // with the async Cloudflare context API.
 export async function getEnvAsync() {
-  const cloudflareEnv = (await getCloudflareContext({ async: true })).env as Env;
+  let cloudflareEnv: Env = {} as Env;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    cloudflareEnv = (await getCloudflareContext({ async: true })).env as Env;
+  } catch {
+    // Fallback to process.env if CF context fails
+  }
 
   return createEnvProxy((key) => {
     const nodeValue = getNodeEnvValue(key);

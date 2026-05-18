@@ -16,10 +16,14 @@ import {
   Download,
   Loader2,
   Check,
+  Users,
 } from "lucide-react";
-import { trpc, trpcClient } from "@/utils/trpc";
+import { trpc, trpcClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+
+type ExportRow = RouterOutputs["analytics"]["getExportData"][number];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -191,6 +195,7 @@ function PerformanceChart({ data }: { data: { name: string; views: number }[] })
 // ─── Main Content ─────────────────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
+  const { activeWorkspaceId } = useWorkspace();
   const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [isExporting, setIsExporting] = useState(false);
@@ -203,17 +208,38 @@ export default function AnalyticsPage() {
     all: "All Time",
   };
 
-  const overviewQuery = useQuery(trpc.analytics.getOverview.queryOptions({ timeframe }));
-  const chartQuery = useQuery(trpc.analytics.getChartData.queryOptions({ timeframe }));
-  const widgetPerformanceQuery = useQuery(
-    trpc.analytics.getWidgetPerformance.queryOptions({ timeframe }),
+  const overviewQuery = useQuery(
+    trpc.analytics.getOverview.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
   );
-  const topTestimonialsQuery = useQuery(trpc.analytics.getTopTestimonials.queryOptions());
+  const chartQuery = useQuery(
+    trpc.analytics.getChartData.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
+  );
+  const widgetPerformanceQuery = useQuery(
+    trpc.analytics.getWidgetPerformance.queryOptions({ timeframe, workspaceId: activeWorkspaceId }),
+  );
+  const topTestimonialsQuery = useQuery(
+    trpc.analytics.getTopTestimonials.queryOptions({ workspaceId: activeWorkspaceId }),
+  );
+
+  const { data: dashData } = useQuery(
+    trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+  );
+  const permissions = dashData?.permissions;
 
   const handleExport = async () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your analytics.",
+      });
+      return;
+    }
+
     setIsExporting(true);
     try {
-      const data = await trpcClient.analytics.getExportData.query({ timeframe });
+      const data = await trpcClient.analytics.getExportData.query({
+        timeframe,
+        workspaceId: activeWorkspaceId,
+      });
       if (!data || data.length === 0) {
         toast.error("No data available to export");
         return;
@@ -222,10 +248,10 @@ export default function AnalyticsPage() {
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(","),
-        ...data.map((row: any) =>
+        ...data.map((row: ExportRow) =>
           headers
             .map((fieldName) => {
-              const value = row[fieldName as keyof typeof row] ?? "";
+              const value = row[fieldName as keyof ExportRow] ?? "";
               const strValue = String(value);
               return strValue.includes(",") ? `"${strValue}"` : strValue;
             })
@@ -283,6 +309,15 @@ export default function AnalyticsPage() {
       icon: Globe,
       accent: "#e8527a",
       bg: "#fff5f7",
+    },
+    {
+      label: "Unique Visitors",
+      value: overview?.uniqueVisitors || "0",
+      change: overview?.uniqueVisitorsChange || "0%",
+      trend: (overview?.uniqueVisitorsChange || "0%").startsWith("+") ? "up" : "down",
+      icon: Users,
+      accent: "#f59e0b",
+      bg: "#fffbeb",
     },
     {
       label: "Conversion Rate",
@@ -392,7 +427,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {STATS_DATA.map((stat) => (
           <PerformanceStatCard key={stat.label} {...stat} />
         ))}

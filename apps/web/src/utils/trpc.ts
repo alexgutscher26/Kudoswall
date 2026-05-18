@@ -1,8 +1,12 @@
 import type { AppRouter } from "@my-better-t-app/api/routers/index";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { gooeyToast as toast } from "goey-toast";
+
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -32,6 +36,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
       headers() {
         return {
           "x-trpc-csrf": getCookie("csrf-token") || "",
+          "x-workspace-id": getCookie("workspace-id") || "",
         };
       },
       fetch(url, options) {

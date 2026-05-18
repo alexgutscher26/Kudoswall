@@ -3,8 +3,6 @@ import { createDb } from "@my-better-t-app/db";
 import { project } from "@my-better-t-app/db/schema";
 import { eq, or } from "drizzle-orm";
 
-export const runtime = "nodejs";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -113,8 +111,8 @@ export async function GET(request: Request) {
         height: 630,
       },
     );
-  } catch (e: any) {
-    console.error(`${e.message}`);
+  } catch (e: unknown) {
+    console.error(e instanceof Error ? e.message : String(e));
     return new Response(`Failed to generate image`, {
       status: 500,
     });

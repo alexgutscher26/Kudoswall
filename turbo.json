@@ -1,5 +1,5 @@
 {
-  "$schema": "https://v2-9-5.turborepo.dev/schema.json",
+  "$schema": "https://v2-9-10.turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
     "build": {
@@ -14,7 +14,30 @@
         "OPENROUTER_API_KEY",
         "RESEND_API_KEY",
         "SENTRY_DSN",
-        "SENTRY_AUTH_TOKEN"
+        "SENTRY_AUTH_TOKEN",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PLAN_1_PRICE_ID",
+        "STRIPE_PLAN_2_PRICE_ID",
+        "STRIPE_LTD_PRICE_ID",
+        "STRIPE_PLAN_1_YEARLY_PRICE_ID",
+        "STRIPE_PLAN_2_YEARLY_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_LTD_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_APP_URL",
+        "CRON_SECRET",
+        "EMAIL_FROM",
+        "UPLOADTHING_TOKEN",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET"
       ]
     },
     "lint": {

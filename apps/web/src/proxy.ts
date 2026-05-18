@@ -1,86 +1,87 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { dbLite as db } from "@my-better-t-app/db/lite";
+import { project } from "@my-better-t-app/db/schema/app";
+import { eq, isNull, and } from "drizzle-orm";
 
-export function proxy(request: NextRequest) {
-  const url = new URL(request.url);
-  const isEmbedPage = url.pathname.startsWith("/embed/");
+/**
+ * List of subdomains that are reserved for platform use and should not
+ * be captured by the custom domain mapping.
+ */
+const RESERVED_SUBDOMAINS = ["www", "api", "dashboard", "auth", "admin", "blog", "app"];
 
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://apis.google.com;
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com;
-    font-src 'self' data:;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors ${isEmbedPage ? "*" : "'none'"};
-    upgrade-insecure-requests;
-  `
-    .replace(/\s{2,}/g, " ")
-    .trim();
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("Content-Security-Policy", cspHeader);
-
-  // CSRF Protection: Origin/Referer Check
-  const origin = request.headers.get("origin");
-  const referer = request.headers.get("referer");
-  const method = request.method;
-
-  const isSafeMethod = ["GET", "HEAD", "OPTIONS"].includes(method);
-  const host = request.headers.get("host") || "";
-  const protocol = request.nextUrl.protocol;
-  const siteUrl = `${protocol}//${host}`;
-
-  const isValidOrigin = origin ? origin === siteUrl : true;
-  const isValidReferer = referer ? referer.startsWith(siteUrl) : true;
-
-  if (!isSafeMethod && !isValidOrigin && !isValidReferer) {
-    return new NextResponse("Invalid origin or referer", { status: 403 });
-  }
-
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
-
-  // Set CSRF token cookie if not present
-  if (!request.cookies.has("csrf-token")) {
-    const csrfToken = crypto.randomUUID();
-    response.cookies.set("csrf-token", csrfToken, {
-      httpOnly: false, // Accessible by client to send in header
-      secure: true,
-      sameSite: "lax",
-    });
-  }
-
-  response.headers.set("Content-Security-Policy", cspHeader);
-  response.headers.set(
-    "Permissions-Policy",
-    "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
-  );
-  response.headers.set("X-XSS-Protection", "1; mode=block");
-
-  return response;
+function isReservedSubdomain(host: string) {
+  const mainDomain = "kudoswall.org";
+  if (!host.endsWith(`.${mainDomain}`)) return false;
+  const subdomain = host.replace(`.${mainDomain}`, "");
+  return RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase());
 }
 
+/**
+ * Next.js 16 Proxy implementation (replaces middleware)
+ */
+export async function proxy(request: NextRequest) {
+  const host = request.headers.get("host") || "";
+  const url = new URL(request.url);
+
+  // 0. Handle documentation proxy (Mintlify)
+  if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
+    // Strip /docs from the path so Mintlify receives / or /subpage
+    const targetPath = url.pathname.replace(/^\/docs/, "") || "/";
+    const mintlifyUrl = new URL(targetPath, "https://kudoswall.mintlify.app");
+    return NextResponse.rewrite(mintlifyUrl);
+  }
+
+  // 1. Detect if this is a custom domain or supported subdomain
+  const mainDomain = "kudoswall.org";
+  const isMainSite = host === mainDomain || host === `www.${mainDomain}`;
+
+  const isSupportedDomain =
+    !isMainSite &&
+    !isReservedSubdomain(host) &&
+    !host.includes("localhost") &&
+    !host.includes("vercel.app") &&
+    !host.includes("pages.dev");
+
+  if (isSupportedDomain && url.pathname === "/") {
+    // A. Check for exact verified custom domain
+    const results = await db
+      .select()
+      .from(project)
+      .where(
+        and(
+          eq(project.customDomain, host),
+          eq(project.customDomainVerified, true),
+          isNull(project.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    let projectData = results[0];
+
+    // B. Fallback to subdomain check (project-slug.kudoswall.org)
+    if (!projectData && host.endsWith(`.${mainDomain}`)) {
+      const subdomain = host.replace(`.${mainDomain}`, "");
+      const resultsSub = await db
+        .select()
+        .from(project)
+        .where(and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)))
+        .limit(1);
+      projectData = resultsSub[0];
+    }
+
+    if (projectData?.collectionSlug) {
+      // Rewrite to the collection page
+      return NextResponse.rewrite(new URL(`/collect/${projectData.collectionSlug}`, request.url));
+    }
+  }
+
+  // Handle other paths or default behavior
+  return NextResponse.next();
+}
+
+export default proxy;
+
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    {
-      source: "/((?!api|_next/static|_next/image|favicon.ico|widget.js).*)",
-      missing: [
-        { type: "header", key: "next-router-prefetch" },
-        { type: "header", key: "purpose", value: "prefetch" },
-      ],
-    },
-  ],
+  matcher: ["/((?!api|_next|static|favicon.ico|robots.txt|sitemap.xml).*)"],
 };

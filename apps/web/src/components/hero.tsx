@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   Star,
@@ -15,7 +13,7 @@ import { Button } from "@my-better-t-app/ui/components/button";
 
 const CATEGORY_CHIPS = [
   { icon: Star, label: "Collect reviews" },
-  { icon: Image, label: "Video testimonials" },
+  { icon: Image, label: "Photo reviews" },
   { icon: MessageSquareQuote, label: "Text quotes" },
   { icon: BarChart2, label: "Analytics" },
   { icon: Palette, label: "Custom widget" },
@@ -51,27 +49,18 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 pt-24 text-center sm:gap-8 sm:px-6">
-        {/* Watch intro badge */}
-        <button
-          type="button"
-          className="flex items-center gap-3 rounded-full border border-neutral-200 bg-white px-3 py-1.5 shadow-sm transition-shadow hover:shadow-md"
-        >
-          <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100">
-            <span className="absolute inset-0 bg-linear-to-br from-pink-400 to-orange-300 opacity-80" />
-            <Play className="relative size-3 fill-white text-white" />
-          </span>
-          <span className="pr-1 text-sm font-medium text-neutral-700">Watch Introduction</span>
-        </button>
-
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 pt-24 text-center sm:px-6 lg:pt-28">
         {/* Main headline */}
-        <h1 className="-mt-2 text-4xl leading-[1.1] font-bold text-neutral-900 sm:text-5xl md:text-6xl">
-          Turn happy customers into your <span style={{ color: "#e8527a" }}>best sales tool.</span>
+        <h1 className="-mt-2 text-4xl leading-[1.1] font-black tracking-tight text-neutral-900 sm:text-5xl md:text-7xl">
+          Wall of Love in <br className="hidden md:block" />
+          <span style={{ color: "#e8527a" }}>5 minutes.</span>
         </h1>
 
         {/* Sub-headline */}
-        <p className="-mt-2 max-w-2xl px-2 text-base text-neutral-500 sm:text-lg md:text-xl">
-          Collect video & text testimonials in one link. Embed anywhere in 5 minutes.
+        <p className="max-w-xl px-2 text-base leading-relaxed text-neutral-500 sm:text-lg md:text-xl">
+          The fast, no-bloat testimonial tool for founders who just want their wall live. No $29/mo
+          paywalls. No unnecessary complexity. Just trust-building social proof, delivered at the
+          edge.
         </p>
 
         {/* CTA Buttons */}
@@ -84,16 +73,15 @@ export default function Hero() {
         </div>
 
         {/* Category chips */}
-        <div className="-mt-2 flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           {CATEGORY_CHIPS.map(({ icon: Icon, label }) => (
-            <button
+            <div
               key={label}
-              type="button"
-              className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-all hover:border-neutral-400 hover:text-neutral-900"
+              className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-600 shadow-sm transition-all hover:border-neutral-400 hover:text-neutral-900"
             >
               <Icon className="size-3" />
               {label}
-            </button>
+            </div>
           ))}
         </div>
       </div>

@@ -2,18 +2,27 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { Star, Quote, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { Star, Quote, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import VideoPlayer from "./video-player";
+
+const BADGE_VARIANTS = [
+  "Powered by KudosWall",
+  "Get a wall like this",
+  "Social proof by KudosWall",
+  "Free Testimonial Wall",
+  "Love this? Get yours free",
+];
 
 interface WidgetProps {
   data: {
     id: string;
     name: string;
     settings: {
-      layout: "grid" | "masonry" | "carousel";
+      layout: "grid" | "masonry" | "carousel" | "bento";
       theme: "light" | "dark" | "auto";
       accentColor: string;
       backgroundColor: string;
@@ -37,6 +46,9 @@ interface WidgetProps {
       textColor?: string | null;
       locale?: string;
       maxWidth?: number | null;
+      fontFamily?: string;
+      customFontUrl?: string;
+      customFontName?: string;
       headerTitle?: string;
       headerRating?: number;
       headerReviewCount?: number;
@@ -44,6 +56,7 @@ interface WidgetProps {
       hideHeader?: boolean;
     };
     isPro: boolean;
+    isBadgeRemoved?: boolean;
     workspaceId: string;
   };
   testimonials: Array<{
@@ -57,24 +70,36 @@ interface WidgetProps {
     createdAt: Date;
     type: "text" | "video";
     videoUrl?: string;
+    verifiedVia?: string | null;
   }>;
 }
 
 export default function Widget({ data, testimonials }: WidgetProps) {
   const { settings, isPro } = data;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
+
+  // Deterministic badge variant selection based on widget ID
+  const badgeText = BADGE_VARIANTS[
+    data.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % BADGE_VARIANTS.length
+  ];
 
   // Track View and Handle Height Reporting
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Only track view once on mount
-    trackEvent.mutate({
-      workspaceId: data.workspaceId,
-      widgetId: data.id,
-      eventType: "view",
-    });
+    trackEvent.mutate(
+      {
+        workspaceId: data.workspaceId,
+        widgetId: data.id,
+        eventType: "view",
+      },
+      {
+        onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message),
+      },
+    );
 
     // Report height to parent if in iframe
     if (window.self !== window.top) {
@@ -83,9 +108,8 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
       const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          // Use the actual scroll height of the content to be more precise
-          // and avoid feedback loops from padding/margins
-          const height = entry.target.scrollHeight;
+          // Use scrollHeight + small buffer to ensure no scrollbars
+          const height = entry.target.scrollHeight + 10;
           window.parent.postMessage({ type: "resize", height, widgetId: data.id }, "*");
         }
       });
@@ -101,9 +125,14 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     // trigger re-renders which would cause an infinite loop.
   }, [data.id, data.workspaceId]);
 
-  // Handle Carousel Auto-advance
+  // Carousel auto-advance logic
   useEffect(() => {
-    if (settings.layout === "carousel" && settings.carouselAutoAdvance && testimonials.length > 1) {
+    if (
+      settings.layout === "carousel" &&
+      settings.carouselAutoAdvance &&
+      testimonials.length > 1 &&
+      !isPaused
+    ) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % testimonials.length);
       }, settings.carouselInterval || 5000);
@@ -114,6 +143,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
     settings.carouselAutoAdvance,
     settings.carouselInterval,
     testimonials.length,
+    isPaused,
   ]);
 
   if (testimonials.length === 0) {
@@ -161,13 +191,51 @@ export default function Widget({ data, testimonials }: WidgetProps) {
       ? "bg-neutral-900 text-white border-neutral-800"
       : "bg-[#fafafa] text-neutral-900 border-neutral-100";
 
-  const renderCard = (t: any, index: number) => {
-    const isTruncated = settings.truncateText !== "off";
-    const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 0;
-    const content =
-      isTruncated && t.content.length > maxLength
-        ? t.content.substring(0, maxLength) + "..."
-        : t.content;
+  const renderCard = (t: WidgetProps["testimonials"][number], index: number) => {
+    return (
+      <TestimonialCard
+        key={t.id}
+        t={t}
+        index={index}
+        data={data}
+        settings={settings}
+        themeClasses={themeClasses}
+        trackEvent={trackEvent}
+        getBorderRadius={getBorderRadius}
+        getShadow={getShadow}
+      />
+    );
+  };
+
+  interface TestimonialCardProps {
+    t: WidgetProps["testimonials"][number];
+    index: number;
+    data: WidgetProps["data"];
+    settings: WidgetProps["data"]["settings"];
+    themeClasses: string;
+    trackEvent: any;
+    getBorderRadius: () => string;
+    getShadow: () => string;
+  }
+
+  function TestimonialCard({
+    t,
+    index,
+    data,
+    settings,
+    themeClasses,
+    trackEvent,
+    getBorderRadius,
+    getShadow,
+  }: TestimonialCardProps) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const isTruncatedSetting = settings.truncateText !== "off";
+    const maxLength = typeof settings.truncateText === "number" ? settings.truncateText : 500;
+    const shouldTruncate = t.content.length > maxLength;
+
+    const displayContent =
+      shouldTruncate && !isExpanded ? t.content.substring(0, maxLength) + "..." : t.content;
 
     const cardStyle: React.CSSProperties = {
       borderRadius: getBorderRadius(),
@@ -178,8 +246,7 @@ export default function Widget({ data, testimonials }: WidgetProps) {
 
     return (
       <div
-        key={t.id}
-        className={`relative flex min-h-[160px] flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""}`}
+        className={`relative flex min-h-[160px] flex-col overflow-hidden border p-4 transition-all duration-500 hover:scale-[1.02] ${themeClasses} ${settings.animation === "fade" ? "animate-in fade-in duration-700" : ""} ${settings.layout === "masonry" ? "mb-6 break-inside-avoid-column" : ""} ${settings.layout === "bento" ? "h-full" : ""}`}
         style={cardStyle}
       >
         {t.type === "video" && t.videoUrl && (
@@ -188,6 +255,39 @@ export default function Widget({ data, testimonials }: WidgetProps) {
               url={t.videoUrl}
               thumbnail={t.authorImage}
               accentColor={settings.accentColor}
+              onPlay={() => {
+                trackEvent.mutate(
+                  {
+                    workspaceId: data.workspaceId,
+                    widgetId: data.id,
+                    eventType: "video_play",
+                  },
+                  {
+                    onError: (err: any) =>
+                      console.error(
+                        "[KudosWall Analytics] video_play tracking failed:",
+                        err.message,
+                      ),
+                  },
+                );
+              }}
+              onProgress={(milestone) => {
+                trackEvent.mutate(
+                  {
+                    workspaceId: data.workspaceId,
+                    widgetId: data.id,
+                    eventType: "video_progress",
+                    metadataJson: JSON.stringify({ milestone }),
+                  },
+                  {
+                    onError: (err: any) =>
+                      console.error(
+                        `[KudosWall Analytics] video_progress ${milestone}% failed:`,
+                        err.message,
+                      ),
+                  },
+                );
+              }}
             />
           </div>
         )}
@@ -206,12 +306,24 @@ export default function Widget({ data, testimonials }: WidgetProps) {
           </div>
         )}
 
-        <p className="mb-3 flex-1 text-xs leading-relaxed wrap-break-word text-neutral-600 dark:text-neutral-400">
-          "{content}"
-          {isTruncated && t.content.length > maxLength && (
-            <span className="ml-1 cursor-pointer font-bold text-pink-500">Read more</span>
+        <div className="mb-3 flex-1">
+          <p className="text-xs leading-relaxed break-words whitespace-pre-wrap text-neutral-600 dark:text-neutral-400">
+            "{displayContent}"
+          </p>
+          {shouldTruncate && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className="mt-1 text-[11px] font-bold transition-opacity hover:opacity-80"
+              style={{ color: settings.accentColor }}
+            >
+              {isExpanded ? "Read less" : "Read more"}
+            </button>
           )}
-        </p>
+        </div>
 
         <div className="flex items-center gap-2">
           {settings.showReviewerPhoto && (
@@ -237,16 +349,27 @@ export default function Widget({ data, testimonials }: WidgetProps) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h5
-              className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
-              style={{ color: settings.textColor || undefined }}
-            >
-              {t.authorName}
-            </h5>
+            <div className="flex items-center gap-1.5">
+              <h5
+                className="truncate text-[13px] font-bold tracking-tight text-neutral-800 dark:text-white"
+                style={{ color: settings.textColor || undefined }}
+              >
+                {t.authorName}
+              </h5>
+              {t.verifiedVia && (
+                <ShieldCheck
+                  className="size-3.5 shrink-0"
+                  aria-label={`Verified via ${t.verifiedVia}`}
+                  style={{ color: "#3b82f6" }}
+                  strokeWidth={3}
+                />
+              )}
+            </div>
             <p className="mt-0.5 truncate text-[11px] font-medium text-neutral-400">
               {t.authorTagline}{" "}
               {settings.showReviewerCompany && t.authorCompany && `· ${t.authorCompany}`}
             </p>
+            {/* Verification Badge - Moved Inline */}
           </div>
         </div>
 
@@ -257,13 +380,24 @@ export default function Widget({ data, testimonials }: WidgetProps) {
         )}
       </div>
     );
-  };
+  }
+
+  // Resolve fontFamily to a valid CSS font-family stack
+  const resolvedFontFamily = (() => {
+    const f = settings.fontFamily;
+    if (f === "custom" && settings.customFontUrl) return "'CustomFont', sans-serif";
+    if (!f || f === "sans") return undefined;
+    if (f === "serif") return "ui-serif, Georgia, serif";
+    if (f === "mono") return "ui-monospace, 'Cascadia Code', monospace";
+    // Custom Google Font — the embed page already loaded the @font-face via <link>
+    return `"${f}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
+  })();
 
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-hidden"
-      style={{ backgroundColor: settings.backgroundColor }}
+      className="w-full overflow-hidden pb-12"
+      style={{ backgroundColor: settings.backgroundColor, fontFamily: resolvedFontFamily }}
     >
       {/* ─── Auto Stats Calculation ────────────────────────────────────────── */}
       {(() => {
@@ -302,69 +436,154 @@ export default function Widget({ data, testimonials }: WidgetProps) {
                     </span>
                   </div>
                 </div>
-                {(!settings.hideBadge || !isPro) && (
+                {(!settings.hideBadge || (!isPro && !data.isBadgeRemoved)) && (
                   <a
                     href="https://kudoswall.org"
                     target="_blank"
+                    onClick={() => {
+                      trackEvent.mutate({
+                        workspaceId: data.workspaceId,
+                        widgetId: data.id,
+                        eventType: "click",
+                        metadataJson: JSON.stringify({ 
+                          action: "click_powered_by",
+                          variant: badgeText 
+                        }),
+                      });
+                    }}
                     className="inline-flex shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-bold transition-all hover:opacity-80"
                     style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
                   >
-                    Powered by KudosWall
+                    {badgeText}
                   </a>
                 )}
               </div>
             )}
 
             {settings.layout === "carousel" ? (
-              <div className="group relative px-12">
+              <div
+                className="group relative px-4 sm:px-12"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+              >
                 <div className="overflow-hidden">
-                  <div
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                  <motion.div
+                    className="flex cursor-grab active:cursor-grabbing"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={(_, info) => {
+                      const threshold = 50;
+                      if (info.offset.x < -threshold) {
+                        setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+                      } else if (info.offset.x > threshold) {
+                        setCurrentIndex(
+                          (prev) => (prev - 1 + testimonials.length) % testimonials.length,
+                        );
+                      }
+                    }}
+                    animate={{ x: `-${currentIndex * (100 / (settings.columnsOverride || 1))}%` }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
                     {testimonials.map((t, index) => (
-                      <div key={t.id} className="w-full shrink-0 px-4">
+                      <div
+                        key={t.id}
+                        className="shrink-0 px-2"
+                        style={{ width: `${100 / (settings.columnsOverride || 1)}%` }}
+                      >
                         {renderCard(t, index)}
                       </div>
                     ))}
-                  </div>
+                  </motion.div>
                 </div>
 
+                {/* Navigation Arrows */}
                 {settings.carouselShowArrows !== false && testimonials.length > 1 && (
                   <>
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const pageSize = settings.columnsOverride || 1;
                         setCurrentIndex(
-                          (prev) => (prev - 1 + testimonials.length) % testimonials.length,
-                        )
-                      }
-                      className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                          (prev) => (prev - pageSize + testimonials.length) % testimonials.length,
+                        );
+                      }}
+                      className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full border border-neutral-100 bg-white/90 p-2 shadow-sm transition-all hover:bg-white hover:shadow-md sm:left-2"
+                      aria-label="Previous slide"
                     >
-                      <ChevronLeft className="size-5" />
+                      <ChevronLeft className="size-5 text-neutral-600" />
                     </button>
                     <button
-                      onClick={() => setCurrentIndex((prev) => (prev + 1) % testimonials.length)}
-                      className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full border border-neutral-100 bg-white p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                      onClick={() => {
+                        const pageSize = settings.columnsOverride || 1;
+                        setCurrentIndex((prev) => (prev + pageSize) % testimonials.length);
+                      }}
+                      className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full border border-neutral-100 bg-white/90 p-2 shadow-sm transition-all hover:bg-white hover:shadow-md sm:right-2"
+                      aria-label="Next slide"
                     >
-                      <ChevronRight className="size-5" />
+                      <ChevronRight className="size-5 text-neutral-600" />
                     </button>
                   </>
                 )}
 
+                {/* Pagination Dots */}
                 {testimonials.length > 1 && (
-                  <div className="mt-6 flex justify-center gap-1.5">
-                    {testimonials.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentIndex(i)}
-                        className={`h-1 rounded-full transition-all ${currentIndex === i ? "w-6" : "w-2 bg-neutral-200"}`}
-                        style={{
-                          backgroundColor: currentIndex === i ? settings.accentColor : undefined,
-                        }}
-                      />
-                    ))}
+                  <div className="mt-10 flex justify-center gap-2.5">
+                    {Array.from({
+                      length: Math.ceil(testimonials.length / (settings.columnsOverride || 1)),
+                    }).map((_, i) => {
+                      const pageSize = settings.columnsOverride || 1;
+                      const isActive = Math.floor(currentIndex / pageSize) === i;
+                      return (
+                        <motion.button
+                          key={i}
+                          layout
+                          onClick={() => setCurrentIndex(i * pageSize)}
+                          className="h-2 rounded-full transition-colors duration-300"
+                          style={{
+                            width: isActive ? 32 : 8,
+                            backgroundColor: isActive ? settings.accentColor : "rgb(209 213 219)", // neutral-300 for better visibility
+                          }}
+                          initial={false}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          aria-label={`Go to slide group ${i + 1}`}
+                        />
+                      );
+                    })}
                   </div>
                 )}
+              </div>
+            ) : settings.layout === "bento" ? (
+              <div
+                className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                style={{ gridAutoRows: "minmax(180px, auto)" }}
+              >
+                {testimonials.map((t, index) => {
+                  // Repeating bento pattern every 5 items
+                  const mod = index % 5;
+                  let spanClass = "";
+
+                  if (mod === 0) {
+                    // Item 1: Large Featured (2x2)
+                    spanClass = "md:col-span-2 md:row-span-2";
+                  } else if (mod === 1) {
+                    // Item 2: Standard (1x1)
+                    spanClass = "md:col-span-1 md:row-span-1";
+                  } else if (mod === 2) {
+                    // Item 3: Standard (1x1)
+                    spanClass = "md:col-span-1 md:row-span-1";
+                  } else if (mod === 3) {
+                    // Item 4: Tall (1x2)
+                    spanClass = "md:col-span-1 md:row-span-2";
+                  } else if (mod === 4) {
+                    // Item 5: Wide (2x1)
+                    spanClass = "md:col-span-2 md:row-span-1";
+                  }
+
+                  return (
+                    <div key={t.id} className={spanClass}>
+                      {renderCard(t, index)}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div
@@ -386,20 +605,42 @@ export default function Widget({ data, testimonials }: WidgetProps) {
               </div>
             )}
 
-            {(!settings.hideBadge || !isPro) && settings.hideHeader && (
+            {(!settings.hideBadge || (!isPro && !data.isBadgeRemoved)) && settings.hideHeader && (
               <div className="mt-8 flex justify-center">
                 <a
                   href="https://kudoswall.org"
                   target="_blank"
+                  onClick={() => {
+                    trackEvent.mutate({
+                      workspaceId: data.workspaceId,
+                      widgetId: data.id,
+                      eventType: "click",
+                      metadataJson: JSON.stringify({ 
+                        action: "click_powered_by",
+                        variant: badgeText 
+                      }),
+                    });
+                  }}
                   className="flex items-center gap-1.5 rounded-full border border-neutral-100 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-400 shadow-sm transition-all hover:border-pink-100 hover:text-neutral-600"
                 >
-                  Powered by{" "}
-                  <span
-                    className="font-extrabold text-neutral-900"
-                    style={{ color: settings.accentColor }}
-                  >
-                    KudosWall
-                  </span>
+                  {badgeText.startsWith("Powered by") ? (
+                    <>
+                      Powered by{" "}
+                      <span
+                        className="font-extrabold text-neutral-900"
+                        style={{ color: settings.accentColor }}
+                      >
+                        KudosWall
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      className="font-extrabold text-neutral-900"
+                      style={{ color: settings.accentColor }}
+                    >
+                      {badgeText}
+                    </span>
+                  )}
                 </a>
               </div>
             )}

@@ -8,9 +8,9 @@ import {
   ChevronRight,
   ExternalLink,
   MessageSquare,
-  Video,
   Clock,
   Trash2,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -20,14 +20,17 @@ import { gooeyToast as toast } from "goey-toast";
 
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
+import type { RouterOutputs } from "@/utils/trpc";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 interface CollectionListProps {
-  projects: any[];
+  projects: RouterOutputs["dashboard"]["getData"]["projects"];
 }
 
 export default function CollectionList({ projects }: CollectionListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const { activeWorkspaceId } = useWorkspace();
 
   const deleteProject = useMutation(
     trpc.dashboard.deleteProject.mutationOptions({
@@ -38,8 +41,19 @@ export default function CollectionList({ projects }: CollectionListProps) {
     }),
   );
 
+  const duplicateProject = useMutation(
+    trpc.dashboard.duplicateProject.mutationOptions({
+      onSuccess: () => {
+        toast.success("Collection duplicated");
+        router.refresh();
+      },
+    }),
+  );
+
   const onCreateClick = () => {
-    router.push("/dashboard/collection?new=project" as Route);
+    router.push(
+      `/dashboard/collection?new=project${activeWorkspaceId ? `&workspaceId=${activeWorkspaceId}` : ""}` as Route,
+    );
   };
 
   const filteredProjects = projects.filter((p) =>
@@ -81,18 +95,30 @@ export default function CollectionList({ projects }: CollectionListProps) {
                 <div className="flex size-10 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-400 transition-colors group-hover:bg-pink-50 group-hover:text-pink-500">
                   <Globe className="size-5" />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="relative z-20 flex items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      if (
-                        confirm(
-                          "Are you sure you want to delete this collection? This will also delete all testimonials within it.",
-                        )
-                      ) {
-                        deleteProject.mutate({ id: p.id });
-                      }
+                      duplicateProject.mutate({ id: p.id });
+                    }}
+                    disabled={duplicateProject.isPending}
+                    className="p-2 text-neutral-300 transition-all hover:bg-neutral-50 hover:text-neutral-600 disabled:opacity-50"
+                    title="Duplicate Collection"
+                  >
+                    <Copy className="size-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toast(`Delete "${p.name}"?`, {
+                        description: "This will also delete all testimonials within it.",
+                        action: {
+                          label: "Delete",
+                          onClick: () => deleteProject.mutate({ id: p.id }),
+                        },
+                      });
                     }}
                     className="p-2 text-neutral-300 transition-all hover:bg-red-50 hover:text-red-500"
                     title="Delete Collection"
@@ -100,11 +126,20 @@ export default function CollectionList({ projects }: CollectionListProps) {
                     <Trash2 className="size-4" />
                   </button>
                   <a
+                    href={`/wall/${p.collectionSlug || p.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex size-8 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-neutral-50 hover:text-neutral-600"
+                    title="Public Wall of Love"
+                  >
+                    <MessageSquare className="size-3.5" />
+                  </a>
+                  <a
                     href={`/collect/${p.collectionSlug || p.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex size-8 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-neutral-50 hover:text-neutral-600"
-                    title="Live Preview"
+                    title="Collection Page Preview"
                   >
                     <ExternalLink className="size-3.5" />
                   </a>
@@ -135,11 +170,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
               <div className="flex items-center gap-4 border-t border-neutral-50 pt-5">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
                   <MessageSquare className="size-3" />
-                  Text
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  <Video className="size-3" />
-                  Video
+                  Text Reviews
                 </div>
                 <div className="ml-auto translate-x-2 text-[11px] font-bold text-pink-500 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
                   Customize <ChevronRight className="inline size-3" />
@@ -147,7 +178,9 @@ export default function CollectionList({ projects }: CollectionListProps) {
               </div>
 
               <Link
-                href={`/dashboard/collection/${p.id}` as Route}
+                href={
+                  `/dashboard/collection/${p.id}${activeWorkspaceId ? `?workspaceId=${activeWorkspaceId}` : ""}` as Route
+                }
                 className="absolute inset-0 z-10"
               />
             </div>
@@ -170,8 +203,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
           </div>
           <h2 className="text-xl font-bold text-neutral-900">Start Collecting Social Proof</h2>
           <p className="mx-auto mt-2 max-w-[320px] text-[13px] leading-relaxed text-neutral-500">
-            Create your first collection link to start getting video and text testimonials from your
-            customers.
+            Create your first collection link to start getting written reviews from your customers.
           </p>
           <button
             onClick={onCreateClick}

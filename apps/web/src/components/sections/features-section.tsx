@@ -3,9 +3,9 @@ import { Link2, Palette, Code2, ShieldCheck, BarChart2, Video } from "lucide-rea
 const FEATURES = [
   {
     icon: Video,
-    title: "Video recording",
+    title: "Video & Photo testimonials",
     description:
-      "Capture high-quality video testimonials directly from your customers' browser with zero friction.",
+      "Allow customers to record high-fidelity video or upload photos with their testimonials in seconds.",
     accent: "#e8527a",
     bg: "#fff5f7",
   },

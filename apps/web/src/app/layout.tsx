@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 import "../index.css";
 
@@ -19,14 +21,18 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://kudoswall.org"),
   title: "KudosWall — Collect & Display Customer Testimonials",
   description:
-    "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
+    "Collect text and video testimonials via a shareable link, then embed a beautiful, customizable widget on any website. No code required.",
   alternates: {
     canonical: "/",
+    languages: {
+      en: "/",
+      "x-default": "/",
+    },
   },
   openGraph: {
     title: "KudosWall — Collect & Display Customer Testimonials",
     description:
-      "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget on any website.",
+      "Collect text and video testimonials via a shareable link, then embed a beautiful, customizable widget on any website.",
     url: "https://kudoswall.org",
     siteName: "KudosWall",
     images: [
@@ -44,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "KudosWall — Collect & Display Customer Testimonials",
     description:
-      "Collect video and text testimonials via a shareable link, then embed a beautiful, customizable widget.",
+      "Collect text and video testimonials via a shareable link, then embed a beautiful, customizable widget.",
     images: ["/og-image.png"],
   },
 };
@@ -106,6 +112,8 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Providers>{children}</Providers>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

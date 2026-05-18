@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Github,
   Chrome,
@@ -16,43 +16,54 @@ import { Button } from "@my-better-t-app/ui/components/button";
 import { Input } from "@my-better-t-app/ui/components/input";
 import { Label } from "@my-better-t-app/ui/components/label";
 import { Card } from "@my-better-t-app/ui/components/card";
+import { Checkbox } from "@my-better-t-app/ui/components/checkbox";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { gooeyToast as toast } from "goey-toast";
+import Link from "next/link";
 
 type AuthTab = "standard" | "magic-link";
 
-export default function LoginPage() {
+function LoginForm() {
   const [tab, setTab] = useState<AuthTab>("standard");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const rawRedirect = searchParams.get("redirect") || "/";
+  // Ensure redirect is relative to prevent "Invalid callbackURL" for untrusted absolute URLs
+  const redirect = rawRedirect.startsWith("http") ? "/" : rawRedirect;
 
   const handleSocial = async (provider: "google" | "github") => {
     setLoading(true);
-    try {
-      await authClient.signIn.social({ provider, callbackURL: "/" });
-    } catch (e: any) {
-      toast.error(e.message || "Failed to sign in");
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL: redirect,
+    });
+    setLoading(false);
+    if (error) toast.error(error.message ?? "Failed to sign in");
   };
 
   const handlePasswordLogin = async () => {
     if (!email || !password) return toast.error("Enter both email and password");
     setLoading(true);
-    try {
-      await authClient.signIn.email({ email, password, callbackURL: "/" });
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: redirect,
+      rememberMe: rememberMe,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message ?? "Invalid credentials");
+    } else {
       toast.success("Welcome back!");
-    } catch (e: any) {
-      toast.error(e.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 !pt-4 shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
+    <Card className="animate-in fade-in zoom-in-95 relative w-full max-w-[420px] overflow-hidden rounded-[2rem] border-2 border-neutral-100 bg-white p-6 pt-4! shadow-[0_20px_50px_rgba(0,0,0,0.06)] duration-500">
       {/* Decorative Glow */}
       <div className="pointer-events-none absolute top-0 right-0 h-24 w-24 bg-pink-500/5 blur-3xl" />
 
@@ -125,11 +136,11 @@ export default function LoginPage() {
 
               {/* Divider */}
               <div className="relative flex items-center gap-3">
-                <div className="h-[1px] flex-1 bg-neutral-100" />
+                <div className="h-px flex-1 bg-neutral-100" />
                 <span className="text-[9px] font-black tracking-widest whitespace-nowrap text-neutral-300 uppercase">
                   Or email
                 </span>
-                <div className="h-[1px] flex-1 bg-neutral-100" />
+                <div className="h-px flex-1 bg-neutral-100" />
               </div>
 
               {/* Inputs */}
@@ -158,12 +169,12 @@ export default function LoginPage() {
                     >
                       Password
                     </Label>
-                    <a
-                      href="#"
+                    <Link
+                      href="/forgot-password"
                       className="text-[9px] font-black text-pink-500 uppercase hover:text-pink-600"
                     >
                       Forgot?
-                    </a>
+                    </Link>
                   </div>
                   <div className="relative">
                     <Input
@@ -177,6 +188,23 @@ export default function LoginPage() {
                     <Lock className="absolute top-1/2 right-4 size-3.5 -translate-y-1/2 text-neutral-300" />
                   </div>
                 </div>
+
+                {/* Remember Me Checkbox */}
+                <div className="flex items-center space-x-2 py-1">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(!!checked)}
+                    className="size-4 border-2 border-neutral-200 data-[state=checked]:border-neutral-900 data-[state=checked]:bg-neutral-900"
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="cursor-pointer text-[10px] font-bold tracking-tight text-neutral-500 select-none"
+                  >
+                    Remember this device for 30 days
+                  </label>
+                </div>
+
                 <Button
                   className="mt-2 h-12 w-full rounded-xl bg-neutral-900 text-xs font-black tracking-widest text-white uppercase shadow-lg shadow-black/5 transition-all hover:bg-neutral-800 active:scale-[0.98]"
                   onClick={handlePasswordLogin}
@@ -222,14 +250,13 @@ export default function LoginPage() {
                   className="h-12 w-full rounded-xl bg-[#e8527a] text-xs font-black tracking-widest text-white uppercase shadow-lg shadow-pink-500/10 transition-all hover:bg-[#d44169] active:scale-[0.98]"
                   onClick={async () => {
                     setLoading(true);
-                    try {
-                      await authClient.signIn.magicLink({ email, callbackURL: "/verify-otp" });
-                      toast.success("Check your email!");
-                    } catch (e: any) {
-                      toast.error(e.message);
-                    } finally {
-                      setLoading(false);
-                    }
+                    const { error } = await authClient.signIn.magicLink({
+                      email,
+                      callbackURL: redirect,
+                    });
+                    setLoading(false);
+                    if (error) toast.error(error.message ?? "Failed to send magic link");
+                    else toast.success("Check your email!");
                   }}
                   disabled={loading}
                 >
@@ -261,6 +288,14 @@ export default function LoginPage() {
         </div>
       </div>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
 

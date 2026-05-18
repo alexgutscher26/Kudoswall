@@ -56,7 +56,7 @@ export default function VerifyOTPPage() {
   return (
     <Card className="relative overflow-hidden rounded-[2.5rem] border-2 border-neutral-100 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
       {/* Decorative Glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-pink-500/5 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-pink-500/5 to-transparent" />
 
       <div className="space-y-6">
         {/* Header */}

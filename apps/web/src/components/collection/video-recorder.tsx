@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { RotateCcw, Lock, Sparkles } from "lucide-react";
+import { RotateCcw, Loader2 } from "lucide-react";
 
 interface VideoRecorderProps {
   isPro: boolean;
@@ -9,6 +9,8 @@ interface VideoRecorderProps {
   accentColor?: string;
   maxLength?: number;
   prompt?: string;
+  initialBlob?: Blob | null;
+  initialPreviewUrl?: string | null;
 }
 
 export default function VideoRecorder({
@@ -17,15 +19,19 @@ export default function VideoRecorder({
   accentColor = "#e8527a",
   maxLength = 60,
   prompt,
+  initialBlob,
+  initialPreviewUrl,
 }: VideoRecorderProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(maxLength);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(initialBlob ?? null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false,
+  );
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 640);
@@ -39,22 +45,69 @@ export default function VideoRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isInitializing, setIsInitializing] = useState(false);
+
   // 1. Initialize Stream
-  const initStream = async () => {
+  const initStream = async (retryMinimal = false) => {
+    if (isInitializing && !retryMinimal) return;
+
+    setIsInitializing(true);
+    setError(null);
+
     try {
-      const constraints: MediaStreamConstraints = {
-        video: isMobile
-          ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
-          : { width: 1280, height: 720, facingMode: "user" },
-        audio: true,
-      };
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      // If we are retrying with minimal constraints, we just ask for any video/audio
+      const constraints: MediaStreamConstraints = retryMinimal
+        ? { video: true, audio: true }
+        : {
+            video: isMobile
+              ? { facingMode: "user", height: { ideal: 1080 }, width: { ideal: 1920 } }
+              : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+            audio: true,
+          };
+
+      console.log(
+        `Starting camera with ${retryMinimal ? "minimal" : "high-quality"} constraints...`,
+      );
+
       const s = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(s);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
       }
-    } catch (err) {
-      setError("Camera & Microphone access is required to record video.");
+    } catch (err: any) {
+      console.error("Camera error:", err);
+
+      // If the primary high-quality constraints failed and we haven't tried minimal yet, try minimal
+      if (
+        !retryMinimal &&
+        (err.name === "AbortError" ||
+          err.name === "NotReadableError" ||
+          err.name === "OverconstrainedError")
+      ) {
+        console.warn("Retrying with minimal constraints due to:", err.name);
+        initStream(true);
+        return;
+      }
+
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setError(
+          "Camera and microphone access was denied. Please enable them in your browser settings to record.",
+        );
+      } else if (err.name === "AbortError" && err.message?.includes("Timeout")) {
+        setError(
+          "The camera took too long to start. Please check if another application is using it and try again.",
+        );
+      } else {
+        setError(
+          "Could not access camera or microphone. Please ensure they are connected and not in use by another app.",
+        );
+      }
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -63,9 +116,19 @@ export default function VideoRecorder({
       initStream();
     }
     return () => {
-      stream?.getTracks().forEach((track) => track.stop());
+      // Don't stop tracks here if we are just transitioning to preview
+      // But we should stop them if the component unmounts entirely
     };
-  }, [isPro, recordedBlob]);
+  }, [recordedBlob]);
+
+  // Handle component unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
 
   // 2. Handle Countdown
   const startRecordingFlow = () => {
@@ -87,20 +150,44 @@ export default function VideoRecorder({
     if (!stream) return;
 
     chunksRef.current = [];
-    const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+    // Choose the best supported MIME type
+    const mimeType =
+      [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+        "video/mp4;codecs=h264,aac",
+        "video/mp4",
+      ].find((type) => MediaRecorder.isTypeSupported(type)) || "";
+
+    console.log("Using MIME type:", mimeType);
+
+    const recorder = new MediaRecorder(stream, { mimeType });
     mediaRecorderRef.current = recorder;
 
     recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
+      if (e.data && e.data.size > 0) {
+        chunksRef.current.push(e.data);
+      }
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const type = chunksRef.current[0]?.type || mimeType || "video/webm";
+      const blob = new Blob(chunksRef.current, { type });
       const url = URL.createObjectURL(blob);
       setRecordedBlob(blob);
       setPreviewUrl(url);
+
+      // Stop the stream tracks after recording is done to release the camera
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        setStream(null);
+      }
     };
 
+    // Do NOT pass a timeslice (e.g. 1000).
+    // Timeslicing can cause corrupt webm blobs in chromium without proper EBML headers for each chunk.
     recorder.start();
     setRecording(true);
     setTimeLeft(maxLength);
@@ -125,6 +212,7 @@ export default function VideoRecorder({
   };
 
   const reset = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setRecordedBlob(null);
     setPreviewUrl(null);
     setTimeLeft(maxLength);
@@ -138,7 +226,15 @@ export default function VideoRecorder({
         <div
           className={`relative w-full overflow-hidden rounded-[24px] border border-neutral-100 bg-black shadow-2xl sm:rounded-[32px] ${isMobile ? "aspect-3/4" : "aspect-video"}`}
         >
-          <video src={previewUrl} controls className="size-full object-cover" playsInline />
+          <video
+            key={previewUrl}
+            src={`${previewUrl}#t=0.001`}
+            controls
+            autoPlay
+            preload="metadata"
+            className="size-full object-cover"
+            playsInline
+          />
         </div>
         <div className="flex gap-3">
           <button
@@ -175,6 +271,15 @@ export default function VideoRecorder({
           className="mirror size-full object-cover"
           style={{ transform: "scaleX(-1)" }}
         />
+
+        {/* Loading Overlay */}
+        {isInitializing && !error && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/80 p-6 text-center text-white backdrop-blur-sm">
+            <Loader2 className="mb-4 size-10 animate-spin text-white/50" />
+            <p className="text-lg font-bold">Starting camera...</p>
+            <p className="mt-2 text-sm text-neutral-400">This might take a few seconds</p>
+          </div>
+        )}
 
         {/* Error Overlay */}
         {error && (

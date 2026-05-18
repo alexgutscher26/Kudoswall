@@ -8,6 +8,48 @@ export type CloudflareEnv = typeof server.Env;
 declare global {
   type Env = CloudflareEnv & {
     RESEND_API_KEY?: string;
+    GOOGLE_CLIENT_ID?: string;
+    GOOGLE_CLIENT_SECRET?: string;
+    LINKEDIN_CLIENT_ID?: string;
+    LINKEDIN_CLIENT_SECRET?: string;
+    EMAIL_FROM?: string;
+    CRON_SECRET?: string;
+    DATABASE_URL?: string;
+    DATABASE_READ_URL?: string;
+    UPSTASH_REDIS_REST_URL?: string;
+    UPSTASH_REDIS_REST_TOKEN?: string;
+    UPLOADTHING_TOKEN?: string;
+    STRIPE_SECRET_KEY?: string;
+    STRIPE_WEBHOOK_SECRET?: string;
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?: string;
+    STRIPE_PLAN_1_PRICE_ID?: string;
+    STRIPE_PLAN_2_PRICE_ID?: string;
+    STRIPE_LTD_PRICE_ID?: string;
+    STRIPE_PLAN_1_YEARLY_PRICE_ID?: string;
+    STRIPE_PLAN_2_YEARLY_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_LTD_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID?: string;
+    NEXT_PUBLIC_ENABLE_VIDEO?: string;
+    /** Secret for signing private R2 asset URLs (HMAC-SHA256). Must be set in production. */
+    R2_SIGNING_SECRET?: string;
+    /** R2 bucket for public images (avatars, logos). Separate from VIDEOS_BUCKET. */
+    IMAGES_BUCKET?: R2Bucket;
+    VIRUSTOTAL_API_KEY?: string;
+    /** KV namespace for caching widget metadata (sub-10ms lookups). */
+    WIDGET_KV?: KVNamespace;
+    /** Cloudflare API Token with Cache Purge permissions. */
+    CLOUDFLARE_API_TOKEN?: string;
+    CLOUDFLARE_ZONE_ID?: string;
+    /** Pusher app credentials for real-time updates. */
+    PUSHER_APP_ID?: string;
+    PUSHER_KEY?: string;
+    PUSHER_SECRET?: string;
+    PUSHER_CLUSTER?: string;
+    NEXT_PUBLIC_PUSHER_KEY?: string;
+    NEXT_PUBLIC_PUSHER_CLUSTER?: string;
   };
 }
 

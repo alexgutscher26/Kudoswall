@@ -1,55 +1,165 @@
-import { protectedProcedure, publicProcedure, router } from "../index";
+import { createHash } from "node:crypto";
+import { protectedProcedure, publicAnalyticsProcedure, router } from "../index";
 import {
   workspace,
   project,
   testimonial,
   widget,
   analyticsEvent,
+  user,
 } from "@my-better-t-app/db/schema";
 import { eq, and, desc, count, sql, gte, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { subDays, startOfDay, eachDayOfInterval, format, differenceInDays } from "date-fns";
+import { subDays, startOfDay, eachDayOfInterval, format, differenceInDays, addDays } from "date-fns";
 
 const timeframeSchema = z.enum(["7d", "30d", "90d", "all"]).optional();
 
 const getTimefilter = (timeframe?: string) => {
   if (!timeframe || timeframe === "all") return null;
-  const days = parseInt(timeframe);
-  if (isNaN(days)) return null;
+  const days = timeframe === "7d" ? 7 : timeframe === "30d" ? 30 : 90;
   return subDays(new Date(), days);
 };
 
 export const analyticsRouter = router({
-  trackEvent: publicProcedure
+  trackEvent: publicAnalyticsProcedure
     .input(
       z.object({
         workspaceId: z.string(),
         projectId: z.string().optional(),
         widgetId: z.string().optional(),
-        eventType: z.enum(["view", "click"]),
+        eventType: z.enum(["view", "click", "video_play", "video_progress"]),
+        metadataJson: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, req } = ctx;
+      const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+      const ua = req.headers.get("user-agent") || "";
+
+      // Create a privacy-preserving hash of IP + User Agent
+      const visitorId = createHash("sha256").update(`${ip}-${ua}`).digest("hex");
+
       const id = crypto.randomUUID();
       await db.insert(analyticsEvent).values({
         id: id,
         workspaceId: input.workspaceId,
         projectId: input.projectId,
         widgetId: input.widgetId,
+        visitorId: visitorId,
         eventType: input.eventType,
+        metadataJson: input.metadataJson,
       });
+
+      // --- Referral Activation Trigger ---
+      if (input.eventType === "view" && input.widgetId) {
+        try {
+          const ws = await db.query.workspace.findFirst({
+            where: eq(workspace.id, input.workspaceId),
+          });
+
+          if (ws) {
+            const owner = await db.query.user.findFirst({
+              where: eq(user.id, ws.ownerId),
+            });
+
+            // Only activate if they have a referrer and haven't been activated yet
+            if (owner?.referredById && !owner.referralActivatedAt) {
+              console.log(`[REFERRAL] Activation Triggered: User ${owner.id} (referred by ${owner.referredById})`);
+              
+              const now = new Date();
+              
+              await db.transaction(async (tx) => {
+                // 1. Mark the referred user as activated
+                await tx.update(user)
+                  .set({ referralActivatedAt: now })
+                  .where(eq(user.id, owner.id));
+
+                // 2. Reward the Referrer (Find their primary workspace)
+                const referrerWorkspace = await tx.query.workspace.findFirst({
+                  where: eq(workspace.ownerId, owner.referredById!),
+                });
+
+                if (referrerWorkspace) {
+                  const currentBadgeEnd = referrerWorkspace.badgeRemovedUntil;
+                  // If they already have an active reward, stack it. Otherwise, start from now.
+                  const baseDate = currentBadgeEnd && new Date(currentBadgeEnd) > now 
+                    ? new Date(currentBadgeEnd) 
+                    : now;
+                  const newBadgeEnd = addDays(baseDate, 30);
+                  
+                  await tx.update(workspace)
+                    .set({ badgeRemovedUntil: newBadgeEnd })
+                    .where(eq(workspace.id, referrerWorkspace.id));
+                    
+                  console.log(`[REFERRAL] Referrer ${owner.referredById} rewarded until ${newBadgeEnd.toISOString()}`);
+                }
+
+                // 3. Reward the Referred User (Initial 30 days)
+                const currentUserBadgeEnd = ws.badgeRemovedUntil;
+                const referredBaseDate = currentUserBadgeEnd && new Date(currentUserBadgeEnd) > now
+                  ? new Date(currentUserBadgeEnd)
+                  : now;
+                const referredNewBadgeEnd = addDays(referredBaseDate, 30);
+
+                await tx.update(workspace)
+                  .set({ badgeRemovedUntil: referredNewBadgeEnd })
+                  .where(eq(workspace.id, ws.id));
+                  
+                console.log(`[REFERRAL] Referred User ${owner.id} rewarded until ${referredNewBadgeEnd.toISOString()}`);
+              });
+            }
+          }
+        } catch (error) {
+          console.error("[REFERRAL] Critical Error during activation:", error);
+        }
+      }
+
       return { success: true };
     }),
 
   getOverview: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      const { workspaceId } = input;
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.analytics) {
+        // Trigger upgrade prompt email
+        const { triggerUpgradePrompt } = await import("../utils/upgrade-prompts");
+        await triggerUpgradePrompt({
+          db,
+          workspaceId: ws.id,
+          userName: session.user.name || "there",
+          userEmail: session.user.email || "",
+          type: "analytics-access",
+        });
+
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
+
 
       const daysNum =
         input.timeframe === "30d"
@@ -139,12 +249,45 @@ export const analyticsRouter = router({
             : "0%"
           : (((currentConvRate - prevConversionRate) / prevConversionRate) * 100).toFixed(0) + "%";
 
+      // Unique visitors
+      const [uniqueViewsResult] = await db
+        .select({ value: sql<number>`count(distinct ${analyticsEvent.visitorId})` })
+        .from(analyticsEvent)
+        .where(
+          and(
+            eq(analyticsEvent.workspaceId, ws.id),
+            eq(analyticsEvent.eventType, "view"),
+            startDate ? gte(analyticsEvent.createdAt, startDate) : undefined,
+          ),
+        );
+
+      let prevUniqueViews = 0;
+      if (startDate && prevStartDate) {
+        const [prevUniqueViewsResult] = await db
+          .select({ value: sql<number>`count(distinct ${analyticsEvent.visitorId})` })
+          .from(analyticsEvent)
+          .where(
+            and(
+              eq(analyticsEvent.workspaceId, ws.id),
+              eq(analyticsEvent.eventType, "view"),
+              gte(analyticsEvent.createdAt, prevStartDate),
+              sql`${analyticsEvent.createdAt} < ${startDate}`,
+            ),
+          );
+        prevUniqueViews = Number(prevUniqueViewsResult?.value || 0);
+      }
+
+      const uniqueViews = Number(uniqueViewsResult?.value || 0);
+      const uniqueViewsChange = calcChange(uniqueViews, prevUniqueViews);
+
       return {
         totalViews: views.toLocaleString(),
+        uniqueVisitors: uniqueViews.toLocaleString(),
         totalTestimonials: submissions.toLocaleString(),
         newTestimonials: submissions,
         conversionRate,
         viewsChange,
+        uniqueVisitorsChange: uniqueViewsChange,
         submissionsChange,
         conversionChange,
         viewsRaw: views,
@@ -153,13 +296,37 @@ export const analyticsRouter = router({
     }),
 
   getChartData: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+      const { workspaceId } = input;
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
 
       let daysNum = 7;
       if (input.timeframe === "30d") daysNum = 30;
@@ -205,14 +372,38 @@ export const analyticsRouter = router({
     }),
 
   getWidgetPerformance: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
+      const { workspaceId } = input;
       const start = getTimefilter(input.timeframe);
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
 
       const widgets = await db.query.widget.findMany({
         where: eq(widget.workspaceId, ws.id),
@@ -261,14 +452,38 @@ export const analyticsRouter = router({
     }),
 
   getExportData: protectedProcedure
-    .input(z.object({ timeframe: timeframeSchema }))
+    .input(z.object({ timeframe: timeframeSchema, workspaceId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       const { db, session } = ctx;
+      const { workspaceId } = input;
       const start = getTimefilter(input.timeframe);
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
+
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
+        });
+      }
+
       if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.csvExport) {
+        throw new Error("CSV Export is not available on your plan.");
+      }
 
       const widgets = await db.query.widget.findMany({
         where: eq(widget.workspaceId, ws.id),
@@ -317,29 +532,55 @@ export const analyticsRouter = router({
       return performance;
     }),
 
-  getTopTestimonials: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
-    const ws = await db.query.workspace.findFirst({
-      where: eq(workspace.ownerId, session.user.id),
-    });
-    if (!ws) throw new Error("No workspace found");
+  getTopTestimonials: protectedProcedure
+    .input(z.object({ workspaceId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const workspaceId = input?.workspaceId;
 
-    const top = await db.query.testimonial.findMany({
-      where: and(
-        inArray(
-          testimonial.projectId,
-          db.select({ id: project.id }).from(project).where(eq(project.workspaceId, ws.id)),
+      let ws;
+      if (workspaceId) {
+        ws = await db.query.workspace.findFirst({
+          where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) {
+        ws = await db.query.workspace.findFirst({
+          where: eq(workspace.ownerId, session.user.id),
+          with: { organization: true },
+        });
+      }
+
+      if (!ws) throw new Error("No workspace found");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
+
+      const top = await db.query.testimonial.findMany({
+        where: and(
+          inArray(
+            testimonial.projectId,
+            db.select({ id: project.id }).from(project).where(eq(project.workspaceId, ws.id)),
+          ),
+          eq(testimonial.status, "approved"),
         ),
-        eq(testimonial.status, "approved"),
-      ),
-      orderBy: desc(testimonial.rating),
-      limit: 5,
-    });
+        orderBy: desc(testimonial.rating),
+        limit: 5,
+      });
 
-    return top.map((t) => ({
-      author: t.authorName || "Anonymous",
-      company: t.authorCompany || "",
-      rating: t.rating,
-    }));
-  }),
+      return top.map((t) => ({
+        author: t.authorName || "Anonymous",
+        company: t.authorCompany || "",
+        rating: t.rating,
+      }));
+    }),
 });

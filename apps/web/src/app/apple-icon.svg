@@ -1,0 +1,9 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="40" fill="#e8527a"/>
+  <!-- Vertical Stem -->
+  <rect x="50" y="45" width="22" height="90" rx="8" fill="white"/>
+  <!-- Upper Diagonal -->
+  <path d="M78 87L115 53C118.5 49.8 124 50 127 53.5L129 56C132 59.5 131.8 65 128.5 68L95 98V87Z" fill="white"/>
+  <!-- Lower Diagonal -->
+  <path d="M78 93L118 127C121.5 130 121.8 135.5 118.8 139L116.5 141.5C113.5 145 108 145.2 104.5 142L78 119V93Z" fill="white"/>
+</svg>

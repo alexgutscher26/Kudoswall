@@ -1,5 +1,4 @@
 import { Button, Section, Text, Hr, Row, Column } from "@react-email/components";
-import * as React from "react";
 import { BaseLayout } from "./components/base-layout";
 
 interface WeeklyDigestEmailProps {

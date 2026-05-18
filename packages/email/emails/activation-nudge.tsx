@@ -1,5 +1,4 @@
 import { Button, Section, Text, Img } from "@react-email/components";
-import * as React from "react";
 import { BaseLayout } from "./components/base-layout";
 
 interface ActivationNudgeEmailProps {

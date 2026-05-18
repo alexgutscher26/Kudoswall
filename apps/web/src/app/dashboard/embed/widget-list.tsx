@@ -21,6 +21,8 @@ import type { Route } from "next";
 import { gooeyToast as toast } from "goey-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+import type { WidgetSettings } from "./[id]/customizer";
 
 export default function WidgetList() {
   const router = useRouter();
@@ -39,6 +41,14 @@ export default function WidgetList() {
     };
   }, [isCreateModalOpen]);
 
+  const { activeWorkspaceId } = useWorkspace();
+
+  const openModal = () => {
+    setIsCreateModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsCreateModalOpen(false);
+  };
   const { data: widgets, isLoading, refetch } = useQuery(trpc.widget.list.queryOptions());
 
   const createWidget = useMutation(
@@ -47,8 +57,8 @@ export default function WidgetList() {
         toast.success("Widget created!");
         router.push(`/dashboard/embed/${data.id}` as Route);
       },
-      onError: (err: any) => {
-        toast.error(err.message);
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : "Failed to create widget");
       },
     }),
   );
@@ -95,7 +105,7 @@ export default function WidgetList() {
           />
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={openModal}
           className="flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
         >
           <Plus className="size-4" />
@@ -107,7 +117,7 @@ export default function WidgetList() {
       {filteredWidgets && filteredWidgets.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredWidgets.map((w) => {
-            const settings = JSON.parse(w.settingsJson);
+            const settings = JSON.parse(w.settingsJson) as WidgetSettings;
             return (
               <div
                 key={w.id}
@@ -183,7 +193,7 @@ export default function WidgetList() {
             Create your first embed config to start showing testimonials on your own website.
           </p>
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={openModal}
             className="mt-8 flex items-center gap-2 rounded-full bg-neutral-900 px-8 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.95]"
           >
             <Plus className="size-4" />
@@ -197,13 +207,13 @@ export default function WidgetList() {
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div
             className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-            onClick={() => setIsCreateModalOpen(false)}
+            onClick={closeModal}
           />
           <div className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-[32px] bg-white p-8 shadow-2xl duration-300">
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-xl font-bold text-neutral-900">New Embed Config</h3>
               <button
-                onClick={() => setIsCreateModalOpen(false)}
+                onClick={closeModal}
                 className="rounded-full p-2 text-neutral-400 transition-all hover:bg-neutral-100 hover:text-neutral-600 active:scale-[0.85]"
               >
                 <X className="size-5" />
@@ -227,7 +237,7 @@ export default function WidgetList() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
+                  onClick={closeModal}
                   className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
                 >
                   Cancel

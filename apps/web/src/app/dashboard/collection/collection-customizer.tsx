@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Palette,
@@ -18,14 +19,42 @@ import {
   Lock,
   Quote,
   Camera,
+  Globe,
+  Terminal,
+  Image as LucideImage,
+  Layers,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
+import { UploadButton } from "@/utils/uploadthing";
+import { Type } from "lucide-react";
 
 interface CollectionCustomizerProps {
-  project: any;
-  workspace: any;
-  isPro?: boolean;
+  project: {
+    id: string;
+    name: string;
+    slug: string;
+    collectionSlug?: string | null;
+    collectionSettingsJson?: string | null;
+    customDomain?: string | null;
+    customDomainVerified?: boolean | null;
+    customDomainVerificationToken?: string | null;
+    customDomainVerificationError?: string | null;
+    customCss?: string | null;
+    emailFromName?: string | null;
+  };
+  workspace: {
+    id: string;
+    name: string;
+    plan: "free" | "plan_1" | "plan_2" | "ltd";
+    logoUrl?: string | null;
+  };
+  isPro: boolean;
+  permissions?: {
+    features: {
+      video: boolean;
+    };
+  };
 }
 
 export type CollectionSettings = {
@@ -34,7 +63,9 @@ export type CollectionSettings = {
   logoUrl?: string;
   accentColor: string;
   backgroundColor: string;
-  fontFamily: "sans" | "serif" | "mono";
+  fontFamily: string;
+  customFontUrl?: string;
+  customFontName?: string;
   form: {
     fields: {
       fullName: { enabled: boolean; required: boolean; label: string; placeholder: string };
@@ -70,6 +101,25 @@ export type CollectionSettings = {
   passwordProtection?: string;
   expiryDate?: string;
   redirectUrl?: string;
+  privacyPolicyUrl?: string;
+  compliance?: {
+    cookieConsent: {
+      enabled: boolean;
+      message: string;
+      buttonText: string;
+    };
+    showFooterPrivacy: boolean;
+    footerPrivacyText: string;
+    privacyPolicyContent?: string;
+  };
+  background?: {
+    type: "color" | "gradient" | "image";
+    gradient?: string;
+    imageUrl?: string;
+    imageOpacity?: number;
+    imageBlur?: number;
+    isAnimated?: boolean;
+  };
 };
 
 const DEFAULT_SETTINGS: CollectionSettings = {
@@ -107,18 +157,80 @@ const DEFAULT_SETTINGS: CollectionSettings = {
     prompt: "Tell us about your experience",
     maxLength: 30,
   },
+  compliance: {
+    cookieConsent: {
+      enabled: false,
+      message: "We use cookies to ensure you get the best experience on our website.",
+      buttonText: "Got it!",
+    },
+    showFooterPrivacy: true,
+    footerPrivacyText: "Privacy Policy",
+    privacyPolicyContent: "",
+  },
+  background: {
+    type: "color",
+    imageOpacity: 1,
+    imageBlur: 0,
+    isAnimated: false,
+  },
 };
 
 export function CollectionCustomizer({
   project,
   workspace,
-  isPro: isProProp,
+  isPro,
+  permissions,
 }: CollectionCustomizerProps) {
+  const router = useRouter();
+  const videoEnabled = permissions?.features?.video ?? isPro;
+
   const [settings, setSettings] = useState<CollectionSettings>(() => {
     try {
-      return project.collectionSettingsJson
+      const parsed = project.collectionSettingsJson
         ? JSON.parse(project.collectionSettingsJson)
-        : DEFAULT_SETTINGS;
+        : {};
+
+      // Deep merge basic structure to ensure missing fields from old projects don't cause crashes
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        form: {
+          ...DEFAULT_SETTINGS.form,
+          ...(parsed.form || {}),
+          fields: {
+            ...DEFAULT_SETTINGS.form.fields,
+            ...(parsed.form?.fields || {}),
+          },
+          starRating: {
+            ...DEFAULT_SETTINGS.form.starRating,
+            ...(parsed.form?.starRating || {}),
+          },
+        },
+        pageContent: {
+          ...DEFAULT_SETTINGS.pageContent,
+          ...(parsed.pageContent || {}),
+          thankYou: {
+            ...DEFAULT_SETTINGS.pageContent?.thankYou,
+            ...(parsed.pageContent?.thankYou || {}),
+          },
+        },
+        video: {
+          ...DEFAULT_SETTINGS.video,
+          ...(parsed.video || {}),
+        },
+        background: {
+          ...DEFAULT_SETTINGS.background!,
+          ...(parsed.background || {}),
+        },
+        compliance: {
+          ...DEFAULT_SETTINGS.compliance!,
+          ...(parsed.compliance || {}),
+          cookieConsent: {
+            ...DEFAULT_SETTINGS.compliance!.cookieConsent,
+            ...(parsed.compliance?.cookieConsent || {}),
+          },
+        },
+      };
     } catch (e) {
       return DEFAULT_SETTINGS;
     }
@@ -128,18 +240,63 @@ export function CollectionCustomizer({
     "rating",
   );
 
+  const [projectName, setProjectName] = useState(project.name);
+  const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
+  const [customCss, setCustomCss] = useState(project.customCss || "");
+  const [emailFromName, setEmailFromName] = useState(project.emailFromName || "");
+
   const [activeTab, setActiveTab] = useState<
-    "branding" | "fields" | "content" | "video" | "share" | "advanced"
+    "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
   >("branding");
-  const isPro = isProProp ?? workspace.isPro;
+
+  const [domain, setDomain] = useState(project.customDomain || "");
+  const [isDomainVerified, setIsDomainVerified] = useState(!!project.customDomainVerified);
+  const [verificationError, setVerificationError] = useState(
+    project.customDomainVerificationError || "",
+  );
+
+  const updateDomainMutation = useMutation(
+    trpc.dashboard.updateProjectDomain.mutationOptions({
+      onSuccess: (data) => {
+        toast.success("Domain updated!");
+        setIsDomainVerified(data.verified);
+        setVerificationError(data.verificationError || "");
+        router.refresh();
+      },
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Failed to update domain");
+      },
+    }),
+  );
+
+  const verifyDomainMutation = useMutation(
+    trpc.dashboard.verifyProjectDomain.mutationOptions({
+      onSuccess: (data) => {
+        if (data.verified) {
+          toast.success("Domain verified successfully!");
+        } else {
+          toast.error(
+            "Verification failed: " + (data.verificationError || "Please check your DNS settings"),
+          );
+        }
+        setIsDomainVerified(data.verified);
+        setVerificationError(data.verificationError || "");
+        router.refresh();
+      },
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Verification failed");
+      },
+    }),
+  );
 
   const updateSettings = useMutation(
     trpc.dashboard.updateProjectSettings.mutationOptions({
       onSuccess: () => {
         toast.success("Settings saved!");
+        router.refresh();
       },
-      onError: (e: any) => {
-        toast.error(e.message);
+      onError: (e) => {
+        toast.error(e instanceof Error ? e.message : "Failed to save settings");
       },
     }),
   );
@@ -154,29 +311,40 @@ export function CollectionCustomizer({
     }
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      updateSettings.mutate({ projectId: project.id, settings });
+      updateSettings.mutate({
+        projectId: project.id,
+        settings,
+        name: projectName,
+        collectionSlug,
+        customCss,
+        emailFromName,
+      });
     }, 1500);
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
-  }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings, projectName, collectionSlug, customCss, emailFromName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     updateSettings.mutate({
       projectId: project.id,
       settings,
+      name: projectName,
+      collectionSlug,
+      customCss,
+      emailFromName,
     });
   };
 
-  const setNestedSetting = (path: string, value: any) => {
+  const setNestedSetting = (path: string, value: unknown) => {
     setSettings((prev) => {
       const next = { ...prev };
       const keys = path.split(".");
-      let current: any = next;
+      let current: Record<string, unknown> = next as unknown as Record<string, unknown>;
       for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] };
-        current = current[keys[i]];
+        current[keys[i]] = { ...(current[keys[i]] as any) };
+        current = current[keys[i]] as Record<string, unknown>;
       }
       current[keys[keys.length - 1]] = value;
       return next;
@@ -195,7 +363,7 @@ export function CollectionCustomizer({
     pro,
   }: {
     title: string;
-    icon: any;
+    icon: React.ElementType;
     pro?: boolean;
   }) => (
     <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-2">
@@ -230,17 +398,25 @@ export function CollectionCustomizer({
           >
             Content
           </button>
-          <button
-            onClick={() => setActiveTab("video")}
-            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "video" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
-          >
-            Video
-          </button>
+          {videoEnabled && (
+            <button
+              onClick={() => setActiveTab("video")}
+              className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "video" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+            >
+              Video
+            </button>
+          )}
           <button
             onClick={() => setActiveTab("advanced")}
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
           >
             Adv
+          </button>
+          <button
+            onClick={() => setActiveTab("domain")}
+            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "domain" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+          >
+            Domain
           </button>
           <button
             onClick={() => setActiveTab("share")}
@@ -259,25 +435,201 @@ export function CollectionCustomizer({
                   <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                     Accent Color
                   </label>
-                  <input
-                    className="size-8 cursor-pointer rounded-lg border-0 p-0"
-                    disabled={!isPro}
-                    onChange={(e) => setNestedSetting("accentColor", e.target.value)}
-                    type="color"
-                    value={settings.accentColor}
-                  />
+                  <div
+                    className="relative"
+                    onClick={() => {
+                      if (!isPro) {
+                        toast.error("Pro Feature", {
+                          description: "Upgrade to Pro to use custom accent colors.",
+                        });
+                      }
+                    }}
+                  >
+                    <input
+                      className={`size-8 cursor-pointer rounded-lg border-0 p-0 ${!isPro ? "opacity-50 grayscale" : ""}`}
+                      disabled={!isPro}
+                      onChange={(e) => setNestedSetting("accentColor", e.target.value)}
+                      type="color"
+                      value={settings.accentColor}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Background
-                  </label>
-                  <input
-                    className="size-8 cursor-pointer rounded-lg border-0 p-0"
-                    disabled={!isPro}
-                    onChange={(e) => setNestedSetting("backgroundColor", e.target.value)}
-                    type="color"
-                    value={settings.backgroundColor}
-                  />
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/30 p-4">
+                  <div className="flex items-center gap-2">
+                    <LucideImage className="size-3.5 text-neutral-400" />
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Background Design
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: "color", label: "Solid", icon: Palette },
+                      { id: "gradient", label: "Gradient", icon: Layers },
+                      { id: "image", label: "Image", icon: LucideImage },
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          if (!isPro && t.id !== "color") {
+                            toast.error("Pro Feature", {
+                              description: "Upgrade to Pro to use premium background designs.",
+                            });
+                            return;
+                          }
+                          setNestedSetting("background.type", t.id);
+                        }}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all ${
+                          settings.background?.type === t.id
+                            ? "border-pink-500 bg-pink-50 text-pink-500"
+                            : "border-neutral-100 bg-white text-neutral-400 hover:bg-neutral-50"
+                        } ${!isPro && t.id !== "color" ? "opacity-40" : ""}`}
+                      >
+                        <t.icon className="size-4" />
+                        <span className="text-[10px] font-bold">{t.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {settings.background?.type === "color" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 flex items-center justify-between pt-2 duration-300">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                        Select Color
+                      </label>
+                      <input
+                        className="size-8 cursor-pointer rounded-lg border-0 p-0"
+                        disabled={!isPro}
+                        onChange={(e) => setNestedSetting("backgroundColor", e.target.value)}
+                        type="color"
+                        value={settings.backgroundColor}
+                      />
+                    </div>
+                  )}
+
+                  {settings.background?.type === "gradient" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 pt-2 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                          CSS Gradient
+                        </label>
+                        <textarea
+                          className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-white px-3 py-2 text-[11px] font-medium outline-none focus:border-pink-500"
+                          disabled={!isPro}
+                          onChange={(e) => setNestedSetting("background.gradient", e.target.value)}
+                          placeholder="linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%)"
+                          value={settings.background?.gradient || ""}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%)",
+                          "linear-gradient(135deg, #ffedfa 0%, #f3e8ff 100%)",
+                          "linear-gradient(to right, #ffecd2 0%, #fcb69f 100%)",
+                          "linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)",
+                          "linear-gradient(120deg, #f6d365 0%, #fda085 100%)",
+                          "linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)",
+                        ].map((g) => (
+                          <button
+                            key={g}
+                            onClick={() => setNestedSetting("background.gradient", g)}
+                            className="size-6 rounded-lg border border-neutral-100 shadow-sm transition-transform hover:scale-110"
+                            style={{ background: g }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] font-bold text-neutral-500 uppercase">
+                          Animate Gradient
+                        </span>
+                        <input
+                          checked={settings.background?.isAnimated || false}
+                          className="accent-pink-500"
+                          disabled={!isPro}
+                          onChange={(e) =>
+                            setNestedSetting("background.isAnimated", e.target.checked)
+                          }
+                          type="checkbox"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {settings.background?.type === "image" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-2 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                          Upload Image
+                        </label>
+                        <UploadButton
+                          endpoint="imageUploader"
+                          onClientUploadComplete={(res) => {
+                            if (res?.[0]) {
+                              setNestedSetting("background.imageUrl", res[0].url);
+                              toast.success("Background uploaded!");
+                            }
+                          }}
+                          onUploadError={(error: Error) => {
+                            toast.error(`Error: ${error.message}`);
+                          }}
+                          appearance={{
+                            button:
+                              "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                            allowedContent: "hidden",
+                          }}
+                        />
+                      </div>
+
+                      {settings.background?.imageUrl && (
+                        <>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between">
+                              <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                                Opacity
+                              </label>
+                              <span className="text-[10px] font-bold text-neutral-400">
+                                {Math.round((settings.background?.imageOpacity || 1) * 100)}%
+                              </span>
+                            </div>
+                            <input
+                              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-pink-500"
+                              max="1"
+                              min="0"
+                              onChange={(e) =>
+                                setNestedSetting(
+                                  "background.imageOpacity",
+                                  parseFloat(e.target.value),
+                                )
+                              }
+                              step="0.01"
+                              type="range"
+                              value={settings.background?.imageOpacity ?? 1}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between">
+                              <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                                Blur
+                              </label>
+                              <span className="text-[10px] font-bold text-neutral-400">
+                                {settings.background?.imageBlur || 0}px
+                              </span>
+                            </div>
+                            <input
+                              className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-pink-500"
+                              max="20"
+                              min="0"
+                              onChange={(e) =>
+                                setNestedSetting("background.imageBlur", parseInt(e.target.value))
+                              }
+                              step="1"
+                              type="range"
+                              value={settings.background?.imageBlur ?? 0}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
@@ -289,10 +641,91 @@ export function CollectionCustomizer({
                     onChange={(e) => setNestedSetting("fontFamily", e.target.value)}
                     value={settings.fontFamily}
                   >
-                    <option value="sans">Sans-serif (Modern)</option>
-                    <option value="serif">Serif (Classic)</option>
-                    <option value="mono">Monospace (Minimal)</option>
+                    <optgroup label="System Defaults">
+                      <option value="sans">Sans-serif (Modern)</option>
+                      <option value="serif">Serif (Classic)</option>
+                      <option value="mono">Monospace (Minimal)</option>
+                    </optgroup>
+                    <optgroup label="Google Fonts">
+                      <option value="Inter">Inter</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Open Sans">Open Sans</option>
+                      <option value="Montserrat">Montserrat</option>
+                      <option value="Poppins">Poppins</option>
+                      <option value="Lato">Lato</option>
+                      <option value="Oswald">Oswald</option>
+                      <option value="Raleway">Raleway</option>
+                      <option value="Nunito">Nunito</option>
+                      <option value="Playfair Display">Playfair Display</option>
+                      <option value="Merriweather">Merriweather</option>
+                      <option value="Ubuntu">Ubuntu</option>
+                      <option value="PT Sans">PT Sans</option>
+                      <option value="Source Sans Pro">Source Sans Pro</option>
+                      <option value="Quicksand">Quicksand</option>
+                      <option value="Josefin Sans">Josefin Sans</option>
+                      <option value="Mulish">Mulish</option>
+                      <option value="Arvo">Arvo</option>
+                      <option value="Alegreya">Alegreya</option>
+                      <option value="Crimson Text">Crimson Text</option>
+                      <option value="Libre Baskerville">Libre Baskerville</option>
+                      <option value="EB Garamond">EB Garamond</option>
+                      <option value="Cormorant Garamond">Cormorant Garamond</option>
+                      <option value="Work Sans">Work Sans</option>
+                      <option value="Fira Sans">Fira Sans</option>
+                      <option value="Space Mono">Space Mono</option>
+                      <option value="DM Sans">DM Sans</option>
+                      <option value="Outfit">Outfit</option>
+                      <option value="Lexend">Lexend</option>
+                      <option value="Urbanist">Urbanist</option>
+                      <option value="Syne">Syne</option>
+                      <option value="Sora">Sora</option>
+                      <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                      <option value="Jost">Jost</option>
+                      <option value="Fraunces">Fraunces</option>
+                    </optgroup>
+                    <optgroup label="Custom Branding">
+                      <option value="custom">Custom Font (.woff2)</option>
+                    </optgroup>
                   </select>
+
+                  {settings.fontFamily === "custom" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 mt-2 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-3 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold tracking-tighter text-neutral-400 uppercase">
+                          Upload .woff2
+                        </span>
+                        {settings.customFontUrl && (
+                          <span className="text-[10px] font-bold text-emerald-500">Ready</span>
+                        )}
+                      </div>
+                      <UploadButton
+                        endpoint="fontUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res?.[0]) {
+                            setNestedSetting("customFontUrl", res[0].url);
+                            setNestedSetting("customFontName", res[0].name.replace(".woff2", ""));
+                            toast.success("Font uploaded!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Error: ${error.message}`);
+                        }}
+                        appearance={{
+                          button:
+                            "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                          allowedContent: "hidden",
+                        }}
+                      />
+                      {settings.customFontName && (
+                        <div className="flex items-center gap-2 truncate overflow-hidden rounded-lg border border-neutral-100 bg-white px-2 py-1.5">
+                          <Type className="size-3 shrink-0 text-neutral-400" />
+                          <span className="truncate text-[10px] font-bold text-neutral-600">
+                            {settings.customFontName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -429,7 +862,8 @@ export function CollectionCustomizer({
                     Thank You Message
                   </label>
                   <textarea
-                    className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    className="h-20 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!isPro}
                     onChange={(e) => setNestedSetting("pageContent.thankYou.body", e.target.value)}
                     value={settings.pageContent.thankYou.body}
                   />
@@ -487,7 +921,7 @@ export function CollectionCustomizer({
                   <input
                     checked={settings.video.enabled}
                     className="accent-pink-500"
-                    disabled={!isPro}
+                    disabled={!videoEnabled}
                     onChange={(e) => setNestedSetting("video.enabled", e.target.checked)}
                     type="checkbox"
                   />
@@ -501,6 +935,7 @@ export function CollectionCustomizer({
                       </label>
                       <input
                         className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                        disabled={!videoEnabled}
                         onChange={(e) => setNestedSetting("video.prompt", e.target.value)}
                         type="text"
                         value={settings.video.prompt}
@@ -512,6 +947,7 @@ export function CollectionCustomizer({
                       </label>
                       <select
                         className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                        disabled={!videoEnabled}
                         onChange={(e) =>
                           setNestedSetting("video.maxLength", parseInt(e.target.value))
                         }
@@ -528,6 +964,171 @@ export function CollectionCustomizer({
             </div>
           )}
 
+          {activeTab === "domain" && (
+            <div className="space-y-6">
+              <SectionHeader icon={Globe} pro title="Custom Domain" />
+              <p className="text-[11px] leading-relaxed font-medium text-neutral-500">
+                Connect your own domain to your collection page. Use a subdomain like{" "}
+                <code className="text-pink-500">testimonials.yourdomain.com</code>.
+              </p>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Domain Name
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-sm font-medium outline-none focus:border-pink-500"
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use your own custom domain.",
+                          });
+                        }
+                      }}
+                      disabled={!isPro || updateDomainMutation.isPending}
+                      onChange={(e) => setDomain(e.target.value.toLowerCase().trim())}
+                      placeholder={isPro ? "testimonials.example.com" : "Available on Pro plans"}
+                      type="text"
+                      value={domain}
+                    />
+                    <button
+                      className="rounded-xl bg-neutral-900 px-6 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use your own custom domain.",
+                          });
+                          return;
+                        }
+                        updateDomainMutation.mutate({ projectId: project.id, domain });
+                      }}
+                      disabled={
+                        (!isPro && domain === "") ||
+                        updateDomainMutation.isPending ||
+                        domain === (project.customDomain || "")
+                      }
+                    >
+                      {updateDomainMutation.isPending ? "Saving..." : "Save Domain"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div
+                    className={`rounded-2xl border p-4 transition-all duration-300 ${isDomainVerified ? "border-emerald-100 bg-emerald-50/50" : "border-neutral-100 bg-neutral-50/30"}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {isDomainVerified ? (
+                          <CheckCircle2 className="size-4 text-emerald-500" />
+                        ) : (
+                          <div className="flex size-4 items-center justify-center rounded-full bg-amber-100">
+                            <Sparkles className="size-2 text-amber-500" />
+                          </div>
+                        )}
+                        <span
+                          className={`text-[10px] font-bold ${isDomainVerified ? "text-emerald-700" : "text-neutral-600"}`}
+                        >
+                          {isDomainVerified ? "Verified & Ready" : "Setup Required"}
+                        </span>
+                      </div>
+                      {domain && project.customDomain === domain && (
+                        <button
+                          className="rounded-lg bg-neutral-900 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-95 disabled:opacity-50"
+                          disabled={verifyDomainMutation.isPending}
+                          onClick={() => verifyDomainMutation.mutate({ projectId: project.id })}
+                        >
+                          {verifyDomainMutation.isPending ? "Checking..." : "Verify DNS Now"}
+                        </button>
+                      )}
+                    </div>
+
+                    {!isDomainVerified && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-start gap-2">
+                          <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[8px] font-black text-white">
+                            1
+                          </div>
+                          <p className="text-[10px] font-bold text-neutral-800">
+                            Configure your DNS provider
+                          </p>
+                        </div>
+
+                        <p className="pl-6 text-[10px] leading-normal text-neutral-500">
+                          Add the following CNAME record to point your subdomain to your collection
+                          page.
+                        </p>
+
+                        <div className="ml-6 overflow-hidden rounded-xl border border-neutral-100 bg-white p-0">
+                          <div className="flex items-center justify-between border-b border-neutral-50 px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Type
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-neutral-900">
+                              CNAME
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between border-b border-neutral-50 px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Host
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-pink-500">
+                              {domain ? domain.split(".")[0] : "subdomain"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between px-3 py-2">
+                            <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+                              Target
+                            </span>
+                            <span className="font-mono text-[10px] font-bold text-neutral-900">
+                              kudoswall.org
+                            </span>
+                          </div>
+                        </div>
+
+                        {domain && project.customDomain !== domain && (
+                          <div className="flex items-start gap-2 pt-1 pl-6">
+                            <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[8px] font-black text-white">
+                              2
+                            </div>
+                            <p className="text-[10px] font-bold text-neutral-800">
+                              Hit "Save" to start verification
+                            </p>
+                          </div>
+                        )}
+
+                        {verificationError && (
+                          <div className="mt-2 ml-6 rounded-lg border border-rose-100 bg-rose-50 p-2">
+                            <p className="mb-1 text-[9px] font-bold tracking-widest text-rose-600 uppercase">
+                              Last Error
+                            </p>
+                            <p className="text-[9px] font-medium text-rose-500">
+                              {verificationError}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {!isPro && (
+                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4 text-center">
+                  <Lock className="mx-auto mb-2 size-4 text-neutral-300" />
+                  <p className="mb-2 text-[11px] font-bold text-neutral-500">
+                    Upgrade to Pro to use custom domains
+                  </p>
+                  <button className="w-full rounded-xl bg-neutral-900 py-2 text-[11px] font-bold text-white transition-opacity hover:opacity-90">
+                    Upgrade Now
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === "share" && (
             <div className="space-y-6">
               <SectionHeader icon={Command} pro title="Share Links" />
@@ -539,10 +1140,10 @@ export function CollectionCustomizer({
               <div className="space-y-4">
                 {[
                   {
-                    label: "Smart Choice Link",
-                    desc: "Let customers choose Video or Text",
+                    label: "Direct Collection Link",
+                    desc: "Send customers to leave a text review",
                     param: "",
-                    icon: Sparkles,
+                    icon: Quote,
                   },
                   {
                     label: "Video Only Link",
@@ -550,14 +1151,8 @@ export function CollectionCustomizer({
                     param: "?t=v",
                     icon: Video,
                   },
-                  {
-                    label: "Text Only Link",
-                    desc: "Direct to text review form",
-                    param: "?t=t",
-                    icon: Quote,
-                  },
                 ].map((link) => {
-                  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${project.collectionSlug || project.slug}${link.param}`;
+                  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/collect/${collectionSlug}${link.param}`;
                   return (
                     <div
                       key={link.label}
@@ -593,7 +1188,66 @@ export function CollectionCustomizer({
 
           {activeTab === "advanced" && (
             <div className="space-y-6">
-              <SectionHeader icon={Command} pro title="Advanced" />
+              <SectionHeader icon={Terminal} pro title="Custom CSS" />
+              <div className="space-y-2">
+                <p className="text-[10px] leading-normal text-neutral-400">
+                  Override styles on your collection page with custom CSS. Use this to fine-tune
+                  colors, spacing, or add custom animations.
+                </p>
+                <div className="relative">
+                  <textarea
+                    className="h-40 w-full resize-none rounded-xl border border-neutral-100 bg-neutral-900 p-3 font-mono text-[11px] text-emerald-400 outline-none focus:ring-1 focus:ring-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!isPro}
+                    onChange={(e) => setCustomCss(e.target.value)}
+                    placeholder="/* .collect-heading { color: red; } */"
+                    spellCheck={false}
+                    value={customCss}
+                  />
+                  {!isPro && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-neutral-900/10 backdrop-blur-[1px]">
+                      <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
+                        <Lock className="size-3 text-neutral-400" />
+                        <span className="text-[10px] font-bold text-neutral-600">Pro Feature</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <SectionHeader icon={Command} title="General Info" />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Collection Name
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    onChange={(e) => setProjectName(e.target.value)}
+                    type="text"
+                    value={projectName}
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    Only visible to you, used to identify it later.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    URL Slug
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    onChange={(e) =>
+                      setCollectionSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
+                    }
+                    type="text"
+                    value={collectionSlug}
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    The public URL path for your collection page.
+                  </p>
+                </div>
+              </div>
 
               <SectionHeader icon={Star} pro title="Star Rating" />
               <div className="flex items-center justify-between">
@@ -641,6 +1295,162 @@ export function CollectionCustomizer({
                   />
                 </div>
               </div>
+
+              <SectionHeader icon={Shield} pro title="Legal & Compliance" />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Privacy Policy URL
+                  </label>
+                  <input
+                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-medium outline-none focus:border-pink-500"
+                    disabled={!isPro}
+                    onChange={(e) =>
+                      setSettings((prev) => ({ ...prev, privacyPolicyUrl: e.target.value }))
+                    }
+                    placeholder="https://yourwebsite.com/privacy"
+                    type="url"
+                    value={settings.privacyPolicyUrl || ""}
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    Linked in the collection form consent checkbox.
+                  </p>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Email "From" Name {isPro && <Sparkles className="size-3 text-pink-500" />}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-medium text-neutral-500">
+                      Customize the sender name for confirmation emails sent to authors.
+                    </p>
+                    <input
+                      className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500 disabled:opacity-50"
+                      disabled={!isPro}
+                      onChange={(e) => setEmailFromName(e.target.value)}
+                      placeholder="e.g. Alex from KudosWall"
+                      type="text"
+                      value={emailFromName}
+                    />
+                    {!isPro && (
+                      <p className="text-[9px] font-bold text-pink-500 uppercase">
+                        Requires Pro Plan
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Cookie Consent Banner
+                    </span>
+                    <input
+                      checked={settings.compliance?.cookieConsent?.enabled || false}
+                      className="accent-pink-500"
+                      disabled={!isPro}
+                      onChange={(e) =>
+                        setNestedSetting("compliance.cookieConsent.enabled", e.target.checked)
+                      }
+                      type="checkbox"
+                    />
+                  </div>
+                  {(settings.compliance?.cookieConsent?.enabled || false) && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Banner Message
+                        </label>
+                        <textarea
+                          className="h-16 w-full resize-none rounded-lg border border-neutral-100 bg-white px-3 py-2 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.cookieConsent.message", e.target.value)
+                          }
+                          value={settings.compliance?.cookieConsent?.message || ""}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Button Text
+                        </label>
+                        <input
+                          className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.cookieConsent.buttonText", e.target.value)
+                          }
+                          type="text"
+                          value={settings.compliance?.cookieConsent?.buttonText || ""}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-widest text-neutral-900 uppercase">
+                      Show Footer Privacy Link
+                    </span>
+                    <input
+                      checked={settings.compliance?.showFooterPrivacy ?? true}
+                      className="accent-pink-500"
+                      disabled={!isPro}
+                      onChange={(e) =>
+                        setNestedSetting("compliance.showFooterPrivacy", e.target.checked)
+                      }
+                      type="checkbox"
+                    />
+                  </div>
+                  {(settings.compliance?.showFooterPrivacy ?? true) && (
+                    <div className="animate-in fade-in slide-in-from-top-2 space-y-3 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                          Footer Link Text
+                        </label>
+                        <input
+                          className="w-full rounded-lg border border-neutral-100 bg-white px-3 py-1.5 text-[11px] font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.footerPrivacyText", e.target.value)
+                          }
+                          type="text"
+                          value={settings.compliance?.footerPrivacyText || "Privacy Policy"}
+                        />
+                      </div>
+
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                            Privacy Policy Content (Markdown)
+                          </label>
+                          <button
+                            onClick={() => {
+                              const template = `## Privacy Policy for ${project.name}\n\nWe value your privacy. This policy explains how ${workspace.name} ("we", "us", or "our") collects, uses, and shares information when you provide a testimonial for ${project.name}.\n\n### 1. Information We Collect\nWhen you submit a testimonial, we collect your name, email address, and any other information you choose to provide (such as your photo, company name, or social media links).\n\n### 2. How We Use Your Information\nWe use your information to display your testimonial on our website and marketing materials. You grant us a non-exclusive, world-wide, perpetual license to use your content.\n\n### 3. Sharing Your Information\nYour testimonial (including your name and photo) will be publicly visible. Your email address will not be shared publicly.\n\n### 4. Your Rights\nYou can request the removal of your testimonial at any time by contacting us at support@example.com.`;
+                              setNestedSetting("compliance.privacyPolicyContent", template);
+                            }}
+                            className="text-[10px] font-bold text-pink-500 hover:underline"
+                          >
+                            Generate Template
+                          </button>
+                        </div>
+                        <textarea
+                          className="h-32 w-full resize-none rounded-lg border border-neutral-100 bg-white px-3 py-2 text-[11px] leading-relaxed font-medium outline-none focus:border-pink-500"
+                          onChange={(e) =>
+                            setNestedSetting("compliance.privacyPolicyContent", e.target.value)
+                          }
+                          placeholder="Markdown supported..."
+                          value={settings.compliance?.privacyPolicyContent || ""}
+                        />
+                        <p className="text-[10px] text-neutral-400 italic">
+                          If empty, we'll use your Privacy Policy URL above.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -659,9 +1469,87 @@ export function CollectionCustomizer({
 
       {/* Main Area - Preview */}
       <div
-        className="relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300"
-        style={{ backgroundColor: settings.backgroundColor }}
+        id="collection-preview-area"
+        className={`relative flex flex-1 flex-col overflow-hidden overflow-y-auto rounded-3xl border border-neutral-100 transition-colors duration-300 ${
+          settings.background?.type === "gradient" && settings.background?.isAnimated
+            ? "animate-gradient"
+            : ""
+        }`}
+        style={{
+          backgroundColor:
+            settings.background?.type === "color" ? settings.backgroundColor : undefined,
+          backgroundImage:
+            settings.background?.type === "gradient" ? settings.background.gradient : undefined,
+          fontFamily:
+            settings?.fontFamily === "custom" && settings.customFontUrl
+              ? "'CustomFont', sans-serif"
+              : settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+                ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+                : settings?.fontFamily === "mono"
+                  ? "monospace"
+                  : settings?.fontFamily === "serif"
+                    ? "serif"
+                    : "var(--font-sans), sans-serif",
+        }}
       >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            @keyframes gradient-shift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            .animate-gradient {
+              background-size: 400% 400% !important;
+              animation: gradient-shift 15s ease infinite !important;
+            }
+          `,
+          }}
+        />
+        {settings.background?.type === "image" && settings.background.imageUrl && (
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${settings.background.imageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: settings.background.imageOpacity ?? 1,
+              filter: `blur(${settings.background.imageBlur ?? 0}px)`,
+            }}
+          />
+        )}
+        {settings?.fontFamily === "custom" && settings.customFontUrl && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                @font-face {
+                  font-family: 'CustomFont';
+                  src: url('${settings.customFontUrl}') format('woff2');
+                  font-weight: 300 900;
+                  font-style: normal;
+                  font-display: swap;
+                }
+                #collection-preview-area, #collection-preview-area * {
+                  font-family: 'CustomFont', system-ui, sans-serif !important;
+                }
+              `,
+            }}
+          />
+        )}
+        {settings?.fontFamily &&
+          !["sans", "serif", "mono", "custom"].includes(settings.fontFamily) && (
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                @import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');
+                #collection-preview-area, #collection-preview-area * {
+                  font-family: inherit !important;
+                }
+              `,
+              }}
+            />
+          )}
         <div className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-neutral-200 bg-white/80 px-5 py-1.5 shadow-sm backdrop-blur-md">
           <div className="mr-1 flex items-center gap-2 border-r border-neutral-100 pr-3">
             <Eye className="size-3.5 text-pink-500" />
@@ -675,7 +1563,7 @@ export function CollectionCustomizer({
               { id: "rating", label: "Rating" },
               { id: "choice", label: "Choice" },
               { id: "text", label: "Story" },
-              { id: "video", label: "Video" },
+              ...(isPro ? [{ id: "video", label: "Video" }] : []),
               { id: "details", label: "Form" },
               { id: "success", label: "Success" },
             ].map((s) => (
@@ -700,7 +1588,7 @@ export function CollectionCustomizer({
                     style={{ backgroundColor: settings.accentColor }}
                   />
                   <Image
-                    src={settings.logoUrl || workspace.logoUrl}
+                    src={(settings.logoUrl || workspace.logoUrl) as string}
                     alt={workspace.name}
                     width={56}
                     height={56}
@@ -722,7 +1610,7 @@ export function CollectionCustomizer({
             <CollectionWizardPreview
               settings={settings}
               projectName={project.name}
-              workspaceIsPro={workspace.isPro}
+              workspaceIsPro={isPro}
               activeTab={activeTab}
               mockStep={mockStep}
               setMockStep={setMockStep}
@@ -776,14 +1664,12 @@ function CollectionWizardPreview({
         <div className="mb-6">
           <div className="mb-2 flex items-end justify-between">
             <div>
-              <span className="font-sans text-[10px] tracking-widest text-[#45464d] uppercase">
+              <span className="text-[10px] tracking-widest text-[#45464d] uppercase">
                 {info.text}
               </span>
               <h2 className="mt-0.5 text-base font-bold text-[#191c1e]">{info.title}</h2>
             </div>
-            <span className="font-sans text-[11px] font-medium text-[#45464d]">
-              {info.percent}% Complete
-            </span>
+            <span className="text-[11px] font-medium text-[#45464d]">{info.percent}% Complete</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e6e8ea]">
             <div
@@ -833,7 +1719,7 @@ function CollectionWizardPreview({
                 </div>
               </div>
               <button
-                onClick={() => setMockStep("choice")}
+                onClick={() => setMockStep("text")}
                 className="rounded-lg bg-[#000000] px-8 py-2.5 text-[11px] font-bold tracking-widest text-white uppercase transition-all hover:opacity-90"
               >
                 Next Step →
@@ -841,7 +1727,6 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Choice Step */}
           {mockStep === "choice" && (
             <div className="py-2 text-center">
               <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-[#191c1e]">
@@ -850,19 +1735,23 @@ function CollectionWizardPreview({
               <p className="mb-6 text-sm text-[#45464d]">
                 Choose the format that works best for you.
               </p>
-              <div className="mb-6 grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setMockStep("video")}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[#f2f4f6]">
-                    <Video className="size-5 text-[#000000]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#191c1e]">Video</h3>
-                    <p className="text-[10px] text-[#76777d]">Quick & Personal</p>
-                  </div>
-                </button>
+              <div
+                className={`mb-6 grid w-full gap-3 ${workspaceIsPro ? "grid-cols-2" : "grid-cols-1"}`}
+              >
+                {workspaceIsPro && (
+                  <button
+                    onClick={() => setMockStep("video")}
+                    className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
+                  >
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-[#f2f4f6]">
+                      <Video className="size-5 text-[#000000]" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-[#191c1e]">Video</h3>
+                      <p className="text-[10px] text-[#76777d]">Quick & Personal</p>
+                    </div>
+                  </button>
+                )}
                 <button
                   onClick={() => setMockStep("text")}
                   className="flex flex-col items-center gap-2 rounded-xl border border-[#c6c6cd]/30 bg-white p-5 transition-all hover:shadow-md"
@@ -899,7 +1788,7 @@ function CollectionWizardPreview({
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-3">
                 <button
-                  onClick={() => setMockStep("choice")}
+                  onClick={() => setMockStep("rating")}
                   className="text-[10px] font-bold tracking-widest text-[#45464d] uppercase"
                 >
                   ← Back
@@ -914,7 +1803,6 @@ function CollectionWizardPreview({
             </div>
           )}
 
-          {/* Video Step */}
           {mockStep === "video" && (
             <div className="text-center">
               <h1 className="mb-1 text-xl font-extrabold text-[#191c1e]">Record your video</h1>

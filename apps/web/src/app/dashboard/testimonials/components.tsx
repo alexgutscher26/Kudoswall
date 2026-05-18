@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import {
   Star,
@@ -13,7 +13,6 @@ import {
   MessageSquareQuote,
   Copy,
   Clock,
-  MoreVertical,
   Trash2,
   ExternalLink,
   ChevronDown,
@@ -22,10 +21,17 @@ import {
   Type,
   Video,
   Layers,
+  Tag,
+  Download,
+  ShieldCheck,
+  Sparkles,
+  GripVertical,
+  Lock,
 } from "lucide-react";
 import { gooeyToast as toast } from "goey-toast";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { trpc, queryClient } from "@/utils/trpc";
+import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,8 +43,17 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@my-better-t-app/ui/components/dropdown-menu";
-import { updateTestimonialStatus, deleteTestimonial } from "../actions";
+import {
+  updateTestimonialStatus,
+  deleteTestimonial,
+  bulkUpdateTestimonialStatus,
+  bulkDeleteTestimonials,
+  bulkTagTestimonials,
+  featureTestimonial,
+  reorderFeaturedTestimonials,
+} from "../actions";
 import { formatDistanceToNow } from "date-fns";
+import { useRealtimeInbox } from "@/hooks/use-realtime-inbox";
 
 interface Testimonial {
   id: string;
@@ -54,8 +69,14 @@ interface Testimonial {
   status: "pending" | "approved" | "archived";
   type: "text" | "video";
   videoUrl?: string | null;
+  verifiedVia?: string | null;
+  verifiedAt?: string | Date | null;
+  verifiedId?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
+  deletedAt?: string | Date | null;
+  featured: boolean;
+  featuredOrder: number;
   testimonialToTags?: {
     tag: {
       id: string;
@@ -67,49 +88,61 @@ interface Testimonial {
 
 interface InboxProps {
   initialTestimonials: Testimonial[];
-  project: {
-    id: string;
-    name: string;
-    slug: string;
-    workspaceId: string;
-  };
+  project: RouterOutputs["dashboard"]["getProjectTestimonials"]["project"];
   projects: {
     id: string;
     name: string;
   }[];
+  permissions: any;
 }
 
 const TABS = [
   { id: "pending", label: "Pending", icon: Clock },
   { id: "approved", label: "Approved", icon: Check },
+  { id: "featured", label: "Featured", icon: Sparkles },
   { id: "archived", label: "Archived", icon: Archive },
   { id: "all", label: "All", icon: MessageSquareQuote },
 ] as const;
 
-export function TestimonialInbox({ initialTestimonials, project, projects }: InboxProps) {
+export function TestimonialInbox({
+  initialTestimonials,
+  project,
+  projects,
+  permissions,
+}: InboxProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "archived">(
-    "pending",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "all" | "pending" | "approved" | "archived" | "featured"
+  >("pending");
   const [typeFilter, setTypeFilter] = useState<"all" | "video" | "text">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Enable real-time updates for this project and workspace
+  useRealtimeInbox(project.workspaceId, project.id);
   const [rawTestimonial, setRawTestimonial] = useState<Testimonial | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+
   // Fetch testimonials with real-time polling
-  const { data: qData } = useQuery({
-    ...trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
-    initialData: { project, testimonials: initialTestimonials } as any,
-    refetchInterval: 5000,
-    staleTime: 5000,
-  });
+  const { data: qData } = useQuery(
+    trpc.dashboard.getProjectTestimonials.queryOptions(
+      { projectId: project.id },
+      {
+        initialData: { project: project as any, testimonials: initialTestimonials as any },
+      },
+    ),
+  );
 
   const testimonials = qData?.testimonials ?? initialTestimonials;
   const displayedTestimonials = mounted ? testimonials : initialTestimonials;
@@ -117,19 +150,28 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   const handleProjectSwitch = (projectId: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("project", projectId);
-    router.push(`/dashboard/testimonials?${params.toString()}`);
+    router.push(`/dashboard/testimonials?${params.toString()}` as any);
   };
 
-  const filteredTestimonials = displayedTestimonials.filter((t) => {
-    const matchesTab = activeTab === "all" || t.status === activeTab;
+  const filteredTestimonials = (displayedTestimonials as Testimonial[]).filter((t: Testimonial) => {
+    const matchesTab =
+      activeTab === "all" ? true : activeTab === "featured" ? t.featured : t.status === activeTab;
     const matchesType = typeFilter === "all" || t.type === typeFilter;
     const matchesSearch =
       t.authorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.authorEmail?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRating = minRating === null || (t.rating ?? 0) >= minRating;
-    const matchesTag = true; // Placeholder for tag filtering
+    const matchesTag =
+      selectedTagId === null || t.testimonialToTags?.some((tt) => tt.tag.id === selectedTagId);
     return matchesTab && matchesType && matchesSearch && matchesRating && matchesTag;
+  });
+
+  const sortedTestimonials = [...filteredTestimonials].sort((a, b) => {
+    if (activeTab === "featured") {
+      return a.featuredOrder - b.featuredOrder;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const handleStatusUpdate = async (id: string, status: "approved" | "archived" | "pending") => {
@@ -140,6 +182,22 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
           trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
         );
         toast.success(`Testimonial ${status}`);
+      } catch (error) {
+        toast.error("Failed to update status");
+      }
+    });
+  };
+
+  const handleBulkStatusUpdate = async (status: "approved" | "archived" | "pending") => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      try {
+        await bulkUpdateTestimonialStatus(selectedIds, status);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(`${selectedIds.length} testimonials ${status}`);
+        setSelectedIds([]);
       } catch (error) {
         toast.error("Failed to update status");
       }
@@ -168,6 +226,94 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     });
   };
 
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    toast(`Delete ${selectedIds.length} testimonials?`, {
+      description: "Are you sure you want to delete selected items? This action cannot be undone.",
+      action: {
+        label: "Delete All",
+        onClick: () => {
+          startTransition(async () => {
+            try {
+              await bulkDeleteTestimonials(selectedIds);
+              await queryClient.invalidateQueries(
+                trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+              );
+              toast.success(`${selectedIds.length} testimonials deleted`);
+              setSelectedIds([]);
+            } catch (error) {
+              toast.error("Failed to delete testimonials");
+            }
+          });
+        },
+      },
+    });
+  };
+
+  const handleBulkTag = async (tagId: string, action: "assign" | "unassign") => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      try {
+        await bulkTagTestimonials(selectedIds, tagId, action);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(`Tags ${action === "assign" ? "assigned" : "removed"}`);
+        setSelectedIds([]);
+      } catch (error) {
+        toast.error("Failed to update tags");
+      }
+    });
+  };
+
+  const handleFeatureToggle = async (id: string, featured: boolean) => {
+    startTransition(async () => {
+      try {
+        await featureTestimonial(id, featured);
+        await queryClient.invalidateQueries(
+          trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+        );
+        toast.success(featured ? "Testimonial featured" : "Testimonial unfeatured");
+      } catch (error) {
+        toast.error("Failed to update featured status");
+      }
+    });
+  };
+
+  const onDragEnd = async (result: any) => {
+    if (!result.destination) return;
+    if (result.destination.index === result.source.index) return;
+
+    const items = Array.from(sortedTestimonials);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistic update
+    const orders = items.map((t, index) => ({ id: t.id, featuredOrder: index }));
+
+    try {
+      await reorderFeaturedTestimonials(orders);
+      await queryClient.invalidateQueries(
+        trpc.dashboard.getProjectTestimonials.queryOptions({ projectId: project.id }),
+      );
+      toast.success("Order updated");
+    } catch (error) {
+      toast.error("Failed to save new order");
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredTestimonials.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredTestimonials.map((t: Testimonial) => t.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  };
+
   const handleCopyLink = () => {
     const url = `${window.location.origin}/collect/${project.slug}`;
     navigator.clipboard.writeText(url);
@@ -176,172 +322,393 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
     });
   };
 
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Header Toolbar: Collection Info & Quick Actions */}
-      <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Project Switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-4 py-2 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-pink-50 transition-colors group-hover:bg-pink-100">
-                <MessageSquareQuote className="size-4 text-pink-500" />
-              </div>
-              <div className="text-left">
-                <p className="mb-0.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Active Collection
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <p className="truncate text-[14px] font-bold text-neutral-900">{project.name}</p>
-                  <ChevronDown className="size-3.5 text-neutral-300 transition-colors group-hover:text-neutral-500" />
-                </div>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl duration-200"
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  Switch Collection
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                <div className="max-h-60 overflow-y-auto">
-                  <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
-                    {projects.map((p) => (
-                      <DropdownMenuRadioItem
-                        key={p.id}
-                        value={p.id}
-                        className="rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
-                      >
-                        {p.name}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </div>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard")}
-                className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
-              >
-                <Plus className="size-3.5" />
-                New Collection Link
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+  const handleExport = () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your testimonials.",
+      });
+      return;
+    }
 
-          {/* Collection Link Action */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="group flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-4 py-2 shadow-sm transition-all outline-none hover:border-neutral-200 hover:shadow-md"
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-neutral-50 transition-colors group-hover:bg-neutral-100">
-              <Copy className="size-4 text-neutral-400 transition-colors group-hover:text-neutral-600" />
-            </div>
-            <div className="text-left">
-              <p className="mb-0.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                Collection Link
-              </p>
-              <p className="max-w-[140px] truncate text-[14px] font-bold text-neutral-900 group-hover:text-pink-600 sm:max-w-[200px]">
-                {mounted
-                  ? `${window.location.host}/collect/${project.slug}`
-                  : `/collect/${project.slug}`}
-              </p>
-            </div>
-          </button>
+    if (filteredTestimonials.length === 0) {
+      toast.error("No testimonials to export");
+      return;
+    }
+
+    const headers = [
+      "ID",
+      "Author Name",
+      "Author Email",
+      "Author Company",
+      "Rating",
+      "Status",
+      "Type",
+      "Content",
+      "Video URL",
+      "Tags",
+      "Submitted At",
+    ];
+
+    const csvRows = filteredTestimonials.map((t: Testimonial) => {
+      const tags = t.testimonialToTags?.map((tt) => tt.tag.name).join("; ") || "";
+      const row = [
+        t.id,
+        t.authorName || "",
+        t.authorEmail || "",
+        t.authorCompany || "",
+        t.rating?.toString() || "",
+        t.status,
+        t.type,
+        (t.content || "").replace(/"/g, '""'),
+        t.videoUrl || "",
+        tags,
+        new Date(t.createdAt).toISOString(),
+      ];
+      return row.map((val) => `"${val}"`).join(",");
+    });
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `testimonials_${project.slug}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Export successful!", {
+      description: `${filteredTestimonials.length} testimonials exported`,
+    });
+  };
+
+  const handleBulkExport = () => {
+    if (!permissions?.features?.csvExport) {
+      toast.error("CSV Export is a Pro feature", {
+        description: "Upgrade your plan to export your testimonials.",
+      });
+      return;
+    }
+
+    if (selectedIds.length === 0) return;
+
+    const selectedTestimonials = filteredTestimonials.filter((t: Testimonial) =>
+      selectedIds.includes(t.id),
+    );
+
+    const headers = [
+      "ID",
+      "Author Name",
+      "Author Email",
+      "Author Company",
+      "Rating",
+      "Status",
+      "Type",
+      "Content",
+      "Video URL",
+      "Tags",
+      "Submitted At",
+    ];
+
+    const csvRows = selectedTestimonials.map((t: Testimonial) => {
+      const tags = t.testimonialToTags?.map((tt) => tt.tag.name).join("; ") || "";
+      const row = [
+        t.id,
+        t.authorName || "",
+        t.authorEmail || "",
+        t.authorCompany || "",
+        t.rating?.toString() || "",
+        t.status,
+        t.type,
+        (t.content || "").replace(/"/g, '""'),
+        t.videoUrl || "",
+        tags,
+        new Date(t.createdAt).toISOString(),
+      ];
+      return row.map((val) => `"${val}"`).join(",");
+    });
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `selected_testimonials_${project.slug}_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Export successful!", {
+      description: `${selectedIds.length} testimonials exported`,
+    });
+    setSelectedIds([]);
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      {/* Premium Header: Project Context & Search/Filter Toolbar */}
+      <div className="space-y-6">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-4">
+            {/* Project Switcher - Simplified */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group flex items-center gap-3 outline-none">
+                <div className="flex size-10 items-center justify-center rounded-2xl bg-pink-50 shadow-sm ring-1 ring-pink-100 transition-all group-hover:scale-105 group-hover:bg-pink-100 group-hover:shadow-md">
+                  <MessageSquareQuote className="size-5 text-pink-500" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
+                      {project.name}
+                    </h1>
+                    <ChevronDown className="mt-1 size-4 text-neutral-400 transition-colors group-hover:text-neutral-600" />
+                  </div>
+                  <p className="text-xs font-medium text-neutral-400">Personal Workspace</p>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="animate-in zoom-in-95 w-64 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl duration-200"
+              >
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                    Switch Collection
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                  <div className="max-h-60 overflow-y-auto">
+                    <DropdownMenuRadioGroup value={project.id} onValueChange={handleProjectSwitch}>
+                      {projects?.map((p) => (
+                        <DropdownMenuRadioItem
+                          key={p.id}
+                          value={p.id}
+                          className="rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
+                        >
+                          {p.name}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </div>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                <DropdownMenuItem
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set("new", "project");
+                    router.push(`${pathname}?${params.toString()}` as any);
+                  }}
+                  className="mt-1 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-neutral-900 transition-all hover:bg-neutral-50 focus:bg-neutral-900 focus:text-white"
+                >
+                  <Plus className="size-3.5" />
+                  New Collection Link
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="mx-2 hidden h-8 w-px bg-neutral-100 sm:block" />
+
+            {/* Subtle Copy Link */}
+            <button
+              onClick={handleCopyLink}
+              className="group hidden items-center gap-2 rounded-xl border border-neutral-100 bg-white px-3 py-1.5 shadow-sm transition-all hover:border-neutral-200 hover:shadow-md sm:flex"
+            >
+              <Copy className="size-3.5 text-neutral-400 transition-colors group-hover:text-pink-500" />
+              <span className="text-[13px] font-semibold text-neutral-600 transition-colors group-hover:text-neutral-900">
+                Copy Link
+              </span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Search testimonials..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-2xl border border-neutral-100 bg-white py-2.5 pr-4 pl-10 text-[14px] text-neutral-900 shadow-sm transition-all outline-none placeholder:text-neutral-400 focus:border-pink-200 focus:ring-2 focus:ring-pink-100 focus:outline-hidden"
-            />
-          </div>
+        {/* Unified Control Bar */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex flex-1 items-center gap-2 rounded-2xl border border-neutral-100 bg-white/50 p-1.5 shadow-xs ring-1 ring-black/[0.02] backdrop-blur-sm sm:gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search testimonials..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-10 w-full rounded-xl bg-transparent pr-4 pl-10 text-[14px] text-neutral-900 outline-none placeholder:text-neutral-400"
+              />
+            </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={`relative flex h-[46px] items-center gap-2 rounded-2xl border px-4 py-2 text-[13px] font-bold shadow-sm transition-all outline-none ${
-                minRating !== null
-                  ? "border-pink-200 bg-pink-50 text-pink-600"
-                  : "border-neutral-100 bg-white text-neutral-600 hover:bg-neutral-50"
-              } `}
-            >
-              <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
-              Rating
-              {minRating !== null && (
-                <span className="absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white bg-pink-500 shadow-sm" />
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
-            >
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                  Minimum Rating
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                <DropdownMenuRadioGroup
-                  value={minRating?.toString() || "all"}
-                  onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
+            <div className="h-6 w-px bg-neutral-100" />
+
+            <div className="scrollbar-hide flex items-center gap-1.5 overflow-x-auto pr-1">
+              {filteredTestimonials.length > 0 && (
+                <button
+                  onClick={handleSelectAll}
+                  className="flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 hover:text-neutral-900"
                 >
-                  <DropdownMenuRadioItem
-                    value="all"
-                    className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                  >
-                    All Ratings
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem
-                    value="5"
-                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                  >
-                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                    <span>5 Stars only</span>
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem
-                    value="4"
-                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                  >
-                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                    <span>4+ Stars</span>
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem
-                    value="3"
-                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
-                  >
-                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                    <span>3+ Stars</span>
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuGroup>
-
-              {minRating !== null && (
-                <>
-                  <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
-                  <DropdownMenuItem
-                    onClick={() => setMinRating(null)}
-                    className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
-                  >
-                    Clear Filter
-                  </DropdownMenuItem>
-                </>
+                  <Check
+                    className={`size-3.5 ${selectedIds.length === filteredTestimonials.length ? "text-pink-500" : "text-neutral-400"}`}
+                  />
+                  <span className="hidden whitespace-nowrap sm:inline">
+                    {selectedIds.length === filteredTestimonials.length ? "Deselect" : "Select All"}
+                  </span>
+                </button>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
+                    minRating !== null
+                      ? "bg-pink-50 text-pink-600"
+                      : "text-neutral-600 hover:bg-neutral-100"
+                  } `}
+                >
+                  <Filter className={`size-3.5 ${minRating !== null ? "text-pink-500" : ""}`} />
+                  Rating
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+                >
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                      Minimum Rating
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                    <DropdownMenuRadioGroup
+                      value={minRating?.toString() || "all"}
+                      onValueChange={(val) => setMinRating(val === "all" ? null : parseInt(val))}
+                    >
+                      <DropdownMenuRadioItem
+                        value="all"
+                        className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        All Ratings
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="5"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>5 Stars only</span>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="4"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>4+ Stars</span>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="3"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                      >
+                        <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                        <span>3+ Stars</span>
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuGroup>
+                  {minRating !== null && (
+                    <>
+                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                      <DropdownMenuItem
+                        onClick={() => setMinRating(null)}
+                        className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                      >
+                        Clear Filter
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  disabled={!permissions?.features?.tagFiltering}
+                  className={`relative flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold transition-all outline-none ${
+                    selectedTagId !== null
+                      ? "bg-pink-50 text-pink-600"
+                      : "text-neutral-600 hover:bg-neutral-100"
+                  } ${!permissions?.features?.tagFiltering ? "cursor-not-allowed opacity-60" : ""}`}
+                  onClick={(e) => {
+                    if (!permissions?.features?.tagFiltering) {
+                      e.preventDefault();
+                      toast.error("Pro Feature", {
+                        description: "Upgrade to Pro to filter testimonials by tags.",
+                      });
+                    }
+                  }}
+                >
+                  <Tag className={`size-3.5 ${selectedTagId !== null ? "text-pink-500" : ""}`} />
+                  Tag
+                  {!permissions?.features?.tagFiltering && (
+                    <Lock className="size-2.5 text-neutral-400" />
+                  )}
+                </DropdownMenuTrigger>
+                {permissions?.features?.tagFiltering && (
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 rounded-2xl border-neutral-100 bg-white p-2 text-neutral-900 shadow-2xl"
+                  >
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                        Filter by Tag
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                      <div className="max-h-60 overflow-y-auto">
+                        <DropdownMenuRadioGroup
+                          value={selectedTagId || "all"}
+                          onValueChange={(val) => setSelectedTagId(val === "all" ? null : val)}
+                        >
+                          <DropdownMenuRadioItem
+                            value="all"
+                            className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                          >
+                            All Tags
+                          </DropdownMenuRadioItem>
+                          {tags?.map((tag) => (
+                            <DropdownMenuRadioItem
+                              key={tag.id}
+                              value={tag.id}
+                              className="rounded-xl px-3 py-2 text-[14px] transition-colors focus:bg-neutral-50"
+                            >
+                              {tag.name}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </div>
+                    </DropdownMenuGroup>
+                    {selectedTagId !== null && (
+                      <>
+                        <DropdownMenuSeparator className="mx-2 my-1 bg-neutral-50" />
+                        <DropdownMenuItem
+                          onClick={() => setSelectedTagId(null)}
+                          className="cursor-pointer justify-center rounded-xl px-3 py-2 text-center text-[13px] font-bold text-pink-600 transition-colors hover:bg-pink-50 focus:bg-pink-50"
+                        >
+                          Clear Filter
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                )}
+              </DropdownMenu>
+
+              <button
+                onClick={handleExport}
+                className="flex h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 hover:text-neutral-900"
+              >
+                <Download className="size-3.5 text-neutral-400" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter Toolbar (Type Switchers & Status Tabs) */}
-      <div className="flex flex-wrap items-center justify-between gap-6 px-1">
-        {/* Type Switchers (Segmented Control) */}
-        <div className="flex items-center gap-1 rounded-xl bg-neutral-100/50 p-1">
+      <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="scrollbar-hide flex items-center gap-1 overflow-x-auto rounded-xl bg-neutral-100/50 p-1">
           {[
             { id: "all", label: "All", icon: Layers },
             { id: "video", label: "Video", icon: Video },
@@ -353,7 +720,7 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
               <button
                 key={type.id}
                 onClick={() => setTypeFilter(type.id as any)}
-                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
                   isActive
                     ? "border border-black/5 bg-white text-neutral-900 shadow-sm"
                     : "text-neutral-500 hover:bg-white/50 hover:text-neutral-700"
@@ -366,20 +733,19 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
           })}
         </div>
 
-        {/* Status Tabs */}
-        <div className="flex w-fit items-center gap-1 rounded-xl bg-neutral-100/50 p-1">
+        <div className="scrollbar-hide flex items-center gap-1 overflow-x-auto rounded-xl bg-neutral-100/50 p-1">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const count = displayedTestimonials.filter(
-              (t) => tab.id === "all" || t.status === tab.id,
+            const count = (displayedTestimonials as Testimonial[]).filter((t: Testimonial) =>
+              tab.id === "all" ? true : tab.id === "featured" ? t.featured : t.status === tab.id,
             ).length;
 
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all ${
                   isActive
                     ? "border border-black/5 bg-white text-neutral-900 shadow-sm"
                     : "text-neutral-500 hover:bg-white/50 hover:text-neutral-700"
@@ -398,17 +764,56 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
         </div>
       </div>
 
-      {/* Testimonials List */}
       <div className="grid grid-cols-1 gap-4">
-        {filteredTestimonials.length > 0 ? (
-          filteredTestimonials.map((t) => (
+        {activeTab === "featured" ? (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="testimonials">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="grid grid-cols-1 gap-4"
+                >
+                  {sortedTestimonials.map((t, index) => (
+                    <Draggable key={t.id} draggableId={t.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className="group relative"
+                        >
+                          <TestimonialCard
+                            testimonial={t}
+                            onUpdateStatus={handleStatusUpdate}
+                            onDelete={handleDelete}
+                            onViewRaw={() => setRawTestimonial(t)}
+                            onFeatureToggle={handleFeatureToggle}
+                            workspaceId={project.workspaceId}
+                            isSelected={selectedIds.includes(t.id)}
+                            onSelect={() => toggleSelect(t.id)}
+                            dragHandleProps={provided.dragHandleProps}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : sortedTestimonials.length > 0 ? (
+          sortedTestimonials.map((t: Testimonial) => (
             <TestimonialCard
               key={t.id}
               testimonial={t}
               onUpdateStatus={handleStatusUpdate}
               onDelete={handleDelete}
               onViewRaw={() => setRawTestimonial(t)}
+              onFeatureToggle={handleFeatureToggle}
               workspaceId={project.workspaceId}
+              isSelected={selectedIds.includes(t.id)}
+              onSelect={() => toggleSelect(t.id)}
             />
           ))
         ) : (
@@ -418,9 +823,11 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
             </div>
             <h3 className="text-[16px] font-bold text-neutral-900">No testimonials found</h3>
             <p className="mx-auto mt-1 max-w-xs text-[14px] leading-relaxed text-neutral-500">
-              {searchQuery || typeFilter !== "all" || minRating !== null
-                ? "Try adjusting your filters to find what you're looking for."
-                : "You haven't received any testimonials for this project yet."}
+              {(activeTab as string) === "featured"
+                ? "Feature your best testimonials to show them off in your widgets and wall of fame."
+                : searchQuery || typeFilter !== "all" || minRating !== null
+                  ? "Try adjusting your filters to find what you're looking for."
+                  : "You haven't received any testimonials for this project yet."}
             </p>
             {!(searchQuery || typeFilter !== "all" || minRating !== null) && (
               <button
@@ -435,6 +842,17 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
         )}
       </div>
 
+      <BulkActionToolbar
+        selectedIds={selectedIds}
+        onApprove={() => handleBulkStatusUpdate("approved")}
+        onReject={() => handleBulkStatusUpdate("archived")}
+        onDelete={handleBulkDelete}
+        onExport={handleBulkExport}
+        onTag={(tagId) => handleBulkTag(tagId, "assign")}
+        tags={tags ?? []}
+        onClearSelection={() => setSelectedIds([])}
+      />
+
       <RawDataModal
         open={!!rawTestimonial}
         testimonial={rawTestimonial}
@@ -444,21 +862,161 @@ export function TestimonialInbox({ initialTestimonials, project, projects }: Inb
   );
 }
 
+const TAG_COLORS = [
+  { name: "Pink", color: "#e8527a" },
+  { name: "Purple", color: "#8b5cf6" },
+  { name: "Indigo", color: "#6366f1" },
+  { name: "Blue", color: "#3b82f6" },
+  { name: "Cyan", color: "#06b6d4" },
+  { name: "Emerald", color: "#10b981" },
+  { name: "Amber", color: "#f59e0b" },
+  { name: "Orange", color: "#f97316" },
+  { name: "Rose", color: "#f43f5e" },
+  { name: "Slate", color: "#64748b" },
+];
+
+function CreateTagModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0].color);
+  const [loading, setLoading] = useState(false);
+
+  const createTag = useMutation(
+    trpc.tag.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.tag.list.queryOptions());
+        toast.success("Tag created!");
+        onClose();
+        setName("");
+      },
+      onError: () => {
+        toast.error("Failed to create tag");
+      },
+    }),
+  );
+
+  useEffect(() => {
+    if (open) {
+      document.body.setAttribute("data-modal-open", "true");
+    } else {
+      document.body.removeAttribute("data-modal-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-modal-open");
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setLoading(true);
+    try {
+      await createTag.mutateAsync({ name, color: selectedColor });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+      <div
+        className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
+        onClick={onClose}
+      />
+      <div
+        className="animate-in zoom-in-95 relative w-full max-w-sm overflow-hidden rounded-[32px] bg-white shadow-2xl duration-300"
+        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+      >
+        <div className="relative p-7 sm:p-9">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-xl font-bold tracking-tight text-neutral-900">Create Tag</h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
+            >
+              <X className="size-5 text-neutral-400" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Tag Name
+              </label>
+              <input
+                autoFocus
+                type="text"
+                required
+                placeholder="e.g. Enterprise"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                Color
+              </label>
+              <div className="grid grid-cols-5 gap-3">
+                {TAG_COLORS.map((c) => (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setSelectedColor(c.color)}
+                    className={`flex size-10 items-center justify-center rounded-xl transition-all ${
+                      selectedColor === c.color ? "ring-2 ring-neutral-900 ring-offset-2" : ""
+                    }`}
+                    style={{ backgroundColor: c.color }}
+                    title={c.name}
+                  >
+                    {selectedColor === c.color && <Check className="size-4 text-white" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !name.trim()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-4 py-3 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+            >
+              {loading ? "Creating..." : "Create Tag"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TestimonialCard({
   testimonial,
   onUpdateStatus,
   onDelete,
   onViewRaw,
+  onFeatureToggle,
   workspaceId,
+  isSelected,
+  onSelect,
+  dragHandleProps,
 }: {
   testimonial: Testimonial;
   onUpdateStatus: (id: string, status: "approved" | "archived" | "pending") => void;
   onDelete: (id: string) => void;
   onViewRaw: () => void;
+  onFeatureToggle?: (id: string, featured: boolean) => void;
   workspaceId?: string;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  dragHandleProps?: any;
 }) {
   const t = testimonial;
   const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+  const [createTagOpen, setCreateTagOpen] = useState(false);
+
   const assignTag = useMutation(
     trpc.tag.assign.mutationOptions({
       onSuccess: () => {
@@ -485,7 +1043,18 @@ function TestimonialCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[24px] border border-neutral-100 bg-white p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7">
+    <div
+      onClick={(e) => {
+        // If clicking anywhere on the card, toggle selection if the user didn't click a button
+        if ((e.target as HTMLElement).closest("button")) return;
+        onSelect?.();
+      }}
+      className={`group relative cursor-pointer overflow-hidden rounded-[24px] border p-6 transition-all hover:shadow-xl hover:shadow-black/5 sm:p-7 ${
+        isSelected
+          ? "border-pink-200 bg-pink-50/30 ring-1 ring-pink-100"
+          : "border-neutral-100 bg-white"
+      }`}
+    >
       <div
         className={`absolute top-0 bottom-0 left-0 w-1 ${
           t.status === "approved"
@@ -498,27 +1067,49 @@ function TestimonialCard({
 
       <div className="flex flex-col gap-8 lg:flex-row">
         <div className="min-w-0 flex-1">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <div key={s} className="relative">
-                  <Star className="size-4 fill-neutral-100 text-neutral-100" />
-                  {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
-                    <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                    </div>
-                  )}
-                  {(t.rating ?? 0) >= s && (
-                    <div className="absolute inset-0 z-10 overflow-hidden">
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                    </div>
-                  )}
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect?.();
+                }}
+                className={`flex size-5 items-center justify-center rounded-md border transition-all ${
+                  isSelected
+                    ? "border-pink-500 bg-pink-500 text-white"
+                    : "border-neutral-200 bg-white group-hover:border-neutral-300"
+                }`}
+              >
+                {isSelected && <Check className="size-3.5" strokeWidth={3} />}
+              </div>
+
+              {dragHandleProps && (
+                <div {...dragHandleProps} className="mr-1 cursor-grab active:cursor-grabbing">
+                  <GripVertical className="size-4 text-neutral-300" />
                 </div>
-              ))}
+              )}
+
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <div key={s} className="relative">
+                    <Star className="size-4 fill-neutral-100 text-neutral-100" />
+                    {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
+                      <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
+                        <Star className="size-4 fill-amber-400 text-amber-400" />
+                      </div>
+                    )}
+                    {(t.rating ?? 0) >= s && (
+                      <div className="absolute inset-0 z-10 overflow-hidden">
+                        <Star className="size-4 fill-amber-400 text-amber-400" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
+                · {t.type} Testimonial
+              </span>
             </div>
-            <span className="text-[11px] font-bold tracking-widest text-neutral-300 uppercase">
-              · {t.type} Testimonial
-            </span>
           </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
@@ -546,34 +1137,51 @@ function TestimonialCard({
                 <Plus className="size-2.5" /> Tag
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 rounded-xl">
-                <DropdownMenuLabel className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Available Tags
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {tags?.map((tag) => (
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Available Tags
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {tags?.map((tag) => (
+                    <DropdownMenuItem
+                      key={tag.id}
+                      disabled={getIsTagged(tag.id)}
+                      onClick={() => assignTag.mutate({ testimonialId: t.id, tagId: tag.id })}
+                      className="flex items-center gap-2"
+                    >
+                      <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                      {tag.name}
+                      {getIsTagged(tag.id) && <Check className="ml-auto size-3" />}
+                    </DropdownMenuItem>
+                  ))}
+                  {(!tags || tags.length === 0) && (
+                    <div className="p-2 text-center text-[11px] text-neutral-400">
+                      No tags created yet
+                    </div>
+                  )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    key={tag.id}
-                    disabled={getIsTagged(tag.id)}
-                    onClick={() => assignTag.mutate({ testimonialId: t.id, tagId: tag.id })}
-                    className="flex items-center gap-2"
+                    onClick={() => setCreateTagOpen(true)}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[11px] font-bold text-pink-600 transition-colors hover:bg-pink-50"
                   >
-                    <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
-                    {tag.name}
-                    {getIsTagged(tag.id) && <Check className="ml-auto size-3" />}
+                    <Plus className="size-3" />
+                    Create New Tag
                   </DropdownMenuItem>
-                ))}
-                {(!tags || tags.length === 0) && (
-                  <div className="p-2 text-center text-[11px] text-neutral-400">
-                    No tags created yet
-                  </div>
-                )}
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
+          <CreateTagModal open={createTagOpen} onClose={() => setCreateTagOpen(false)} />
+
           {t.type === "video" && t.videoUrl && (
             <div className="mb-6 aspect-video w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-100 bg-black shadow-lg">
-              <video src={t.videoUrl} controls className="size-full object-cover" />
+              <video
+                src={`${t.videoUrl}#t=0.001`}
+                controls
+                preload="metadata"
+                className="size-full object-cover"
+              />
             </div>
           )}
 
@@ -590,7 +1198,7 @@ function TestimonialCard({
             <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
               {t.authorImage ? (
                 <Image
-                  src={t.authorImage}
+                  src={t.authorImage as string}
                   alt={t.authorName ?? "Author"}
                   width={44}
                   height={44}
@@ -601,7 +1209,15 @@ function TestimonialCard({
               )}
             </div>
             <div className="min-w-0">
-              <h4 className="truncate text-[15px] font-bold text-neutral-900">{t.authorName}</h4>
+              <h4 className="flex items-center gap-2 truncate text-[15px] font-bold text-neutral-900">
+                {t.authorName}
+                {t.verifiedVia && (
+                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 uppercase ring-1 ring-blue-500/10">
+                    <ShieldCheck className="size-2.5" />
+                    Verified
+                  </span>
+                )}
+              </h4>
               <p className="mt-0.5 truncate text-[13px] text-neutral-400">
                 {t.authorEmail}
                 <span className="mx-2 inline-block size-1 rounded-full bg-neutral-200" />
@@ -631,6 +1247,19 @@ function TestimonialCard({
               >
                 <Clock className="size-4" />
                 Unapprove
+              </button>
+            )}
+            {t.status === "approved" && (
+              <button
+                onClick={() => onFeatureToggle?.(t.id, !t.featured)}
+                className={`flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-[13px] font-bold transition-all ${
+                  t.featured
+                    ? "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100"
+                    : "border-neutral-100 bg-white text-neutral-400 shadow-sm hover:border-neutral-200 hover:text-neutral-900"
+                }`}
+              >
+                <Sparkles className={`size-4 ${t.featured ? "fill-pink-500" : ""}`} />
+                {t.featured ? "Featured" : "Feature"}
               </button>
             )}
             <div className="flex items-center gap-2.5">
@@ -759,6 +1388,113 @@ function RawDataModal({
               Close Metadata
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface BulkActionToolbarProps {
+  selectedIds: string[];
+  onApprove: () => void;
+  onReject: () => void;
+  onDelete: () => void;
+  onExport: () => void;
+  onTag: (tagId: string) => void;
+  tags: any[];
+  onClearSelection: () => void;
+}
+
+function BulkActionToolbar({
+  selectedIds,
+  onApprove,
+  onReject,
+  onDelete,
+  onExport,
+  onTag,
+  tags,
+  onClearSelection,
+}: BulkActionToolbarProps) {
+  if (selectedIds.length === 0) return null;
+
+  return (
+    <div className="animate-in slide-in-from-bottom-8 fixed right-0 bottom-8 left-0 z-50 flex justify-center px-4 duration-300">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-neutral-200 bg-white/80 p-2 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-3">
+        <div className="flex items-center gap-3 px-3 sm:border-r sm:border-neutral-100 sm:pr-4">
+          <div className="flex size-6 items-center justify-center rounded-full bg-pink-500 text-[12px] font-bold text-white">
+            {selectedIds.length}
+          </div>
+          <span className="hidden text-[13px] font-bold text-neutral-600 sm:inline">Selected</span>
+          <button
+            onClick={onClearSelection}
+            className="rounded-full p-1 transition-colors hover:bg-neutral-100"
+          >
+            <X className="size-3.5 text-neutral-400" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 sm:gap-2">
+          <button
+            onClick={onApprove}
+            className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-[13px] font-bold text-green-600 transition-all hover:bg-green-100 active:scale-95"
+          >
+            <Check className="size-3.5" />
+            <span className="hidden sm:inline">Approve All</span>
+            <span className="sm:hidden">Approve</span>
+          </button>
+
+          <button
+            onClick={onReject}
+            className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-[13px] font-bold text-amber-600 transition-all hover:bg-amber-100 active:scale-95"
+          >
+            <Archive className="size-3.5" />
+            <span className="hidden sm:inline">Archive All</span>
+            <span className="sm:hidden">Archive</span>
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all outline-none hover:bg-neutral-100 active:scale-95">
+              <Tag className="size-3.5" />
+              Tag
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="center"
+              className="w-48 rounded-2xl border-neutral-100 p-2 shadow-xl"
+            >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                  Tag Selected
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 my-1" />
+                {tags.map((tag) => (
+                  <DropdownMenuItem
+                    key={tag.id}
+                    onClick={() => onTag(tag.id)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors focus:bg-pink-50 focus:text-pink-600"
+                  >
+                    <div className="size-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                    {tag.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            onClick={onExport}
+            className="flex items-center gap-2 rounded-full bg-neutral-50 px-4 py-2 text-[13px] font-bold text-neutral-600 transition-all hover:bg-neutral-100 active:scale-95"
+          >
+            <Download className="size-3.5" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-[13px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-95"
+          >
+            <Trash2 className="size-3.5" />
+            <span className="hidden sm:inline">Delete</span>
+          </button>
         </div>
       </div>
     </div>

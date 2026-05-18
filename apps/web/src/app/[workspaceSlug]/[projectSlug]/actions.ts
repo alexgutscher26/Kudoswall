@@ -1,11 +1,14 @@
 "use server";
 
 import { db } from "@/lib/server-db";
-import { project, testimonial, workspace } from "@my-better-t-app/db/schema";
-import { eq, and } from "drizzle-orm";
+import { project, testimonial, workspace, videoTranscodingJob } from "@my-better-t-app/db/schema";
+import { eq, and, count } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { notifyOwnerNewTestimonial, sendAuthorConfirmationEmail } from "@/lib/email-helpers";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getProjectBySlug(workspaceSlug: string, projectSlug: string) {
+  noStore();
   const ws = await db.query.workspace.findFirst({
     where: eq(workspace.slug, workspaceSlug),
   });
@@ -21,8 +24,25 @@ export async function getProjectBySlug(workspaceSlug: string, projectSlug: strin
 
   if (!result) return null;
 
+  // Get current usage for permissions
+  const counts = await db
+    .select({ count: count() })
+    .from(testimonial)
+    .where(eq(testimonial.projectId, result.id));
+
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: result.workspace.plan,
+    testimonialsCount: counts[0]?.count ?? 0,
+  });
+
+  console.log(
+    `[Collection Action] Project: ${projectSlug}, Plan: ${result.workspace.plan}, Video Enbled: ${permissions.features.video}`,
+  );
+
   return {
     ...result,
+    permissions,
     workspace: {
       ...result.workspace,
       branding: result.workspace.brandingJson
@@ -48,12 +68,41 @@ export async function submitTestimonial(
     authorLinkedin?: string;
     authorTagline?: string;
     videoUrl?: string;
+    verifiedVia?: string;
+    verifiedAt?: Date;
+    verifiedId?: string;
   },
 ) {
   const id = `tst_${nanoid()}`;
 
+  // Check testimonial limits
+  const p = await db.query.project.findFirst({
+    where: eq(project.id, projectId),
+    with: { workspace: true },
+  });
+
+  if (!p) throw new Error("Project not found");
+
+  const counts = await db
+    .select({ count: count() })
+    .from(testimonial)
+    .where(eq(testimonial.projectId, projectId));
+
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: p.workspace.plan,
+    testimonialsCount: counts[0]?.count ?? 0,
+  });
+
+  if (!permissions.canAddTestimonial) {
+    throw new Error(
+      `This project has reached its testimonial limit for the current plan. Please contact the owner.`,
+    );
+  }
+
   await db.insert(testimonial).values({
     id,
+    workspaceId: p.workspaceId,
     projectId,
     rating: data.rating,
     content: data.content,
@@ -64,9 +113,37 @@ export async function submitTestimonial(
     authorLinkedin: data.authorLinkedin,
     authorTagline: data.authorTagline,
     videoUrl: data.videoUrl,
+    verifiedVia: data.verifiedVia,
+    verifiedAt: data.verifiedAt,
+    verifiedId: data.verifiedId,
     status: "pending",
     type: data.videoUrl ? "video" : "text",
   });
+
+  if (data.videoUrl && data.videoUrl.startsWith("/api/videos/")) {
+    const key = data.videoUrl.replace("/api/videos/", "");
+    await db.insert(videoTranscodingJob).values({
+      id: `vtj_${nanoid()}`,
+      workspaceId: p.workspaceId,
+      testimonialId: id,
+      sourceKey: key,
+      status: "pending",
+    });
+  }
+
+  // Fire-and-forget email notification
+  void notifyOwnerNewTestimonial(projectId, {
+    authorName: data.authorName,
+    content: data.content,
+    rating: data.rating,
+  });
+
+  if (data.authorEmail) {
+    void sendAuthorConfirmationEmail(projectId, {
+      authorName: data.authorName,
+      authorEmail: data.authorEmail,
+    });
+  }
 
   return { success: true };
 }

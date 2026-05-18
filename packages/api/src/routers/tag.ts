@@ -1,79 +1,112 @@
-import { protectedProcedure, router } from "../index";
-import { tag, workspace, testimonialToTag, testimonial } from "@my-better-t-app/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { workspaceProcedure, router } from "../index";
+import { tag, testimonialToTag, workspace } from "@my-better-t-app/db/schema";
+import { eq, and, desc, isNull } from "drizzle-orm";
+import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
+import { purgeWidgetCache } from "../utils/purge";
+import { getEnvAsync } from "@my-better-t-app/env/server";
 
 export const tagRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const { db, session } = ctx;
-
-    const ws = await db.query.workspace.findFirst({
-      where: eq(workspace.ownerId, session.user.id),
-    });
-
-    if (!ws) return [];
+  list: workspaceProcedure.query(async ({ ctx }) => {
+    const { db } = ctx;
 
     return db.query.tag.findMany({
-      where: eq(tag.workspaceId, ws.id),
+      where: isNull(tag.deletedAt),
       orderBy: desc(tag.createdAt),
     });
   }),
 
-  create: protectedProcedure
+  create: workspaceProcedure
     .input(z.object({ name: z.string(), color: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
 
-      const ws = await db.query.workspace.findFirst({
-        where: eq(workspace.ownerId, session.user.id),
-      });
-
-      if (!ws) throw new Error("Workspace not found");
-
       const id = crypto.randomUUID();
       await db.insert(tag).values({
         id,
-        workspaceId: ws.id,
+        workspaceId: ctx.workspaceId,
         name: input.name,
         color: input.color,
+      });
+
+      // Trigger upgrade prompt email for tag filtering
+      try {
+        const { getWorkspacePermissions } = await import("../logic/billing");
+        const ws = await db.query.workspace.findFirst({
+          where: eq(workspace.id, ctx.workspaceId),
+          with: { organization: true },
+        });
+        const permissions = getWorkspacePermissions({
+          plan: ws?.plan || "free",
+          organization: (ws as any)?.organization,
+        });
+
+        if (!permissions.features.tagFiltering) {
+          const { triggerUpgradePrompt } = await import("../utils/upgrade-prompts");
+          await triggerUpgradePrompt({
+            db,
+            workspaceId: ctx.workspaceId,
+            userName: session.user.name || "there",
+            userEmail: session.user.email || "",
+            type: "tag-filtering",
+          });
+        }
+      } catch (e) {
+        console.error("[TAG_CREATE] Failed to trigger upgrade prompt:", e);
+      }
+
+      await recordAuditLog({
+        userId: session.user.id,
+        workspaceId: ctx.workspaceId,
+        entityType: "tag",
+        entityId: id,
+        action: "create",
+        diff: { name: input.name, color: input.color },
       });
 
       return { id };
     }),
 
-  delete: protectedProcedure
+  delete: workspaceProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
 
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, input.id),
-        with: {
-          workspace: true,
-        },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
-        throw new Error("Forbidden");
+      if (!t) {
+        throw new Error("Forbidden or not found");
       }
 
-      await db.delete(tag).where(eq(tag.id, input.id));
+      await db.update(tag).set({ deletedAt: new Date() }).where(eq(tag.id, input.id));
+
+      await recordAuditLog({
+        userId: session.user.id,
+        entityType: "tag",
+        entityId: input.id,
+        action: "delete",
+      });
+
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
+
       return { success: true };
     }),
 
-  assign: protectedProcedure
+  assign: workspaceProcedure
     .input(z.object({ testimonialId: z.string(), tagId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { testimonialId, tagId } = input;
 
-      // Verify tag ownership
+      // Verify tag ownership (handled by tenantDb)
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, tagId),
-        with: { workspace: true },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
+      if (!t) {
         throw new Error("Forbidden: Tag ownership");
       }
 
@@ -85,22 +118,24 @@ export const tagRouter = router({
         })
         .onConflictDoNothing();
 
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
+
       return { success: true };
     }),
 
-  unassign: protectedProcedure
+  unassign: workspaceProcedure
     .input(z.object({ testimonialId: z.string(), tagId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { db, session } = ctx;
+      const { db } = ctx;
       const { testimonialId, tagId } = input;
 
-      // Verify tag ownership
+      // Verify tag ownership (handled by tenantDb)
       const t = await db.query.tag.findFirst({
         where: eq(tag.id, tagId),
-        with: { workspace: true },
       });
 
-      if (!t || t.workspace.ownerId !== session.user.id) {
+      if (!t) {
         throw new Error("Forbidden: Tag ownership");
       }
 
@@ -109,6 +144,9 @@ export const tagRouter = router({
         .where(
           and(eq(testimonialToTag.testimonialId, testimonialId), eq(testimonialToTag.tagId, tagId)),
         );
+
+      const env = await getEnvAsync();
+      await purgeWidgetCache({ db, workspaceId: ctx.workspaceId, env });
 
       return { success: true };
     }),

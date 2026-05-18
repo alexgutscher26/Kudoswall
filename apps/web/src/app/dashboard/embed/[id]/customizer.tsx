@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Code2,
   Copy,
@@ -19,24 +20,25 @@ import {
   Zap,
   ArrowRight,
   Save,
-  Globe,
   Loader2,
-  Link,
+  Type,
   MoreHorizontal,
+  Lock,
+  Terminal,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
+import { UploadButton } from "@/utils/uploadthing";
 import { useRouter } from "next/navigation";
-import type { Route } from "next";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Widget from "@/components/widget";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type LayoutType = "grid" | "masonry" | "carousel";
+type LayoutType = "grid" | "masonry" | "carousel" | "bento";
 type ThemeType = "light" | "dark" | "auto";
 
-interface WidgetSettings {
+export interface WidgetSettings {
   layout: LayoutType;
   theme: ThemeType;
   maxItems: number;
@@ -68,6 +70,9 @@ interface WidgetSettings {
   // Advanced
   locale: string;
   animation: "fade" | "none";
+  fontFamily: string;
+  customFontUrl?: string;
+  customFontName?: string;
 
   // Header
   headerTitle: string;
@@ -83,11 +88,13 @@ export default function WidgetCustomizer({
   widgetId,
   workspaceId,
   initialSettings,
+  initialCustomCss,
   isPro,
 }: {
   widgetId: string;
   workspaceId: string;
-  initialSettings: any;
+  initialSettings: Partial<WidgetSettings>;
+  initialCustomCss?: string | null;
   isPro: boolean;
 }) {
   const router = useRouter();
@@ -115,6 +122,7 @@ export default function WidgetCustomizer({
     hideBadge: false,
     locale: "en",
     animation: "fade",
+    fontFamily: "sans",
     headerTitle: "What our customers say",
     headerRating: 4.9,
     headerReviewCount: 128,
@@ -122,10 +130,14 @@ export default function WidgetCustomizer({
     hideHeader: false,
     ...initialSettings,
   });
+  const [customCss, setCustomCss] = useState(initialCustomCss || "");
 
   const [activeTab, setActiveTab] = useState<"layout" | "display" | "filtering" | "branding">(
     "layout",
   );
+
+  const { data: tags } = useQuery(trpc.tag.list.queryOptions());
+
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewTab, setPreviewTab] = useState<"preview" | "code">("preview");
   const [copied, setCopied] = useState(false);
@@ -135,8 +147,8 @@ export default function WidgetCustomizer({
       onSuccess: () => {
         toast.success("Settings saved");
       },
-      onError: (err: any) => {
-        toast.error(err.message);
+      onError: (err) => {
+        toast.error(err instanceof Error ? err.message : String(err));
       },
     }),
   );
@@ -145,6 +157,7 @@ export default function WidgetCustomizer({
     updateWidget.mutate({
       id: widgetId,
       settings: settings,
+      customCss,
     });
   };
 
@@ -158,6 +171,41 @@ export default function WidgetCustomizer({
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  // Dynamically load the Google Font or Custom Font in the customizer preview whenever fontFamily changes.
+  useEffect(() => {
+    const { fontFamily, customFontUrl } = settings;
+    if (!fontFamily) return;
+
+    if (fontFamily === "custom" && customFontUrl) {
+      const linkId = "kudos-custom-font";
+      let style = document.getElementById(linkId) as HTMLStyleElement;
+      if (!style) {
+        style = document.createElement("style");
+        style.id = linkId;
+        document.head.appendChild(style);
+      }
+      style.innerHTML = `
+        @font-face {
+          font-family: 'CustomFont';
+          src: url('${customFontUrl}') format('woff2');
+          font-weight: 300 900;
+          font-style: normal;
+          font-display: swap;
+        }
+      `;
+      return;
+    }
+
+    if (["sans", "serif", "mono"].includes(fontFamily)) return;
+    const linkId = `kudos-preview-font-${fontFamily.replace(/\s+/g, "-")}`.toLowerCase();
+    if (document.getElementById(linkId)) return; // already injected
+    const link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
+    document.head.appendChild(link);
+  }, [settings.fontFamily, settings.customFontUrl]);
 
   const embedCode = `<script src="${origin || "https://kudoswall.org"}/widget.js" 
   data-id="${widgetId}" 
@@ -195,6 +243,40 @@ export default function WidgetCustomizer({
       authorTagline: "Founder",
       authorCompany: "LaunchPad",
       content: "Best purchase this year. The support team is also incredibly responsive.",
+      rating: 5,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
+    {
+      id: "4",
+      authorName: "Sarah J.",
+      authorTagline: "Product Manager",
+      authorCompany: "TechFlow",
+      content: "The interface is so intuitive. We were up and running in minutes.",
+      rating: 5,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
+    {
+      id: "5",
+      authorName: "Michael R.",
+      authorTagline: "Software Engineer",
+      authorCompany: "DevOps Inc",
+      content: "Robust API and great documentation. Highly recommended for developers.",
+      rating: 4,
+      createdAt: new Date(),
+      type: "text" as const,
+      authorImage: "",
+    },
+    {
+      id: "6",
+      authorName: "Elena V.",
+      authorTagline: "Marketing Director",
+      authorCompany: "Creative co",
+      content:
+        "Our conversion rate jumped by 20% after adding these testimonials to our landing page.",
       rating: 5,
       createdAt: new Date(),
       type: "text" as const,
@@ -251,6 +333,7 @@ export default function WidgetCustomizer({
                     {[
                       { id: "grid", icon: LayoutGrid, label: "Grid", pro: false },
                       { id: "masonry", icon: Columns, label: "Masonry", pro: true },
+                      { id: "bento", icon: Layout, label: "Bento", pro: true },
                       { id: "carousel", icon: GalleryHorizontal, label: "Carousel", pro: true },
                     ].map((l) => (
                       <button
@@ -271,23 +354,39 @@ export default function WidgetCustomizer({
                   </div>
                 </div>
 
-                {settings.layout === "carousel" && (
+                {settings.layout === "carousel" && isPro && (
                   <div className="space-y-6 border-t border-neutral-50 pt-6">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-medium text-neutral-700">Auto-advance</span>
-                      <input
-                        type="checkbox"
-                        checked={settings.carouselAutoAdvance}
-                        onChange={(e) =>
-                          setSettings((s) => ({ ...s, carouselAutoAdvance: e.target.checked }))
-                        }
-                        disabled={!isPro}
-                      />
+                    {/* Toggles */}
+                    <div className="space-y-4">
+                      <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-neutral-700">
+                        <input
+                          type="checkbox"
+                          checked={settings.carouselAutoAdvance}
+                          className="size-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                          onChange={(e) =>
+                            setSettings((s) => ({ ...s, carouselAutoAdvance: e.target.checked }))
+                          }
+                        />
+                        Auto-advance slides
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-neutral-700">
+                        <input
+                          type="checkbox"
+                          checked={settings.carouselShowArrows ?? true}
+                          className="size-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                          onChange={(e) =>
+                            setSettings((s) => ({ ...s, carouselShowArrows: e.target.checked }))
+                          }
+                        />
+                        Show navigation arrows
+                      </label>
                     </div>
+
+                    {/* Interval */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-neutral-400 uppercase">
-                          Interval
+                          Auto-advance Interval
                         </span>
                         <span className="text-[11px] font-bold text-neutral-900">
                           {settings.carouselInterval / 1000}s
@@ -298,13 +397,29 @@ export default function WidgetCustomizer({
                           <button
                             key={v}
                             onClick={() => setSettings((s) => ({ ...s, carouselInterval: v }))}
-                            className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.carouselInterval === v ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"}`}
+                            className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${
+                              settings.carouselInterval === v
+                                ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm"
+                                : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"
+                            }`}
                           >
                             {v / 1000}s
                           </button>
                         ))}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {settings.layout === "carousel" && !isPro && (
+                  <div className="mt-6 rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-center">
+                    <Zap className="mx-auto mb-2 size-5 text-pink-500" />
+                    <p className="text-[12px] font-bold text-pink-600">
+                      Carousel Layout is a Pro Feature
+                    </p>
+                    <p className="mt-1 text-[10px] text-pink-400">
+                      Upgrade to customize carousel settings
+                    </p>
                   </div>
                 )}
 
@@ -334,12 +449,17 @@ export default function WidgetCustomizer({
             {activeTab === "display" && (
               <div className="space-y-6">
                 {[
-                  { key: "showRating", label: "Show star ratings", pro: false },
-                  { key: "showReviewerPhoto", label: "Show reviewer photo", pro: true },
-                  { key: "showReviewerCompany", label: "Show company info", pro: true },
-                  { key: "showDate", label: "Show submission date", pro: true },
-                  { key: "hideHeader", label: "Hide widget header", pro: false, invert: true },
-                ].map((field: any) => (
+                  { key: "showRating" as const, label: "Show star ratings", pro: false },
+                  { key: "showReviewerPhoto" as const, label: "Show reviewer photo", pro: true },
+                  { key: "showReviewerCompany" as const, label: "Show company info", pro: true },
+                  { key: "showDate" as const, label: "Show submission date", pro: true },
+                  {
+                    key: "hideHeader" as const,
+                    label: "Hide widget header",
+                    pro: false,
+                    invert: true,
+                  },
+                ].map((field) => (
                   <div key={field.key} className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-neutral-700">{field.label}</span>
                     <div className="flex items-center gap-2">
@@ -445,19 +565,64 @@ export default function WidgetCustomizer({
                     <span className="text-[11px] font-bold text-neutral-400 uppercase">
                       Card Rounding
                     </span>
-                    <span className="text-[11px] font-bold text-neutral-900 capitalize">
-                      {settings.cardBorderRadius}
-                    </span>
                   </div>
                   <div className="flex gap-2">
                     {["none", "small", "large", "pill"].map((v) => (
                       <button
                         key={v}
-                        disabled={!isPro && v !== "large"}
+                        disabled={!isPro && v !== "small"}
                         onClick={() => setSettings((s) => ({ ...s, cardBorderRadius: v as any }))}
-                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.cardBorderRadius === v ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v !== "large" ? "opacity-50" : ""}`}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold ${settings.cardBorderRadius === v ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro && v !== "small" ? "opacity-30" : ""}`}
                       >
                         {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Shadow */}
+                <div className="space-y-3 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                      Card Shadow
+                    </span>
+                    {!isPro && <Zap className="size-3 text-pink-400" />}
+                  </div>
+                  <div className="flex gap-2">
+                    {["none", "subtle", "medium"].map((v) => (
+                      <button
+                        key={v}
+                        disabled={!isPro}
+                        onClick={() => setSettings((s) => ({ ...s, cardShadow: v as any }))}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.cardShadow === v ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro ? "opacity-30" : ""}`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text Truncation */}
+                <div className="space-y-3 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                      Text Limit
+                    </span>
+                    {!isPro && <Zap className="size-3 text-pink-400" />}
+                  </div>
+                  <div className="flex gap-2">
+                    {[
+                      { id: "off", label: "None" },
+                      { id: 150, label: "150ch" },
+                      { id: 250, label: "250ch" },
+                    ].map((v) => (
+                      <button
+                        key={v.id}
+                        disabled={!isPro}
+                        onClick={() => setSettings((s) => ({ ...s, truncateText: v.id as any }))}
+                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.truncateText === v.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro ? "opacity-30" : ""}`}
+                      >
+                        {v.label}
                       </button>
                     ))}
                   </div>
@@ -503,8 +668,15 @@ export default function WidgetCustomizer({
                     ].map((v) => (
                       <button
                         key={v.id}
-                        disabled={!isPro && v.id !== "all"}
-                        onClick={() => setSettings((s) => ({ ...s, filterType: v.id as any }))}
+                        onClick={() => {
+                          if (!isPro && v.id !== "all") {
+                            toast.error("Pro Feature", {
+                              description: "Upgrade to Pro to filter by testimonial type.",
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, filterType: v.id as any }));
+                        }}
                         className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase ${settings.filterType === v.id ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v.id !== "all" ? "opacity-50" : ""}`}
                       >
                         {v.label}
@@ -512,28 +684,183 @@ export default function WidgetCustomizer({
                     ))}
                   </div>
                 </div>
+
+                {tags && tags.length > 0 && (
+                  <div className="space-y-4 border-t border-neutral-50 pt-6">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                        Filter by Tags
+                      </label>
+                      {!isPro && <ProBadge />}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => {
+                        const isSelected = (settings.filterTags || []).includes(tag.id);
+                        return (
+                          <button
+                            key={tag.id}
+                            onClick={() => {
+                              if (!isPro) {
+                                toast.error("Pro Feature", {
+                                  description: "Upgrade to Pro to filter your widget by tags.",
+                                });
+                                return;
+                              }
+                              setSettings((s) => ({
+                                ...s,
+                                filterTags: isSelected
+                                  ? (s.filterTags || []).filter((id) => id !== tag.id)
+                                  : [...(s.filterTags || []), tag.id],
+                              }));
+                            }}
+                            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
+                              isSelected
+                                ? "border-pink-200 bg-pink-50 text-pink-600"
+                                : "border-neutral-100 bg-white text-neutral-500 hover:bg-neutral-50"
+                            } ${!isPro ? "opacity-50" : ""}`}
+                          >
+                            <div
+                              className="size-2 rounded-full"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            {tag.name}
+                            {isSelected && <Check className="ml-0.5 size-3" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {(settings.filterTags || []).length > 0 && (
+                      <button
+                        onClick={() => setSettings((s) => ({ ...s, filterTags: [] }))}
+                        className="text-[11px] font-bold text-pink-500 transition-colors hover:text-pink-600"
+                      >
+                        Clear tags
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             {activeTab === "branding" && (
               <div className="space-y-8">
+                {/* Accent Color */}
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Accent Color
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Accent Color
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
                   <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={settings.accentColor}
-                      onChange={(e) => setSettings((s) => ({ ...s, accentColor: e.target.value }))}
-                      className="size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm"
-                    />
+                    <div
+                      className="relative"
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use custom accent colors.",
+                          });
+                        }
+                      }}
+                    >
+                      <input
+                        type="color"
+                        disabled={!isPro}
+                        value={settings.accentColor}
+                        onChange={(e) =>
+                          setSettings((s) => ({ ...s, accentColor: e.target.value }))
+                        }
+                        className={`size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm ${!isPro ? "cursor-not-allowed opacity-50" : ""}`}
+                      />
+                      {!isPro && <Lock className="absolute inset-0 m-auto size-3 text-white" />}
+                    </div>
                     <code className="text-[12px] font-bold text-neutral-400 uppercase">
                       {settings.accentColor}
                     </code>
                   </div>
                 </div>
 
+                {/* Font Family */}
+                <div className="space-y-4 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Font Family
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "sans", label: "Sans" },
+                      { id: "serif", label: "Serif" },
+                      { id: "Outfit", label: "Outfit" },
+                      { id: "Playfair Display", label: "Elegant" },
+                      { id: "custom", label: "Custom Font" },
+                    ].map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          if (!isPro && f.id !== "sans") {
+                            toast.error("Pro Feature", {
+                              description: "Upgrade to Pro to use premium fonts.",
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, fontFamily: f.id }));
+                        }}
+                        className={`flex items-center justify-between rounded-xl border px-3 py-2 transition-all ${settings.fontFamily === f.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && f.id !== "sans" ? "opacity-30" : ""}`}
+                      >
+                        <span className="text-[12px] font-bold" style={{ fontFamily: f.id }}>
+                          {f.label}
+                        </span>
+                        {settings.fontFamily === f.id && <Check className="size-3" />}
+                      </button>
+                    ))}
+                  </div>
+
+                  {settings.fontFamily === "custom" && (
+                    <div className="animate-in fade-in slide-in-from-top-2 mt-2 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-3 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold tracking-tighter text-neutral-400 uppercase">
+                          Upload .woff2
+                        </span>
+                        {settings.customFontUrl && (
+                          <span className="text-[10px] font-bold text-emerald-500">Ready</span>
+                        )}
+                      </div>
+                      <UploadButton
+                        endpoint="fontUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res?.[0]) {
+                            setSettings((s) => ({
+                              ...s,
+                              customFontUrl: res[0].url,
+                              customFontName: res[0].name.replace(".woff2", ""),
+                            }));
+                            toast.success("Font uploaded!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Error: ${error.message}`);
+                        }}
+                        appearance={{
+                          button:
+                            "w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl",
+                          allowedContent: "hidden",
+                        }}
+                      />
+                      {settings.customFontName && (
+                        <div className="flex items-center gap-2 truncate overflow-hidden rounded-lg border border-neutral-100 bg-white px-2 py-1.5">
+                          <Type className="size-3 shrink-0 text-neutral-400" />
+                          <span className="truncate text-[10px] font-bold text-neutral-600">
+                            {settings.customFontName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* White Label */}
                 <div className="space-y-4 border-t border-neutral-50 pt-6">
                   <div className="flex items-center justify-between">
                     <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
@@ -548,8 +875,15 @@ export default function WidgetCustomizer({
                     </div>
                     <button
                       type="button"
-                      disabled={!isPro}
-                      onClick={() => setSettings((s) => ({ ...s, hideBadge: !s.hideBadge }))}
+                      onClick={() => {
+                        if (!isPro) {
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to remove the KudosWall branding.",
+                          });
+                          return;
+                        }
+                        setSettings((s) => ({ ...s, hideBadge: !s.hideBadge }));
+                      }}
                       className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${settings.hideBadge ? "bg-emerald-500" : "bg-neutral-200"} ${!isPro ? "opacity-50" : ""}`}
                     >
                       <div
@@ -557,6 +891,39 @@ export default function WidgetCustomizer({
                       />
                     </button>
                   </div>
+                </div>
+
+                {/* Custom CSS */}
+                <div className="space-y-4 border-t border-neutral-50 pt-6">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Custom CSS
+                    </label>
+                    {!isPro && <ProBadge />}
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      className="h-32 w-full resize-none rounded-2xl border border-neutral-100 bg-neutral-900 p-3 font-mono text-[11px] text-emerald-400 outline-none focus:ring-1 focus:ring-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!isPro}
+                      onChange={(e) => setCustomCss(e.target.value)}
+                      placeholder="/* .card { background: red; } */"
+                      spellCheck={false}
+                      value={customCss}
+                    />
+                    {!isPro && (
+                      <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-900/10 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
+                          <Lock className="size-3 text-neutral-400" />
+                          <span className="text-[10px] font-bold text-neutral-600">
+                            Pro Feature
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-neutral-400 italic">
+                    Advanced users only. Target classes like .card, .author-name, etc.
+                  </p>
                 </div>
               </div>
             )}
@@ -587,7 +954,7 @@ export default function WidgetCustomizer({
             appear on.
           </p>
           <Link
-            href={"/dashboard/settings" as Route}
+            href={"/dashboard/settings"}
             className="mt-4 flex items-center gap-1.5 text-[11px] font-bold text-pink-400 transition-colors hover:text-pink-300"
           >
             Upgrade to PRO <ArrowRight className="size-3" />
@@ -654,7 +1021,7 @@ export default function WidgetCustomizer({
               className={`transition-all duration-500 ${viewMode === "mobile" ? "w-full max-w-[375px]" : "w-full max-w-3xl"}`}
             >
               {/* Browser chrome mock */}
-              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
+              <div className="rounded-2xl border border-neutral-200 bg-white shadow-2xl">
                 {/* Browser bar */}
                 <div
                   className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3"
@@ -721,36 +1088,22 @@ export default function WidgetCustomizer({
               </code>
             </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-neutral-100 bg-neutral-50 p-6">
-                <Globe className="mb-4 size-6 text-pink-500" />
-                <h4 className="mb-2 font-bold text-neutral-900">Iframe Fallback</h4>
-                <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-                  Ideal for platforms like Squarespace or Wix that restrict custom scripts.
-                </p>
-                <button
-                  onClick={() =>
-                    copyToClipboard(
-                      `<iframe src="${origin || "https://kudoswall.org"}/embed/${widgetId}" width="100%" height="600px" frameborder="0"></iframe>`,
-                    )
-                  }
-                  className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
-                >
-                  Copy Iframe Code <ArrowRight className="size-3" />
-                </button>
-              </div>
-              <div className="rounded-3xl border border-neutral-100 bg-neutral-50 p-6">
-                <Zap className="mb-4 size-6 text-pink-500" />
-                <h4 className="mb-2 font-bold text-neutral-900">Dynamic Filtering</h4>
-                <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+            <div className="mt-12">
+              <div className="group rounded-[32px] border border-neutral-100 bg-white p-8 shadow-sm transition-all hover:shadow-md">
+                <div className="mb-6 flex size-12 items-center justify-center rounded-2xl bg-pink-50 text-pink-500 transition-transform group-hover:scale-110">
+                  <Zap className="size-6 fill-pink-500/10" />
+                </div>
+                <h4 className="mb-3 text-xl font-bold text-neutral-900">Dynamic Filtering</h4>
+                <p className="mb-6 text-[15px] leading-relaxed text-neutral-500">
                   You can override some settings via data-attributes without coming back here.
                 </p>
-                <a
-                  href="#"
-                  className="flex items-center gap-2 text-[12px] font-bold text-neutral-900 hover:text-pink-500"
+                <Link
+                  href={"/docs"}
+                  className="inline-flex items-center gap-2 text-[14px] font-bold text-neutral-900 transition-colors hover:text-pink-500"
                 >
-                  View Documentation <ArrowRight className="size-3" />
-                </a>
+                  View Documentation{" "}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
             </div>
           </div>

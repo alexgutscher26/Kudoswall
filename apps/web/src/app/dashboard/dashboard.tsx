@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -13,23 +12,26 @@ import {
   Code2,
   Settings,
   LogOut,
-  Star,
-  Clock,
-  Copy,
   Plus,
   Globe,
   ChevronRight,
   Menu,
   X,
-  User,
+  Lock,
+  Gift,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
-import { createProject } from "./actions";
+import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
 import { gooeyToast as toast } from "goey-toast";
-import { trpc, queryClient } from "@/utils/trpc";
+import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
+import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
+import { createProject } from "./actions";
+
+type DashboardData = RouterOutputs["dashboard"]["getData"];
+type Project = DashboardData["projects"][number];
+type RecentTestimonial = DashboardData["recentTestimonials"][number];
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -37,47 +39,13 @@ const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
   { href: "/dashboard/collection", icon: Globe, label: "Collection Page" },
-  { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
+  { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics", feature: "analytics" },
   { href: "/dashboard/embed", icon: Code2, label: "Embed Widget" },
+  { href: "/dashboard/rewards", icon: Gift, label: "Rewards" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ] as const;
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
-
-const STATS = [
-  {
-    label: "Testimonials",
-    value: "0",
-    sub: "Start collecting today",
-    icon: MessageSquareQuote,
-    accent: "#e8527a",
-    bg: "#fff5f7",
-  },
-  {
-    label: "Pending Approval",
-    value: "0",
-    sub: "All clear",
-    icon: Clock,
-    accent: "#7c3aed",
-    bg: "#f5f3ff",
-  },
-  {
-    label: "Widget Views",
-    value: "0",
-    sub: "Embed to start tracking",
-    icon: Globe,
-    accent: "#0ea5e9",
-    bg: "#f0f9ff",
-  },
-  {
-    label: "Conversion Rate",
-    value: "—",
-    sub: "Needs more data",
-    icon: BarChart2,
-    accent: "#16a34a",
-    bg: "#f0fdf4",
-  },
-] as const;
+// ─── Dot-grid background ──────────────────────────────────────────────────────
 
 // ─── Dot-grid background ──────────────────────────────────────────────────────
 
@@ -94,6 +62,20 @@ function DotGrid({ opacity = 0.08 }: { opacity?: number }) {
   );
 }
 
+function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name: string) {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+  return null;
+}
+
 // ─── Nav content (shared between sidebar + mobile drawer) ─────────────────────
 
 function NavContent({
@@ -103,6 +85,9 @@ function NavContent({
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
+  plan,
 }: {
   pathname: string;
   onNavClick?: () => void;
@@ -110,35 +95,54 @@ function NavContent({
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
+  const isFeatureLocked = (feature?: string) => {
+    if (!feature) return false;
+    if (feature === "analytics" && (!plan || plan === "free")) return true;
+    return false;
+  };
   return (
     <>
-      {/* Logo */}
-      <div className="shrink-0 px-5 py-5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-        <Link
-          href="/"
-          onClick={onNavClick}
-          className="block text-lg leading-none font-bold tracking-tight text-neutral-900 select-none"
-          style={{ fontFamily: "'Georgia', serif" }}
-        >
-          KudosWall
-        </Link>
-        <span
-          className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase"
-          style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
-        >
-          Dashboard
-        </span>
+      {/* Workspace Switcher */}
+      <div className="px-3 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+        <WorkspaceSwitcher
+          currentWorkspaceId={currentWorkspaceId}
+          onWorkspaceChange={onWorkspaceChange}
+        />
       </div>
 
       {/* Nav links */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {NAV_ITEMS.map((item) => {
+          const { href, icon: Icon, label } = item;
           const isActive = pathname === href;
+          const isLocked = isFeatureLocked((item as any).feature);
+
+          const linkHref = currentWorkspaceId
+            ? (`${href}?workspaceId=${currentWorkspaceId}` as Route)
+            : (href as Route);
+
+          if (isLocked) {
+            return (
+              <div
+                key={href}
+                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-300 opacity-60"
+                title={`${label} is a Pro feature`}
+              >
+                <Icon className="size-4 shrink-0" />
+                {label}
+                <Lock className="ml-auto size-3 text-neutral-300" />
+              </div>
+            );
+          }
+
           return (
             <Link
               key={href}
-              href={href as Route}
+              href={linkHref}
               onClick={onNavClick}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
                 isActive
@@ -208,17 +212,22 @@ function NavContent({
 }
 
 // ─── Desktop sidebar (hidden on mobile) ──────────────────────────────────────
-
 function DesktopSidebar({
   userName,
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
+  plan,
 }: {
   userName: string;
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
   const pathname = usePathname();
   return (
@@ -235,13 +244,15 @@ function DesktopSidebar({
         userEmail={userEmail}
         onSignOut={onSignOut}
         onNewCollection={onNewCollection}
+        currentWorkspaceId={currentWorkspaceId}
+        onWorkspaceChange={onWorkspaceChange}
+        plan={plan}
       />
     </aside>
   );
 }
 
 // ─── Mobile drawer ────────────────────────────────────────────────────────────
-
 function MobileDrawer({
   open,
   onClose,
@@ -249,6 +260,9 @@ function MobileDrawer({
   userEmail,
   onSignOut,
   onNewCollection,
+  currentWorkspaceId,
+  onWorkspaceChange,
+  plan,
 }: {
   open: boolean;
   onClose: () => void;
@@ -256,6 +270,9 @@ function MobileDrawer({
   userEmail: string;
   onSignOut: () => void;
   onNewCollection: () => void;
+  currentWorkspaceId: string;
+  onWorkspaceChange: (id: string) => void;
+  plan?: string;
 }) {
   const pathname = usePathname();
 
@@ -293,6 +310,9 @@ function MobileDrawer({
           userEmail={userEmail}
           onSignOut={onSignOut}
           onNewCollection={onNewCollection}
+          currentWorkspaceId={currentWorkspaceId}
+          onWorkspaceChange={onWorkspaceChange}
+          plan={plan}
         />
       </div>
     </>
@@ -353,104 +373,25 @@ function TopBar({
           </div>
         </div>
       </div>
-
-      <div className="flex items-center gap-2">
-        {/* Upgrade pill */}
-        <button
-          type="button"
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] sm:px-4 sm:text-[13px]"
-          style={{ backgroundColor: "#171717" }}
-        >
-          <span className="hidden sm:inline">Upgrade Plan</span>
-          <span className="sm:hidden">Upgrade</span>
-          <span className="hidden sm:inline">→</span>
-        </button>
-      </div>
     </header>
   );
 }
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  accent,
-  bg,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  icon: React.ElementType;
-  accent: string;
-  bg: string;
-}) {
-  return (
-    <div
-      className="rounded-2xl border border-neutral-100 p-4 transition-shadow hover:shadow-md sm:p-5"
-      style={{ backgroundColor: bg }}
-    >
-      <div
-        className="mb-3 inline-flex size-9 items-center justify-center rounded-xl"
-        style={{ backgroundColor: `${accent}20` }}
-      >
-        <Icon className="size-4" style={{ color: accent }} />
-      </div>
-      <p className="mb-1 text-2xl leading-none font-bold tracking-tight text-neutral-900 sm:text-3xl">
-        {value}
-      </p>
-      <p className="text-[13px] font-medium text-neutral-700">{label}</p>
-      <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">{sub}</p>
-    </div>
-  );
-}
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
-function EmptyTestimonials({ onNewCollection }: { onNewCollection: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-6 py-10 text-center sm:py-14">
-      <div
-        className="mb-4 flex size-14 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: "#fff5f7" }}
-      >
-        <MessageSquareQuote className="size-6" style={{ color: "#e8527a" }} />
-      </div>
-      <h3 className="mb-1.5 text-[15px] font-semibold text-neutral-900">No testimonials yet</h3>
-      <p className="mb-6 max-w-xs text-[13px] leading-relaxed text-neutral-400">
-        Share your collection link with customers and your first testimonials will appear here —
-        ready to review and approve.
-      </p>
-      <button
-        type="button"
-        onClick={onNewCollection}
-        className="flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
-        style={{ backgroundColor: "#171717" }}
-      >
-        <Plus className="size-3.5" />
-        New Collection Link
-      </button>
-    </div>
-  );
-}
-
-// ─── Quick actions ────────────────────────────────────────────────────────────
-
-function QuickActions({
-  onNewCollection,
-  onCopyLink,
-  hasProjects,
-}: {
-  onNewCollection: () => void;
-  onCopyLink: () => void;
-  hasProjects: boolean;
-}) {}
+// ─── Modal ──────────────────────────────────────────────────────────────────
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
-function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function NewCollectionModal({
+  open,
+  onClose,
+  workspaceId,
+  workspaceSlug,
+}: {
+  open: boolean;
+  onClose: () => void;
+  workspaceId: string;
+  workspaceSlug: string;
+}) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -472,7 +413,7 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
     const formData = new FormData(e.currentTarget);
 
     try {
-      const result = await createProject(formData);
+      const result = await createProject(formData, workspaceId);
       if (result.success) {
         toast.success("Collection link created!");
         onClose();
@@ -549,13 +490,10 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
               <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <Globe className="size-3" />
-                  kudoswall.org/my-workspace/
+                  kudoswall.org/{workspaceSlug}/
                   <span className={name ? "text-pink-500" : "text-neutral-300"}>
                     {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
                   </span>
-                </div>
-                <div className="text-[10px] font-medium text-neutral-300">
-                  Local: localhost:3001/my-workspace/...
                 </div>
               </code>
             </div>
@@ -591,163 +529,6 @@ function NewCollectionModal({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
-function RecentTestimonialsList({ testimonials }: { testimonials: any[] }) {
-  if (!testimonials || testimonials.length === 0) return null;
-
-  return (
-    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {testimonials.map((t: any) => (
-        <div
-          key={t.id}
-          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
-        >
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50">
-              {t.authorImage ? (
-                <Image
-                  src={t.authorImage}
-                  alt={t.authorName || "User"}
-                  width={40}
-                  height={40}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <User className="size-5 text-neutral-300" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
-                  {t.authorName || "Anonymous"}
-                </h4>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <div key={s} className="relative">
-                      {/* Base Star (Grey) */}
-                      <Star className="size-2.5 fill-neutral-100 text-neutral-100" />
-                      {/* Half Star Overlay */}
-                      {(t.rating ?? 0) >= s - 0.5 && (t.rating ?? 0) < s && (
-                        <div className="absolute inset-0 z-10 w-1/2 overflow-hidden">
-                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                        </div>
-                      )}
-                      {/* Full Star Overlay */}
-                      {(t.rating ?? 0) >= s && (
-                        <div className="absolute inset-0 z-10 overflow-hidden">
-                          <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p className="mt-0.5 line-clamp-1 text-[12px] text-neutral-500 italic">
-                "{t.content || (t.type === "video" ? "Video testimonial" : "No content")}"
-              </p>
-              <div className="mt-1 flex items-center gap-2">
-                <span className="rounded-md border border-neutral-100/50 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-medium text-neutral-400">
-                  {t.project?.name}
-                </span>
-                <span className="text-[10px] text-neutral-300">
-                  {new Date(t.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="ml-4 flex items-center gap-2">
-            <Link
-              href={`/dashboard/testimonials?id=${t.id}`}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-            >
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ProjectsList({
-  projects,
-  workspaceSlug,
-  onCopyLink,
-}: {
-  projects: any[];
-  workspaceSlug: string;
-  onCopyLink?: () => void;
-}) {
-  if (!projects || projects.length === 0) return null;
-
-  return (
-    <div className="max-h-[400px] divide-y divide-neutral-50 overflow-y-auto">
-      {projects.map((p: any) => (
-        <div
-          key={p.id}
-          className="group flex items-center justify-between px-4 py-4 transition-all hover:bg-neutral-50/50 sm:px-6"
-        >
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-pink-50">
-              <LinkIcon className="size-5 text-pink-500" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="truncate text-[14px] font-bold tracking-tight text-neutral-900">
-                {p.name}
-              </h4>
-              <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
-                <Globe className="size-3" />/{workspaceSlug}/{p.slug}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                const url =
-                  window.location.origin === "http://localhost:3001"
-                    ? `http://localhost:3001/${workspaceSlug}/${p.slug}`
-                    : `https://kudoswall.org/${workspaceSlug}/${p.slug}`;
-                navigator.clipboard.writeText(url);
-                toast.success("Link copied!");
-                onCopyLink?.();
-              }}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-              title="Copy link"
-            >
-              <Copy className="size-4" />
-            </button>
-            <Link
-              href={`/dashboard/testimonials?project=${p.id}`}
-              className="rounded-full p-2 text-neutral-300 transition-all hover:bg-white hover:text-neutral-600 hover:shadow-sm"
-            >
-              <ChevronRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
-
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
 // When `children` is provided it renders instead of the default overview content.
 
@@ -758,20 +539,24 @@ export default function DashboardShell({
   pageTitle,
   pageSubtitle,
   initialData,
+  initialWorkspaceId,
 }: {
   userName: string;
   userEmail: string;
   children?: ReactNode;
   pageTitle?: string;
   pageSubtitle?: string;
-  initialData?: any;
+  initialData?: DashboardData | null;
+  initialWorkspaceId?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
-  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Video" | "Text">("All");
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false);
+
+  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {
@@ -785,69 +570,105 @@ export default function DashboardShell({
     }
   }, [searchParams, pathname, router]);
 
-  // Live polling for dashboard data
-  const { data: liveData } = useQuery({
-    ...trpc.dashboard.getData.queryOptions(),
-    initialData,
-    refetchInterval: 5000,
-  });
+  const urlWorkspaceId = searchParams.get("workspaceId");
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(
+    initialWorkspaceId || urlWorkspaceId || initialData?.workspace.id || "",
+  );
 
-  const activeData = liveData || initialData;
+  // Sync state with URL search params
+  useEffect(() => {
+    if (urlWorkspaceId && urlWorkspaceId !== activeWorkspaceId) {
+      setActiveWorkspaceId(urlWorkspaceId);
+      setCookie("workspace-id", urlWorkspaceId);
+    } else if (activeWorkspaceId) {
+      setCookie("workspace-id", activeWorkspaceId);
+    }
+  }, [urlWorkspaceId, activeWorkspaceId]);
 
-  const completeStep = useMutation({
-    ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+  const [isMounted, setIsMounted] = useState(false);
+  const claimReferral = useMutation(trpc.referral.claim.mutationOptions());
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Claim referral if code exists in cookies
+  useEffect(() => {
+    if (isMounted) {
+      const refCode = getCookie("kudoswall-ref");
+      if (refCode) {
+        claimReferral.mutate(
+          { code: refCode },
+          {
+            onSuccess: () => {
+              // Clear cookie
+              document.cookie =
+                "kudoswall-ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              toast.success("Referral linked! Embed a wall to unlock your 30-day reward.");
+            },
+          },
+        );
+      }
+    }
+  }, [isMounted]);
+
+  // Synchronize state with initialData from server
+  useEffect(() => {
+    if (initialData?.workspace.id && initialData.workspace.id !== activeWorkspaceId) {
+      // Only override local state if there's no workspaceId in the URL,
+      // or if the URL matches the initialData (meaning navigation finished)
+      if (!urlWorkspaceId || urlWorkspaceId === initialData.workspace.id) {
+        setActiveWorkspaceId(initialData.workspace.id);
+        setCookie("workspace-id", initialData.workspace.id);
+      }
+    }
+  }, [initialData?.workspace.id, urlWorkspaceId, activeWorkspaceId]);
+
+  // Derived data state (polled content)
+  const [polledData, setPolledData] = useState<DashboardData | null>(null);
+
+  // Sync initialData vs polledData with protection against stale data
+  const activeData = (() => {
+    // If polledData is for the wrong workspace, ignore it
+    const isPolledDataStale = polledData && polledData.workspace.id !== activeWorkspaceId;
+
+    if (isPolledDataStale) {
+      // If initialData matches current workspace, use it as fallback
+      if (initialData?.workspace.id === activeWorkspaceId) return initialData;
+      return null;
+    }
+
+    // Normal selection logic
+    return activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
+  })();
+
+  const completeStep = useMutation(
+    {
+      ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
+      onSuccess: () => {
+        toast.success("Progress updated!");
+        // Correctly invalidate the specific workspace query to trigger a refresh
+        queryClient.invalidateQueries(
+          trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
+        );
+      },
+      onError: (err) => {
+        console.error("❌ Onboarding mutation failed:", err);
+        toast.error("Failed to update progress");
+      },
     },
-  });
-
-  // Derived stats from initialData
-  const stats = activeData
-    ? [
-        {
-          label: "Testimonials",
-          value: activeData.stats.testimonials.toString(),
-          sub: activeData.stats.testimonials > 0 ? "Great progress!" : "Start collecting today",
-          icon: MessageSquareQuote,
-          accent: "#e8527a",
-          bg: "#fff5f7",
-        },
-        {
-          label: "Pending Approval",
-          value: activeData.stats.pending.toString(),
-          sub: activeData.stats.pending > 0 ? "New submissions!" : "All clear",
-          icon: Clock,
-          accent: "#7c3aed",
-          bg: "#f5f3ff",
-        },
-        {
-          label: "Widget Views",
-          value: activeData.stats.views.toString(),
-          sub: activeData.stats.views > 0 ? "Tracking live" : "Embed to start tracking",
-          icon: Globe,
-          accent: "#0ea5e9",
-          bg: "#f0f9ff",
-        },
-        {
-          label: "Conversion Rate",
-          value: activeData.stats.conversion,
-          sub: activeData.stats.views > 0 ? "Real-time performance" : "Needs more data",
-          icon: BarChart2,
-          accent: "#16a34a",
-          bg: "#f0fdf4",
-        },
-      ]
-    : [];
+    queryClient,
+  );
 
   const handleCopyCollectionLink = () => {
-    if (activeData?.projects?.length > 0) {
+    if (activeData?.projects && activeData.projects.length > 0) {
       const p = activeData.projects[0];
       const url = `${window.location.origin}/collect/${p.slug}`;
       navigator.clipboard.writeText(url);
       toast.success("Collection link copied!", {
         description: url,
       });
-      completeStep.mutate({ step: "step3" });
+      completeStep.mutate({ step: "step3", workspaceId: activeWorkspaceId });
     } else {
       setNewCollectionOpen(true);
     }
@@ -862,147 +683,141 @@ export default function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-      {/* Desktop sidebar */}
-      <DesktopSidebar
-        userName={userName}
-        userEmail={userEmail}
-        onSignOut={handleSignOut}
-        onNewCollection={() => setNewCollectionOpen(true)}
-      />
+    <WorkspaceProvider
+      activeWorkspaceId={activeWorkspaceId}
+      setActiveWorkspaceId={setActiveWorkspaceId}
+      isModalOpen={isChildModalOpen}
+      setIsModalOpen={setIsChildModalOpen}
+      onShareLink={handleCopyCollectionLink}
+      onCompleteStep={async (step) => {
+        await completeStep.mutateAsync({ step, workspaceId: activeWorkspaceId });
+      }}
+      data={activeData}
+    >
+      {/* Live Data Poller (Client Only) */}
+      {isMounted && (
+        <DashboardPoller
+          workspaceId={activeWorkspaceId}
+          onData={setPolledData}
+          initialData={activeWorkspaceId === initialData?.workspace.id ? initialData : null}
+        />
+      )}
 
-      {/* Mobile drawer */}
-      <MobileDrawer
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        userName={userName}
-        userEmail={userEmail}
-        onSignOut={handleSignOut}
-        onNewCollection={() => setNewCollectionOpen(true)}
-      />
+      <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
+        {/* Desktop sidebar */}
 
-      {/* Modal */}
-      <NewCollectionModal open={newCollectionOpen} onClose={() => setNewCollectionOpen(false)} />
+        <DesktopSidebar
+          userName={userName}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          onNewCollection={() => setNewCollectionOpen(true)}
+          currentWorkspaceId={activeWorkspaceId}
+          plan={activeData?.workspace.plan}
+          onWorkspaceChange={(id) => {
+            setActiveWorkspaceId(id);
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("workspaceId", id);
+            // Clear project-specific params that won't exist in the new workspace
+            params.delete("project");
 
-      {/* Main content — offset only on lg+ */}
-      <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
-        <DotGrid opacity={0.08} />
+            // Stay on current page if it's a dashboard page, otherwise go to overview
+            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+            router.push(`${targetPath}?${params.toString()}` as any);
+          }}
+        />
 
-        {/* Soft central glow */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-start justify-center"
-          style={{ zIndex: 0 }}
-        >
+        {/* Mobile drawer */}
+        <MobileDrawer
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          userName={userName}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          onNewCollection={() => setNewCollectionOpen(true)}
+          currentWorkspaceId={activeWorkspaceId}
+          plan={activeData?.workspace.plan}
+          onWorkspaceChange={(id) => {
+            setActiveWorkspaceId(id);
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("workspaceId", id);
+            params.delete("project");
+
+            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+            router.push(`${targetPath}?${params.toString()}` as any);
+          }}
+        />
+
+        {/* Modal */}
+        <NewCollectionModal
+          open={newCollectionOpen}
+          onClose={() => setNewCollectionOpen(false)}
+          workspaceId={activeWorkspaceId}
+          workspaceSlug={activeData?.workspace.slug || "loading"}
+        />
+
+        {/* Main content — offset only on lg+ */}
+        <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
+          <DotGrid opacity={0.08} />
+
+          {/* Soft central glow */}
           <div
-            className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
-            style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-          />
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-start justify-center"
+            style={{ zIndex: 0 }}
+          >
+            <div
+              className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
+              style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+            />
+          </div>
+
+          {/* Top bar */}
+          <div className="relative z-10">
+            <TopBar
+              userName={userName}
+              onMenuOpen={() => setMobileMenuOpen(true)}
+              pageTitle={pageTitle}
+              pageSubtitle={pageSubtitle}
+              isLive
+            />
+          </div>
+
+          {/* Main content */}
+          <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+            <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
+          </main>
         </div>
-
-        {/* Top bar */}
-        <div className="relative z-10">
-          <TopBar
-            userName={userName}
-            onMenuOpen={() => setMobileMenuOpen(true)}
-            pageTitle={pageTitle}
-            pageSubtitle={pageSubtitle}
-            isLive
-          />
-        </div>
-
-        {/* Main content */}
-        <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <ErrorBoundary name={pageTitle || "Dashboard Content"}>
-            {children || (
-              <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-                {/* Stats grid — 2 cols on mobile, 4 on xl */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-                  {stats.map((stat) => (
-                    <StatCard key={stat.label} {...stat} />
-                  ))}
-                </div>
-
-                {/* Main split */}
-                <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
-                  {/* Testimonials panel */}
-                  <div
-                    className="overflow-hidden rounded-2xl border border-neutral-100 xl:col-span-2"
-                    style={{ backgroundColor: "#ffffff" }}
-                  >
-                    <div
-                      className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6"
-                      style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                    >
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-semibold text-neutral-900">
-                          Recent Testimonials
-                        </p>
-                        <p className="mt-0.5 hidden text-[11px] text-neutral-400 sm:block">
-                          Latest submissions from your customers
-                        </p>
-                      </div>
-                      {/* Filter chips */}
-                      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-                        {(["All", "Video", "Text"] as const).map((f) => {
-                          const isActive = testimonialFilter === f;
-                          return (
-                            <button
-                              key={f}
-                              type="button"
-                              onClick={() => setTestimonialFilter(f)}
-                              className="rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:px-3"
-                              style={
-                                isActive
-                                  ? {
-                                      backgroundColor: "#fff5f7",
-                                      color: "#e8527a",
-                                      borderColor: "#fecdd3",
-                                    }
-                                  : {
-                                      backgroundColor: "transparent",
-                                      color: "#a3a3a3",
-                                      borderColor: "rgba(0,0,0,0.08)",
-                                    }
-                              }
-                            >
-                              {f}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {activeData?.recentTestimonials && activeData.recentTestimonials.length > 0 ? (
-                      <div className="flex flex-col gap-4">
-                        <ProjectsList
-                          projects={activeData.projects}
-                          workspaceSlug={activeData.workspace.slug}
-                          onCopyLink={() => completeStep.mutate({ step: "step3" })}
-                        />
-                        <RecentTestimonialsList
-                          testimonials={activeData.recentTestimonials.filter((t: any) => {
-                            if (testimonialFilter === "All") return true;
-                            return t.type?.toLowerCase() === testimonialFilter.toLowerCase();
-                          })}
-                        />
-                      </div>
-                    ) : (
-                      <EmptyTestimonials onNewCollection={() => setNewCollectionOpen(true)} />
-                    )}
-                  </div>
-
-                  {/* Right column */}
-                  <div className="space-y-4 sm:space-y-5 xl:col-span-1">
-                    {activeData?.onboarding && (
-                      <OnboardingChecklist status={activeData.onboarding} />
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </ErrorBoundary>
-        </main>
       </div>
-    </div>
+    </WorkspaceProvider>
   );
+}
+
+/**
+ * Client-only component to handle live data polling and mutations.
+ * This avoids SSR issues with useQuery/useMutation in the main DashboardShell.
+ */
+function DashboardPoller({
+  workspaceId,
+  onData,
+  initialData,
+}: {
+  workspaceId: string;
+  onData: (data: DashboardData) => void;
+  initialData?: DashboardData | null;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const { data } = useQuery({
+    ...trpc.dashboard.getData.queryOptions({ workspaceId }),
+    initialData: initialData || undefined,
+    refetchInterval: 5000,
+    enabled: mounted && !!workspaceId,
+  });
+
+  useEffect(() => {
+    if (data) onData(data);
+  }, [data, onData]);
+
+  return null;
 }

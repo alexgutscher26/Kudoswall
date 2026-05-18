@@ -12,59 +12,54 @@ async function fix() {
     process.exit(1);
   }
 
-  console.log("Using DATABASE_URL (prefix):", dbUrl.substring(0, 20) + "...");
-
   const pool = new pg.Pool({
     connectionString: dbUrl,
     ssl: { rejectUnauthorized: false },
   });
 
   try {
-    console.log("Checking for tables...");
-    const tablesRes = await pool.query(
-      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
-    );
-    const tableNames = tablesRes.rows.map((r) => r.table_name);
-    console.log("Tables found:", tableNames.join(", "));
+    console.log("Checking for missing workspace_id columns...");
 
-    if (!tableNames.includes("session")) {
-      console.log("⚠️ session table missing. Creating it...");
-      await pool.query(`
-        CREATE TABLE "session" (
-          "id" text PRIMARY KEY NOT NULL,
-          "expires_at" timestamp NOT NULL,
-          "token" text NOT NULL,
-          "created_at" timestamp DEFAULT now() NOT NULL,
-          "updated_at" timestamp NOT NULL DEFAULT now(),
-          "ip_address" text,
-          "user_agent" text,
-          "user_id" text NOT NULL,
-          CONSTRAINT "session_token_unique" UNIQUE("token")
-        );
-      `);
-      console.log("✓ session table created.");
-    } else {
-      console.log("✓ session table exists. Adding missing columns...");
-      await pool.query(`ALTER TABLE "session" ADD COLUMN IF NOT EXISTS "ip_address" text;`);
-      await pool.query(`ALTER TABLE "session" ADD COLUMN IF NOT EXISTS "user_agent" text;`);
-    }
+    // Project table
+    await pool.query(`ALTER TABLE "project" ADD COLUMN IF NOT EXISTS "workspace_id" text;`);
+    console.log("✓ project.workspace_id checked.");
 
-    if (!tableNames.includes("verification")) {
-      console.log("⚠️ verification table missing. Creating it...");
-      await pool.query(`
-        CREATE TABLE "verification" (
-          "id" text PRIMARY KEY NOT NULL,
-          "identifier" text NOT NULL,
-          "value" text NOT NULL,
-          "expires_at" timestamp NOT NULL,
-          "created_at" timestamp DEFAULT now() NOT NULL,
-          "updated_at" timestamp DEFAULT now() NOT NULL
-        );
-      `);
-      console.log("✓ verification table created.");
-    }
+    // Testimonial table
+    await pool.query(`ALTER TABLE "testimonial" ADD COLUMN IF NOT EXISTS "workspace_id" text;`);
+    console.log("✓ testimonial.workspace_id checked.");
 
-    console.log("🎉 Database schema synchronized successfully!");
+    // Tag table
+    await pool.query(`ALTER TABLE "tag" ADD COLUMN IF NOT EXISTS "workspace_id" text;`);
+    console.log("✓ tag.workspace_id checked.");
+
+    // Widget table
+    await pool.query(`ALTER TABLE "widget" ADD COLUMN IF NOT EXISTS "workspace_id" text;`);
+    console.log("✓ widget.workspace_id checked.");
+
+    // Analytics Event table
+    await pool.query(`ALTER TABLE "analytics_event" ADD COLUMN IF NOT EXISTS "workspace_id" text;`);
+    console.log("✓ analytics_event.workspace_id checked.");
+
+    // Update missing workspace_ids if possible (backfill from relations)
+    console.log("Attempting to backfill workspace_ids...");
+
+    // Testimonial from Project
+    await pool.query(`
+      UPDATE "testimonial" t
+      SET workspace_id = p.workspace_id
+      FROM "project" p
+      WHERE t.project_id = p.id AND t.workspace_id IS NULL AND p.workspace_id IS NOT NULL
+    `);
+
+    // Project from Workspace (if there's only one workspace or we can find an owner)
+    // This is harder without a direct link, but we can assume the first workspace for now if needed.
+    // Or just let the user fix it in the UI.
+
+    // Constraints (optional but recommended)
+    // await pool.query(`ALTER TABLE "testimonial" ALTER COLUMN "workspace_id" SET NOT NULL;`);
+    // Wait, don't set NOT NULL yet if we have existing data without workspace_id.
+
+    console.log("🎉 Database schema columns added successfully!");
   } catch (err: any) {
     console.error("❌ MIGRATION FAILED:");
     console.error("Error Message:", err.message);

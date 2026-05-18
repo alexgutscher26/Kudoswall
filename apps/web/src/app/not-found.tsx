@@ -87,12 +87,6 @@ export default function GlobalNotFound() {
           />
           <QuickLink
             href="/"
-            icon={<MessageSquare className="size-5" />}
-            title="Help Center"
-            description="Get answers and contact support"
-          />
-          <QuickLink
-            href="/"
             icon={<ArrowLeft className="size-5" />}
             title="Main Home"
             description="Back to the start of our story"

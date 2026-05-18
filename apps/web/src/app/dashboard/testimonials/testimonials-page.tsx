@@ -39,6 +39,8 @@ interface Testimonial {
   status: TestimonialStatus;
   submittedAt: string;
   featured: boolean;
+  verifiedVia?: string;
+  verifiedAt?: string;
 }
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -65,9 +67,9 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
     company: "LaunchPad SaaS",
     avatar: "JO",
     content:
-      "We tried three other tools before this one. None of them let customers submit video reviews this easily, without creating an account. Huge win for our team.",
+      "We tried three other tools before this one. None of them let customers submit reviews this easily, without creating an account. Huge win for our team.",
     rating: 5,
-    type: "video",
+    type: "text",
     status: "approved",
     submittedAt: "2025-03-25",
     featured: false,
@@ -121,9 +123,9 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
     company: "BuildFast",
     avatar: "EV",
     content:
-      "The video submission flow is so smooth — customers don't need to install anything. We went from 0 video reviews to 14 in two weeks after sharing the link in our onboarding email.",
+      "The submission flow is so smooth — customers don't need to install anything. We went from 0 reviews to 14 in two weeks after sharing the link in our onboarding email.",
     rating: 5,
-    type: "video",
+    type: "text",
     status: "approved",
     submittedAt: "2025-04-02",
     featured: false,
@@ -139,7 +141,7 @@ const STATUS_TABS = [
   { key: "rejected", label: "Rejected" },
 ] as const;
 
-const TYPE_FILTERS = ["All types", "Text", "Video"] as const;
+const TYPE_FILTERS = ["All types", "Text"] as const;
 
 const SORT_OPTIONS = ["Newest first", "Oldest first", "Highest rating", "Featured first"] as const;
 
@@ -308,6 +310,13 @@ function TestimonialCard({
           <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">
             {testimonial.role} · {testimonial.company}
           </p>
+          {testimonial.verifiedVia && (
+            <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-green-600">
+              <CheckCircle2 className="size-2.5" />
+              Verified via{" "}
+              {testimonial.verifiedVia === "verified" ? "Social" : testimonial.verifiedVia}
+            </div>
+          )}
         </div>
         {/* Badges — hide on very small, show inline on sm+ */}
         <div className="hidden shrink-0 items-center gap-1.5 sm:flex">

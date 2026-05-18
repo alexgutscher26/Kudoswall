@@ -6,13 +6,19 @@ import { ActivationNudgeEmail } from "../emails/activation-nudge";
 import { UpgradePromptEmail } from "../emails/upgrade-prompt";
 import { WeeklyDigestEmail } from "../emails/weekly-digest";
 import { ReEngagementEmail } from "../emails/re-engagement";
+import { TeamInviteEmail } from "../emails/team-invite";
+import { TrialExpiringEmail } from "../emails/trial-expiring";
+import { CancellationEmail } from "../emails/cancellation";
+import { SuspiciousLoginEmail } from "../emails/suspicious-login";
+import { SubmissionConfirmationEmail } from "../emails/submission-confirmation";
 
 export class EmailService {
   public resend: Resend;
-  private from = "Alex from KudosWall <alex@kudoswall.org>";
+  private from: string;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, from?: string) {
     this.resend = new Resend(apiKey);
+    this.from = from || "Alex from KudosWall <alex@kudoswall.org>";
   }
 
   async sendWelcomeEmail(to: string, userName: string) {
@@ -53,14 +59,40 @@ export class EmailService {
     });
   }
 
-  async sendUpgradePrompt(to: string, userName: string, approvedCount: number) {
+  async sendUpgradePrompt(
+    to: string,
+    userName: string,
+    type:
+      | "limit-hit"
+      | "badge-removal"
+      | "testimonial-milestone"
+      | "analytics-access"
+      | "tag-filtering" = "limit-hit",
+    approvedCount?: number,
+  ) {
+    const getSubject = () => {
+      switch (type) {
+        case "badge-removal":
+          return "Want to remove the KudosWall badge? 🎨";
+        case "testimonial-milestone":
+          return "10 testimonials! Time for a custom domain? 🌐";
+        case "analytics-access":
+          return "Unlock your Wall of Love analytics 📈";
+        case "tag-filtering":
+          return "Filter testimonials by tag? Here's how 🏷️";
+        default:
+          return "You're crushing it! (And hitting your limit) 🚀";
+      }
+    };
+
     return this.resend.emails.send({
       from: this.from,
       to,
-      subject: "You're crushing it! (And hitting your limit) 🚀",
-      react: React.createElement(UpgradePromptEmail, { userName, approvedCount }),
+      subject: getSubject(),
+      react: React.createElement(UpgradePromptEmail, { userName, type, approvedCount }),
     });
   }
+
 
   async sendWeeklyDigest(
     to: string,
@@ -89,6 +121,84 @@ export class EmailService {
       to,
       subject: "Is your Wall of Love getting lonely? 🥺",
       react: React.createElement(ReEngagementEmail, { userName }),
+    });
+  }
+
+  async sendInviteEmail(
+    to: string,
+    inviterName: string,
+    workspaceName: string,
+    inviteLink: string,
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: `You've been invited to join ${workspaceName} on KudosWall`,
+      react: React.createElement(TeamInviteEmail, {
+        inviterName,
+        workspaceName,
+        inviteLink,
+      }),
+    });
+  }
+
+  async sendTrialExpiringEmail(to: string, userName: string, expiryDate: string) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Your Pro trial is ending soon! ⏳",
+      react: React.createElement(TrialExpiringEmail, { userName, expiryDate }),
+    });
+  }
+
+  async sendCancellationEmail(to: string, userName: string) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Your KudosWall subscription has been canceled",
+      react: React.createElement(CancellationEmail, { userName }),
+    });
+  }
+
+  async sendSuspiciousLoginEmail(
+    to: string,
+    userName: string,
+    data: {
+      ipAddress: string;
+      userAgent: string;
+      location?: string;
+      time: string;
+    },
+  ) {
+    return this.resend.emails.send({
+      from: this.from,
+      to,
+      subject: "Security Alert: New login detected on KudosWall 🛡️",
+      react: React.createElement(SuspiciousLoginEmail, {
+        userName,
+        ...data,
+      }),
+    });
+  }
+
+  async sendSubmissionConfirmationEmail(
+    to: string,
+    authorName: string,
+    projectName: string,
+    thankYouMessage?: string | null,
+    fromName?: string | null,
+  ) {
+    const from = fromName ? `${fromName} via KudosWall <alex@kudoswall.org>` : this.from;
+
+    return this.resend.emails.send({
+      from,
+      to,
+      subject: `Thank you for your feedback!`,
+      react: React.createElement(SubmissionConfirmationEmail, {
+        authorName,
+        projectName,
+        thankYouMessage,
+      }),
     });
   }
 }

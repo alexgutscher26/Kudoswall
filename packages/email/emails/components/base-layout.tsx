@@ -4,7 +4,6 @@ import {
   Head,
   Heading,
   Html,
-  Img,
   Link,
   Preview,
   Section,
@@ -12,8 +11,6 @@ import {
   Text,
   Font,
 } from "@react-email/components";
-import * as React from "react";
-
 interface BaseLayoutProps {
   previewText: string;
   children: React.ReactNode;
@@ -57,13 +54,6 @@ export const BaseLayout = ({ previewText, children }: BaseLayoutProps) => {
             {/* Footer / Signature */}
             <Section className="mt-[32px] border-t border-solid border-[#eaeaea] pt-[32px]">
               <div className="flex items-center gap-4">
-                <Img
-                  src="https://kudoswall.org/images/founder.png"
-                  width="48"
-                  height="48"
-                  alt="Alex"
-                  className="rounded-full"
-                />
                 <div>
                   <Text className="text-dark m-0 p-0 text-[14px] font-bold">Alex</Text>
                   <Text className="m-0 p-0 text-[12px] text-neutral-500">Founder, KudosWall</Text>

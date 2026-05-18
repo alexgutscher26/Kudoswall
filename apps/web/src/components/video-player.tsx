@@ -9,6 +9,8 @@ interface VideoPlayerProps {
   thumbnail?: string;
   accentColor?: string;
   className?: string;
+  onPlay?: () => void;
+  onProgress?: (milestone: 25 | 50 | 75 | 100) => void;
 }
 
 export default function VideoPlayer({
@@ -16,11 +18,15 @@ export default function VideoPlayer({
   thumbnail,
   accentColor = "#e8527a",
   className = "",
+  onPlay,
+  onProgress,
 }: VideoPlayerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const milestonesReached = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -40,8 +46,25 @@ export default function VideoPlayer({
     return () => observer.disconnect();
   }, []);
 
+  const handleTimeUpdate = () => {
+    if (!videoRef.current || !onProgress) return;
+    const { currentTime, duration } = videoRef.current;
+    if (!duration) return;
+
+    const progress = (currentTime / duration) * 100;
+    const milestones = [25, 50, 75, 100] as const;
+
+    for (const milestone of milestones) {
+      if (progress >= milestone && !milestonesReached.current.has(milestone)) {
+        milestonesReached.current.add(milestone);
+        onProgress(milestone);
+      }
+    }
+  };
+
   const handlePlay = () => {
     setIsPlaying(true);
+    onPlay?.();
   };
 
   return (
@@ -89,11 +112,13 @@ export default function VideoPlayer({
         <>
           {isInView ? (
             <video
+              ref={videoRef}
               src={url}
               controls
               autoPlay
               className="size-full object-cover"
               onLoadedData={() => setIsLoaded(true)}
+              onTimeUpdate={handleTimeUpdate}
             />
           ) : (
             <div className="flex size-full items-center justify-center">

@@ -22,6 +22,41 @@
       "when": 1775550137780,
       "tag": "0002_legal_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775970399206,
+      "tag": "0003_add_analytics_event_type_enum",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775976818883,
+      "tag": "0004_daily_blob",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776045775591,
+      "tag": "0005_new_morph",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776045992899,
+      "tag": "0006_special_lord_tyger",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776108478352,
+      "tag": "0007_stiff_tattoo",
+      "breakpoints": true
     }
   ]
 }

@@ -15,7 +15,7 @@ const STEPS = [
     icon: Sparkles,
     title: "Customers leave a review",
     description:
-      "They click the link and record a short video or type a written review — no account needed, takes under 60 seconds.",
+      "They click the link and share their experience with a photo, video, or written review — no account needed, takes under 60 seconds.",
     color: "#7c3aed",
     bg: "#f5f3ff",
   },

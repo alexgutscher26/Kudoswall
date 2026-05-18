@@ -4,31 +4,29 @@ import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import {
-  Building2,
   Camera,
   CheckCircle2,
-  ChevronLeft,
-  Linkedin,
   Quote,
   Star,
   Video as VideoIcon,
-  Loader2,
   BadgeCheck,
   ShieldCheck,
   ArrowRight,
   ArrowLeft,
-  Lightbulb,
-  Gauge,
-  Headset,
   User,
+  SkipForward,
+  Linkedin,
 } from "lucide-react";
-import { useState, useMemo, useEffect, type SetStateAction } from "react";
+import { useLocale } from "@/lib/collection-i18n";
+import { useState, useMemo, useEffect } from "react";
+import { uploadFiles } from "@/utils/uploadthing";
 import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
 import VideoRecorder from "@/components/collection/video-recorder";
 import { submitTestimonial } from "./actions";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
 
 interface CollectionWizardProps {
   project: {
@@ -45,28 +43,197 @@ interface CollectionWizardProps {
         font: string;
       };
     };
+    permissions?: {
+      features: {
+        video: boolean;
+      };
+    };
   };
 }
 
 type Step = "rating" | "choice" | "text" | "video" | "details" | "review" | "success";
 
+interface CollectionSettings {
+  fontFamily?: string;
+  backgroundColor?: string;
+  form?: {
+    starRating?: { enabled: boolean };
+    minCharCount?: number;
+    fields?: {
+      fullName?: { label?: string; required?: boolean };
+      email?: { label?: string; required?: boolean; enabled?: boolean };
+      content?: { label?: string; placeholder?: string };
+      jobTitle?: { label?: string; enabled?: boolean };
+      company?: { label?: string; enabled?: boolean };
+      linkedin?: { label?: string; enabled?: boolean; required?: boolean };
+    };
+  };
+  privacyPolicyUrl?: string;
+  video?: {
+    prompt?: string;
+    maxLength?: number;
+  };
+  redirectUrl?: string;
+  pageContent?: {
+    subheading?: string;
+    thankYou?: {
+      headline?: string;
+      body?: string;
+      cta?: { enabled: boolean; text: string; url: string };
+    };
+  };
+  compliance?: {
+    cookieConsent: {
+      enabled: boolean;
+      message: string;
+      buttonText: string;
+    };
+    showFooterPrivacy: boolean;
+    footerPrivacyText: string;
+    privacyPolicyContent?: string;
+  };
+}
+
+/**
+ * Detects system color scheme preference via `prefers-color-scheme`.
+ * Returns `false` when `enabled` is `false` (e.g. project has explicit bg).
+ */
+function useDarkMode(enabled: boolean): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [enabled]);
+
+  return isDark;
+}
+
+/**
+ * Framer Motion variants for directional slide+fade step transitions.
+ * Uses `transform: translateX` for GPU acceleration (no layout thrash).
+ */
+const SLIDE_VARIANTS = {
+  enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -40 : 40, opacity: 0 }),
+} as const;
+
+const SLIDE_TRANSITION = {
+  duration: 0.25,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
+
+/** Scoped CSS custom properties for light/dark color themes. */
+const THEME_CSS = `
+  .cw-root {
+    --cw-card: #ffffff;
+    --cw-surface: #f2f4f6;
+    --cw-badge: #e6e8ea;
+    --cw-border-20: rgba(198, 198, 205, 0.2);
+    --cw-border-30: rgba(198, 198, 205, 0.3);
+    --cw-border-60: rgba(198, 198, 205, 0.65);
+    --cw-text-primary: #191c1e;
+    --cw-text-secondary: #45464d;
+    --cw-text-muted: #76777d;
+    --cw-fg: #000000;
+    --cw-fg-inv: #ffffff;
+    --cw-blue-tint-30: rgba(213, 227, 253, 0.3);
+    --cw-blue-tint-40: rgba(213, 227, 253, 0.4);
+    --cw-blue-tint-border: #d5e3fd;
+    --cw-star-empty: #e0e3e5;
+    --cw-green: #009668;
+    --cw-progress-track: #e6e8ea;
+    --cw-anim-bg: rgba(213, 227, 253, 0.3);
+  }
+  .cw-root[data-dark="true"] {
+    --cw-card: #1c1c1f;
+    --cw-surface: #27272a;
+    --cw-badge: #3f3f46;
+    --cw-border-20: rgba(255, 255, 255, 0.06);
+    --cw-border-30: rgba(255, 255, 255, 0.1);
+    --cw-border-60: rgba(255, 255, 255, 0.22);
+    --cw-text-primary: #fafafa;
+    --cw-text-secondary: #a1a1aa;
+    --cw-text-muted: #71717a;
+    --cw-fg: #ffffff;
+    --cw-fg-inv: #18181b;
+    --cw-blue-tint-30: rgba(63, 63, 70, 0.5);
+    --cw-blue-tint-40: rgba(63, 63, 70, 0.6);
+    --cw-blue-tint-border: rgba(255, 255, 255, 0.1);
+    --cw-star-empty: #3f3f46;
+    --cw-green: #34d399;
+    --cw-progress-track: #3f3f46;
+    --cw-anim-bg: rgba(63, 63, 70, 0.3);
+  }
+  /* Interactive field styles using CSS vars for hover/focus states */
+  .cw-root .cw-field {
+    background-color: var(--cw-surface);
+    color: var(--cw-text-primary);
+    border: 1px solid var(--cw-border-30);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.15s ease;
+  }
+  .cw-root .cw-field::placeholder {
+    color: var(--cw-text-muted);
+    opacity: 1;
+  }
+  .cw-root .cw-field:hover {
+    border-color: var(--cw-border-60);
+  }
+  .cw-root .cw-field:focus {
+    outline: none;
+    background-color: var(--cw-card);
+    box-shadow: 0 0 0 2px var(--cw-fg);
+    border-color: transparent;
+  }
+  /* Choice card button hover */
+  .cw-root .cw-choice-btn {
+    background-color: var(--cw-card);
+    border: 1px solid var(--cw-border-30);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .cw-root .cw-choice-btn:hover {
+    border-color: var(--cw-border-60);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .cw-root .cw-choice-btn:active {
+    transform: scale(0.98);
+  }
+`;
+
 export default function CollectionWizard({
   project,
   initialType,
 }: CollectionWizardProps & { initialType?: "text" | "video" | null }) {
-  const settings = useMemo(() => {
+  const settings = useMemo<CollectionSettings | null>(() => {
     try {
       return project.collectionSettingsJson ? JSON.parse(project.collectionSettingsJson) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }, [project.collectionSettingsJson]);
 
-  const [mode, setMode] = useState<"text" | "video" | null>(initialType || null);
+  // Force light mode for now as per user request (will avoid following system theme)
+  const isDark = false;
+
+  // i18n — auto-detected from navigator.language
+  const { t, dir } = useLocale();
+
+  // Slide direction: 1 = forward (enter from right), -1 = backward (enter from left)
+  const [direction, setDirection] = useState(1);
+
+  const [mode, setMode] = useState<"text" | "video" | null>(() => {
+    if (initialType === "video" && project.permissions?.features?.video) return "video";
+    return initialType ?? null;
+  });
   const [step, setStep] = useState<Step>(() => {
     if (settings?.form?.starRating?.enabled === false) {
-      if (initialType) return initialType === "video" ? "video" : "text";
-      return "choice";
+      // Force text even if initialType was video
+      return "text";
     }
     return "rating";
   });
@@ -76,21 +243,38 @@ export default function CollectionWizard({
   const [photo, setPhoto] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [tagline, setTagline] = useState("");
   const [loading, setLoading] = useState(false);
+  // Consent state — gating the Submit button on the review step
+  const [hasConsented, setHasConsented] = useState(false);
+  const { data: session } = authClient.useSession();
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
   const DRAFT_KEY = `t-wall-draft-${project.id}`;
 
+  // Restore draft from localStorage on mount
   useEffect(() => {
     const savedDraft = localStorage.getItem(DRAFT_KEY);
     if (savedDraft) {
       try {
-        const draft = JSON.parse(savedDraft);
+        const draft = JSON.parse(savedDraft) as Partial<{
+          rating: number;
+          content: string;
+          photo: string;
+          name: string;
+          email: string;
+          company: string;
+          linkedin: string;
+          tagline: string;
+          mode: "text" | "video";
+          step: Step;
+          hasConsented: boolean;
+        }>;
         if (draft.rating) setRating(draft.rating);
         if (draft.content) setContent(draft.content);
         if (draft.photo) setPhoto(draft.photo);
@@ -101,11 +285,15 @@ export default function CollectionWizard({
         if (draft.tagline) setTagline(draft.tagline);
         if (draft.mode) setMode(draft.mode);
         if (draft.step && draft.step !== "success") setStep(draft.step);
-      } catch (e) {}
+        if (draft.hasConsented) setHasConsented(draft.hasConsented);
+      } catch {
+        // Ignore malformed draft
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Persist draft to localStorage on change
   useEffect(() => {
     if (step === "success") return;
     const draft = {
@@ -119,61 +307,95 @@ export default function CollectionWizard({
       tagline,
       mode,
       step,
+      hasConsented,
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-  }, [DRAFT_KEY, rating, content, photo, name, email, company, linkedin, tagline, mode, step]);
+  }, [
+    DRAFT_KEY,
+    rating,
+    content,
+    photo,
+    name,
+    email,
+    company,
+    linkedin,
+    tagline,
+    mode,
+    step,
+    hasConsented,
+  ]);
 
+  // Auto-fill from session if verified
   useEffect(() => {
-    trackEvent.mutate({
-      workspaceId: project.workspaceId,
-      projectId: project.id,
-      eventType: "view",
-    });
+    if (session?.user) {
+      if (!name) setName(session.user.name || "");
+      if (!email) setEmail(session.user.email || "");
+      if (!photo) setPhoto(session.user.image || null);
+    }
+  }, [session, name, email, photo]);
+
+  // Track page view
+  useEffect(() => {
+    trackEvent.mutate(
+      { workspaceId: project.workspaceId, projectId: project.id, eventType: "view" },
+      { onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message) },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isPro = project.workspace.isPro;
-
   const stepsData = useMemo(() => {
     const mapping: Record<Step, { percent: number; text: string; title: string }> = {
-      rating: { percent: 25, text: "Step 1 of 4", title: "Overall Satisfaction" },
-      choice: { percent: 50, text: "Step 2 of 4", title: "Format Choice" },
-      text: { percent: 50, text: "Step 2 of 4", title: "Detailed Feedback" },
-      video: { percent: 50, text: "Step 2 of 4", title: "Record Video" },
-      details: { percent: 75, text: "Step 3 of 4", title: "Identity & Photo" },
-      review: { percent: 100, text: "Step 4 of 4", title: "Final Review" },
-      success: { percent: 100, text: "Complete", title: "Thank You" },
+      rating: { percent: 25, text: t.step1of4, title: t.titleRating },
+      choice: { percent: 50, text: t.step2of4, title: t.titleChoice },
+      text: { percent: 50, text: t.step2of4, title: t.titleText },
+      video: { percent: 50, text: t.step2of4, title: t.titleVideo },
+      details: { percent: 75, text: t.step3of4, title: t.titleDetails },
+      review: { percent: 100, text: t.step4of4, title: t.titleReview },
+      success: { percent: 100, text: t.complete, title: t.titleSuccess },
     };
     return mapping[step];
-  }, [step]);
-
-  const currentStepInfo = stepsData;
+  }, [step, t]);
 
   const nextStep = () => {
-    if (step === "rating") {
-      if (mode === "video") return setStep("video");
-      if (mode === "text") return setStep("text");
-      return setStep("choice");
+    setDirection(1);
+    const nextStepName = (() => {
+      if (step === "rating") {
+        if (project.permissions?.features?.video) {
+          return "choice";
+        }
+        setMode("text");
+        return "text";
+      }
+      if (step === "text") return "details";
+      if (step === "video") return "details";
+      if (step === "details") return "review";
+      if (step === "review") return "success";
+      return null;
+    })();
+
+    if (nextStepName) {
+      trackEvent.mutate({
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "click",
+        metadataJson: JSON.stringify({ action: "next_step", from: step, to: nextStepName }),
+      });
+      setStep(nextStepName as Step);
     }
-    if (step === "choice") {
-      if (mode === "video") return setStep("video");
-      return setStep("text");
-    }
-    if (step === "text") return setStep("details");
-    if (step === "video") return setStep("details");
-    if (step === "details") return setStep("review");
-    if (step === "review") return setStep("success");
   };
 
   const prevStep = () => {
+    setDirection(-1);
     if (step === "choice") return setStep("rating");
-    if (step === "text" || step === "video") {
-      if (initialType) return setStep("rating");
+    if (step === "text") {
+      if (project.permissions?.features?.video) return setStep("choice");
+      return setStep("rating");
+    }
+    if (step === "video") {
       return setStep("choice");
     }
     if (step === "details") {
-      if (mode === "video") return setStep("video");
-      return setStep("text");
+      return setStep(mode === "video" ? "video" : "text");
     }
     if (step === "review") return setStep("details");
   };
@@ -182,11 +404,9 @@ export default function CollectionWizard({
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
-    function randomInRange(min: number, max: number) {
-      return Math.random() * (max - min) + min;
-    }
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-    const interval: any = setInterval(() => {
+    const interval: ReturnType<typeof setInterval> = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
       if (timeLeft <= 0) return clearInterval(interval);
       const particleCount = 50 * (timeLeft / duration);
@@ -246,11 +466,25 @@ export default function CollectionWizard({
     try {
       let videoUrl: string | undefined;
       if (videoBlob) {
-        const reader = new FileReader();
-        videoUrl = await new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(videoBlob);
+        // Upload via UploadThing
+        const extension = videoBlob.type.includes("mp4") ? "mp4" : "webm";
+
+        const response = await fetch(`/api/upload/video?projectId=${project.id}&ext=${extension}`, {
+          method: "POST",
+          body: videoBlob,
         });
+
+        if (!response.ok) {
+          const errBody = (await response.json().catch(() => ({}))) as Record<string, string>;
+          throw new Error(errBody.message || "Failed to upload video to storage");
+        }
+
+        const data = (await response.json()) as { key?: string };
+        if (!data.key) {
+          throw new Error("Failed to retrieve uploaded video URL");
+        }
+
+        videoUrl = `/api/videos/${data.key}`;
       }
 
       await submitTestimonial(project.id, {
@@ -258,18 +492,29 @@ export default function CollectionWizard({
         content: mode === "video" && !content ? "Video Testimonial" : content,
         authorName: name,
         authorEmail: email,
-        authorImage: photo || undefined,
+        authorImage: photo ?? undefined,
         authorCompany: company || undefined,
         authorLinkedin: linkedin || undefined,
         authorTagline: tagline || undefined,
         videoUrl,
+        verifiedVia: session?.user ? "verified" : undefined, // simplified for now, could be more specific
+        verifiedAt: session?.user ? new Date() : undefined,
+        verifiedId: session?.user?.id,
       });
 
       localStorage.removeItem(DRAFT_KEY);
       fireConfetti();
       setStep("success");
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+
+      // Handle custom redirect if configured
+      const redirectUrl = settings?.redirectUrl;
+      if (redirectUrl) {
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 2000);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -281,7 +526,7 @@ export default function CollectionWizard({
 
   if (isCropping && photo) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
         <ImageCropper
           image={photo}
           onCancel={() => setIsCropping(false)}
@@ -294,75 +539,125 @@ export default function CollectionWizard({
     );
   }
 
+  const fontFamily =
+    settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily)
+      ? `"${settings.fontFamily}", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+      : settings?.fontFamily === "mono"
+        ? "monospace"
+        : settings?.fontFamily === "serif"
+          ? "serif"
+          : "var(--font-sans), sans-serif";
+
   return (
-    <div className="mx-auto w-full max-w-lg">
+    <div
+      className="cw-root mx-auto w-full max-w-lg"
+      data-dark={isDark ? "true" : "false"}
+      dir={dir}
+      style={{ fontFamily }}
+    >
+      {/* Scoped CSS custom properties for adaptive color theming */}
+      <style>{THEME_CSS}</style>
+
+      {/* Google Font import (only for non-system fonts) */}
+      {settings?.fontFamily && !["sans", "serif", "mono"].includes(settings.fontFamily) && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@import url('https://fonts.googleapis.com/css2?family=${settings.fontFamily.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap');`,
+          }}
+        />
+      )}
+
       {/* Step Indicator */}
       {step !== "success" && (
         <div className="mb-8">
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <span className="font-sans text-[11px] tracking-[0.1em] text-[#45464d] uppercase">
-                {currentStepInfo.text}
+              <span
+                className="text-[11px] tracking-widest uppercase"
+                style={{ color: "var(--cw-text-secondary)" }}
+              >
+                {stepsData.text}
               </span>
-              <h2 className="mt-1 font-(family-name:--font-manrope) text-lg font-bold text-[#191c1e]">
-                {currentStepInfo.title}
+              <h2 className="mt-1 text-lg font-bold" style={{ color: "var(--cw-text-primary)" }}>
+                {stepsData.title}
               </h2>
             </div>
-            <span className="font-sans text-xs font-medium text-[#45464d]">
-              {currentStepInfo.percent}% Complete
+            <span className="text-xs font-medium" style={{ color: "var(--cw-text-secondary)" }}>
+              {stepsData.percent}% Complete
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#e6e8ea]">
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full"
+            style={{ backgroundColor: "var(--cw-progress-track)" }}
+          >
             <div
-              className="h-full rounded-full bg-[#000000] transition-all duration-500"
-              style={{ width: `${currentStepInfo.percent}%` }}
-            ></div>
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${stepsData.percent}%`, backgroundColor: "var(--cw-fg)" }}
+            />
           </div>
         </div>
       )}
 
       {/* Central Editorial Card */}
-      <div className="group relative overflow-hidden rounded-xl border border-[#c6c6cd]/20 bg-[#ffffff] p-5 shadow-sm md:p-8">
-        {/* Abstract Subtle Background Element */}
-        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#d5e3fd]/30 blur-3xl transition-colors duration-700 group-hover:bg-[#d5e3fd]/50"></div>
+      <div
+        className="group relative overflow-hidden rounded-xl p-5 shadow-sm md:p-8"
+        style={{
+          backgroundColor: "var(--cw-card)",
+          border: "1px solid var(--cw-border-20)",
+        }}
+      >
+        {/* Abstract background accent */}
+        <div
+          className="absolute -top-24 -right-24 h-48 w-48 rounded-full blur-3xl transition-colors duration-700"
+          style={{ backgroundColor: "var(--cw-anim-bg)" }}
+        />
 
         <div className="relative z-10 text-center">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={step}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              custom={direction}
+              variants={SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={SLIDE_TRANSITION}
             >
+              {/* ─── RATING STEP ─── */}
               {step === "rating" && (
                 <>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    How would you rate your experience?
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {t.ratingHeadline}
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
-                    Your feedback helps us grow and provides authentic proof to others considering
-                    our services.
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {t.ratingSubtext}
                   </p>
 
-                  {/* Star Rating Component */}
+                  {/* Star Rating */}
                   <div className="mb-10 flex justify-center gap-2 md:gap-3">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <button
                         key={s}
                         onMouseEnter={() => setHoveredRating(s)}
                         onMouseLeave={() => setHoveredRating(0)}
-                        onClick={() => {
-                          setRating(s);
-                        }}
+                        onClick={() => setRating(s)}
                         className="group/star outline-none"
                       >
                         <Star
-                          className={`size-10 transition-all duration-200 group-hover/star:scale-110 ${
-                            (hoveredRating || rating) >= s
-                              ? "fill-[#000000] text-[#000000]"
-                              : "text-[#e0e3e5]"
-                          }`}
+                          className="size-10 transition-all duration-200 group-hover/star:scale-110"
+                          style={{
+                            color:
+                              (hoveredRating || rating) >= s
+                                ? "var(--cw-fg)"
+                                : "var(--cw-star-empty)",
+                            fill: (hoveredRating || rating) >= s ? "var(--cw-fg)" : "transparent",
+                          }}
                         />
                       </button>
                     ))}
@@ -370,89 +665,161 @@ export default function CollectionWizard({
 
                   {/* Trust Signals */}
                   <div className="mb-8 flex flex-wrap justify-center gap-3">
-                    <div className="flex items-center gap-2 rounded-lg bg-[#e6e8ea] px-3 py-1.5">
-                      <BadgeCheck className="size-[16px] text-[#009668]" strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold tracking-wider text-[#45464d] uppercase">
-                        Verified User
+                    <div
+                      className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                      style={{ backgroundColor: "var(--cw-badge)" }}
+                    >
+                      <BadgeCheck
+                        className="size-[16px]"
+                        strokeWidth={2.5}
+                        style={{ color: "var(--cw-green)" }}
+                      />
+                      <span
+                        className="text-[11px] font-semibold tracking-wider uppercase"
+                        style={{ color: "var(--cw-text-secondary)" }}
+                      >
+                        {t.verifiedUser}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 rounded-lg bg-[#e6e8ea] px-3 py-1.5">
+                    <div
+                      className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                      style={{ backgroundColor: "var(--cw-badge)" }}
+                    >
                       <ShieldCheck className="size-[16px] text-[#7c839b]" strokeWidth={2.5} />
-                      <span className="text-[11px] font-semibold tracking-wider text-[#45464d] uppercase">
-                        Privacy Guaranteed
+                      <span
+                        className="text-[11px] font-semibold tracking-wider uppercase"
+                        style={{ color: "var(--cw-text-secondary)" }}
+                      >
+                        {t.privacyGuaranteed}
                       </span>
                     </div>
                   </div>
 
-                  {/* Action Button */}
                   <button
                     onClick={nextStep}
-                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-3 font-(family-name:--font-manrope) font-bold text-[#ffffff] transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
+                    className="mx-auto flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-bold transition-all hover:opacity-90 md:w-auto md:min-w-[180px]"
+                    style={{
+                      backgroundColor: "var(--cw-fg)",
+                      color: "var(--cw-fg-inv)",
+                    }}
                   >
-                    Next Step
+                    {t.nextStep}
                     <ArrowRight className="size-4" />
                   </button>
                 </>
               )}
 
+              {/* ─── CHOICE STEP ─── */}
               {step === "choice" && (
                 <>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    How would you like to share?
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {t.choiceHeadline}
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
-                    Choose the format that works best for you.
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {t.choiceSubtext}
                   </p>
-                  <div className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div
+                    className={`mb-8 grid w-full grid-cols-1 gap-4 ${project.permissions?.features?.video ? "sm:grid-cols-2" : ""}`}
+                  >
+                    {project.permissions?.features?.video && (
+                      <button
+                        onClick={() => {
+                          setDirection(1);
+                          setMode("video");
+                          trackEvent.mutate({
+                            workspaceId: project.workspaceId,
+                            projectId: project.id,
+                            eventType: "click",
+                            metadataJson: JSON.stringify({ action: "choose_mode", mode: "video" }),
+                          });
+                          setStep("video");
+                        }}
+                        className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
+                      >
+                        <div
+                          className="flex size-12 items-center justify-center rounded-2xl"
+                          style={{ backgroundColor: "var(--cw-surface)" }}
+                        >
+                          <VideoIcon className="size-6" style={{ color: "var(--cw-fg)" }} />
+                        </div>
+                        <div>
+                          <h3
+                            className="text-base font-bold"
+                            style={{ color: "var(--cw-text-primary)" }}
+                          >
+                            {t.choiceVideo}
+                          </h3>
+                          <p
+                            className="text-[11px] font-medium"
+                            style={{ color: "var(--cw-text-muted)" }}
+                          >
+                            {t.choiceVideoSub}
+                          </p>
+                        </div>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
-                        setMode("video");
-                        setStep("video");
-                      }}
-                      className="group relative flex flex-col items-center gap-3 rounded-xl border border-[#c6c6cd]/30 bg-white p-6 transition-all hover:border-[#c6c6cd]/60 hover:shadow-md active:scale-[0.98]"
-                    >
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f2f4f6]">
-                        <VideoIcon className="size-6 text-[#000000]" />
-                      </div>
-                      <div>
-                        <h3 className="font-(family-name:--font-manrope) text-base font-bold text-[#191c1e]">
-                          Video
-                        </h3>
-                        <p className="text-[11px] font-medium text-[#76777d]">Quick & Personal</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
+                        setDirection(1);
                         setMode("text");
+                        trackEvent.mutate({
+                          workspaceId: project.workspaceId,
+                          projectId: project.id,
+                          eventType: "click",
+                          metadataJson: JSON.stringify({ action: "choose_mode", mode: "text" }),
+                        });
                         setStep("text");
                       }}
-                      className="group relative flex flex-col items-center gap-3 rounded-xl border border-[#c6c6cd]/30 bg-white p-6 transition-all hover:border-[#c6c6cd]/60 hover:shadow-md active:scale-[0.98]"
+                      className="cw-choice-btn group relative flex flex-col items-center gap-3 rounded-xl p-6"
                     >
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-[#000000]">
-                        <Quote className="size-6 text-[#ffffff]" />
+                      <div
+                        className="flex size-12 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: "var(--cw-fg)" }}
+                      >
+                        <Quote className="size-6" style={{ color: "var(--cw-fg-inv)" }} />
                       </div>
                       <div>
-                        <h3 className="font-(family-name:--font-manrope) text-base font-bold text-[#191c1e]">
-                          Text
+                        <h3
+                          className="text-base font-bold"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
+                          {t.choiceText}
                         </h3>
-                        <p className="text-[11px] font-medium text-[#76777d]">Simple & Classic</p>
+                        <p
+                          className="text-[11px] font-medium"
+                          style={{ color: "var(--cw-text-muted)" }}
+                        >
+                          {t.choiceTextSub}
+                        </p>
                       </div>
                     </button>
                   </div>
                 </>
               )}
 
+              {/* ─── TEXT STEP ─── */}
               {step === "text" && (
                 <div className="text-left">
                   <label
                     htmlFor="feedback"
-                    className="mb-2 block font-(family-name:--font-manrope) text-lg leading-tight font-bold text-[#191c1e]"
+                    className="mb-2 block text-lg leading-tight font-bold"
+                    style={{ color: "var(--cw-text-primary)" }}
                   >
-                    {settings?.form?.fields?.content?.label ||
+                    {settings?.form?.fields?.content?.label ??
                       "Tell us more about your experience."}
                   </label>
-                  <p className="mb-4 max-w-lg font-(family-name:--font-inter) text-sm leading-relaxed text-[#45464d]">
-                    {settings?.video?.prompt ||
+                  <p
+                    className="mb-4 max-w-lg text-sm leading-relaxed"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.pageContent?.subheading ||
+                      settings?.video?.prompt ||
                       "What stood out the most? Sharing specific details helps others understand the true value of our service."}
                   </p>
 
@@ -461,67 +828,104 @@ export default function CollectionWizard({
                       id="feedback"
                       name="feedback"
                       autoFocus
-                      className="w-full resize-none rounded-xl border-none bg-[#f2f4f6] p-4 font-(family-name:--font-inter) text-sm leading-relaxed text-[#191c1e] shadow-inner transition-all duration-300 placeholder:text-[#76777d] focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                      className="cw-field w-full resize-none rounded-xl p-4 text-sm leading-relaxed"
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={
-                        settings?.form?.fields?.content?.placeholder ||
-                        "It was an incredible experience because..."
+                        settings?.form?.fields?.content?.placeholder ?? t.textPlaceholder
                       }
                       value={content}
                       rows={5}
                     />
                     <div className="absolute right-4 bottom-4 flex items-center gap-2">
                       <span
-                        className={`text-xs ${isContentValid ? "text-[#009668]" : "text-[#76777d]"}`}
+                        className="text-xs"
+                        style={{
+                          color: isContentValid ? "var(--cw-green)" : "var(--cw-text-muted)",
+                        }}
                       >
                         {charCount} / {minCount}
                       </span>
                     </div>
                   </div>
 
-                  {/* Action Bar */}
-                  <div className="mt-6 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-4">
+                  <div
+                    className="mt-6 flex items-center justify-between border-t pt-4"
+                    style={{ borderColor: "var(--cw-border-20)" }}
+                  >
                     <button
                       onClick={prevStep}
-                      className="flex items-center gap-2 font-(family-name:--font-inter) text-xs font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000]"
+                      className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase transition-opacity hover:opacity-70"
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
                       <ArrowLeft className="size-4" />
-                      Back
+                      {t.back}
                     </button>
                     <button
-                      className="flex items-center gap-3 rounded-md bg-[#000000] px-10 py-4 font-(family-name:--font-inter) text-xs font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+                      className="flex items-center gap-3 rounded-md px-10 py-4 text-xs font-bold tracking-widest uppercase transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
                       disabled={!isContentValid}
                       onClick={nextStep}
+                      style={{
+                        backgroundColor: "var(--cw-fg)",
+                        color: "var(--cw-fg-inv)",
+                      }}
                     >
-                      Next Step
+                      {t.nextStep}
                       <ArrowRight className="size-4" />
                     </button>
                   </div>
                 </div>
               )}
+
+              {/* ─── VIDEO STEP ─── */}
               {step === "video" && (
                 <div className="w-full text-left">
-                  <h1 className="mb-3 text-center font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    Record your video
+                  <h1
+                    className="mb-3 text-center text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {t.videoHeadline}
                   </h1>
-                  <p className="mx-auto mb-6 max-w-sm text-center text-base text-[#45464d]">
-                    {settings?.video?.prompt ||
-                      "What stood out the most? Sharing specific details helps others."}
+                  <p
+                    className="mx-auto mb-6 max-w-sm text-center text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.video?.prompt ?? t.videoSubtext}
                   </p>
 
                   <VideoRecorder
-                    isPro={project.workspace.isPro}
+                    isPro={project.permissions?.features?.video ?? false}
                     onConfirm={(blob: Blob) => {
                       setVideoBlob(blob);
+                      const url = URL.createObjectURL(blob);
+                      setVideoPreviewUrl(url);
                       nextStep();
                     }}
-                    maxLength={settings?.video?.maxLength || 120}
+                    initialBlob={videoBlob}
+                    initialPreviewUrl={videoPreviewUrl}
+                    maxLength={settings?.video?.maxLength ?? 120}
                     prompt={settings?.video?.prompt}
                     accentColor={project.workspace.branding.accentColor}
                   />
+
+                  <button
+                    onClick={() => {
+                      setVideoBlob(null);
+                      setVideoPreviewUrl(null);
+                      setMode("text");
+                      setDirection(1);
+                      setStep("text");
+                    }}
+                    className="mx-auto mt-5 flex items-center justify-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70"
+                    style={{ color: "var(--cw-text-muted)" }}
+                    type="button"
+                  >
+                    <SkipForward className="size-3.5" />
+                    {t.videoSkip}
+                  </button>
                 </div>
               )}
 
+              {/* ─── DETAILS STEP ─── */}
               {step === "details" && (
                 <div className="mx-auto w-full text-left">
                   <form
@@ -534,9 +938,19 @@ export default function CollectionWizard({
                     {/* Profile Photo Upload */}
                     <div className="mb-1 flex items-center justify-start gap-4">
                       <div className="group relative shrink-0 overflow-visible">
-                        <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-[#c6c6cd]/30 bg-[#f2f4f6] transition-colors group-hover:border-[#000000]/30">
+                        <div
+                          className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-colors"
+                          style={{
+                            borderColor: "var(--cw-border-30)",
+                            backgroundColor: "var(--cw-surface)",
+                          }}
+                        >
                           {!photo ? (
-                            <User className="size-6 text-[#45464d]/40" strokeWidth={1.5} />
+                            <User
+                              className="size-6 opacity-40"
+                              style={{ color: "var(--cw-text-secondary)" }}
+                              strokeWidth={1.5}
+                            />
                           ) : (
                             <Image
                               alt="Preview"
@@ -553,15 +967,29 @@ export default function CollectionWizard({
                             type="file"
                           />
                         </div>
-                        <div className="pointer-events-none absolute -right-1 -bottom-1 rounded-full bg-[#000000] p-1.5 text-[#ffffff] shadow-lg transition-transform group-hover:scale-105">
+                        <div
+                          className="pointer-events-none absolute -right-1 -bottom-1 rounded-full p-1.5 shadow-lg transition-transform group-hover:scale-105"
+                          style={{
+                            backgroundColor: "var(--cw-fg)",
+                            color: "var(--cw-fg-inv)",
+                          }}
+                        >
                           <Camera className="size-3" />
                         </div>
                       </div>
                       <div className="text-left">
-                        <label className="mb-0.5 block text-xs font-semibold text-[#000000]">
-                          Upload Profile Photo
+                        <label
+                          className="mb-0.5 flex items-center gap-1 text-xs font-semibold"
+                          style={{ color: "var(--cw-fg)" }}
+                        >
+                          {t.detailsPhoto}
+                          <span className="font-normal" style={{ color: "var(--cw-text-muted)" }}>
+                            {t.detailsPhotoOptional}
+                          </span>
                         </label>
-                        <p className="text-[10px] text-[#45464d]">Recommended: 400x400px</p>
+                        <p className="text-[10px]" style={{ color: "var(--cw-text-secondary)" }}>
+                          {t.detailsPhotoHint}
+                        </p>
                       </div>
                     </div>
 
@@ -569,15 +997,16 @@ export default function CollectionWizard({
                     <div className="grid grid-cols-1 gap-3">
                       <div className="space-y-1">
                         <label
-                          className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                          className="block text-[11px] font-bold tracking-widest uppercase"
                           htmlFor="full_name"
+                          style={{ color: "var(--cw-text-secondary)" }}
                         >
-                          {settings?.form?.fields?.fullName?.label || "Full Name"}{" "}
+                          {settings?.form?.fields?.fullName?.label ?? t.detailsFullName}{" "}
                           {settings?.form?.fields?.fullName?.required !== false && "*"}
                         </label>
                         <input
                           id="full_name"
-                          className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                          className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Alex Rivera"
                           value={name}
@@ -587,15 +1016,16 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.email?.enabled !== false && (
                         <div className="space-y-1">
                           <label
-                            className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest uppercase"
                             htmlFor="email"
+                            style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.email?.label || "Email"}{" "}
+                            {settings?.form?.fields?.email?.label ?? t.detailsEmail}{" "}
                             {settings?.form?.fields?.email?.required && "*"}
                           </label>
                           <input
                             id="email"
-                            className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="alex@company.com"
                             type="email"
@@ -608,14 +1038,15 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.jobTitle?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest uppercase"
                               htmlFor="job_title"
+                              style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.jobTitle?.label || "Job Title"}
+                              {settings?.form?.fields?.jobTitle?.label ?? t.detailsJobTitle}
                             </label>
                             <input
                               id="job_title"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                               onChange={(e) => setTagline(e.target.value)}
                               placeholder="Head of Growth"
                               value={tagline}
@@ -625,14 +1056,15 @@ export default function CollectionWizard({
                         {settings?.form?.fields?.company?.enabled !== false && (
                           <div className="space-y-1">
                             <label
-                              className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                              className="block text-[11px] font-bold tracking-widest uppercase"
                               htmlFor="company"
+                              style={{ color: "var(--cw-text-secondary)" }}
                             >
-                              {settings?.form?.fields?.company?.label || "Company"}
+                              {settings?.form?.fields?.company?.label ?? t.detailsCompany}
                             </label>
                             <input
                               id="company"
-                              className="h-9 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-3 font-(family-name:--font-inter) text-[13px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                              className="cw-field h-9 w-full rounded-lg px-3 text-[13px]"
                               onChange={(e) => setCompany(e.target.value)}
                               placeholder="TechFlow"
                               value={company}
@@ -644,15 +1076,16 @@ export default function CollectionWizard({
                       {settings?.form?.fields?.linkedin?.enabled && (
                         <div className="space-y-1">
                           <label
-                            className="block font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase"
+                            className="block text-[11px] font-bold tracking-widest uppercase"
                             htmlFor="linkedin"
+                            style={{ color: "var(--cw-text-secondary)" }}
                           >
-                            {settings?.form?.fields?.linkedin?.label || "LinkedIn Profile"}{" "}
+                            {settings?.form?.fields?.linkedin?.label ?? t.detailsLinkedIn}{" "}
                             {settings?.form?.fields?.linkedin?.required && "*"}
                           </label>
                           <input
                             id="linkedin"
-                            className="h-10 w-full rounded-lg border border-[#c6c6cd]/30 bg-[#f2f4f6] px-4 font-(family-name:--font-inter) text-[15px] text-[#191c1e] transition-all outline-none hover:border-[#c6c6cd]/80 focus:bg-[#ffffff] focus:ring-2 focus:ring-[#000000]"
+                            className="cw-field h-10 w-full rounded-lg px-4 text-[15px]"
                             onChange={(e) => setLinkedin(e.target.value)}
                             placeholder="https://linkedin.com/in/alex"
                             value={linkedin}
@@ -661,17 +1094,85 @@ export default function CollectionWizard({
                       )}
                     </div>
 
+                    {/* Social Verification Buttons */}
+                    <div className="mt-4 space-y-3">
+                      {!session ? (
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-bold tracking-widest text-neutral-500 uppercase">
+                            Trust Verification (Recommended)
+                          </p>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                authClient.signIn.social({
+                                  provider: "google",
+                                  callbackURL: window.location.href,
+                                })
+                              }
+                              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-[13px] font-medium text-neutral-900 transition-all hover:bg-neutral-50 active:scale-95"
+                            >
+                              <svg className="size-4" viewBox="0 0 24 24">
+                                <path
+                                  fill="currentColor"
+                                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                />
+                                <path
+                                  fill="currentColor"
+                                  d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                />
+                              </svg>
+                              {t.verifyWithGoogle}
+                            </button>
+                            {/* LinkedIn hidden for now as per user request */}
+                            {/* 
+                            <button
+                              type="button"
+                              onClick={() => authClient.signIn.social({ provider: "linkedin", callbackURL: window.location.href })}
+                              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-[13px] font-medium text-neutral-900 transition-all hover:bg-neutral-50 active:scale-95"
+                            >
+                              <Linkedin className="size-4 text-[#0077b5]" />
+                              {t.verifyWithLinkedIn}
+                            </button>
+                            */}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900">
+                            <BadgeCheck className="size-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-neutral-900">
+                              {t.verifiedAs.replace("{name}", session.user.name)}
+                            </p>
+                            <p className="text-[10px] text-neutral-500 opacity-70">
+                              Identity confirmed via social login
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Trust Verification Signal */}
-                    <div className="mt-1 flex items-center gap-3 rounded-lg bg-[#f2f4f6] px-3 py-2">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[#e6e8ea]">
-                        <ShieldCheck className="size-3.5 text-[#009668]" />
+                    <div className="mt-1 flex items-center gap-3 rounded-lg bg-neutral-50 px-3 py-2">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-neutral-100">
+                        <ShieldCheck className="size-3.5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-(family-name:--font-inter) text-xs leading-none font-semibold text-[#191c1e]">
-                          Identity Verification
+                        <p className="text-xs leading-none font-semibold text-neutral-900">
+                          {t.identityVerification}
                         </p>
-                        <p className="mt-1 font-(family-name:--font-inter) text-[10px] leading-relaxed text-[#45464d]">
-                          Your name and title are verified to build trust.
+                        <p className="mt-1 text-[10px] leading-relaxed text-neutral-500">
+                          {t.identityVerificationSub}
                         </p>
                       </div>
                     </div>
@@ -680,33 +1181,37 @@ export default function CollectionWizard({
                     <div className="flex flex-col items-center justify-between gap-4 pt-4 md:flex-row">
                       <button
                         onClick={prevStep}
-                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#e6e8ea] px-6 py-2.5 font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#45464d] uppercase transition-colors hover:opacity-90 md:order-1 md:w-auto"
+                        className="order-2 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-opacity hover:opacity-80 md:order-1 md:w-auto"
+                        style={{
+                          backgroundColor: "var(--cw-badge)",
+                          color: "var(--cw-text-secondary)",
+                        }}
                         type="button"
                       >
-                        Back
+                        {t.back}
                       </button>
                       <button
-                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 font-(family-name:--font-inter) text-[11px] font-bold tracking-widest text-[#ffffff] uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
+                        className="order-1 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-[11px] font-bold tracking-widest uppercase transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:order-2 md:flex-1"
                         disabled={settings?.form?.fields?.fullName?.required !== false && !name}
                         onClick={(e) => {
                           e.preventDefault();
-                          const minCount = settings?.form?.minCharCount ?? 50;
-                          const isNameRequired =
-                            settings?.form?.fields?.fullName?.required !== false;
-                          if (
-                            mode === "text" &&
-                            ((isNameRequired && !name) || content.length < minCount)
-                          ) {
+                          const mc = settings?.form?.minCharCount ?? 50;
+                          const isNameReq = settings?.form?.fields?.fullName?.required !== false;
+                          if (mode === "text" && ((isNameReq && !name) || content.length < mc)) {
                             toast.error(
-                              `Please ensure your name is filled and testimonial is at least ${minCount} characters.`,
+                              `Please ensure your name is filled and testimonial is at least ${mc} characters.`,
                             );
                             return;
                           }
                           nextStep();
                         }}
+                        style={{
+                          backgroundColor: "var(--cw-fg)",
+                          color: "var(--cw-fg-inv)",
+                        }}
                         type="button"
                       >
-                        Review Testimonial
+                        {t.reviewTestimonial}
                         <ArrowRight className="size-4" />
                       </button>
                     </div>
@@ -714,24 +1219,46 @@ export default function CollectionWizard({
                 </div>
               )}
 
+              {/* ─── REVIEW STEP ─── */}
               {step === "review" && (
                 <div className="mx-auto w-full text-left">
-                  <h1 className="mb-2 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    Ready to submit?
+                  <h1
+                    className="mb-2 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {t.reviewHeadline}
                   </h1>
-                  <p className="mb-4 max-w-sm text-sm text-[#45464d]">
-                    Everything looks great. Take one last look at how your testimonial will appear
-                    to others before you hit the button.
+                  <p
+                    className="mb-4 max-w-sm text-sm"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {t.reviewSubtext}
                   </p>
 
                   <div className="relative mt-2 mb-5">
-                    <div className="absolute -top-3 -left-3 z-10 rounded-sm bg-[#e6e8ea] px-3 py-1 font-(family-name:--font-inter) text-[10px] font-bold tracking-widest text-[#45464d] uppercase shadow-sm">
-                      Live Preview
+                    <div
+                      className="absolute -top-3 -left-3 z-10 rounded-sm px-3 py-1 text-[10px] font-bold tracking-widest uppercase shadow-sm"
+                      style={{
+                        backgroundColor: "var(--cw-badge)",
+                        color: "var(--cw-text-secondary)",
+                      }}
+                    >
+                      {t.reviewLivePreview}
                     </div>
-                    <div className="relative rounded-xl border border-[#c6c6cd]/30 bg-[#f2f4f6] p-5 shadow-inner">
+                    <div
+                      className="relative rounded-xl p-5"
+                      style={{
+                        backgroundColor: "var(--cw-surface)",
+                        border: "1px solid var(--cw-border-30)",
+                        boxShadow: "inset 0 2px 4px rgba(0,0,0,0.04)",
+                      }}
+                    >
                       <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#e6e8ea]">
+                          <div
+                            className="h-10 w-10 shrink-0 overflow-hidden rounded-full"
+                            style={{ backgroundColor: "var(--cw-badge)" }}
+                          >
                             {photo ? (
                               <Image
                                 src={photo}
@@ -741,42 +1268,78 @@ export default function CollectionWizard({
                                 alt="Profile"
                               />
                             ) : (
-                              <User className="m-2.5 size-5 text-[#45464d]" />
+                              <User
+                                className="m-2.5 size-5"
+                                style={{ color: "var(--cw-text-secondary)" }}
+                              />
                             )}
                           </div>
                           <div className="text-left">
-                            <h3 className="font-(family-name:--font-manrope) text-lg leading-tight font-bold text-[#191c1e]">
+                            <h3
+                              className="text-lg leading-tight font-bold"
+                              style={{ color: "var(--cw-text-primary)" }}
+                            >
                               {name}
                             </h3>
-                            <p className="font-(family-name:--font-inter) text-xs text-[#45464d]">
+                            <p className="text-xs" style={{ color: "var(--cw-text-secondary)" }}>
                               {tagline} {tagline && company && "at "} {company}
                             </p>
                           </div>
                         </div>
-                        <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[#d5e3fd] bg-[#d5e3fd]/40 px-2.5 py-1">
-                          <BadgeCheck className="size-3.5 text-[#000000]" />
-                          <span className="font-(family-name:--font-inter) text-[10px] font-bold tracking-tighter text-[#000000] uppercase">
-                            Verified
-                          </span>
-                        </div>
+                        {session && (
+                          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1">
+                            <BadgeCheck className="size-3.5 text-blue-600" />
+                            <span className="text-[10px] font-bold tracking-tighter text-blue-700 uppercase">
+                              {session?.user ? t.reviewVerified : t.verifiedUser}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="relative mt-2 text-left">
-                        <Quote className="absolute -top-2 -left-3 z-0 size-10 rotate-180 text-[#c6c6cd]/30" />
-                        <p className="relative z-10 font-(family-name:--font-inter) text-sm leading-relaxed text-[#191c1e] italic">
-                          &quot;{content || "Video Testimonial Attached"}&quot;
-                        </p>
+                        <Quote
+                          className="absolute -top-2 -left-3 z-0 size-10 rotate-180 opacity-25"
+                          style={{ color: "var(--cw-text-muted)" }}
+                        />
+                        {videoPreviewUrl ? (
+                          <div className="relative z-10 my-4 overflow-hidden rounded-xl bg-black shadow-lg">
+                            <video
+                              key={videoPreviewUrl}
+                              src={videoPreviewUrl}
+                              controls
+                              className="aspect-video w-full object-cover"
+                              playsInline
+                            />
+                          </div>
+                        ) : (
+                          <p
+                            className="relative z-10 text-sm leading-relaxed wrap-break-word whitespace-pre-wrap italic"
+                            style={{ color: "var(--cw-text-primary)" }}
+                          >
+                            &quot;{content}&quot;
+                          </p>
+                        )}
                       </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-[#c6c6cd]/20 pt-4">
-                        <div className="flex gap-0.5 text-[#000000]">
+                      <div
+                        className="mt-4 flex items-center justify-between border-t pt-4"
+                        style={{ borderColor: "var(--cw-border-20)" }}
+                      >
+                        <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`size-3 ${i < rating ? "fill-current" : "text-[#c6c6cd]/40"}`}
+                              className="size-3"
+                              style={{
+                                color: "var(--cw-fg)",
+                                fill: i < rating ? "var(--cw-fg)" : "none",
+                              }}
                             />
                           ))}
                         </div>
-                        <span className="font-(family-name:--font-inter) text-[10px] tracking-widest text-[#45464d] uppercase">
-                          {new Date().toLocaleDateString("en-US", {
+                        <span
+                          className="text-[10px] tracking-widest uppercase"
+                          style={{ color: "var(--cw-text-secondary)" }}
+                        >
+                          {new Date().toLocaleDateString(undefined, {
                             month: "long",
                             day: "numeric",
                             year: "numeric",
@@ -786,58 +1349,114 @@ export default function CollectionWizard({
                     </div>
                   </div>
 
+                  {/* ── Consent Checkbox ── */}
+                  <label
+                    htmlFor="cw-consent"
+                    className="mb-4 flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors"
+                    style={{
+                      backgroundColor: hasConsented
+                        ? "var(--cw-blue-tint-30)"
+                        : "var(--cw-surface)",
+                      border: `1px solid ${
+                        hasConsented ? "var(--cw-blue-tint-border)" : "var(--cw-border-30)"
+                      }`,
+                    }}
+                  >
+                    <input
+                      id="cw-consent"
+                      type="checkbox"
+                      checked={hasConsented}
+                      onChange={(e) => setHasConsented(e.target.checked)}
+                      className="mt-0.5 size-4 shrink-0 cursor-pointer accent-current"
+                      style={{ accentColor: "var(--cw-fg)" }}
+                    />
+                    <span
+                      className="text-[11px] leading-relaxed"
+                      style={{ color: "var(--cw-text-secondary)" }}
+                    >
+                      {t.consentLabel.replace("{projectName}", project.name)}{" "}
+                      {settings?.privacyPolicyUrl ? (
+                        <a
+                          href={settings.privacyPolicyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 hover:opacity-80"
+                          style={{ color: "var(--cw-text-primary)" }}
+                        >
+                          {t.consentPrivacyLink}
+                        </a>
+                      ) : null}
+                    </span>
+                  </label>
+
                   <div className="flex w-full flex-col items-center gap-3 sm:flex-row">
                     <button
                       onClick={handleSubmit}
-                      disabled={loading}
-                      className="w-full rounded-lg bg-[#000000] py-3.5 font-(family-name:--font-manrope) text-[13px] font-bold text-[#ffffff] shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 sm:flex-1"
+                      disabled={loading || !hasConsented}
+                      className="w-full rounded-lg py-3.5 text-[13px] font-bold shadow-xl shadow-black/10 transition-all duration-200 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 sm:flex-1"
+                      style={{
+                        backgroundColor: "var(--cw-fg)",
+                        color: "var(--cw-fg-inv)",
+                      }}
                     >
-                      {loading ? "Submitting..." : "Submit Testimonial"}
+                      {loading ? t.submittingButton : t.submitButton}
                     </button>
                     <button
                       onClick={prevStep}
-                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 font-(family-name:--font-inter) text-[11px] font-semibold tracking-widest text-[#45464d] uppercase transition-colors hover:text-[#000000] sm:w-auto"
+                      className="flex w-full items-center justify-center gap-2 px-6 py-3.5 text-[11px] font-semibold tracking-widest uppercase transition-opacity hover:opacity-70 sm:w-auto"
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
-                      Edit details
+                      {t.editDetails}
                     </button>
                   </div>
-                  <p className="mt-4 px-4 text-center font-(family-name:--font-inter) text-[10px] leading-relaxed text-[#45464d]">
-                    By submitting, you agree to our Terms of Service. Your testimonial will be
-                    shared with the team for review and publishing.
-                  </p>
                 </div>
               )}
 
+              {/* ─── SUCCESS STEP ─── */}
               {step === "success" && (
                 <>
-                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#d5e3fd]/40">
-                    <CheckCircle2 className="size-8 text-[#009668]" />
+                  <div
+                    className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
+                    style={{ backgroundColor: "var(--cw-blue-tint-40)" }}
+                  >
+                    <CheckCircle2 className="size-8" style={{ color: "var(--cw-green)" }} />
                   </div>
-                  <h1 className="mb-3 font-(family-name:--font-manrope) text-2xl font-extrabold tracking-tight text-[#191c1e] md:text-3xl">
-                    {settings?.pageContent?.thankYou?.headline || "You're awesome!"}
+                  <h1
+                    className="mb-3 text-2xl font-extrabold tracking-tight md:text-3xl"
+                    style={{ color: "var(--cw-text-primary)" }}
+                  >
+                    {settings?.pageContent?.thankYou?.headline ?? t.defaultThankYouHeadline}
                   </h1>
-                  <p className="mx-auto mb-8 max-w-sm text-base text-[#45464d]">
-                    {settings?.pageContent?.thankYou?.body ||
-                      project.thankYouMessage ||
-                      `Your feedback helps us grow and provides authentic proof to others considering our services.`}
+                  <p
+                    className="mx-auto mb-8 max-w-sm text-base"
+                    style={{ color: "var(--cw-text-secondary)" }}
+                  >
+                    {settings?.pageContent?.thankYou?.body ??
+                      project.thankYouMessage ??
+                      t.defaultThankYouBody}
                   </p>
 
                   <div className="flex flex-col items-center gap-3">
                     {settings?.pageContent?.thankYou?.cta?.enabled &&
                       settings?.pageContent?.thankYou?.cta?.text && (
                         <a
-                          href={settings.pageContent.thankYou.cta.url}
-                          className="inline-flex items-center gap-2 rounded-lg bg-[#000000] px-6 py-2.5 font-(family-name:--font-manrope) text-sm font-bold text-[#ffffff] transition-all hover:opacity-90"
+                          href={settings?.pageContent?.thankYou?.cta?.url || "#"}
+                          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold transition-all hover:opacity-90"
+                          style={{
+                            backgroundColor: "var(--cw-fg)",
+                            color: "var(--cw-fg-inv)",
+                          }}
                         >
-                          {settings.pageContent.thankYou.cta.text}
+                          {settings?.pageContent?.thankYou?.cta?.text}
                           <ArrowRight className="size-4" />
                         </a>
                       )}
                     <button
-                      className="text-[13px] font-medium text-[#45464d] hover:underline"
+                      className="text-[13px] font-medium hover:underline"
                       onClick={() => window.location.reload()}
+                      style={{ color: "var(--cw-text-secondary)" }}
                     >
-                      Post another review
+                      {t.postAnotherReview}
                     </button>
                   </div>
                 </>
@@ -847,7 +1466,7 @@ export default function CollectionWizard({
         </div>
       </div>
 
-      {/* Contextual Trust Signal */}
+      {/* Contextual Trust Signal (text step only) */}
       <AnimatePresence>
         {step === "text" && (
           <motion.div
@@ -858,7 +1477,10 @@ export default function CollectionWizard({
             className="mx-auto mt-6 flex max-w-sm flex-col items-center text-center"
           >
             <div className="mb-2 flex justify-center">
-              <div className="relative h-10 w-10 overflow-hidden rounded-full border border-[#c6c6cd]/30 shadow-sm">
+              <div
+                className="relative h-10 w-10 overflow-hidden rounded-full shadow-sm"
+                style={{ border: "1px solid var(--cw-border-30)" }}
+              >
                 <img
                   alt="User Profile"
                   className="h-full w-full object-cover"
@@ -866,18 +1488,22 @@ export default function CollectionWizard({
                 />
               </div>
             </div>
-            <p className="px-4 font-(family-name:--font-inter) text-xs leading-relaxed text-[#45464d] italic">
-              &quot;Real feedback like yours is what makes our community thrive. Thank you for your
-              time.&quot;
+            <p
+              className="px-4 text-xs leading-relaxed italic"
+              style={{ color: "var(--cw-text-secondary)" }}
+            >
+              {t.trustQuote}
             </p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Footer-ish Meta Info */}
-      <p className="mt-4 px-4 text-center text-[10px] leading-relaxed font-medium text-[#45464d] opacity-60">
-        By continuing, you agree to our terms of service and acknowledge that your rating may be
-        used for marketing purposes.
+      {/* Footer disclaimer */}
+      <p
+        className="mt-4 px-4 text-center text-[10px] leading-relaxed font-medium opacity-60"
+        style={{ color: "var(--cw-text-secondary)" }}
+      >
+        {t.footerDisclaimer}
       </p>
     </div>
   );
