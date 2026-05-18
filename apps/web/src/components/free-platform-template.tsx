@@ -150,8 +150,10 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
                 <tbody>
                   <tr className="border-b">
                     <td className="p-6 font-medium">Free Limit</td>
-                    <td className="text-muted-foreground p-6 text-center">Very Limited</td>
-                    <td className="text-muted-foreground p-6 text-center">10-15</td>
+                    <td className="p-6 text-center text-slate-600 dark:text-slate-400">
+                      Very Limited
+                    </td>
+                    <td className="p-6 text-center text-slate-600 dark:text-slate-400">10-15</td>
                     <td className="bg-primary/5 text-primary p-6 text-center font-bold italic">
                       50 + Video
                     </td>
@@ -170,8 +172,8 @@ export default function FreePlatformTemplate({ platform }: FreePlatformTemplateP
                   </tr>
                   <tr className="border-b">
                     <td className="p-6 font-medium">Setup Time</td>
-                    <td className="text-muted-foreground p-6 text-center">Manual</td>
-                    <td className="text-muted-foreground p-6 text-center">15 mins</td>
+                    <td className="p-6 text-center text-slate-600 dark:text-slate-400">Manual</td>
+                    <td className="p-6 text-center text-slate-600 dark:text-slate-400">15 mins</td>
                     <td className="bg-primary/5 text-primary p-6 text-center font-bold italic">
                       5 mins
                     </td>

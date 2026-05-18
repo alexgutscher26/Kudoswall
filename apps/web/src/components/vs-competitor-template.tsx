@@ -131,21 +131,21 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
             <div className="grid gap-8 md:grid-cols-2">
               <div className="bg-background rounded-3xl border p-8 shadow-sm">
                 <h3 className="mb-6 text-2xl font-bold">{competitor.name} Free Tier</h3>
-                <div className="text-muted-foreground mb-8 text-4xl font-bold opacity-50">
+                <div className="mb-8 text-4xl font-bold text-slate-500 dark:text-slate-400">
                   {competitor.freeTier}
                 </div>
-                <p className="text-muted-foreground mb-6">
+                <p className="mb-6 text-slate-700 dark:text-slate-300">
                   Most tools use their free tier as a "bait-and-switch" demo. You hit the limit just
                   as your wall starts looking good.
                 </p>
                 <ul className="space-y-3">
-                  <li className="text-muted-foreground flex items-center gap-2">
+                  <li className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                     <X className="text-destructive h-4 w-4" /> Limited social proof volume
                   </li>
-                  <li className="text-muted-foreground flex items-center gap-2">
+                  <li className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                     <X className="text-destructive h-4 w-4" /> Often gates video recording
                   </li>
-                  <li className="text-muted-foreground flex items-center gap-2">
+                  <li className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                     <X className="text-destructive h-4 w-4" /> Designed for 14-day activation
                   </li>
                 </ul>
@@ -156,7 +156,7 @@ export default function VsCompetitorTemplate({ competitor }: VsCompetitorTemplat
                 </div>
                 <h3 className="mb-6 text-2xl font-bold">KudosWall Free Tier</h3>
                 <div className="text-primary mb-8 text-4xl font-extrabold">{kudoswallFreeTier}</div>
-                <p className="text-muted-foreground mb-6 font-medium">
+                <p className="mb-6 font-medium text-slate-700 dark:text-slate-300">
                   We built our free tier to be a real product, not a demo. It's designed to get your
                   Wall of Love live and converting.
                 </p>

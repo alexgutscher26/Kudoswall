@@ -28,6 +28,9 @@ import {
   VOUCH_ALTERNATIVE,
   FRAMER_EMBED_GUIDE,
   COURSE_CREATOR_TESTIMONIALS,
+  VIDEO_TESTIMONIALS_GUIDE,
+  COURSE_TESTIMONIALS_GUIDE,
+  TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -129,6 +132,12 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = FRAMER_EMBED_GUIDE.content;
   } else if (slug === "course-creator-testimonials") {
     content = COURSE_CREATOR_TESTIMONIALS.content;
+  } else if (slug === "video-testimonials-ultimate-guide") {
+    content = VIDEO_TESTIMONIALS_GUIDE.content;
+  } else if (slug === "collect-course-testimonials") {
+    content = COURSE_TESTIMONIALS_GUIDE.content;
+  } else if (slug === "testimonial-collection-software") {
+    content = TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE.content;
   } else {
     return notFound();
   }

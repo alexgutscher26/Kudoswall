@@ -159,4 +159,25 @@ export const BLOG_POSTS = [
     slug: "course-creator-testimonials",
     date: "2026-05-08",
   },
+  {
+    title: "Video Testimonials: The Ultimate Guide to Collecting and Sharing Social Proof (2026)",
+    description:
+      "The why, what, and how of video testimonials. Discover the exact strategies, questions, and tools to collect and share video reviews that double your conversions.",
+    slug: "video-testimonials-ultimate-guide",
+    date: "2026-05-18",
+  },
+  {
+    title: "How to Collect Testimonials for Your Online Course: A Step-by-Step Guide (2026)",
+    description:
+      "The definitive guide to collecting student results and video testimonials for your online course. Turn student success into Kajabi, Podia, Teachable, and Skool sales.",
+    slug: "collect-course-testimonials",
+    date: "2026-05-18",
+  },
+  {
+    title: "5 Best Testimonial Collection Software in 2026 (Detailed Comparison)",
+    description:
+      "Looking for the perfect testimonial collection software? We methodically compared the top 5 tools—KudosWall, Vocal Video, Famewall, Boast, and Vouch—on UX, limits, widgets, and pricing to help you choose the best one.",
+    slug: "testimonial-collection-software",
+    date: "2026-05-18",
+  },
 ] as const;
