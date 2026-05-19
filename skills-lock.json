@@ -6,6 +6,12 @@
       "sourceType": "github",
       "computedHash": "9ab075b5061be2a5f299c10505667345cc1ec76e8de4120901cfd586643e776f"
     },
+    "google-ai-search-optimization": {
+      "source": "deepakness/google-ai-search-optimization",
+      "sourceType": "github",
+      "skillPath": "skills/google-ai-search-optimization/SKILL.md",
+      "computedHash": "4e49ad3b8ed261c13df71522ba8f76ce045476b86fd637b7ceab9068728fd567"
+    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
