@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import VsCompetitorTemplate from "@/components/vs-competitor-template";
 import { COMPETITORS } from "@/lib/competitor-data";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 type Params = Promise<{ slug: string }>;
 
@@ -41,6 +42,8 @@ export default async function VsPage({ params }: { params: Params }) {
     return notFound();
   }
 
+  const baseUrl = "https://kudoswall.org";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -56,8 +59,15 @@ export default async function VsPage({ params }: { params: Params }) {
     },
   };
 
+  const breadcrumbs = [
+    { name: "Home", url: baseUrl },
+    { name: "Comparisons", url: `${baseUrl}/vs` },
+    { name: `KudosWall vs ${competitor.name}`, url: `${baseUrl}/vs/${slug}` },
+  ];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumbs} />
       <Script
         id="json-ld-vs"
         type="application/ld+json"

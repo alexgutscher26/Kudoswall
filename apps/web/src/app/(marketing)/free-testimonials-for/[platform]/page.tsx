@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FreePlatformTemplate from "@/components/free-platform-template";
 import { PLATFORM_PAGES } from "@/lib/platform-pages";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 type Params = Promise<{ platform: string }>;
 
@@ -39,5 +40,17 @@ export default async function FreePlatformPage({ params }: { params: Params }) {
     return notFound();
   }
 
-  return <FreePlatformTemplate platform={platform} />;
+  const baseUrl = "https://kudoswall.org";
+  const breadcrumbs = [
+    { name: "Home", url: baseUrl },
+    { name: "Free Testimonials For", url: `${baseUrl}/free` },
+    { name: platform.name, url: `${baseUrl}/free-testimonials-for/${slug}` },
+  ];
+
+  return (
+    <>
+      <BreadcrumbJsonLd items={breadcrumbs} />
+      <FreePlatformTemplate platform={platform} />
+    </>
+  );
 }

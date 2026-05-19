@@ -36,6 +36,7 @@ import {
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { ChevronLeft } from "lucide-react";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 type Params = Promise<{ slug: string }>;
 
@@ -152,8 +153,18 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     description: description,
     author: {
       "@type": "Person",
-      name: "Alex G.",
-      url: baseUrl,
+      name: "Alex Gutscher",
+      jobTitle: "Founder",
+      worksFor: {
+        "@type": "Organization",
+        name: "KudosWall",
+      },
+      url: `${baseUrl}/blog`,
+      sameAs: [
+        "https://twitter.com/alexgutscher26",
+        "https://linkedin.com/in/alexgutscher",
+        "https://github.com/alexgutscher26",
+      ],
     },
     datePublished: `${post.date}T00:00:00Z`,
     dateModified: `${post.date}T00:00:00Z`,
@@ -171,8 +182,15 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     },
   };
 
+  const breadcrumbs = [
+    { name: "Home", url: baseUrl },
+    { name: "Blog", url: `${baseUrl}/blog` },
+    { name: title, url: `${baseUrl}/blog/${slug}` },
+  ];
+
   return (
     <main className="bg-background text-foreground min-h-screen">
+      <BreadcrumbJsonLd items={breadcrumbs} />
       <Script
         id="json-ld"
         type="application/ld+json"

@@ -3,10 +3,18 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Card, CardContent } from "@my-better-t-app/ui/components/card";
 import { BLOG_POSTS } from "@/lib/blog";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 export default function BlogPage() {
+  const baseUrl = "https://kudoswall.org";
+  const breadcrumbs = [
+    { name: "Home", url: baseUrl },
+    { name: "Blog", url: `${baseUrl}/blog` },
+  ];
+
   return (
     <main className="bg-background min-h-screen">
+      <BreadcrumbJsonLd items={breadcrumbs} />
       <Navbar />
       <div className="container mx-auto max-w-4xl px-4 py-24">
         <header className="mb-16 text-center">

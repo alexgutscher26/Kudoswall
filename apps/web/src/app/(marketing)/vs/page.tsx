@@ -5,6 +5,7 @@ import Link from "next/link";
 import { COMPETITORS } from "@/lib/competitor-data";
 import { ArrowRight, Star } from "lucide-react";
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 export const metadata: Metadata = {
   title: "KudosWall vs Competitors: Compare Testimonial Software",
@@ -13,8 +14,15 @@ export const metadata: Metadata = {
 };
 
 export default function VsHubPage() {
+  const baseUrl = "https://kudoswall.org";
+  const breadcrumbs = [
+    { name: "Home", url: baseUrl },
+    { name: "Comparisons", url: `${baseUrl}/vs` },
+  ];
+
   return (
     <div className="bg-background min-h-screen">
+      <BreadcrumbJsonLd items={breadcrumbs} />
       <Navbar />
       <main className="container mx-auto max-w-5xl px-4 py-32">
         <h1 className="mb-6 text-5xl font-black">KudosWall vs Everyone</h1>

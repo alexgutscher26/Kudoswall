@@ -3,6 +3,8 @@ import { createDb } from "@my-better-t-app/db";
 import { project } from "@my-better-t-app/db/schema";
 import { isNotNull } from "drizzle-orm";
 import { BLOG_POSTS } from "@/lib/blog";
+import { COMPETITORS } from "@/lib/competitor-data";
+import { PLATFORM_PAGES } from "@/lib/platform-pages";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://kudoswall.org";
@@ -34,12 +36,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const comparisonSlugs = ["senja", "testimonial-to"];
-  const vsUrls: MetadataRoute.Sitemap = comparisonSlugs.map((slug) => ({
-    url: `${baseUrl}/vs/${slug}`,
+  const vsUrls: MetadataRoute.Sitemap = COMPETITORS.map((c) => ({
+    url: `${baseUrl}/vs/${c.slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.6,
+  }));
+
+  const platformUrls: MetadataRoute.Sitemap = PLATFORM_PAGES.map((p) => ({
+    url: `${baseUrl}/free-testimonials-for/${p.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
   }));
 
   const staticUrls: MetadataRoute.Sitemap = [
@@ -93,5 +101,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticUrls, ...blogUrls, ...vsUrls, ...collectionUrls];
+  return [...staticUrls, ...blogUrls, ...vsUrls, ...collectionUrls, ...wallUrls, ...platformUrls];
 }
