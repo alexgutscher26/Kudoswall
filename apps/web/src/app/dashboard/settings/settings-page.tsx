@@ -335,35 +335,17 @@ export default function SettingsPage() {
                 Workspace Identity
               </h3>
 
-              {/* Name & Slug */}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Workspace Name
-                  </label>
-                  <input
-                    type="text"
-                    value={workspaceName}
-                    onChange={(e) => setWorkspaceName(e.target.value)}
-                    className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium transition-all outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    URL Slug
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="shrink-0 text-[13px] font-medium text-neutral-300">
-                      kudoswall.org/
-                    </span>
-                    <input
-                      type="text"
-                      value={slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium transition-all outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-                    />
-                  </div>
-                </div>
+              {/* Name */}
+              <div className="max-w-md space-y-2">
+                <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Workspace Name
+                </label>
+                <input
+                  type="text"
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 text-[14px] font-medium transition-all outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                />
               </div>
             </section>
 
