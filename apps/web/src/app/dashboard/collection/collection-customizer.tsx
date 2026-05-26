@@ -728,7 +728,7 @@ export function CollectionCustomizer({
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
                     Favicon
                   </label>
@@ -789,7 +789,7 @@ export function CollectionCustomizer({
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {!isPro && (
