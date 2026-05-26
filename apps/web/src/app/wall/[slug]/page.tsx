@@ -29,6 +29,9 @@ export async function generateMetadata({ params }: WallPageProps) {
   return {
     title,
     description,
+    icons: {
+      icon: projectData.settings?.faviconUrl || "/favicon.ico",
+    },
     alternates: {
       canonical: canonicalUrl,
     },
@@ -102,8 +105,13 @@ const getProjectByCollectionSlug = unstable_cache(
       hideHeader: false,
     };
 
+    const settings = result.collectionSettingsJson
+      ? JSON.parse(result.collectionSettingsJson)
+      : null;
+
     return {
       ...result,
+      settings,
       wallSettings,
       workspace: {
         ...result.workspace,

@@ -61,6 +61,7 @@ export type CollectionSettings = {
   thankYouMessage?: string;
   workspaceName?: string;
   logoUrl?: string;
+  faviconUrl?: string;
   accentColor: string;
   backgroundColor: string;
   fontFamily: string;
@@ -726,6 +727,68 @@ export function CollectionCustomizer({
                       )}
                     </div>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Favicon
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {settings.faviconUrl ? (
+                      <div className="relative flex size-10 items-center justify-center rounded-xl border border-neutral-100 bg-white">
+                        <Image
+                          src={settings.faviconUrl}
+                          alt="Favicon preview"
+                          width={24}
+                          height={24}
+                          className="object-contain"
+                        />
+                        {isPro && (
+                          <button
+                            onClick={() => setNestedSetting("faviconUrl", undefined)}
+                            className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white hover:bg-red-600"
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex size-10 items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50">
+                        <Globe className="size-5 text-neutral-300" />
+                      </div>
+                    )}
+                    <div
+                      className="flex-1"
+                      onClickCapture={(e) => {
+                        if (!isPro) {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          toast.error("Pro Feature", {
+                            description: "Upgrade to Pro to use a custom favicon.",
+                          });
+                        }
+                      }}
+                    >
+                      <UploadButton
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res?.[0]) {
+                            setNestedSetting("faviconUrl", res[0].url);
+                            toast.success("Favicon uploaded!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Error: ${error.message}`);
+                        }}
+                        appearance={{
+                          button: `w-full h-8 text-[11px] font-bold bg-neutral-900 border-none rounded-xl ${
+                            !isPro ? "pointer-events-none opacity-50" : ""
+                          }`,
+                          allowedContent: "hidden",
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

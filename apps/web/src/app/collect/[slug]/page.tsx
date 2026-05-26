@@ -37,6 +37,9 @@ export async function generateMetadata({ params }: CollectPageProps) {
   return {
     title: `${headline} | ${projectData.name} on KudosWall`,
     description: subheading,
+    icons: {
+      icon: projectData.settings?.faviconUrl || "/favicon.ico",
+    },
     alternates: {
       canonical: canonicalUrl,
     },
