@@ -185,6 +185,28 @@ export async function createProject(formData: FormData, workspaceId?: string) {
     updatedAt: new Date(),
   });
 
+  // Sync to Loops.so
+  const loopsApiKey = env.LOOPS_API_KEY;
+  if (loopsApiKey && session.user.email) {
+    try {
+      const { LoopsService } = await import("@my-better-t-app/email");
+      const loops = new LoopsService(loopsApiKey);
+      await loops.sendEvent({
+        email: session.user.email,
+        eventName: "project_created",
+        eventProperties: {
+          projectName: name,
+        },
+      });
+      await loops.updateContact({
+        email: session.user.email,
+        projectCount: (projectsCount[0]?.value || 0) + 1,
+      });
+    } catch (loopsErr) {
+      console.error("[Loops Sync] Failed to sync project_created:", loopsErr);
+    }
+  }
+
   revalidatePath("/dashboard");
   return { success: true };
 }

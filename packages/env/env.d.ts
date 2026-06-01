@@ -8,6 +8,8 @@ export type CloudflareEnv = typeof server.Env;
 declare global {
   type Env = CloudflareEnv & {
     RESEND_API_KEY?: string;
+    LOOPS_API_KEY?: string;
+    LOOPS_TRANSACTIONAL_SUBSCRIBED_ID?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
     LINKEDIN_CLIENT_ID?: string;

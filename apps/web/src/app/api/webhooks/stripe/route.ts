@@ -107,6 +107,48 @@ export async function POST(req: Request) {
         console.log(
           `🚀 Workspace ${workspaceId} and User ${userId} updated to plan: ${plan || "free"}`,
         );
+
+        // Sync subscription to Loops.so
+        const loopsApiKey = env.LOOPS_API_KEY;
+        const customerEmail = session.customer_details?.email;
+        if (loopsApiKey && customerEmail) {
+          try {
+            const { LoopsService } = await import("@my-better-t-app/email");
+            const loops = new LoopsService(loopsApiKey);
+
+            // Update contact properties
+            await loops.updateContact({
+              email: customerEmail,
+              plan: plan || "free",
+              subscriptionStatus: "active",
+            });
+
+            // Send custom event
+            await loops.sendEvent({
+              email: customerEmail,
+              eventName: "subscription_created",
+              eventProperties: {
+                planName: plan || "free",
+              },
+            });
+
+            // Trigger Loops transactional email if transactionalId is set
+            const transactionalId = env.LOOPS_TRANSACTIONAL_SUBSCRIBED_ID;
+            if (transactionalId) {
+              await loops.sendTransactional({
+                email: customerEmail,
+                transactionalId,
+                dataVariables: {
+                  planName: plan || "free",
+                  userName: session.customer_details?.name || "there",
+                },
+              });
+              console.log(`[Loops Webhook Sync] Triggered transactional email to ${customerEmail}`);
+            }
+          } catch (loopsErr) {
+            console.error("[Loops Webhook Sync] Failed to sync subscription completed:", loopsErr);
+          }
+        }
       } catch (dbError: any) {
         console.error(`❌ Database Update Error: ${dbError.message}`);
         return new NextResponse("Database update failed", { status: 500 });
@@ -156,6 +198,32 @@ export async function POST(req: Request) {
       });
 
       console.log(`✅ Subscription ${subscription.id} and User ${userId} updated. Plan: ${plan}`);
+
+      // Sync update to Loops.so
+      const loopsApiKey = env.LOOPS_API_KEY;
+      if (loopsApiKey) {
+        try {
+          const orgData = await db.query.organization.findFirst({
+            where: eq(organization.stripeSubscriptionId, subscription.id),
+            with: { owner: true },
+          });
+
+          if (orgData?.owner?.email) {
+            const { LoopsService } = await import("@my-better-t-app/email");
+            const loops = new LoopsService(loopsApiKey);
+            await loops.updateContact({
+              email: orgData.owner.email,
+              plan: plan || "free",
+              subscriptionStatus: subscription.status as string,
+            });
+            console.log(
+              `[Loops Webhook Sync] Updated subscription synced for ${orgData.owner.email}`,
+            );
+          }
+        } catch (loopsErr) {
+          console.error("[Loops Webhook Sync] Failed to sync subscription updated:", loopsErr);
+        }
+      }
     }
 
     if (event.type === "customer.subscription.deleted") {
@@ -211,6 +279,29 @@ export async function POST(req: Request) {
       }
 
       console.log(`✅ Subscription ${subscription.id} and User ${userId} marked as canceled.`);
+
+      // Sync subscription deletion to Loops.so
+      const loopsApiKey = env.LOOPS_API_KEY;
+      if (loopsApiKey && organizationData?.owner?.email) {
+        try {
+          const { LoopsService } = await import("@my-better-t-app/email");
+          const loops = new LoopsService(loopsApiKey);
+          await loops.updateContact({
+            email: organizationData.owner.email,
+            plan: "free",
+            subscriptionStatus: "canceled",
+          });
+          await loops.sendEvent({
+            email: organizationData.owner.email,
+            eventName: "subscription_cancelled",
+          });
+          console.log(
+            `[Loops Webhook Sync] Synced canceled subscription for ${organizationData.owner.email}`,
+          );
+        } catch (loopsErr) {
+          console.error("[Loops Webhook Sync] Failed to sync subscription deleted:", loopsErr);
+        }
+      }
     }
 
     return new NextResponse(null, { status: 200 });

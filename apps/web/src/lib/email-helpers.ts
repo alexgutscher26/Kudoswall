@@ -2,7 +2,7 @@ import { EmailService } from "@my-better-t-app/email";
 import { env } from "@my-better-t-app/env/server";
 import { db } from "./server-db";
 import { testimonial, project } from "@my-better-t-app/db/schema";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and, isNull } from "drizzle-orm";
 
 export async function notifyOwnerNewTestimonial(
   projectId: string,
@@ -57,6 +57,43 @@ export async function notifyOwnerNewTestimonial(
         testimonialData.rating,
       );
       console.log(`[TESTIMONIAL_NOTIFICATION] Sent to ${proj.workspace.owner.email}`);
+    }
+
+    // Sync to Loops.so
+    const loopsApiKey = env.LOOPS_API_KEY;
+    if (loopsApiKey && proj.workspace.owner.email) {
+      try {
+        const { LoopsService } = await import("@my-better-t-app/email");
+        const loops = new LoopsService(loopsApiKey);
+
+        // Fetch overall testimonial count in owner's workspace
+        const testimonialCountResult = await db
+          .select({ value: count() })
+          .from(testimonial)
+          .innerJoin(project, eq(testimonial.projectId, project.id))
+          .where(and(eq(project.workspaceId, proj.workspaceId), isNull(testimonial.deletedAt)));
+        const totalTestimonials = testimonialCountResult[0]?.value || 0;
+
+        await loops.sendEvent({
+          email: proj.workspace.owner.email,
+          eventName: "testimonial_received",
+          eventProperties: {
+            authorName: testimonialData.authorName,
+            rating: testimonialData.rating,
+            isFirst: totalTestimonials === 1,
+          },
+        });
+
+        await loops.updateContact({
+          email: proj.workspace.owner.email,
+          testimonialCount: totalTestimonials,
+        });
+        console.log(
+          `[Loops Sync] Testimonial synced successfully for ${proj.workspace.owner.email}`,
+        );
+      } catch (loopsErr) {
+        console.error("[Loops Sync] Failed to sync testimonial_received:", loopsErr);
+      }
     }
   } catch (error) {
     console.error("[TESTIMONIAL_NOTIFICATION_FAILURE]", error);

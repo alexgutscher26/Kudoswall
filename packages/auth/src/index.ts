@@ -255,6 +255,33 @@ export function createAuth() {
               const emailService = new EmailService(env.RESEND_API_KEY || "");
               await emailService.sendWelcomeEmail(user.email, user.name || "there");
               console.log(`[Welcome Email] Sent to ${user.email}`);
+
+              // Sync to Loops.so if key is present
+              const loopsApiKey = env.LOOPS_API_KEY;
+              if (loopsApiKey) {
+                try {
+                  const { LoopsService } = await import("@my-better-t-app/email");
+                  const loopsService = new LoopsService(loopsApiKey);
+                  await loopsService.createContact({
+                    email: user.email,
+                    firstName: user.name?.split(" ")[0] || "",
+                    lastName: user.name?.split(" ").slice(1).join(" ") || "",
+                    userGroup: "Free Tier",
+                    source: "KudosWall Signup",
+                    plan: "free",
+                    testimonialCount: 0,
+                    projectCount: 0,
+                    widgetCount: 0,
+                  } as any);
+                  console.log(`[Loops Sync] User ${user.email} synced successfully.`);
+                } catch (loopsError) {
+                  console.error(`[Loops Sync] Failed to sync ${user.email}:`, loopsError);
+                }
+              } else {
+                console.log(
+                  `[Loops Sync] LOOPS_API_KEY is not defined. Skipping sync for ${user.email}.`,
+                );
+              }
             } catch (error) {
               console.error(`[Signup Hook] Error for ${user.email}:`, error);
             }

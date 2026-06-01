@@ -4,6 +4,7 @@ import HowItWorksSection from "@/components/sections/how-it-works-section";
 import PricingSection from "@/components/sections/pricing-section";
 import FaqSection from "@/components/sections/faq-section";
 import CtaSection from "@/components/sections/cta-section";
+import NewsletterSection from "@/components/sections/newsletter-section";
 import Footer from "@/components/footer";
 import SocialProofSection from "@/components/sections/social-proof-section";
 import Navbar from "@/components/navbar";
@@ -18,6 +19,7 @@ export default async function Home() {
       <SocialProofSection />
       <PricingSection />
       <FaqSection />
+      <NewsletterSection />
       <CtaSection />
       <Footer />
     </main>

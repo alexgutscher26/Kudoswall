@@ -7,3 +7,4 @@ export * from "../emails/weekly-digest";
 export * from "../emails/re-engagement";
 export * from "../emails/trial-expiring";
 export * from "../emails/cancellation";
+export * from "./loops";

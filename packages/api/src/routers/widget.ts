@@ -1,7 +1,7 @@
 import { workspaceProcedure, router, publicProcedure } from "../index";
 import { TRPCError } from "@trpc/server";
 import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-t-app/db/schema";
-import { eq, and, desc, inArray, gte, isNull, exists, asc } from "drizzle-orm";
+import { eq, and, desc, inArray, gte, isNull, exists, asc, count } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
 import { purgeWidgetCache } from "../utils/purge";
@@ -124,6 +124,39 @@ export const widgetRouter = router({
         action: "create",
         diff: { name: input.name, settings: defaultSettings },
       });
+
+      // Sync to Loops.so
+      const env = await getEnvAsync();
+      const loopsApiKey = env.LOOPS_API_KEY;
+      if (loopsApiKey && session.user.email) {
+        try {
+          const { LoopsService } = await import("@my-better-t-app/email");
+          const loops = new LoopsService(loopsApiKey);
+
+          const widgetCountResult = await db
+            .select({ value: count() })
+            .from(widget)
+            .where(and(eq(widget.workspaceId, workspaceId), isNull(widget.deletedAt)));
+          const totalWidgets = widgetCountResult[0]?.value || 0;
+
+          await loops.sendEvent({
+            email: session.user.email,
+            eventName: "widget_created",
+            eventProperties: {
+              widgetName: input.name,
+              widgetLayout: defaultSettings.layout,
+            },
+          });
+
+          await loops.updateContact({
+            email: session.user.email,
+            widgetCount: totalWidgets,
+          });
+          console.log(`[Loops Sync] Widget creation synced for ${session.user.email}`);
+        } catch (loopsErr) {
+          console.error("[Loops Sync] Failed to sync widget_created event:", loopsErr);
+        }
+      }
 
       return { id };
     }),
