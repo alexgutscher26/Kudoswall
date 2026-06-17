@@ -57,6 +57,7 @@
     "react-easy-crop": "^5.5.7",
     "stripe": "catalog:",
     "uploadthing": "^7.7.4",
+    "web-streams-polyfill": "^4.3.0",
     "zod": "catalog:"
   },
   "devDependencies": {
