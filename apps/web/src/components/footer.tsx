@@ -31,6 +31,8 @@ const RESOURCES_LINKS = [
   { label: "Security", href: "/security/responsible-disclosure" },
 ] as const;
 
+const OTHER_PROJECTS_LINKS = [{ label: "AquaIQ Privacy", href: "/aquaiq/privacy-policy" }] as const;
+
 export default function Footer() {
   return (
     <footer
@@ -47,9 +49,9 @@ export default function Footer() {
         }}
       />
       <div className="relative mx-auto max-w-6xl">
-        <div className="mb-16 grid grid-cols-2 gap-10 md:grid-cols-5">
+        <div className="mb-16 grid grid-cols-2 gap-10 sm:grid-cols-3 md:grid-cols-6">
           {/* Brand */}
-          <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
+          <div className="col-span-2 flex flex-col gap-4 sm:col-span-3 md:col-span-1">
             <Link
               href="/"
               className="text-2xl font-bold text-neutral-900"
@@ -155,6 +157,25 @@ export default function Footer() {
             </p>
             <ul className="flex flex-col gap-3">
               {RESOURCES_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className="text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Other Projects */}
+          <div>
+            <p className="mb-5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+              Other Projects
+            </p>
+            <ul className="flex flex-col gap-3">
+              {OTHER_PROJECTS_LINKS.map(({ label, href }) => (
                 <li key={label}>
                   <Link
                     href={href}
