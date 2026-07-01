@@ -36,20 +36,6 @@ export const COMPETITORS: CompetitorData[] = [
       "If you need to import reviews from 30+ different platforms or want an AI to automatically generate video reels for you, Senja is currently the superior tool.",
     migrationGuide:
       "Export your testimonials from Senja as a CSV.\nUpload to KudosWall's importer.\nCopy your new KudosWall embed script into your site.",
-    testimonials: [
-      {
-        name: "Marcus Aurelius",
-        role: "Founder at Meditations SaaS",
-        content:
-          "I spent hours fighting Senja's menus. I switched to KudosWall and had a live 'Wall of Love' in exactly 4 minutes. The simplicity is a feature, not a compromise.",
-      },
-      {
-        name: "Sarah Chen",
-        role: "Head of Marketing at GrowthFlow",
-        content:
-          "Senja is great for giant teams. For a solo founder, KudosWall is the only tool that doesn't feel like a part-time job to maintain.",
-      },
-    ],
   },
   {
     name: "Testimonial.to",
@@ -86,20 +72,6 @@ export const COMPETITORS: CompetitorData[] = [
       "If you want the 'original' brand and need specific integrations they've built over the years, they are a very safe bet.",
     migrationGuide:
       "Export your data from Testimonial.to.\nImport into KudosWall.\nUpdate your embed code.",
-    testimonials: [
-      {
-        name: "Jack Butcher",
-        role: "Designer at Visualize Value",
-        content:
-          "The typography control in KudosWall is on another level. I couldn't get Testimonial.to to look native on my dark-mode site, but KudosWall's CSS-first approach made it look integrated in seconds.",
-      },
-      {
-        name: "Elena Rodriguez",
-        role: "CEO at StealthAI",
-        content:
-          "We love that KudosWall handles both text and video. The high-fidelity video recording is so smooth that our customers actually enjoy leaving reviews.",
-      },
-    ],
   },
   {
     name: "Vouch",

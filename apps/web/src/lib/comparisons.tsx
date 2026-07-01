@@ -63,20 +63,6 @@ export const SENJA_COMPARISON = {
       kudoswall: "Zero Layout Shift / Edge",
     },
   ],
-  testimonials: [
-    {
-      name: "Marcus Aurelius",
-      role: "Founder at Meditations SaaS",
-      content:
-        "I spent hours fighting Senja's menus. I switched to KudosWall and had a live 'Wall of Love' in exactly 4 minutes. The simplicity is a feature, not a compromise.",
-    },
-    {
-      name: "Sarah Chen",
-      role: "Head of Marketing at GrowthFlow",
-      content:
-        "Senja is great for giant teams. For a solo founder, KudosWall is the only tool that doesn't feel like a part-time job to maintain.",
-    },
-  ],
   content: (
     <>
       <section className="mb-12">
@@ -176,20 +162,6 @@ export const TESTIMONIAL_TO_COMPARISON = {
     { feature: "Focus", competitor: "Manual", kudoswall: "Text and Video" },
     { feature: "SEO Rich Snippets", competitor: "$80 tier", kudoswall: "Included in Pro" },
   ],
-  testimonials: [
-    {
-      name: "Jack Butcher",
-      role: "Designer at Visualize Value",
-      content:
-        "The typography control in KudosWall is on another level. I couldn't get Testimonial.to to look native on my dark-mode site, but KudosWall's CSS-first approach made it look integrated in seconds.",
-    },
-    {
-      name: "Elena Rodriguez",
-      role: "CEO at StealthAI",
-      content:
-        "We love that KudosWall handles both text and video. The high-fidelity video recording is so smooth that our customers actually enjoy leaving reviews, and the text fallback is perfect for those who are camera-shy.",
-    },
-  ],
   content: (
     <>
       <section className="mb-12">
@@ -258,20 +230,6 @@ export const COURSE_CREATORS_COMPARISON = {
     { feature: "Success Stories", competitor: "Standard Quote", kudoswall: "Rich Story Format" },
     { feature: "Identity Proof", competitor: "Social Link", kudoswall: "LinkedIn Verified" },
   ],
-  testimonials: [
-    {
-      name: "Tiago Forte",
-      role: "Creator of Building a Second Brain",
-      content:
-        "Testimonial.to was slowing down my sales page significantly. Moving to KudosWall's edge-rendered widgets improved my LCP by 40% and resulted in a noticeable bump in conversion rate.",
-    },
-    {
-      name: "Ali Abdaal",
-      role: "Founder at Part-Time YouTuber Academy",
-      content:
-        "For course creators, social proof is everything. KudosWall's verified badges make student results feel real and tangible, which is crucial for building trust at scale.",
-    },
-  ],
   content: (
     <>
       <section className="mb-12">
@@ -330,20 +288,6 @@ export const AFFORDABLE_SENJA_ALTERNATIVE = {
     { feature: "Starter Monthly", competitor: "$29/mo", kudoswall: "$0/mo (Free Forever)" },
     { feature: "Pro Annual", competitor: "$290/yr", kudoswall: "$190/yr ($19/mo)" },
     { feature: "Support", competitor: "Email/Bot", kudoswall: "Direct to Founder" },
-  ],
-  testimonials: [
-    {
-      name: "Pat Walls",
-      role: "Founder at Starter Story",
-      content:
-        "I love Senja, but for a simple operation, $29/month adds up quickly. KudosWall's Lifetime Deal was a no-brainer for my side projects. Same results, fraction of the long-term cost.",
-    },
-    {
-      name: "Courtland Allen",
-      role: "Indie Hackers",
-      content:
-        "For indie hackers, keeping burn low is the priority. KudosWall provides 90% of the value of more expensive alternatives at a price point that actually makes sense for early-stage products.",
-    },
   ],
   content: (
     <>
@@ -3590,46 +3534,6 @@ export const SAAS_TESTIMONIALS_GUIDE = {
           the framework for a 10/10 SaaS testimonial:
         </P>
 
-        <div className="my-8 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                SC
-              </div>
-              <div>
-                <h4 className="text-base font-bold text-slate-900 dark:text-white">Sarah Chen</h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Head of Growth at FlowScale
-                </p>
-              </div>
-            </div>
-            <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span>
-              Verified ROI
-            </div>
-          </div>
-
-          <blockquote className="mt-4 text-base leading-relaxed text-slate-800 italic dark:text-slate-200">
-            "Before FlowScale moved to KudosWall, our collection rates were microscopic because
-            founders hated registering accounts just to upload a clip. We switched, and within 3
-            weeks, we collected over 45 high-fidelity video reviews. Our sign-up page conversion
-            immediately bumped up by 24%."
-          </blockquote>
-
-          <div className="mt-6 flex flex-wrap gap-3 border-t border-slate-100 pt-6 dark:border-slate-900">
-            <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-400">
-              🎯 Impact: +24% conversions
-            </span>
-            <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-400">
-              🔄 Switched From: G2 Scrapes
-            </span>
-          </div>
-        </div>
-
-        <P>
-          Notice how the above example provides all key context: the buyer's full identity, their
-          specific role (Growth), the exact tool they migrated from, and a clear outcome metric.
-        </P>
       </section>
 
       <section className="mb-12">
