@@ -23,7 +23,7 @@ export function createLiteAuth() {
         verification: schema.verification,
       },
     }),
-    secret: env.BETTER_AUTH_SECRET,
+    secret: env.BETTER_AUTH_SECRET || "dummy_secret_for_build",
     baseURL: env.BETTER_AUTH_URL,
     plugins: [nextCookies()],
   });
