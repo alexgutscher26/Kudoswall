@@ -38,7 +38,7 @@ export function createAuth() {
       "https://kudoswall.org",
       "https://www.kudoswall.org",
     ].filter(Boolean),
-    secret: env.BETTER_AUTH_SECRET,
+    secret: env.BETTER_AUTH_SECRET || "dummy_secret_for_build",
     baseURL: env.BETTER_AUTH_URL || "https://kudoswall.org",
     debug: true,
     advanced: {
