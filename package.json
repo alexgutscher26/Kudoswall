@@ -37,7 +37,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "bun x turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev:bare",
