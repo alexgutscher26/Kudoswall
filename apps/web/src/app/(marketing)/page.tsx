@@ -6,7 +6,6 @@ import FaqSection from "@/components/sections/faq-section";
 import CtaSection from "@/components/sections/cta-section";
 import NewsletterSection from "@/components/sections/newsletter-section";
 import Footer from "@/components/footer";
-import SocialProofSection from "@/components/sections/social-proof-section";
 import Navbar from "@/components/navbar";
 
 export default async function Home() {
@@ -16,7 +15,6 @@ export default async function Home() {
       <Hero />
       <FeaturesSection />
       <HowItWorksSection />
-      <SocialProofSection />
       <PricingSection />
       <FaqSection />
       <NewsletterSection />
