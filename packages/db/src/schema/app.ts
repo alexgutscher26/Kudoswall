@@ -56,7 +56,7 @@ export const organization = pgTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
-    ownerId: text("owner_id")
+    ownerId: text("ownerId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     plan: planEnum("plan").default("free").notNull(),
@@ -80,7 +80,7 @@ export const workspace = pgTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
-    ownerId: text("owner_id")
+    ownerId: text("ownerId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     organizationId: text("organization_id").references(() => organization.id, {
