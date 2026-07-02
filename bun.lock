@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "my-better-t-app",
@@ -247,6 +246,9 @@
         "typescript": "^5.9.3",
       },
     },
+  },
+  "patchedDependencies": {
+    "proper-lockfile@4.1.2": "patches/proper-lockfile@4.1.2.patch",
   },
   "catalog": {
     "@cloudflare/workers-types": "^4.20251213.0",
