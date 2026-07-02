@@ -86,13 +86,13 @@ describe("EmailService", () => {
   });
 
   it("should send upgrade prompt email", async () => {
-    await service.sendUpgradePrompt("test@example.com", "John", 100);
+    await service.sendUpgradePrompt("test@example.com", "John", "limit-hit", 100);
 
     expect(mockSend).toHaveBeenCalledWith({
       from: "Alex from KudosWall <alex@kudoswall.org>",
       to: "test@example.com",
       subject: "You're crushing it! (And hitting your limit) 🚀",
-      react: React.createElement(UpgradePromptEmail, { userName: "John", approvedCount: 100 }),
+      react: React.createElement(UpgradePromptEmail, { userName: "John", type: "limit-hit", approvedCount: 100 }),
     });
   });
 
