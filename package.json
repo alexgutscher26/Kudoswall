@@ -37,10 +37,11 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "bun x turbo dev",
+    "dev": "turbo dev --filter=web --filter=@my-better-t-app/email",
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev:bare",
+    "dev:infra": "turbo -F @my-better-t-app/infra dev",
     "db:push": "turbo -F @my-better-t-app/db db:push",
     "db:studio": "turbo -F @my-better-t-app/db db:studio",
     "db:generate": "turbo -F @my-better-t-app/db db:generate",
