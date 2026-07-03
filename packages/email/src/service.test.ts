@@ -92,7 +92,11 @@ describe("EmailService", () => {
       from: "Alex from KudosWall <alex@kudoswall.org>",
       to: "test@example.com",
       subject: "You're crushing it! (And hitting your limit) 🚀",
-      react: React.createElement(UpgradePromptEmail, { userName: "John", type: "limit-hit", approvedCount: 100 }),
+      react: React.createElement(UpgradePromptEmail, {
+        userName: "John",
+        type: "limit-hit",
+        approvedCount: 100,
+      }),
     });
   });
 

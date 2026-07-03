@@ -17,7 +17,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: isNotNull(project.collectionSlug),
     });
   } catch (error) {
-    console.error("Failed to fetch projects for sitemap, returning empty array during build", error);
+    console.error(
+      "Failed to fetch projects for sitemap, returning empty array during build",
+      error,
+    );
     projects = [];
   }
 

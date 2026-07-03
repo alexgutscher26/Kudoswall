@@ -3533,7 +3533,6 @@ export const SAAS_TESTIMONIALS_GUIDE = {
           An effective testimonial needs to present maximum credibility at a single glance. Here is
           the framework for a 10/10 SaaS testimonial:
         </P>
-
       </section>
 
       <section className="mb-12">
