@@ -13,7 +13,7 @@ console.log(
   process.env.NEXT_PUBLIC_ENABLE_VIDEO,
 );
 
-export type Plan = "free" | "plan_1" | "plan_2" | "ltd";
+export type Plan = "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
 
 export interface PlanConfig {
   id: Plan;
@@ -148,6 +148,45 @@ export const PLANS: Record<Plan, PlanConfig> = {
       "Up to 3 team members",
       "White-label collection page",
       "Priority VIP support",
+    ],
+  },
+  plan_3: {
+    id: "plan_3",
+    name: "Pro Plus",
+    priceLabel: "$39/mo",
+    stripePriceIdMonthly:
+      env.STRIPE_PLAN_3_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PLAN_3_PRICE_ID,
+    stripePriceIdYearly:
+      env.STRIPE_PLAN_3_YEARLY_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PLAN_3_YEARLY_PRICE_ID,
+    limits: {
+      maxProjects: 3,
+      maxTestimonials: Infinity,
+      maxTeamMembers: 1,
+      maxVideoSizeMb: 250,
+      maxImageSizeMb: 10,
+    },
+    features: {
+      video: IS_VIDEO_ENABLED,
+      customDomain: true,
+      whiteLabel: true,
+      prioritySupport: true,
+      memberInvites: true,
+      csvExport: true,
+      analytics: true,
+      premiumWidgets: true,
+      tagFiltering: true,
+      singleTestimonialShare: true,
+    },
+    displayFeatures: [
+      "Unlimited testimonials",
+      "Up to 3 projects",
+      "Text & Video testimonials",
+      "All 4 widget layouts",
+      "Custom branding & colors",
+      "Remove 'Powered by' badge",
+      "Custom domain for collection",
+      "CSV Export",
+      "Priority support",
     ],
   },
   ltd: {

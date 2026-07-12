@@ -4,7 +4,7 @@ import PricingGrid from "./pricing-grid";
 import { PLANS as CONFIG_PLANS } from "@my-better-t-app/api/config/plans";
 
 interface Plan {
-  id: "free" | "plan_1" | "plan_2" | "ltd";
+  id: "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;

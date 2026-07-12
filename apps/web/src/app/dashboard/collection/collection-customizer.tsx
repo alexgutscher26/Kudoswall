@@ -46,7 +46,7 @@ interface CollectionCustomizerProps {
   workspace: {
     id: string;
     name: string;
-    plan: "free" | "plan_1" | "plan_2" | "ltd";
+    plan: "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
     logoUrl?: string | null;
   };
   isPro: boolean;

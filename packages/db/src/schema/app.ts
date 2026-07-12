@@ -26,7 +26,7 @@ export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
 ]);
 export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
 export const workspaceRoleEnum = pgEnum("workspace_role", ["owner", "admin", "member"]);
-export const planEnum = pgEnum("plan", ["free", "plan_1", "plan_2", "ltd"]);
+export const planEnum = pgEnum("plan", ["free", "plan_1", "plan_2", "plan_3", "ltd"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active",
   "trialing",

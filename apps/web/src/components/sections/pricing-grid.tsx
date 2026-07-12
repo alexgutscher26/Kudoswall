@@ -10,7 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
 
 interface Plan {
-  id: "free" | "plan_1" | "plan_2" | "ltd";
+  id: "free" | "plan_1" | "plan_2" | "plan_3" | "ltd";
   name: string;
   monthlyPrice: string;
   yearlyPrice: string;

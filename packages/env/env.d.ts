@@ -26,14 +26,17 @@ declare global {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?: string;
     STRIPE_PLAN_1_PRICE_ID?: string;
     STRIPE_PLAN_2_PRICE_ID?: string;
+    STRIPE_PLAN_3_PRICE_ID?: string;
     STRIPE_LTD_PRICE_ID?: string;
     STRIPE_PLAN_1_YEARLY_PRICE_ID?: string;
     STRIPE_PLAN_2_YEARLY_PRICE_ID?: string;
+    STRIPE_PLAN_3_YEARLY_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_1_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_2_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_LTD_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_1_YEARLY_PRICE_ID?: string;
     NEXT_PUBLIC_STRIPE_PLAN_2_YEARLY_PRICE_ID?: string;
+    NEXT_PUBLIC_STRIPE_PLAN_3_YEARLY_PRICE_ID?: string;
     NEXT_PUBLIC_ENABLE_VIDEO?: string;
     /** Secret for signing private R2 asset URLs (HMAC-SHA256). Must be set in production. */
     R2_SIGNING_SECRET?: string;
