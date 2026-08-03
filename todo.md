@@ -232,7 +232,7 @@
 - [x] Onboarding checklist widget on the home dashboard ("Your first testimonial in 5 steps")
 - [ ] Global search (Cmd+K): Find testimonials, collections, customers instantly
 - [x] Dashboard home redesign: Key metrics, recent activity, quick actions
-- [ ] Collapsible sidebar for more screen real estate
+- [x] Collapsible sidebar for more screen real estate
 - [ ] Dark mode for the entire dashboard
 - [ ] Notification center (bell icon) for all async events
 
@@ -303,7 +303,7 @@
 - [x] Display toggles: Show/hide avatar, rating, company, role, date
 - [x] Max testimonials to display (slider)
 - [x] Filter: Show only video, only text, or both
-- [ ] Theme preset library: Minimal, Glassmorphism, Neo-brutalism, Dark Luxury, Soft Pastel
+- [x] Theme preset library: Minimal, Glassmorphism, Neo-brutalism, Dark Luxury, Soft Pastel
 - [ ] Save / name multiple widget themes per collection
 - [ ] Import/export widget config as JSON
 - [ ] Global design variables: Apply one color change everywhere
