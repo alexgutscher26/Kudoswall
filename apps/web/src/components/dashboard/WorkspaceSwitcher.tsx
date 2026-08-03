@@ -26,6 +26,7 @@ import { gooeyToast as toast } from "goey-toast";
 interface WorkspaceSwitcherProps {
   currentWorkspaceId: string;
   onWorkspaceChange: (workspaceId: string) => void;
+  collapsed?: boolean;
 }
 
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
@@ -33,6 +34,7 @@ import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 export function WorkspaceSwitcher({
   currentWorkspaceId,
   onWorkspaceChange,
+  collapsed = false,
 }: WorkspaceSwitcherProps) {
   const { isModalOpen, setIsModalOpen } = useWorkspace();
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
@@ -77,7 +79,12 @@ export function WorkspaceSwitcher({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="group flex w-full items-center gap-3 rounded-xl border border-neutral-100 bg-white p-2 text-left transition-all outline-none hover:bg-neutral-50 active:scale-[0.98]">
+        <DropdownMenuTrigger
+          title={collapsed ? "Switch workspace" : undefined}
+          className={`group flex w-full items-center rounded-xl border border-neutral-100 bg-white text-left transition-all outline-none hover:bg-neutral-50 active:scale-[0.98] ${
+            collapsed ? "justify-center p-1" : "gap-3 p-2"
+          }`}
+        >
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-pink-500">
             {isLoading ? (
               <Loader2 className="size-4 animate-spin" />
@@ -85,13 +92,19 @@ export function WorkspaceSwitcher({
               <Building2 className="size-5" />
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-neutral-900">
-              {activeWorkspace?.name || "Loading..."}
-            </p>
-            <p className="truncate text-[11px] font-medium text-neutral-400">Personal Workspace</p>
-          </div>
-          <ChevronDown className="mr-1 size-4 text-neutral-300 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+          {!collapsed && (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-neutral-900">
+                  {activeWorkspace?.name || "Loading..."}
+                </p>
+                <p className="truncate text-[11px] font-medium text-neutral-400">
+                  Personal Workspace
+                </p>
+              </div>
+              <ChevronDown className="mr-1 size-4 text-neutral-300 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 rounded-xl p-1" align="start">
           <DropdownMenuGroup>

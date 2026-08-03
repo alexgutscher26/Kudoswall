@@ -15,6 +15,8 @@ import {
   Plus,
   Globe,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Menu,
   X,
   Lock,
@@ -88,6 +90,7 @@ function NavContent({
   currentWorkspaceId,
   onWorkspaceChange,
   plan,
+  collapsed = false,
 }: {
   pathname: string;
   onNavClick?: () => void;
@@ -98,6 +101,7 @@ function NavContent({
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
   plan?: string;
+  collapsed?: boolean;
 }) {
   const isFeatureLocked = (feature?: string) => {
     if (!feature) return false;
@@ -107,10 +111,14 @@ function NavContent({
   return (
     <>
       {/* Workspace Switcher */}
-      <div className="px-3 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+      <div
+        className={`pt-5 pb-4 ${collapsed ? "px-1" : "px-3"}`}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+      >
         <WorkspaceSwitcher
           currentWorkspaceId={currentWorkspaceId}
           onWorkspaceChange={onWorkspaceChange}
+          collapsed={collapsed}
         />
       </div>
 
@@ -129,12 +137,14 @@ function NavContent({
             return (
               <div
                 key={href}
-                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-300 opacity-60"
+                className={`flex cursor-not-allowed items-center rounded-xl py-2.5 text-[13px] font-medium text-neutral-300 opacity-60 ${
+                  collapsed ? "justify-center px-0" : "gap-3 px-3"
+                }`}
                 title={`${label} is a Pro feature`}
               >
                 <Icon className="size-4 shrink-0" />
-                {label}
-                <Lock className="ml-auto size-3 text-neutral-300" />
+                {!collapsed && label}
+                {!collapsed && <Lock className="ml-auto size-3 text-neutral-300" />}
               </div>
             );
           }
@@ -144,7 +154,10 @@ function NavContent({
               key={href}
               href={linkHref}
               onClick={onNavClick}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
+              title={collapsed ? label : undefined}
+              className={`flex items-center rounded-xl py-2.5 text-[13px] font-medium transition-all duration-150 ${
+                collapsed ? "justify-center px-0" : "gap-3 px-3"
+              } ${
                 isActive
                   ? "text-neutral-900"
                   : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
@@ -152,8 +165,8 @@ function NavContent({
               style={isActive ? { backgroundColor: "#fff5f7", color: "#c2395d" } : {}}
             >
               <Icon className="size-4 shrink-0" style={isActive ? { color: "#e8527a" } : {}} />
-              {label}
-              {isActive && (
+              {!collapsed && label}
+              {isActive && !collapsed && (
                 <div
                   className="ml-auto size-1.5 rounded-full"
                   style={{ backgroundColor: "#e8527a" }}
@@ -172,40 +185,50 @@ function NavContent({
             if (onNavClick) onNavClick();
             onNewCollection();
           }}
-          className="group flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+          title={collapsed ? "New Collection Link" : undefined}
+          className={`group flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-[13px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] ${
+            collapsed ? "px-0" : "px-4"
+          }`}
           style={{ backgroundColor: "#171717" }}
         >
           <Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" />
-          New Collection Link
+          {!collapsed && "New Collection Link"}
         </button>
       </div>
 
       {/* User */}
       <div
-        className="flex shrink-0 items-center gap-3 px-4 py-4"
+        className={`flex shrink-0 items-center py-4 ${collapsed ? "justify-center px-2" : "gap-3 px-4"}`}
         style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
         <div
           className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
           style={{ backgroundColor: "#e8527a" }}
+          title={collapsed ? userName : undefined}
         >
           {userName.charAt(0).toUpperCase()}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] leading-tight font-semibold text-neutral-900">
-            {userName}
-          </p>
-          <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">{userEmail}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onSignOut}
-          className="p-1 text-neutral-300 transition-colors hover:text-neutral-600"
-          title="Sign out"
-          aria-label="Sign out"
-        >
-          <LogOut className="size-3.5" />
-        </button>
+        {!collapsed && (
+          <>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] leading-tight font-semibold text-neutral-900">
+                {userName}
+              </p>
+              <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">
+                {userEmail}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="p-1 text-neutral-300 transition-colors hover:text-neutral-600"
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <LogOut className="size-3.5" />
+            </button>
+          </>
+        )}
       </div>
     </>
   );
@@ -220,6 +243,7 @@ function DesktopSidebar({
   currentWorkspaceId,
   onWorkspaceChange,
   plan,
+  collapsed,
 }: {
   userName: string;
   userEmail: string;
@@ -228,11 +252,14 @@ function DesktopSidebar({
   currentWorkspaceId: string;
   onWorkspaceChange: (id: string) => void;
   plan?: string;
+  collapsed: boolean;
 }) {
   const pathname = usePathname();
   return (
     <aside
-      className="dashboard-sidebar fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col lg:flex"
+      className={`dashboard-sidebar fixed top-0 left-0 z-40 hidden h-screen flex-col transition-[width] duration-300 lg:flex ${
+        collapsed ? "w-16" : "w-60"
+      }`}
       style={{
         backgroundColor: "#ffffff",
         borderRight: "1px solid rgba(0,0,0,0.07)",
@@ -247,6 +274,7 @@ function DesktopSidebar({
         currentWorkspaceId={currentWorkspaceId}
         onWorkspaceChange={onWorkspaceChange}
         plan={plan}
+        collapsed={collapsed}
       />
     </aside>
   );
@@ -327,12 +355,16 @@ function TopBar({
   pageTitle = "Overview",
   pageSubtitle,
   isLive,
+  collapsed,
+  onToggleCollapsed,
 }: {
   userName: string;
   onMenuOpen: () => void;
   pageTitle?: string;
   pageSubtitle?: string;
   isLive?: boolean;
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
 }) {
   return (
     <header
@@ -345,6 +377,22 @@ function TopBar({
       }}
     >
       <div className="flex items-center gap-3">
+        {/* Collapse toggle — only on desktop */}
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="hidden size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50 lg:flex"
+          style={{ borderColor: "rgba(0,0,0,0.1)" }}
+        >
+          {collapsed ? (
+            <ChevronsRight className="size-4 text-neutral-600" />
+          ) : (
+            <ChevronsLeft className="size-4 text-neutral-600" />
+          )}
+        </button>
+
         {/* Hamburger — only on mobile */}
         <button
           type="button"
@@ -556,6 +604,23 @@ export default function DashboardShell({
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
 
+  const SIDEBAR_COLLAPSED_KEY = "kudoswall:sidebar-collapsed";
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false; // SSR guard
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // Persist sidebar collapse state (client-only)
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "true" : "false");
+    } catch {}
+  }, [sidebarCollapsed]);
+
   const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
 
   // Auto-open modal if `new=project` is in URL
@@ -712,6 +777,7 @@ export default function DashboardShell({
           onNewCollection={() => setNewCollectionOpen(true)}
           currentWorkspaceId={activeWorkspaceId}
           plan={activeData?.workspace.plan}
+          collapsed={sidebarCollapsed}
           onWorkspaceChange={(id) => {
             setActiveWorkspaceId(id);
             const params = new URLSearchParams(searchParams.toString());
@@ -755,7 +821,11 @@ export default function DashboardShell({
         />
 
         {/* Main content — offset only on lg+ */}
-        <div className="dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden lg:ml-60">
+        <div
+          className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden transition-[margin] duration-300 ${
+            sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"
+          }`}
+        >
           <DotGrid opacity={0.08} />
 
           {/* Soft central glow */}
@@ -778,6 +848,8 @@ export default function DashboardShell({
               pageTitle={pageTitle}
               pageSubtitle={pageSubtitle}
               isLive
+              collapsed={sidebarCollapsed}
+              onToggleCollapsed={() => setSidebarCollapsed((c) => !c)}
             />
           </div>
 
