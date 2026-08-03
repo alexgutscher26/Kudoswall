@@ -5,6 +5,7 @@ import { isNotNull } from "drizzle-orm";
 import { BLOG_POSTS } from "@/lib/blog";
 import { COMPETITORS } from "@/lib/competitor-data";
 import { PLATFORM_PAGES } from "@/lib/platform-pages";
+import { INTEGRATIONS } from "@/lib/integration-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://kudoswall.org";
@@ -59,6 +60,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const embedUrls: MetadataRoute.Sitemap = INTEGRATIONS.map((i) => ({
+    url: `${baseUrl}/embed-testimonials/${i.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
   const staticUrls: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -83,6 +91,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/embed-testimonials`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/privacy`,
@@ -110,5 +124,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticUrls, ...blogUrls, ...vsUrls, ...collectionUrls, ...wallUrls, ...platformUrls];
+  return [
+    ...staticUrls,
+    ...blogUrls,
+    ...vsUrls,
+    ...collectionUrls,
+    ...wallUrls,
+    ...platformUrls,
+    ...embedUrls,
+  ];
 }

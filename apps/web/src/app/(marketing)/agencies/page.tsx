@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Users, Layout, ShieldCheck, Zap, BarChart, Settings, Check } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "The Best Testimonial Tool for Agencies: Manage 5 Brands for $59/mo",
+  title: "Best Testimonial Tool for Agencies | 5 Brands for $59/mo",
   description:
     "Manage 5 client brands, white-label everything, $59/mo flat. Built for agencies that collect testimonials for clients — not just themselves.",
   alternates: {

@@ -10,6 +10,10 @@ import Overview from "./Overview";
 export const metadata = {
   title: "Dashboard — KudosWall",
   description: "Manage your testimonials, embed widget, and analytics.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const experimental_ppr = true;

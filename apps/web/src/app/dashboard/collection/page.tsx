@@ -11,6 +11,10 @@ import CollectionLoading from "./loading";
 export const metadata = {
   title: "Manage Collection Pages — KudosWall",
   description: "Manage and create dedicated collection pages for your projects.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function CollectionRoute({

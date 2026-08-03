@@ -915,7 +915,6 @@
 ### 22.4 Accessibility Testing
 
 - [ ] `axe` accessibility audit on all dashboard pages
-- [ ] Screen reader test (NVDA / VoiceOver) for collection form
 - [ ] Keyboard-only navigation test for all interactive elements
 - [ ] Color contrast ratio check: All text meets WCAG 2.1 AA (4.5:1)
 

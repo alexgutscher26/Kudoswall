@@ -13,6 +13,10 @@ import AnalyticsLoading from "./loading";
 export const metadata = {
   title: "Analytics — KudosWall",
   description: "Track your testimonial performance, page views, and conversions.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AnalyticsRoute({

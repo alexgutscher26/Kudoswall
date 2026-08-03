@@ -4,6 +4,22 @@ import Footer from "@/components/footer";
 import { Card, CardContent } from "@my-better-t-app/ui/components/card";
 import { BLOG_POSTS } from "@/lib/blog";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Blog | KudosWall",
+  description:
+    "Insights, guides, and comparisons to help you build trust with social proof. Learn testimonial collection best practices.",
+  alternates: {
+    canonical: "https://kudoswall.org/blog",
+  },
+  openGraph: {
+    title: "KudosWall Blog — Social Proof Insights",
+    description: "Insights, guides, and comparisons to help you build trust with social proof.",
+    url: "https://kudoswall.org/blog",
+    type: "website",
+  },
+};
 
 export default function BlogPage() {
   const baseUrl = "https://kudoswall.org";

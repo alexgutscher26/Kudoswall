@@ -11,6 +11,10 @@ import SettingsLoading from "./loading";
 export const metadata = {
   title: "Settings — KudosWall",
   description: "Manage your workspace settings, collection landing page, and billing.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function SettingsRoute({

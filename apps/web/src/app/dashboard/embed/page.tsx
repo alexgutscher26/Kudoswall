@@ -11,6 +11,10 @@ import EmbedLoading from "./loading";
 export const metadata = {
   title: "Embed Widgets — KudosWall",
   description: "Manage your testimonial embed configurations and show social proof on any website.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function EmbedRoute({
