@@ -53,6 +53,9 @@ export const metadata: Metadata = {
       "Collect text and video testimonials via a shareable link, then embed a beautiful, customizable widget.",
     images: ["/og-image.png"],
   },
+  other: {
+    "strix-verification": "strix-verify-296551520fecad6c9c538057e67408d4",
+  },
 };
 
 export default async function RootLayout({
