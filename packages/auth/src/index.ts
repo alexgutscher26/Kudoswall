@@ -7,8 +7,12 @@ import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins/magic-link";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
+import { APIError } from "better-auth/api";
 import { lastLoginMethod } from "better-auth/plugins";
+import disposableDomains from "disposable-email-domains";
 // import { EmailService } from "@my-better-t-app/email"; // Moved to dynamic imports to save Edge bundle size
+
+const fakeNames = ["fake", "test", "admin"];
 
 export function createAuth() {
   const db = createDb();
@@ -136,6 +140,21 @@ export function createAuth() {
     databaseHooks: {
       user: {
         create: {
+          before: async (user) => {
+            const name = user.name?.toLowerCase() || "";
+            if (fakeNames.some(f => name.includes(f))) {
+              throw new APIError("BAD_REQUEST", { message: "Invalid name" });
+            }
+
+            const email = user.email.toLowerCase();
+            const domain = email.split('@')[1];
+            if (domain && disposableDomains.includes(domain)) {
+              throw new APIError("BAD_REQUEST", { message: "Disposable email addresses are not allowed" });
+            }
+            return {
+              data: user
+            };
+          },
           after: async (user) => {
             try {
               const { workspace, workspaceMember, organization } =
