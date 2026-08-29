@@ -12,15 +12,17 @@
   "scripts": {},
   "dependencies": {
     "@my-better-t-app/db": "workspace:*",
-    "@my-better-t-app/env": "workspace:*",
     "@my-better-t-app/email": "workspace:*",
+    "@my-better-t-app/env": "workspace:*",
     "@my-better-t-app/stripe": "workspace:*",
     "better-auth": "catalog:",
+    "disposable-email-domains": "^1.0.62",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@my-better-t-app/config": "workspace:*",
+    "@types/disposable-email-domains": "^1.0.6",
     "typescript": "^5"
   }
 }
