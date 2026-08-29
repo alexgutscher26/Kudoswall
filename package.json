@@ -49,6 +49,7 @@
     "deploy": "turbo -F @my-better-t-app/infra deploy",
     "destroy": "turbo -F @my-better-t-app/infra destroy",
     "format": "prettier --write .",
+    "test": "bun test packages",
     "test:e2e": "playwright test"
   },
   "dependencies": {
