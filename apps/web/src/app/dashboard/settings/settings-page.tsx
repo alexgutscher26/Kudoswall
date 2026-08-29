@@ -26,7 +26,7 @@ import { UploadButton } from "@/utils/uploadthing";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/utils/trpc";
 import TeamTab from "./team-tab";
@@ -175,6 +175,35 @@ export default function SettingsPage() {
       toast.error("Failed to open billing portal: " + err.message);
     },
   });
+
+  const searchParams = useSearchParams();
+  const sessionId = searchParams?.get("session_id");
+
+  const syncCheckout = useMutation({
+    ...trpc.billing.syncCheckoutSession.mutationOptions(),
+    onSuccess: (data) => {
+      const planName = PLANS[(data.plan || "free") as Plan]?.name || data.plan;
+      toast.success(`Subscription activated! You are now on the ${planName} plan 🎉`);
+      setActiveTab("billing");
+      queryClient.invalidateQueries(trpc.dashboard.getData.queryOptions());
+      if (typeof window !== "undefined") {
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.delete("session_id");
+        const newUrl =
+          window.location.pathname + (newParams.toString() ? `?${newParams.toString()}` : "");
+        window.history.replaceState(null, "", newUrl);
+      }
+    },
+    onError: (err) => {
+      console.error("Failed to sync checkout:", err);
+    },
+  });
+
+  useEffect(() => {
+    if (sessionId && activeWorkspaceId && !syncCheckout.isPending && !syncCheckout.isSuccess) {
+      syncCheckout.mutate({ sessionId });
+    }
+  }, [sessionId, activeWorkspaceId]);
 
   useEffect(() => {
     if (dashboardData?.workspace) {

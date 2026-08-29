@@ -246,4 +246,31 @@ export const billingRouter = router({
       });
     }
   }),
+
+  syncCheckoutSession: workspaceProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { sessionId } = input;
+
+      try {
+        const { fulfillStripeCheckoutSession } = await import("../logic/stripe-fulfillment");
+        const result = await fulfillStripeCheckoutSession({
+          db,
+          sessionId,
+        });
+
+        return result;
+      } catch (err) {
+        console.error("❌ Failed to sync checkout session:", err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err instanceof Error ? err.message : "Failed to sync checkout session",
+        });
+      }
+    }),
 });

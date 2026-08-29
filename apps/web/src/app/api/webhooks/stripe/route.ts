@@ -34,124 +34,20 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       console.log("💳 Processing checkout.session.completed...");
 
-      const { getPriceToPlan } = await import("@my-better-t-app/api/config/plans");
-      const priceToPlan = getPriceToPlan();
-
-      let plan = session.metadata?.planId;
-
-      let trialEnd: number | null = null;
-      // If it's a subscription, retrieve it to get the price ID
-      if (session.subscription) {
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-        const priceId = subscription.items.data[0]?.price.id;
-        plan = priceId ? priceToPlan[priceId] : plan;
-        trialEnd = subscription.trial_end;
-      }
-
-      const organizationId = session.client_reference_id || session.metadata?.organizationId;
-      const workspaceId = session.metadata?.workspaceId;
-      const userId = session.metadata?.userId;
-
-      console.log(`🔍 Received Webhook Session:`, {
-        id: session.id,
-        customer: session.customer,
-        workspaceId,
-        userId,
-        plan,
-        client_ref: session.client_reference_id,
-      });
-
-      if (!organizationId) {
-        console.error(
-          "❌ CRITICAL: No organizationId found in checkout session metadata OR client_reference_id",
-        );
-        return new NextResponse("No organizationId found to link payment", { status: 400 });
-      }
-
       try {
-        await db.transaction(async (tx) => {
-          // 1. Update Organization
-          await tx
-            .update(organization)
-            .set({
-              stripeCustomerId: session.customer as string,
-              stripeSubscriptionId: session.subscription || null,
-              subscriptionStatus: "active",
-              plan: plan || "free",
-              trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : null,
-            })
-            .where(eq(organization.id, organizationId));
-
-          // 2. Optional: Sync to Workspace (legacy/fallback)
-          if (workspaceId) {
-            await tx
-              .update(workspace)
-              .set({
-                plan: plan || "free",
-                subscriptionStatus: "active",
-              })
-              .where(eq(workspace.id, workspaceId));
-          }
-
-          // 2. Update User if present
-          if (userId) {
-            await tx
-              .update(user)
-              .set({
-                plan: plan || "free",
-              })
-              .where(eq(user.id, userId));
-          }
+        const { fulfillStripeCheckoutSession } =
+          await import("@my-better-t-app/api/logic/stripe-fulfillment");
+        const result = await fulfillStripeCheckoutSession({
+          db,
+          session,
         });
 
         console.log(
-          `🚀 Workspace ${workspaceId} and User ${userId} updated to plan: ${plan || "free"}`,
+          `🚀 Checkout session fulfilled successfully! Plan: ${result.plan}, Org: ${result.organizationId}, Workspace: ${result.workspaceId}`,
         );
-
-        // Sync subscription to Loops.so
-        const loopsApiKey = env.LOOPS_API_KEY;
-        const customerEmail = session.customer_details?.email;
-        if (loopsApiKey && customerEmail) {
-          try {
-            const { LoopsService } = await import("@my-better-t-app/email");
-            const loops = new LoopsService(loopsApiKey);
-
-            // Update contact properties
-            await loops.updateContact({
-              email: customerEmail,
-              plan: plan || "free",
-              subscriptionStatus: "active",
-            });
-
-            // Send custom event
-            await loops.sendEvent({
-              email: customerEmail,
-              eventName: "subscription_created",
-              eventProperties: {
-                planName: plan || "free",
-              },
-            });
-
-            // Trigger Loops transactional email if transactionalId is set
-            const transactionalId = env.LOOPS_TRANSACTIONAL_SUBSCRIBED_ID;
-            if (transactionalId) {
-              await loops.sendTransactional({
-                email: customerEmail,
-                transactionalId,
-                dataVariables: {
-                  planName: plan || "free",
-                  userName: session.customer_details?.name || "there",
-                },
-              });
-              console.log(`[Loops Webhook Sync] Triggered transactional email to ${customerEmail}`);
-            }
-          } catch (loopsErr) {
-            console.error("[Loops Webhook Sync] Failed to sync subscription completed:", loopsErr);
-          }
-        }
       } catch (dbError: any) {
-        console.error(`❌ Database Update Error: ${dbError.message}`);
-        return new NextResponse("Database update failed", { status: 500 });
+        console.error(`❌ Fulfillment / Database Update Error: ${dbError.message}`);
+        return new NextResponse("Fulfillment failed: " + dbError.message, { status: 500 });
       }
     }
 
