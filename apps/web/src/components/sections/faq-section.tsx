@@ -29,7 +29,7 @@ const FAQS: FAQItem[] = [
   {
     question: "Is there a limit on how many testimonials I can collect?",
     answer:
-      "Our Free forever plan allows you to collect and display up to 50 text and video testimonials. Our Pro and Agency plans offer unlimited collection, advanced analytics, and premium customization options.",
+      "All new users get a 14-day free Pro trial with unlimited collection (no credit card required). Our Free plan allows you to collect up to 10 text and video testimonials. Our Pro and Agency plans offer unlimited collection, HD video downloads, and custom branding.",
   },
 ];
 

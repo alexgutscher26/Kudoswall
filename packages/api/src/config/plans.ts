@@ -26,6 +26,7 @@ export interface PlanConfig {
     maxProjects: number;
     maxTestimonials: number;
     maxTeamMembers: number;
+    maxWidgets: number;
     /** Max video upload size in MB. 0 means video uploads are not allowed. */
     maxVideoSizeMb: number;
     /** Max image upload size in MB. */
@@ -53,9 +54,10 @@ export const PLANS: Record<Plan, PlanConfig> = {
     priceLabel: "$0",
     limits: {
       maxProjects: 1,
-      maxTestimonials: 50,
+      maxTestimonials: 10,
       maxTeamMembers: 1,
-      maxVideoSizeMb: 128, // Enabled video
+      maxWidgets: 1,
+      maxVideoSizeMb: 60, // 60MB video size limit for free
       maxImageSizeMb: 5,
     },
     features: {
@@ -71,8 +73,9 @@ export const PLANS: Record<Plan, PlanConfig> = {
       singleTestimonialShare: false,
     },
     displayFeatures: [
-      "Up to 50 testimonials",
+      "Up to 10 testimonials",
       "1 Project",
+      "1 Embed Widget",
       "Text & Video testimonials",
       "KudosWall branding",
     ],
@@ -89,6 +92,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 1,
       maxTestimonials: Infinity,
       maxTeamMembers: 1,
+      maxWidgets: Infinity,
       maxVideoSizeMb: 128,
       maxImageSizeMb: 10,
     },
@@ -106,6 +110,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     },
     displayFeatures: [
       "Unlimited testimonials",
+      "Unlimited widgets",
       "1 Project",
       "Text & Video testimonials",
       "All 4 widget layouts",
@@ -127,6 +132,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 5,
       maxTestimonials: Infinity,
       maxTeamMembers: 3,
+      maxWidgets: Infinity,
       maxVideoSizeMb: 250,
       maxImageSizeMb: 20,
     },
@@ -146,6 +152,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       "Everything in Pro",
       "Up to 5 projects",
       "Up to 3 team members",
+      "Unlimited widgets",
       "White-label collection page",
       "Priority VIP support",
     ],
@@ -162,6 +169,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 3,
       maxTestimonials: Infinity,
       maxTeamMembers: 1,
+      maxWidgets: Infinity,
       maxVideoSizeMb: 250,
       maxImageSizeMb: 10,
     },
@@ -180,6 +188,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     displayFeatures: [
       "Unlimited testimonials",
       "Up to 3 projects",
+      "Unlimited widgets",
       "Text & Video testimonials",
       "All 4 widget layouts",
       "Custom branding & colors",
@@ -198,6 +207,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
       maxProjects: 5,
       maxTestimonials: Infinity,
       maxTeamMembers: 3,
+      maxWidgets: Infinity,
       maxVideoSizeMb: 250,
       maxImageSizeMb: 20,
     },

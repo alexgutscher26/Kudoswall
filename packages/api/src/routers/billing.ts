@@ -64,11 +64,36 @@ export const billingRouter = router({
         });
       }
 
+      let stripeCustomerId = org.stripeCustomerId;
+      if (stripeCustomerId) {
+        try {
+          const existingCust = await stripe.customers.retrieve(stripeCustomerId);
+          if (existingCust.deleted) {
+            stripeCustomerId = null;
+            await db
+              .update(organization)
+              .set({ stripeCustomerId: null })
+              .where(eq(organization.id, org.id));
+          }
+        } catch (err: any) {
+          if (err?.code === "resource_missing" || err?.message?.includes("No such customer")) {
+            console.warn(
+              `[Stripe] Stale customer ID ${stripeCustomerId} not found in Stripe. Resetting.`,
+            );
+            stripeCustomerId = null;
+            await db
+              .update(organization)
+              .set({ stripeCustomerId: null })
+              .where(eq(organization.id, org.id));
+          }
+        }
+      }
+
       try {
-        const origin = req.headers.get("origin") ?? "https://kudoswall.xyz";
+        const origin = req.headers.get("origin") ?? "https://kudoswall.org";
         const stripeSession = await stripe.checkout.sessions.create({
-          customer: org.stripeCustomerId || undefined,
-          customer_email: org.stripeCustomerId ? undefined : session.user.email,
+          customer: stripeCustomerId || undefined,
+          customer_email: stripeCustomerId ? undefined : session.user.email,
 
           line_items: [
             {
@@ -77,13 +102,13 @@ export const billingRouter = router({
             },
           ],
           mode: isLTD ? "payment" : "subscription",
-          customer_creation: isLTD && !org.stripeCustomerId ? "always" : undefined,
+          customer_creation: isLTD && !stripeCustomerId ? "always" : undefined,
           client_reference_id: org.id,
 
           subscription_data: isLTD
             ? undefined
             : {
-                trial_period_days: 7,
+                trial_period_days: 14,
                 metadata: {
                   organizationId: org.id,
                   workspaceId,
@@ -139,6 +164,22 @@ export const billingRouter = router({
 
     const org = ws.organization;
     let stripeCustomerId = org.stripeCustomerId;
+
+    if (stripeCustomerId) {
+      try {
+        const existingCust = await stripe.customers.retrieve(stripeCustomerId);
+        if (existingCust.deleted) {
+          stripeCustomerId = null;
+        }
+      } catch (err: any) {
+        if (err?.code === "resource_missing" || err?.message?.includes("No such customer")) {
+          console.warn(
+            `[Stripe] Stale customer ID ${stripeCustomerId} not found in Stripe. Resetting.`,
+          );
+          stripeCustomerId = null;
+        }
+      }
+    }
 
     // If missing, create it on the fly
     if (!stripeCustomerId) {

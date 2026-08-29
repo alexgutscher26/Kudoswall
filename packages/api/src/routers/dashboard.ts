@@ -86,15 +86,19 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
 
   if (!org) {
     const orgId = crypto.randomUUID();
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     await db.insert(organization).values({
       id: orgId,
       name: `${userName}'s Org`,
       ownerId: userId,
-      plan: "free",
+      plan: "plan_1",
+      subscriptionStatus: "trialing",
+      trialEndsAt,
     });
     org = (await db.query.organization.findFirst({ where: eq(organization.id, orgId) }))!;
   }
 
+  const trialEndsAt = org.trialEndsAt || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
   const newWorkspace = {
     id: crypto.randomUUID(),
     name: `${userName}'s Workspace`,
@@ -113,8 +117,9 @@ async function getOrCreateWorkspace(db: Database, userId: string, userName: stri
     logoUrl: null,
     brandingJson: null,
     notificationSettingsJson: JSON.stringify({ instantAlerts: true, dailySummary: false }),
-    plan: (org.plan || "free") as any,
-    subscriptionStatus: (org.subscriptionStatus || "active") as any,
+    plan: (org.plan || "plan_1") as any,
+    subscriptionStatus: (org.subscriptionStatus || "trialing") as any,
+    trialEndsAt,
 
     retentionEnabled: false,
     retentionDays: 365,
@@ -327,6 +332,8 @@ export const dashboardRouter = router({
       const { getWorkspacePermissions } = await import("../logic/billing");
       const permissions = getWorkspacePermissions({
         plan: ws.plan,
+        subscriptionStatus: ws.subscriptionStatus,
+        trialEndsAt: ws.trialEndsAt,
         organization: ws.organization,
         projectsCount: projects.length,
         testimonialsCount: testimonialsCount,

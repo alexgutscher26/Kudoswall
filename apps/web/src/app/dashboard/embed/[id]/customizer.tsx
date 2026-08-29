@@ -32,6 +32,7 @@ import { UploadButton } from "@/utils/uploadthing";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Widget from "@/components/widget";
+import { useUpgradeModal } from "@/components/modals/UpgradeModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -99,6 +100,7 @@ export default function WidgetCustomizer({
   isPro: boolean;
 }) {
   const router = useRouter();
+  const { openUpgradeModal } = useUpgradeModal();
   const [settings, setSettings] = useState<WidgetSettings>({
     layout: "grid",
     theme: "light",
@@ -340,17 +342,26 @@ export default function WidgetCustomizer({
                     ].map((l) => (
                       <button
                         key={l.id}
-                        disabled={l.pro && !isPro}
-                        onClick={() => setSettings((s) => ({ ...s, layout: l.id as any }))}
-                        className={`flex flex-col items-center gap-2 rounded-2xl border p-3 transition-all ${
+                        type="button"
+                        onClick={() => {
+                          if (l.pro && !isPro) {
+                            openUpgradeModal({
+                              featureName: `${l.label} Layout`,
+                              description: `Upgrade to Pro to unlock the ${l.label} layout, along with Masonry, Carousel, and Bento display options.`,
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, layout: l.id as any }));
+                        }}
+                        className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border p-3 transition-all ${
                           settings.layout === l.id
                             ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm"
                             : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"
-                        } ${l.pro && !isPro ? "cursor-not-allowed opacity-50 grayscale" : ""}`}
+                        } ${l.pro && !isPro ? "opacity-75 hover:border-pink-200" : ""}`}
                       >
                         <l.icon className="size-5" />
                         <span className="text-[10px] font-bold uppercase">{l.label}</span>
-                        {l.pro && !isPro && <Zap className="size-3 text-pink-400" />}
+                        {l.pro && !isPro && <Zap className="size-3 text-pink-500" />}
                       </button>
                     ))}
                   </div>
@@ -620,9 +631,19 @@ export default function WidgetCustomizer({
                     ].map((v) => (
                       <button
                         key={v.id}
-                        disabled={!isPro}
-                        onClick={() => setSettings((s) => ({ ...s, truncateText: v.id as any }))}
-                        className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.truncateText === v.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500"} ${!isPro ? "opacity-30" : ""}`}
+                        type="button"
+                        onClick={() => {
+                          if (!isPro && v.id !== "off") {
+                            openUpgradeModal({
+                              featureName: "Text Length Truncation",
+                              description:
+                                "Upgrade to Pro to customize testimonial card lengths and truncation.",
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, truncateText: v.id as any }));
+                        }}
+                        className={`flex-1 cursor-pointer rounded-lg border py-1.5 text-[10px] font-bold transition-all ${settings.truncateText === v.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && v.id !== "off" ? "opacity-60" : ""}`}
                       >
                         {v.label}
                       </button>
@@ -671,9 +692,19 @@ export default function WidgetCustomizer({
                     {[0, 3, 4, 5].map((r) => (
                       <button
                         key={r}
-                        disabled={!isPro && r !== 0}
-                        onClick={() => setSettings((s) => ({ ...s, filterMinRating: r }))}
-                        className={`flex flex-1 items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold ${settings.filterMinRating === r ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-neutral-100 text-neutral-500"} ${!isPro && r !== 0 ? "opacity-50" : ""}`}
+                        type="button"
+                        onClick={() => {
+                          if (!isPro && r !== 0) {
+                            openUpgradeModal({
+                              featureName: "Star Rating Filtering",
+                              description:
+                                "Upgrade to Pro to filter testimonials by star rating and highlight top reviews.",
+                            });
+                            return;
+                          }
+                          setSettings((s) => ({ ...s, filterMinRating: r }));
+                        }}
+                        className={`flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-xl border py-2 text-[12px] font-bold transition-all ${settings.filterMinRating === r ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && r !== 0 ? "opacity-60" : ""}`}
                       >
                         {r === 0 ? "All" : `${r}+★`}
                       </button>
@@ -696,16 +727,19 @@ export default function WidgetCustomizer({
                     ].map((v) => (
                       <button
                         key={v.id}
+                        type="button"
                         onClick={() => {
                           if (!isPro && v.id !== "all") {
-                            toast.error("Pro Feature", {
-                              description: "Upgrade to Pro to filter by testimonial type.",
+                            openUpgradeModal({
+                              featureName: "Testimonial Type Filtering",
+                              description:
+                                "Upgrade to Pro to filter your embed widget to show only video or text testimonials.",
                             });
                             return;
                           }
                           setSettings((s) => ({ ...s, filterType: v.id as any }));
                         }}
-                        className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase ${settings.filterType === v.id ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500"} ${!isPro && v.id !== "all" ? "opacity-50" : ""}`}
+                        className={`flex-1 cursor-pointer rounded-xl border py-2 text-[10px] font-bold uppercase transition-all ${settings.filterType === v.id ? "border-pink-200 bg-pink-50 text-pink-600" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && v.id !== "all" ? "opacity-60" : ""}`}
                       >
                         {v.label}
                       </button>
@@ -727,10 +761,13 @@ export default function WidgetCustomizer({
                         return (
                           <button
                             key={tag.id}
+                            type="button"
                             onClick={() => {
                               if (!isPro) {
-                                toast.error("Pro Feature", {
-                                  description: "Upgrade to Pro to filter your widget by tags.",
+                                openUpgradeModal({
+                                  featureName: "Tag Filtering",
+                                  description:
+                                    "Upgrade to Pro to filter your widgets by customer tags and personas.",
                                 });
                                 return;
                               }
@@ -741,11 +778,11 @@ export default function WidgetCustomizer({
                                   : [...(s.filterTags || []), tag.id],
                               }));
                             }}
-                            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition-all ${
                               isSelected
                                 ? "border-pink-200 bg-pink-50 text-pink-600"
                                 : "border-neutral-100 bg-white text-neutral-500 hover:bg-neutral-50"
-                            } ${!isPro ? "opacity-50" : ""}`}
+                            } ${!isPro ? "opacity-60" : ""}`}
                           >
                             <div
                               className="size-2 rounded-full"
@@ -782,11 +819,13 @@ export default function WidgetCustomizer({
                   </div>
                   <div className="flex items-center gap-3">
                     <div
-                      className="relative"
+                      className="relative cursor-pointer"
                       onClick={() => {
                         if (!isPro) {
-                          toast.error("Pro Feature", {
-                            description: "Upgrade to Pro to use custom accent colors.",
+                          openUpgradeModal({
+                            featureName: "Custom Accent Colors",
+                            description:
+                              "Upgrade to Pro to customize widget accent colors to match your brand.",
                           });
                         }
                       }}
@@ -798,7 +837,7 @@ export default function WidgetCustomizer({
                         onChange={(e) =>
                           setSettings((s) => ({ ...s, accentColor: e.target.value }))
                         }
-                        className={`size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm ${!isPro ? "cursor-not-allowed opacity-50" : ""}`}
+                        className={`size-10 cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm ${!isPro ? "opacity-60" : ""}`}
                       />
                       {!isPro && <Lock className="absolute inset-0 m-auto size-3 text-white" />}
                     </div>
@@ -826,16 +865,19 @@ export default function WidgetCustomizer({
                     ].map((f) => (
                       <button
                         key={f.id}
+                        type="button"
                         onClick={() => {
                           if (!isPro && f.id !== "sans") {
-                            toast.error("Pro Feature", {
-                              description: "Upgrade to Pro to use premium fonts.",
+                            openUpgradeModal({
+                              featureName: "Premium & Custom Typography",
+                              description:
+                                "Upgrade to Pro to unlock custom typography and premium fonts.",
                             });
                             return;
                           }
                           setSettings((s) => ({ ...s, fontFamily: f.id }));
                         }}
-                        className={`flex items-center justify-between rounded-xl border px-3 py-2 transition-all ${settings.fontFamily === f.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && f.id !== "sans" ? "opacity-30" : ""}`}
+                        className={`flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2 transition-all ${settings.fontFamily === f.id ? "border-pink-200 bg-pink-50 text-pink-600 shadow-sm" : "border-neutral-100 text-neutral-500 hover:bg-neutral-50"} ${!isPro && f.id !== "sans" ? "opacity-60" : ""}`}
                       >
                         <span className="text-[12px] font-bold" style={{ fontFamily: f.id }}>
                           {f.label}
@@ -845,7 +887,7 @@ export default function WidgetCustomizer({
                     ))}
                   </div>
 
-                  {settings.fontFamily === "custom" && (
+                  {settings.fontFamily === "custom" && isPro && (
                     <div className="animate-in fade-in slide-in-from-top-2 mt-2 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-3 duration-300">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold tracking-tighter text-neutral-400 uppercase">
@@ -905,14 +947,16 @@ export default function WidgetCustomizer({
                       type="button"
                       onClick={() => {
                         if (!isPro) {
-                          toast.error("Pro Feature", {
-                            description: "Upgrade to Pro to remove the KudosWall branding.",
+                          openUpgradeModal({
+                            featureName: "White-Label Badges",
+                            description:
+                              "Upgrade to Pro to remove the 'Powered by KudosWall' watermark from your widgets.",
                           });
                           return;
                         }
                         setSettings((s) => ({ ...s, hideBadge: !s.hideBadge }));
                       }}
-                      className={`relative flex h-5 w-10 items-center rounded-full transition-all duration-300 ${settings.hideBadge ? "bg-emerald-500" : "bg-neutral-200"} ${!isPro ? "opacity-50" : ""}`}
+                      className={`relative flex h-5 w-10 cursor-pointer items-center rounded-full transition-all duration-300 ${settings.hideBadge ? "bg-emerald-500" : "bg-neutral-200"}`}
                     >
                       <div
                         className={`size-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${settings.hideBadge ? "translate-x-5.5" : "translate-x-1"}`}
@@ -939,11 +983,20 @@ export default function WidgetCustomizer({
                       value={customCss}
                     />
                     {!isPro && (
-                      <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-900/10 backdrop-blur-[1px]">
+                      <div
+                        onClick={() =>
+                          openUpgradeModal({
+                            featureName: "Custom CSS Overrides",
+                            description:
+                              "Upgrade to Pro to add custom CSS stylesheets and advanced layout styling to your embed widgets.",
+                          })
+                        }
+                        className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-2xl bg-neutral-900/10 backdrop-blur-[1px] transition-colors hover:bg-neutral-900/20"
+                      >
                         <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-xl">
                           <Lock className="size-3 text-neutral-400" />
                           <span className="text-[10px] font-bold text-neutral-600">
-                            Pro Feature
+                            Pro Feature — Click to Unlock
                           </span>
                         </div>
                       </div>

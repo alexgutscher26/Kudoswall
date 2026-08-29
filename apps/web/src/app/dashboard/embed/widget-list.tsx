@@ -22,6 +22,8 @@ import { gooeyToast as toast } from "goey-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+import { Lock } from "lucide-react";
+import { useUpgradeModal } from "@/components/modals/UpgradeModal";
 import type { WidgetSettings } from "./[id]/customizer";
 
 export default function WidgetList() {
@@ -29,6 +31,7 @@ export default function WidgetList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newWidgetName, setNewWidgetName] = useState("");
+  const { openUpgradeModal } = useUpgradeModal();
 
   useEffect(() => {
     if (isCreateModalOpen) {
@@ -41,7 +44,8 @@ export default function WidgetList() {
     };
   }, [isCreateModalOpen]);
 
-  const { activeWorkspaceId } = useWorkspace();
+  const { activeWorkspaceId, data: dashboardData } = useWorkspace();
+  const permissions = dashboardData?.permissions;
 
   const openModal = () => {
     setIsCreateModalOpen(true);
@@ -51,6 +55,17 @@ export default function WidgetList() {
   };
   const { data: widgets, isLoading, refetch } = useQuery(trpc.widget.list.queryOptions());
 
+  const handleCreateButtonClick = () => {
+    if (permissions && !permissions.canAddWidget && (widgets?.length ?? 0) >= 1) {
+      openUpgradeModal({
+        featureName: "Unlimited Embed Widgets",
+        description: `Your ${permissions.name} plan allows ${permissions.limits.maxWidgets} embed widget. Upgrade to Pro to create unlimited widgets and unlock Carousel, Masonry, and Bento layouts.`,
+      });
+      return;
+    }
+    openModal();
+  };
+
   const createWidget = useMutation(
     trpc.widget.create.mutationOptions({
       onSuccess: (data: { id: string }) => {
@@ -58,7 +73,16 @@ export default function WidgetList() {
         router.push(`/dashboard/embed/${data.id}` as Route);
       },
       onError: (err) => {
-        toast.error(err instanceof Error ? err.message : "Failed to create widget");
+        const msg = err instanceof Error ? err.message : "Failed to create widget";
+        if (msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("upgrade")) {
+          closeModal();
+          openUpgradeModal({
+            featureName: "Unlimited Embed Widgets",
+            description: msg,
+          });
+        } else {
+          toast.error(msg);
+        }
       },
     }),
   );
@@ -105,7 +129,7 @@ export default function WidgetList() {
           />
         </div>
         <button
-          onClick={openModal}
+          onClick={handleCreateButtonClick}
           className="flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
         >
           <Plus className="size-4" />
@@ -219,45 +243,83 @@ export default function WidgetList() {
                 <X className="size-5" />
               </button>
             </div>
-            <form onSubmit={handleCreate} className="space-y-6">
-              <div className="space-y-2">
-                <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Widget Name
-                </label>
-                <input
-                  autoFocus
-                  type="text"
-                  required
-                  placeholder="e.g. Homepage Hero Section"
-                  value={newWidgetName}
-                  onChange={(e) => setNewWidgetName(e.target.value)}
-                  className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-5 py-4 text-sm font-medium transition-all outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/5"
-                />
+            {permissions && !permissions.canAddWidget && (widgets?.length ?? 0) >= 1 ? (
+              <div className="space-y-6">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-center">
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                    <Lock className="size-6" />
+                  </div>
+                  <h4 className="text-base font-bold text-neutral-900">Widget Limit Reached</h4>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-600">
+                    Your {permissions.name} plan allows {permissions.limits.maxWidgets} embed
+                    widget. Upgrade to Pro to create unlimited embed widgets, custom themes, and
+                    unlock all premium layout styles.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+                  <Link
+                    href={
+                      activeWorkspaceId
+                        ? (`/dashboard/settings?tab=billing&workspaceId=${activeWorkspaceId}` as any)
+                        : ("/dashboard/settings?tab=billing" as any)
+                    }
+                    onClick={closeModal}
+                    className="flex flex-2 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
+                  >
+                    Upgrade to Pro
+                    <ChevronRight className="size-4" />
+                  </Link>
+                </div>
               </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createWidget.isPending}
-                  className="flex flex-2 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
-                >
-                  {createWidget.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <>
-                      Create Widget
-                      <ChevronRight className="size-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+            ) : (
+              <form onSubmit={handleCreate} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Widget Name
+                  </label>
+                  <input
+                    autoFocus
+                    type="text"
+                    required
+                    placeholder="e.g. Homepage Hero Section"
+                    value={newWidgetName}
+                    onChange={(e) => setNewWidgetName(e.target.value)}
+                    className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-5 py-4 text-sm font-medium transition-all outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/5"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createWidget.isPending}
+                    className="flex flex-2 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {createWidget.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <>
+                        Create Widget
+                        <ChevronRight className="size-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

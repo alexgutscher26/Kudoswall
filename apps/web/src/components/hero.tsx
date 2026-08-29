@@ -58,16 +58,15 @@ export default function Hero() {
 
         {/* Sub-headline */}
         <p className="max-w-xl px-2 text-base leading-relaxed text-neutral-500 sm:text-lg md:text-xl">
-          The fast, no-bloat testimonial tool for founders who just want their wall live. No $29/mo
-          paywalls. No unnecessary complexity. Just trust-building social proof, delivered at the
-          edge.
+          The fast, no-bloat testimonial tool for founders. Collect text and video reviews, export
+          social media ad cards, and embed trust-building walls at the edge.
         </p>
 
         {/* CTA Buttons */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
           <Link href="/login">
             <Button className="h-12 rounded-full bg-neutral-900 px-8 text-base font-bold text-white shadow-xl transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
-              Start free — no credit card
+              Start 14-day Pro trial — no credit card
             </Button>
           </Link>
         </div>

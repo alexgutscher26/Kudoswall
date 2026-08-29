@@ -166,14 +166,18 @@ export async function createProject(formData: FormData, workspaceId?: string) {
   const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
   const permissions = getWorkspacePermissions({
     plan: ws?.plan || "free",
+    subscriptionStatus: ws?.subscriptionStatus,
+    trialEndsAt: ws?.trialEndsAt,
     organization: (ws as any)?.organization,
     projectsCount: projectsCount[0]?.value || 0,
   });
 
   if (!permissions.canAddProject) {
-    throw new Error(
-      `You have reached the project limit for your ${permissions.name} plan. Please upgrade.`,
-    );
+    return {
+      success: false,
+      error: `You have reached the project limit for your ${permissions.name} plan. Upgrade to Agency to create multiple projects.`,
+      needsUpgrade: true,
+    };
   }
 
   await db.insert(project).values({
@@ -364,6 +368,8 @@ export async function getDashboardData(workspaceId?: string) {
     const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
     const permissions = getWorkspacePermissions({
       plan: ws.plan,
+      subscriptionStatus: ws.subscriptionStatus,
+      trialEndsAt: ws.trialEndsAt,
       organization: (ws as any).organization,
       projectsCount: projects.length,
       testimonialsCount: testimonialsCount,

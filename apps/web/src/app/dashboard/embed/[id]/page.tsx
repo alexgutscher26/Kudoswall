@@ -61,6 +61,14 @@ async function WidgetDetailContentWrapper({
 
   const settings = JSON.parse(w.settingsJson);
 
+  const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+  const permissions = getWorkspacePermissions({
+    plan: w.workspace.plan,
+    subscriptionStatus: w.workspace.subscriptionStatus,
+    trialEndsAt: w.workspace.trialEndsAt,
+    organization: w.workspace.organization,
+  });
+
   return (
     <DashboardShell
       userName={userName}
@@ -75,7 +83,7 @@ async function WidgetDetailContentWrapper({
           workspaceId={w.workspaceId}
           initialSettings={settings}
           initialCustomCss={w.customCss}
-          isPro={(w.workspace.organization?.plan || w.workspace.plan) !== "free"}
+          isPro={permissions.isPro}
         />
       </div>
     </DashboardShell>

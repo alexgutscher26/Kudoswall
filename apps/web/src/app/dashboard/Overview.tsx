@@ -4,6 +4,7 @@ import type { RouterOutputs } from "@/utils/trpc";
 import { StatCard } from "./components";
 import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { TestimonialsPanel } from "./TestimonialsPanel";
+import { MomentOfJoyModal } from "@/components/modals/MomentOfJoyModal";
 
 type DashboardData = RouterOutputs["dashboard"]["getData"];
 
@@ -13,7 +14,11 @@ interface OverviewProps {
 }
 
 export default function Overview({ data, workspaceId }: OverviewProps) {
-  const isFree = data.workspace.plan === "free" || !data.workspace.plan;
+  const isFree =
+    data.permissions?.effectivePlan === "free" ||
+    data.workspace.plan === "free" ||
+    !data.workspace.plan;
+  const hasVideoTestimonial = data.recentTestimonials.some((t) => t.type === "video");
 
   const stats = [
     {
@@ -54,6 +59,14 @@ export default function Overview({ data, workspaceId }: OverviewProps) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 overflow-x-hidden sm:space-y-6">
+      {/* Contextual Moment of Joy Milestone Modals */}
+      <MomentOfJoyModal
+        workspaceId={workspaceId || data.workspace.id}
+        testimonialsCount={data.stats.testimonials}
+        hasVideoTestimonial={hasVideoTestimonial}
+        permissions={data.permissions}
+      />
+
       {isFree && (
         <div className="relative overflow-hidden rounded-2xl border border-pink-100 bg-white p-4 sm:p-5">
           <div className="absolute top-[-50%] right-[-10%] size-48 rounded-full bg-pink-500/5 blur-[60px]" />
@@ -64,10 +77,11 @@ export default function Overview({ data, workspaceId }: OverviewProps) {
               </div>
               <div className="space-y-0.5">
                 <h3 className="text-[14px] font-bold tracking-tight text-neutral-900">
-                  Ready to take your testimonials to the next level?
+                  You are currently on the Free Plan (10 testimonials limit)
                 </h3>
                 <p className="max-w-xl text-[12px] font-medium text-neutral-500">
-                  Upgrade to Pro to remove branding, use custom domains, analytics, and more.
+                  Upgrade to Pro to unlock unlimited testimonials, HD video downloads, 7 layout
+                  types, and zero branding.
                 </p>
               </div>
             </div>

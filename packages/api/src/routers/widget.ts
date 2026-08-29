@@ -1,6 +1,13 @@
 import { workspaceProcedure, router, publicProcedure } from "../index";
 import { TRPCError } from "@trpc/server";
-import { widget, project, testimonial, testimonialToTag, tag } from "@my-better-t-app/db/schema";
+import {
+  workspace,
+  widget,
+  project,
+  testimonial,
+  testimonialToTag,
+  tag,
+} from "@my-better-t-app/db/schema";
 import { eq, and, desc, inArray, gte, isNull, exists, asc, count } from "drizzle-orm";
 import { recordAuditLog } from "@my-better-t-app/db";
 import { z } from "zod";
@@ -85,6 +92,33 @@ export const widgetRouter = router({
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, session, workspaceId } = ctx;
+
+      const [widgetCountResult] = await db
+        .select({ value: count() })
+        .from(widget)
+        .where(and(eq(widget.workspaceId, workspaceId), isNull(widget.deletedAt)));
+      const totalWidgets = Number(widgetCountResult?.value || 0);
+
+      const ws = await db.query.workspace.findFirst({
+        where: eq(workspace.id, workspaceId),
+        with: { organization: true },
+      });
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws?.plan || "free",
+        subscriptionStatus: ws?.subscriptionStatus,
+        trialEndsAt: ws?.trialEndsAt,
+        organization: ws?.organization,
+        widgetsCount: totalWidgets,
+      });
+
+      if (!permissions.canAddWidget) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `You have reached the widget limit (${permissions.limits.maxWidgets} widget) for your ${permissions.name} plan. Upgrade to Pro for unlimited embed widgets.`,
+        });
+      }
 
       const id = crypto.randomUUID();
       const defaultSettings = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { gooeyToast as toast } from "goey-toast";
+import { useUpgradeModal } from "@/components/modals/UpgradeModal";
 
 interface UpgradeToastTriggerProps {
   title: string;
@@ -15,6 +15,8 @@ export function UpgradeToastTrigger({
   children,
   locked,
 }: UpgradeToastTriggerProps) {
+  const { openUpgradeModal } = useUpgradeModal();
+
   if (!locked) return <>{children}</>;
 
   return (
@@ -22,7 +24,8 @@ export function UpgradeToastTrigger({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        toast.error(title, {
+        openUpgradeModal({
+          title,
           description,
         });
       }}

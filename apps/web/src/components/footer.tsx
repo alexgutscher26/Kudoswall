@@ -24,6 +24,7 @@ const PLATFORM_LINKS = [
 ] as const;
 
 const RESOURCES_LINKS = [
+  { label: "System Status", href: "/status" },
   { label: "Free Testimonial Widgets", href: "/blog/free-testimonial-widget-comparison" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },

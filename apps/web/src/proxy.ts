@@ -8,23 +8,38 @@ import { eq, isNull, and } from "drizzle-orm";
  * List of subdomains that are reserved for platform use and should not
  * be captured by the custom domain mapping.
  */
-const RESERVED_SUBDOMAINS = ["www", "api", "dashboard", "auth", "admin", "blog", "app"];
+const RESERVED_SUBDOMAINS = ["www", "api", "dashboard", "auth", "admin", "blog", "app", "status"];
 
 function isReservedSubdomain(host: string) {
-  const mainDomain = "kudoswall.org";
-  if (!host.endsWith(`.${mainDomain}`)) return false;
-  const subdomain = host.replace(`.${mainDomain}`, "");
-  return RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase());
+  const cleanHost = host.toLowerCase();
+  for (const mainDomain of ["kudoswall.org", "kudoswall.com"]) {
+    if (cleanHost.endsWith(`.${mainDomain}`)) {
+      const subdomain = cleanHost.replace(`.${mainDomain}`, "");
+      return RESERVED_SUBDOMAINS.includes(subdomain);
+    }
+  }
+  return false;
 }
 
 /**
  * Next.js 16 Proxy implementation (replaces middleware)
  */
 export async function proxy(request: NextRequest) {
-  const host = request.headers.get("host") || "";
+  const host = (request.headers.get("host") || "").toLowerCase();
   const url = new URL(request.url);
 
-  // 0. Handle documentation proxy (Mintlify)
+  // 0. Handle status subdomain
+  if (
+    host.startsWith("status.") &&
+    (host.endsWith("kudoswall.com") || host.endsWith("kudoswall.org") || host.includes("localhost"))
+  ) {
+    const targetPath = url.pathname.startsWith("/status")
+      ? url.pathname
+      : `/status${url.pathname === "/" ? "" : url.pathname}`;
+    return NextResponse.rewrite(new URL(targetPath, request.url));
+  }
+
+  // 1. Handle documentation proxy (Mintlify)
   if (url.pathname === "/docs" || url.pathname.startsWith("/docs/")) {
     // Strip /docs from the path so Mintlify receives / or /subpage
     const targetPath = url.pathname.replace(/^\/docs/, "") || "/";
@@ -32,9 +47,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(mintlifyUrl);
   }
 
-  // 1. Detect if this is a custom domain or supported subdomain
-  const mainDomain = "kudoswall.org";
-  const isMainSite = host === mainDomain || host === `www.${mainDomain}`;
+  // 2. Detect if this is a custom domain or supported subdomain
+  const mainDomains = ["kudoswall.org", "kudoswall.com"];
+  const isMainSite = mainDomains.some((d) => host === d || host === `www.${d}`);
 
   const isSupportedDomain =
     !isMainSite &&
@@ -59,15 +74,20 @@ export async function proxy(request: NextRequest) {
 
     let projectData = results[0];
 
-    // B. Fallback to subdomain check (project-slug.kudoswall.org)
-    if (!projectData && host.endsWith(`.${mainDomain}`)) {
-      const subdomain = host.replace(`.${mainDomain}`, "");
-      const resultsSub = await db
-        .select()
-        .from(project)
-        .where(and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)))
-        .limit(1);
-      projectData = resultsSub[0];
+    // B. Fallback to subdomain check (project-slug.kudoswall.org / project-slug.kudoswall.com)
+    if (!projectData) {
+      for (const d of mainDomains) {
+        if (host.endsWith(`.${d}`)) {
+          const subdomain = host.replace(`.${d}`, "");
+          const resultsSub = await db
+            .select()
+            .from(project)
+            .where(and(eq(project.collectionSlug, subdomain), isNull(project.deletedAt)))
+            .limit(1);
+          projectData = resultsSub[0];
+          break;
+        }
+      }
     }
 
     if (projectData?.collectionSlug) {

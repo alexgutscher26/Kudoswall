@@ -29,6 +29,8 @@ import { trpc, queryClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ErrorBoundary from "@/components/error-boundary";
 import { WorkspaceProvider } from "@/components/dashboard/WorkspaceContext";
+import { TrialBanner } from "@/components/dashboard/TrialBanner";
+import { UpgradeModalProvider, useUpgradeModal } from "@/components/modals/UpgradeModal";
 import { createProject } from "./actions";
 
 type DashboardData = RouterOutputs["dashboard"]["getData"];
@@ -103,6 +105,8 @@ function NavContent({
   plan?: string;
   collapsed?: boolean;
 }) {
+  const { openUpgradeModal } = useUpgradeModal();
+
   const isFeatureLocked = (feature?: string) => {
     if (!feature) return false;
     if (feature === "analytics" && (!plan || plan === "free")) return true;
@@ -135,17 +139,25 @@ function NavContent({
 
           if (isLocked) {
             return (
-              <div
+              <button
                 key={href}
-                className={`flex cursor-not-allowed items-center rounded-xl py-2.5 text-[13px] font-medium text-neutral-300 opacity-60 ${
+                type="button"
+                onClick={() => {
+                  if (onNavClick) onNavClick();
+                  openUpgradeModal({
+                    featureName: label,
+                    description: `Upgrade to KudosWall Pro to unlock ${label}, unlimited testimonials, video downloads, and custom domains.`,
+                  });
+                }}
+                className={`flex w-full cursor-pointer items-center rounded-xl py-2.5 text-[13px] font-medium text-neutral-400 transition-colors hover:bg-pink-50/60 hover:text-pink-600 ${
                   collapsed ? "justify-center px-0" : "gap-3 px-3"
                 }`}
-                title={`${label} is a Pro feature`}
+                title={`${label} is a Pro feature — Click to unlock`}
               >
                 <Icon className="size-4 shrink-0" />
                 {!collapsed && label}
-                {!collapsed && <Lock className="ml-auto size-3 text-neutral-300" />}
-              </div>
+                {!collapsed && <Lock className="ml-auto size-3 text-neutral-400" />}
+              </button>
             );
           }
 
@@ -159,12 +171,13 @@ function NavContent({
                 collapsed ? "justify-center px-0" : "gap-3 px-3"
               } ${
                 isActive
-                  ? "text-neutral-900"
-                  : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+                  ? "bg-pink-500/10 font-semibold text-pink-600 shadow-xs"
+                  : "text-neutral-600 hover:bg-neutral-100/80 hover:text-neutral-900"
               }`}
-              style={isActive ? { backgroundColor: "#fff5f7", color: "#c2395d" } : {}}
             >
-              <Icon className="size-4 shrink-0" style={isActive ? { color: "#e8527a" } : {}} />
+              <Icon
+                className={`size-4 shrink-0 ${isActive ? "text-pink-600" : "text-neutral-400"}`}
+              />
               {!collapsed && label}
               {isActive && !collapsed && (
                 <div
@@ -434,11 +447,13 @@ function NewCollectionModal({
   onClose,
   workspaceId,
   workspaceSlug,
+  permissions,
 }: {
   open: boolean;
   onClose: () => void;
   workspaceId: string;
   workspaceSlug: string;
+  permissions?: DashboardData["permissions"];
 }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -462,13 +477,25 @@ function NewCollectionModal({
 
     try {
       const result = await createProject(formData, workspaceId);
-      if (result.success) {
+      if (result?.success) {
         toast.success("Collection link created!");
         onClose();
         router.refresh();
+      } else if (result?.needsUpgrade) {
+        toast.error("Project Limit Reached", {
+          description: result.error,
+        });
+        onClose();
+        router.push(
+          workspaceId
+            ? (`/dashboard/settings?tab=billing&workspaceId=${workspaceId}` as any)
+            : ("/dashboard/settings?tab=billing" as any),
+        );
+      } else {
+        toast.error(result?.error || "Failed to create collection link");
       }
-    } catch (error) {
-      toast.error("Failed to create collection link");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to create collection link");
       console.error(error);
     } finally {
       setLoading(false);
@@ -514,63 +541,97 @@ function NewCollectionModal({
             Create a dedicated page where your customers can record or write their testimonials.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                Project / Campaign Name
-              </label>
-              <input
-                autoFocus
-                name="name"
-                type="text"
-                required
-                placeholder="e.g. April 2024 Product Launch"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-              />
-            </div>
-
-            <div className="space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
-              <p className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                Preview URL
-              </p>
-              <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
-                <div className="flex items-center gap-1.5">
-                  <Globe className="size-3" />
-                  kudoswall.org/{workspaceSlug}/
-                  <span className={name ? "text-pink-500" : "text-neutral-300"}>
-                    {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
-                  </span>
+          {permissions && !permissions.canAddProject ? (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-center">
+                <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                  <Lock className="size-6" />
                 </div>
-              </code>
-            </div>
+                <h4 className="text-base font-bold text-neutral-900">Project Limit Reached</h4>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-600">
+                  Your current {permissions.name} plan includes {permissions.limits.maxProjects}{" "}
+                  project link. Upgrade to the Agency plan to manage up to 5 projects and client
+                  brands.
+                </p>
+              </div>
 
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-                style={{ backgroundColor: "#171717" }}
-              >
-                {loading ? (
-                  <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                ) : (
-                  <>
-                    Create Link
-                    <ChevronRight className="size-3.5" />
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
+                >
+                  Cancel
+                </button>
+                <Link
+                  href={`/dashboard/settings?tab=billing&workspaceId=${workspaceId}` as any}
+                  onClick={onClose}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.98]"
+                >
+                  Upgrade to Agency
+                  <ChevronRight className="size-4" />
+                </Link>
+              </div>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Project / Campaign Name
+                </label>
+                <input
+                  autoFocus
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="e.g. April 2024 Product Launch"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                />
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
+                <p className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
+                  Preview URL
+                </p>
+                <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
+                  <div className="flex items-center gap-1.5">
+                    <Globe className="size-3" />
+                    kudoswall.org/{workspaceSlug}/
+                    <span className={name ? "text-pink-500" : "text-neutral-300"}>
+                      {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
+                    </span>
+                  </div>
+                </code>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                  style={{ backgroundColor: "#171717" }}
+                >
+                  {loading ? (
+                    <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  ) : (
+                    <>
+                      Create Link
+                      <ChevronRight className="size-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>
@@ -758,107 +819,111 @@ export default function DashboardShell({
       }}
       data={activeData}
     >
-      {/* Live Data Poller (Client Only) */}
-      {isMounted && (
-        <DashboardPoller
-          workspaceId={activeWorkspaceId}
-          onData={setPolledData}
-          initialData={activeWorkspaceId === initialData?.workspace.id ? initialData : null}
-        />
-      )}
+      <UpgradeModalProvider>
+        {/* Live Data Poller (Client Only) */}
+        {isMounted && (
+          <DashboardPoller
+            workspaceId={activeWorkspaceId}
+            onData={setPolledData}
+            initialData={activeWorkspaceId === initialData?.workspace.id ? initialData : null}
+          />
+        )}
 
-      <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
-        {/* Desktop sidebar */}
+        <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
+          {/* Desktop sidebar */}
 
-        <DesktopSidebar
-          userName={userName}
-          userEmail={userEmail}
-          onSignOut={handleSignOut}
-          onNewCollection={() => setNewCollectionOpen(true)}
-          currentWorkspaceId={activeWorkspaceId}
-          plan={activeData?.workspace.plan}
-          collapsed={sidebarCollapsed}
-          onWorkspaceChange={(id) => {
-            setActiveWorkspaceId(id);
-            const params = new URLSearchParams(searchParams.toString());
-            params.set("workspaceId", id);
-            // Clear project-specific params that won't exist in the new workspace
-            params.delete("project");
+          <DesktopSidebar
+            userName={userName}
+            userEmail={userEmail}
+            onSignOut={handleSignOut}
+            onNewCollection={() => setNewCollectionOpen(true)}
+            currentWorkspaceId={activeWorkspaceId}
+            plan={activeData?.workspace.plan}
+            collapsed={sidebarCollapsed}
+            onWorkspaceChange={(id) => {
+              setActiveWorkspaceId(id);
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("workspaceId", id);
+              // Clear project-specific params that won't exist in the new workspace
+              params.delete("project");
 
-            // Stay on current page if it's a dashboard page, otherwise go to overview
-            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
-            router.push(`${targetPath}?${params.toString()}` as any);
-          }}
-        />
+              // Stay on current page if it's a dashboard page, otherwise go to overview
+              const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+              router.push(`${targetPath}?${params.toString()}` as any);
+            }}
+          />
 
-        {/* Mobile drawer */}
-        <MobileDrawer
-          open={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          userName={userName}
-          userEmail={userEmail}
-          onSignOut={handleSignOut}
-          onNewCollection={() => setNewCollectionOpen(true)}
-          currentWorkspaceId={activeWorkspaceId}
-          plan={activeData?.workspace.plan}
-          onWorkspaceChange={(id) => {
-            setActiveWorkspaceId(id);
-            const params = new URLSearchParams(searchParams.toString());
-            params.set("workspaceId", id);
-            params.delete("project");
+          {/* Mobile drawer */}
+          <MobileDrawer
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            userName={userName}
+            userEmail={userEmail}
+            onSignOut={handleSignOut}
+            onNewCollection={() => setNewCollectionOpen(true)}
+            currentWorkspaceId={activeWorkspaceId}
+            plan={activeData?.workspace.plan}
+            onWorkspaceChange={(id) => {
+              setActiveWorkspaceId(id);
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("workspaceId", id);
+              params.delete("project");
 
-            const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
-            router.push(`${targetPath}?${params.toString()}` as any);
-          }}
-        />
+              const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
+              router.push(`${targetPath}?${params.toString()}` as any);
+            }}
+          />
 
-        {/* Modal */}
-        <NewCollectionModal
-          open={newCollectionOpen}
-          onClose={() => setNewCollectionOpen(false)}
-          workspaceId={activeWorkspaceId}
-          workspaceSlug={activeData?.workspace.slug || "loading"}
-        />
+          {/* Modal */}
+          <NewCollectionModal
+            open={newCollectionOpen}
+            onClose={() => setNewCollectionOpen(false)}
+            workspaceId={activeWorkspaceId}
+            workspaceSlug={activeData?.workspace.slug || "loading"}
+            permissions={activeData?.permissions}
+          />
 
-        {/* Main content — offset only on lg+ */}
-        <div
-          className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden transition-[margin] duration-300 ${
-            sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"
-          }`}
-        >
-          <DotGrid opacity={0.08} />
-
-          {/* Soft central glow */}
+          {/* Main content — offset only on lg+ */}
           <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 flex items-start justify-center"
-            style={{ zIndex: 0 }}
+            className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden transition-[margin] duration-300 ${
+              sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"
+            }`}
           >
+            <DotGrid opacity={0.08} />
+
+            {/* Soft central glow */}
             <div
-              className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
-              style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-            />
-          </div>
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 flex items-start justify-center"
+              style={{ zIndex: 0 }}
+            >
+              <div
+                className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
+                style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+              />
+            </div>
 
-          {/* Top bar */}
-          <div className="relative z-10">
-            <TopBar
-              userName={userName}
-              onMenuOpen={() => setMobileMenuOpen(true)}
-              pageTitle={pageTitle}
-              pageSubtitle={pageSubtitle}
-              isLive
-              collapsed={sidebarCollapsed}
-              onToggleCollapsed={() => setSidebarCollapsed((c) => !c)}
-            />
-          </div>
+            {/* Top bar */}
+            <div className="relative z-10">
+              <TopBar
+                userName={userName}
+                onMenuOpen={() => setMobileMenuOpen(true)}
+                pageTitle={pageTitle}
+                pageSubtitle={pageSubtitle}
+                isLive
+                collapsed={sidebarCollapsed}
+                onToggleCollapsed={() => setSidebarCollapsed((c) => !c)}
+              />
+            </div>
 
-          {/* Main content */}
-          <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-            <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
-          </main>
+            {/* Main content */}
+            <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+              <TrialBanner permissions={activeData?.permissions} workspaceId={activeWorkspaceId} />
+              <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
+            </main>
+          </div>
         </div>
-      </div>
+      </UpgradeModalProvider>
     </WorkspaceProvider>
   );
 }

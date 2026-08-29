@@ -38,7 +38,7 @@ export default function CtaSection() {
               className="flex h-11 items-center gap-2 rounded-full px-7 text-base text-white"
               style={{ backgroundColor: "#171717" }}
             >
-              Get started free
+              Start 14-day Pro trial
               <ArrowRight className="size-4" />
             </Button>
           </a>
@@ -52,7 +52,7 @@ export default function CtaSection() {
           </a>
         </div>
         <p className="text-sm text-neutral-400">
-          No credit card required · Free forever plan available
+          No credit card required · 14-day Pro trial · Free plan available
         </p>
       </div>
     </section>

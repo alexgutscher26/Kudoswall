@@ -2,7 +2,7 @@ import { db } from "@/lib/server-db";
 import { project, testimonial } from "@my-better-t-app/db/schema";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { eq } from "drizzle-orm";
+import { eq, and, count, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { notifyOwnerNewTestimonial } from "@/lib/email-helpers";
@@ -81,6 +81,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
 
     if (!proj) {
       return NextResponse.json({ error: "Collection not found" }, { status: 404 });
+    }
+
+    const counts = await db
+      .select({ count: count() })
+      .from(testimonial)
+      .where(and(eq(testimonial.workspaceId, proj.workspaceId), isNull(testimonial.deletedAt)));
+
+    const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
+    const permissions = getWorkspacePermissions({
+      plan: proj.workspace.plan,
+      subscriptionStatus: proj.workspace.subscriptionStatus,
+      trialEndsAt: proj.workspace.trialEndsAt,
+      testimonialsCount: counts[0]?.count ?? 0,
+    });
+
+    if (!permissions.canAddTestimonial) {
+      return NextResponse.json(
+        {
+          error: "Limit reached",
+          message: `This workspace has reached its testimonial collection limit (${permissions.limits.maxTestimonials} reviews). Submissions are temporarily paused.`,
+        },
+        { status: 403 },
+      );
     }
 
     // 3. Insert Testimonial

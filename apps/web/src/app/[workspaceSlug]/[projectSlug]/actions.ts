@@ -91,12 +91,14 @@ export async function submitTestimonial(
   const { getWorkspacePermissions } = await import("@my-better-t-app/api/logic/billing");
   const permissions = getWorkspacePermissions({
     plan: p.workspace.plan,
+    subscriptionStatus: p.workspace.subscriptionStatus,
+    trialEndsAt: p.workspace.trialEndsAt,
     testimonialsCount: counts[0]?.count ?? 0,
   });
 
   if (!permissions.canAddTestimonial) {
     throw new Error(
-      `This project has reached its testimonial limit for the current plan. Please contact the owner.`,
+      `This workspace has reached its testimonial collection limit (${permissions.limits.maxTestimonials} reviews). Please notify the page owner.`,
     );
   }
 

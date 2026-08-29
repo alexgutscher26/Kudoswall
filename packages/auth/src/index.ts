@@ -210,7 +210,9 @@ export function createAuth() {
                   name: `${user.name || "My"}'s Org`,
                   ownerId: user.id,
                   stripeCustomerId,
-                  plan: "free" as const,
+                  plan: "plan_1" as const,
+                  subscriptionStatus: "trialing" as const,
+                  trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
                 };
 
                 const newWorkspace = {
@@ -232,8 +234,9 @@ export function createAuth() {
                   dpaAcceptedById: null,
                   retentionEnabled: false,
                   retentionDays: 365,
-                  plan: "free" as const,
-                  subscriptionStatus: null,
+                  plan: "plan_1" as const,
+                  subscriptionStatus: "trialing" as const,
+                  trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
                 };
 
                 await db.transaction(async (tx) => {
