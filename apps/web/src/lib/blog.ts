@@ -188,4 +188,74 @@ export const BLOG_POSTS = [
     slug: "saas-testimonials",
     date: "2026-05-18",
   },
+  {
+    title: "Testimonial Software with Free Plan: The Definitive 2026 Comparison",
+    description:
+      "Looking for testimonial software with a generous free plan? Compare the top tools in 2026—limits, video support, custom domains, and zero hidden costs.",
+    slug: "testimonial-software-with-free-plan",
+    date: "2026-05-20",
+  },
+  {
+    title: "Can You Really Get Unlimited Free Testimonials? (2026 Truth & Breakdown)",
+    description:
+      "Unpacking the myth of unlimited free testimonial tools. Discover how KudosWall offers 50 free testimonials with video without locking your data behind paywalls.",
+    slug: "unlimited-free-testimonials",
+    date: "2026-05-20",
+  },
+  {
+    title: "Senja vs Testimonial.to: Which Social Proof Tool Wins in 2026?",
+    description:
+      "A side-by-side battle between Senja and Testimonial.to covering pricing, video collection, widget styling, speed, and why founders are choosing KudosWall.",
+    slug: "senja-vs-testimonial-to",
+    date: "2026-05-20",
+  },
+  {
+    title: "Top 5 Famewall Alternatives for High-Converting Social Proof in 2026",
+    description:
+      "Evaluating the best Famewall alternatives in 2026. Compare video collection, Wall of Love layouts, page speed, and pricing across the top social proof tools.",
+    slug: "famewall-alternative",
+    date: "2026-05-20",
+  },
+  {
+    title: "Best Trustmary Alternatives for Fast, Video-First Testimonials in 2026",
+    description:
+      "Tired of complex enterprise pricing from Trustmary? Here are the best lightweight, high-performance Trustmary alternatives for 2026.",
+    slug: "trustmary-alternative",
+    date: "2026-05-20",
+  },
+  {
+    title: "How to Embed Testimonials on WordPress (Step-by-Step, No Plugins Required)",
+    description:
+      "Learn how to embed beautiful testimonial widgets, carousels, and Walls of Love onto WordPress using Gutenberg, Elementor, or standard HTML.",
+    slug: "how-to-embed-testimonials-on-wordpress",
+    date: "2026-05-20",
+  },
+  {
+    title: "How to Add Customer Video & Text Testimonials to Shopify in 2026",
+    description:
+      "Boost Shopify store conversions by embedding video reviews, customer feedback, and dynamic Walls of Love on product pages and homepages.",
+    slug: "how-to-embed-testimonials-on-shopify",
+    date: "2026-05-20",
+  },
+  {
+    title: "How to Embed Interactive Testimonial Walls in Notion Sites & Portals",
+    description:
+      "Turn your Notion pages, client portals, and Super/Fruition sites into high-converting portfolios with embedded testimonial widgets.",
+    slug: "how-to-embed-testimonials-on-notion",
+    date: "2026-05-20",
+  },
+  {
+    title: "How to Embed Testimonials on Squarespace (Zero Layout Shift Guide)",
+    description:
+      "Step-by-step guide to embedding responsive video and text testimonials onto Squarespace without slowing down your site or breaking your layout.",
+    slug: "how-to-embed-testimonials-on-squarespace",
+    date: "2026-05-20",
+  },
+  {
+    title: "White-Label Testimonial Software for Agencies: Scale Client Proof Without the Overhead",
+    description:
+      "How modern agencies manage testimonial collection and custom-branded widgets across multiple clients with multi-workspace support and custom domains.",
+    slug: "white-label-testimonial-software",
+    date: "2026-05-20",
+  },
 ] as const;

@@ -32,6 +32,16 @@ import {
   COURSE_TESTIMONIALS_GUIDE,
   TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE,
   SAAS_TESTIMONIALS_GUIDE,
+  TESTIMONIAL_SOFTWARE_FREE_PLAN,
+  UNLIMITED_FREE_TESTIMONIALS,
+  SENJA_VS_TESTIMONIAL_TO,
+  FAMEWALL_ALTERNATIVE,
+  TRUSTMARY_ALTERNATIVE,
+  WORDPRESS_EMBED_GUIDE,
+  SHOPIFY_EMBED_GUIDE,
+  NOTION_EMBED_GUIDE,
+  SQUARESPACE_EMBED_GUIDE,
+  WHITE_LABEL_TESTIMONIAL_SOFTWARE,
 } from "@/lib/comparisons";
 import { BLOG_POSTS } from "@/lib/blog";
 import { Button } from "@my-better-t-app/ui/components/button";
@@ -142,6 +152,26 @@ export default async function BlogPostPage({ params }: { params: Params }) {
     content = TESTIMONIAL_COLLECTION_SOFTWARE_GUIDE.content;
   } else if (slug === "saas-testimonials") {
     content = SAAS_TESTIMONIALS_GUIDE.content;
+  } else if (slug === "testimonial-software-with-free-plan") {
+    content = TESTIMONIAL_SOFTWARE_FREE_PLAN.content;
+  } else if (slug === "unlimited-free-testimonials") {
+    content = UNLIMITED_FREE_TESTIMONIALS.content;
+  } else if (slug === "senja-vs-testimonial-to") {
+    content = SENJA_VS_TESTIMONIAL_TO.content;
+  } else if (slug === "famewall-alternative") {
+    content = FAMEWALL_ALTERNATIVE.content;
+  } else if (slug === "trustmary-alternative") {
+    content = TRUSTMARY_ALTERNATIVE.content;
+  } else if (slug === "how-to-embed-testimonials-on-wordpress") {
+    content = WORDPRESS_EMBED_GUIDE.content;
+  } else if (slug === "how-to-embed-testimonials-on-shopify") {
+    content = SHOPIFY_EMBED_GUIDE.content;
+  } else if (slug === "how-to-embed-testimonials-on-notion") {
+    content = NOTION_EMBED_GUIDE.content;
+  } else if (slug === "how-to-embed-testimonials-on-squarespace") {
+    content = SQUARESPACE_EMBED_GUIDE.content;
+  } else if (slug === "white-label-testimonial-software") {
+    content = WHITE_LABEL_TESTIMONIAL_SOFTWARE.content;
   } else {
     return notFound();
   }
