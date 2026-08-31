@@ -28,10 +28,11 @@ export const BLOG_POSTS = [
     date: "2026-04-18",
   },
   {
-    title: "Best Testimonial Tools for Teachable Creators (2026)",
-    description: "Upgrade your course sales page with the best social proof tools for Teachable.",
+    title: "How to Embed Testimonials on Teachable (Step-by-Step Guide)",
+    description:
+      "Learn how to collect student video and text reviews and embed high-converting testimonial widgets directly into your Teachable course sales pages and lessons.",
     slug: "best-testimonial-tools-teachable",
-    date: "2026-04-18",
+    date: "2026-05-20",
   },
   {
     title: "Best Testimonial Tools for Kajabi Creators",

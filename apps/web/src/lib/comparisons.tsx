@@ -1,28 +1,38 @@
 import React from "react";
 import Link from "next/link";
 
-const H2 = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="text-foreground mt-12 mb-6 text-3xl font-bold tracking-tight">{children}</h2>
+const H2 = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-foreground mt-12 mb-6 text-3xl font-bold tracking-tight ${className || ""}`}>
+    {children}
+  </h2>
 );
 
-const H3 = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="text-foreground mt-8 mb-4 text-2xl font-bold tracking-tight">{children}</h3>
+const H3 = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <h3 className={`text-foreground mt-8 mb-4 text-2xl font-bold tracking-tight ${className || ""}`}>
+    {children}
+  </h3>
 );
 
-const H4 = ({ children }: { children: React.ReactNode }) => (
-  <h4 className="text-foreground mt-6 mb-3 text-xl font-bold tracking-tight">{children}</h4>
+const H4 = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <h4 className={`text-foreground mt-6 mb-3 text-xl font-bold tracking-tight ${className || ""}`}>
+    {children}
+  </h4>
 );
 
-const P = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-muted-foreground mb-6 text-lg leading-relaxed">{children}</p>
+const P = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-muted-foreground mb-6 text-lg leading-relaxed ${className || ""}`}>
+    {children}
+  </p>
 );
 
-const UL = ({ children }: { children: React.ReactNode }) => (
-  <ul className="text-muted-foreground mb-6 list-disc space-y-2 pl-6">{children}</ul>
+const UL = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <ul className={`text-muted-foreground mb-6 list-disc space-y-2 pl-6 ${className || ""}`}>
+    {children}
+  </ul>
 );
 
-const LI = ({ children }: { children: React.ReactNode }) => (
-  <li className="text-lg leading-relaxed">{children}</li>
+const LI = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <li className={`text-lg leading-relaxed ${className || ""}`}>{children}</li>
 );
 
 export const SENJA_COMPARISON = {
@@ -352,21 +362,183 @@ export const TEACHABLE_BEST_TOOLS = {
   content: (
     <>
       <section className="mb-12">
-        <H2>Best Testimonial Tools for Teachable Creators in 2026</H2>
+        <H2>How to Embed Testimonials on Teachable to Double Course Sales</H2>
         <P>
-          Teachable is a power-house for courses, but its native "Success Stories" block is
-          extremely limited. To build real authority, you need a tool that can display students'
-          photos, verified names, and social links in a clean, modern grid.
+          Selling an online course requires overcoming a major hurdle: student skepticism.
+          Prospective learners want proof that your curriculum actually delivers results, unlocks
+          career advancement, or teaches tangible skills before they commit their hard-earned money.
         </P>
-        <H3>1. KudosWall (The Performance Leader)</H3>
         <P>
-          KudosWall is designed to be the fastest loading widget for long-form sales pages. With
-          absolute control over typography, it blends perfectly into your Teachable theme.
+          While Teachable comes with built-in page building blocks, its default social proof
+          elements are rigid text-only cards with no verification, no video support, and limited
+          styling control. Embedding dynamic, verified text and video reviews directly into your
+          sales pages and lesson graduation checkpoints bridges that trust gap immediately.
         </P>
-        <H3>2. Senja (The Importer)</H3>
         <P>
-          Great if you already have 100+ reviews on Google or Trustpilot that you want to bring into
-          Teachable.
+          In this guide, you will learn the exact requirements, code snippets, and placement
+          strategies to embed interactive testimonial widgets onto any Teachable school page without
+          slowing down your page load speeds.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Where to Place Testimonials on Your Teachable School</H2>
+        <P>
+          Strategic placement makes the difference between passive browsing and active checkout.
+          Focus on these three key touchpoints:
+        </P>
+        <UL>
+          <LI>
+            <strong>Directly Below the Curriculum Outline:</strong> When prospective students finish
+            reading course modules, their next thought is, "Can someone like me actually finish
+            this?" Placing a masonry wall of student transformations here answers that question
+            instantly.
+          </LI>
+          <LI>
+            <strong>Adjacent to the Pricing Table:</strong> Reduce cart abandonment by placing a
+            compact slider or badge widget right next to your payment tiers.
+          </LI>
+          <LI>
+            <strong>Inside the Final Course Lesson (Automated Collection):</strong> Place an
+            interactive testimonial collection form directly inside your graduation lesson so
+            students can record video feedback while their excitement is at its peak.
+          </LI>
+        </UL>
+        <div className="bg-muted/50 my-6 rounded-xl border p-6">
+          <P className="mb-2 font-semibold">
+            Want to collect and embed student reviews without complex setups?
+          </P>
+          <P className="text-muted-foreground text-sm">
+            <Link href="/embed-testimonials" className="text-primary font-medium underline">
+              Try KudosWall's lightweight embed widgets
+            </Link>{" "}
+            to generate responsive video and text social proof walls for your Teachable site in
+            minutes.
+          </P>
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step-by-Step: Embedding Testimonial Widgets in Teachable 2.0 Page Builder</H2>
+        <P>
+          Teachable's Page Builder supports Custom HTML blocks across all course sales pages,
+          homepage templates, and custom landing pages. Follow these implementation steps:
+        </P>
+        <UL>
+          <LI>
+            <strong>Step 1: Access Your Teachable School Admin:</strong> Log in to your Teachable
+            account, navigate to <em>Courses</em>, select your target course, and click{" "}
+            <strong>Pages</strong>.
+          </LI>
+          <LI>
+            <strong>Step 2: Open the Page Editor:</strong> Click <strong>Edit</strong> on your Sales
+            Page or Course Landing Page to launch the visual page builder.
+          </LI>
+          <LI>
+            <strong>Step 3: Add a Custom HTML Block:</strong> In the left sidebar, click{" "}
+            <strong>Add Section</strong>, scroll down to the developer tools area, and select{" "}
+            <strong>Custom HTML</strong>.
+          </LI>
+          <LI>
+            <strong>Step 4: Paste Your Embed Script:</strong> Open the Custom HTML block editor on
+            the left panel and paste your embed code snippet:
+          </LI>
+        </UL>
+
+        <div className="bg-muted my-6 rounded-xl border p-4 font-mono text-sm">
+          <code>
+            {`<!-- Testimonial Wall Embed Container -->
+<div class="student-social-proof-wrapper" style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 0;">
+  <div id="kudoswall-embed-container" data-wall-id="your-wall-slug"></div>
+  <script src="https://kudoswall.org/widget.js" async></script>
+</div>`}
+          </code>
+        </div>
+
+        <UL>
+          <LI>
+            <strong>Step 5: Preview and Publish:</strong> Click <strong>Preview</strong> in the top
+            right corner to verify that the widget renders cleanly across mobile and desktop
+            viewport sizes, then click <strong>Publish</strong>.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>How to Embed Testimonial Collection Inside a Teachable Lesson</H2>
+        <P>
+          The highest response rates come from asking students for feedback right after they
+          complete your course material. You can embed a collection widget or direct link inside
+          Teachable's curriculum builder:
+        </P>
+        <UL>
+          <LI>
+            Navigate to <strong>Curriculum</strong> in your course admin.
+          </LI>
+          <LI>
+            Add a new lecture named <em>"🎉 Graduation & Next Steps"</em> or{" "}
+            <em>"Share Your Feedback & Get Certified"</em>.
+          </LI>
+          <LI>
+            Add a <strong>Custom Code</strong> block or an <strong>Add Video/Text</strong> block
+            with your unique collection link button.
+          </LI>
+          <LI>
+            When students reach the end of your course, they can record a 60-second video or type
+            their review without leaving their browser.
+          </LI>
+        </UL>
+      </section>
+
+      <section className="mb-12">
+        <H2>How to Do This with KudosWall</H2>
+        <P>
+          KudosWall is built to give course creators a streamlined system to collect, manage, and
+          embed student proof without custom development or monthly subscriber lock-in.
+        </P>
+        <UL>
+          <LI>
+            <strong>1. Generate Your Shareable Link:</strong> Create a workspace and grab your
+            branded collection link (e.g., <code>kudoswall.org/collect/your-course</code>).
+          </LI>
+          <LI>
+            <strong>2. Customize Video & Text Prompts:</strong> Prompt students with targeted
+            questions like "What was your biggest transformation after taking this course?"
+          </LI>
+          <LI>
+            <strong>3. Approve Student Testimonials:</strong> Review incoming video and text
+            submissions in your dashboard, approve the best reviews, and tag them by course tier.
+          </LI>
+          <LI>
+            <strong>4. Copy the Lightweight Script:</strong> Select your preferred layout (Grid,
+            Carousel, or Wall of Love) and paste the 1-line code into Teachable.
+          </LI>
+        </UL>
+        <P>
+          <strong>Honest Limits:</strong> KudosWall's free plan provides up to 50 text and video
+          testimonials forever. If you need multi-course workspace segregation, custom domain CNAME
+          routing, or removal of the small footer badge, you can upgrade to a paid creator plan.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Frequently Asked Questions</H2>
+        <H3>Will embedding third-party testimonial widgets slow down my Teachable page?</H3>
+        <P>
+          No, provided you use an asynchronous (<code>async</code>) script embed. Modern widgets
+          load their assets in parallel without blocking Teachable's primary HTML rendering or
+          payment checkout scripts.
+        </P>
+        <H3>Can students record video testimonials on their phones?</H3>
+        <P>
+          Yes. Responsive collection pages allow students to record native mobile video directly
+          through their mobile browser camera without needing to download a separate mobile app.
+        </P>
+        <H3>Do I need Teachable Pro to add Custom HTML blocks?</H3>
+        <P>
+          Teachable allows Custom HTML blocks in the Page Builder across all standard paid plans. If
+          you are on a legacy free tier without custom code access, you can still link directly to
+          your dedicated collection and wall page via standard button blocks.
         </P>
       </section>
     </>
@@ -1366,69 +1538,159 @@ export const CARRD_EMBED_GUIDE = {
   content: (
     <>
       <section className="mb-12">
-        <H2>How to Embed Testimonials on Carrd in 5 Minutes</H2>
+        <H2>How to Embed Testimonials on Carrd in 5 Minutes (Step-by-Step Guide)</H2>
         <P>
-          Carrd is the gold standard for minimalist, one-page websites. Whether you're building a
-          personal brand, a landing page for a digital product, or a simple signup form, adding
-          social proof is the fastest way to increase your conversion rate.
+          Carrd is the gold standard for minimalist, ultra-fast one-page websites. Whether you are
+          launching a newsletter, selling a digital product, or showcasing a freelance portfolio,
+          visitors make up their minds in seconds.
         </P>
         <P>
-          In this guide, we'll show you exactly how to embed a beautiful "Wall of Love" on your
-          Carrd site using KudosWall.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>Step 1: Create Your KudosWall Widget</H3>
-        <P>
-          First, sign up for KudosWall (the free plan gives you 50 testimonials + video). Create a
-          new "Wall" and start collecting testimonials using your unique collection link. Once you
-          have a few reviews, head to the "Widgets" tab.
+          On a single-page site, every pixel matters. Adding authentic customer reviews, video
+          shoutouts, and client logos reduces risk and reassures hesitant prospects. However,
+          because Carrd is intentionally lightweight, you must ensure your embedded social proof
+          does not bloat your page weight or disrupt your responsive container flow.
         </P>
         <P>
-          Customize your widget's colors and fonts to match your Carrd site. Since Carrd is often
-          minimalist, we recommend using our <strong>Grid</strong> or <strong>Masonry</strong>
-          layouts with a subtle background.
+          This guide covers the exact prerequisites, embed configurations (Inline vs. Hidden), and
+          styling adjustments needed to display responsive testimonial walls seamlessly on any Carrd
+          site.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>Step 2: Copy Your Embed Code</H3>
-        <P>
-          Once your widget looks perfect, click the "Embed" button. You'll see a single line of
-          JavaScript code. Copy this to your clipboard.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>Step 3: Add an "Embed" Element in Carrd</H3>
-        <P>Open your Carrd editor and follow these steps:</P>
+        <H2>Prerequisites for Adding Custom Code to Carrd</H2>
+        <P>Before adding custom embed widgets, check your Carrd site setup:</P>
         <UL>
           <LI>
-            Click the <strong>+ (Add)</strong> button in the sidebar.
+            <strong>Carrd Pro Plan:</strong> Carrd requires a Pro Standard plan (or higher) to use
+            the <strong>Embed</strong> element. The entry-level Pro plan starts at just $19/year.
           </LI>
           <LI>
-            Select <strong>Embed</strong> from the list of elements.
+            <strong>Container Width Planning:</strong> Decide whether your testimonials should live
+            inside a standard <em>Container</em> (boxed layout) or span full-width across the
+            viewport.
           </LI>
           <LI>
-            In the settings for the Embed element, set the "Style" to <strong>Hidden</strong> (this
-            is usually best for JS scripts).
+            <strong>Embed Format:</strong> Choose between an asynchronous JavaScript tag
+            (recommended for dynamic masonry layouts) or an isolated <code>&lt;iframe&gt;</code>{" "}
+            embed.
+          </LI>
+        </UL>
+        <div className="bg-muted/50 my-6 rounded-xl border p-6">
+          <P className="mb-2 font-semibold">Ready to build your social proof widget?</P>
+          <P className="text-muted-foreground text-sm">
+            <Link href="/free" className="text-primary font-medium underline">
+              Create a free KudosWall account
+            </Link>{" "}
+            to collect up to 50 text and video testimonials and generate your responsive embed code
+            in seconds.
+          </P>
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step-by-Step: Adding the Embed Element in Carrd</H2>
+        <P>Follow these verified steps inside the Carrd site editor:</P>
+        <UL>
+          <LI>
+            <strong>Step 1: Open Your Site in Carrd Editor:</strong> Go to your Carrd dashboard and
+            click to edit your target site.
           </LI>
           <LI>
-            Paste your KudosWall embed code into the <strong>Code</strong> box.
+            <strong>Step 2: Add an Embed Element:</strong> Click the{" "}
+            <strong>+ (Add Element)</strong> icon in the top toolbar and select{" "}
+            <strong>Embed</strong>.
           </LI>
           <LI>
-            Position the Embed element where you want the testimonials to appear on your page.
+            <strong>Step 3: Set Embed Type & Style:</strong>
+            <ul className="list-circle mt-2 space-y-1 pl-6">
+              <li>
+                <strong>Type:</strong> Select <strong>Code</strong>.
+              </li>
+              <li>
+                <strong>Style:</strong> Select <strong>Inline</strong>. (Do not select{" "}
+                <em>Hidden</em>; inline is required so Carrd reserves document flow for the rendered
+                widget).
+              </li>
+            </ul>
+          </LI>
+          <LI>
+            <strong>Step 4: Paste Your Embed Script:</strong> Paste your snippet into the{" "}
+            <strong>Code</strong> text area:
+          </LI>
+        </UL>
+
+        <div className="bg-muted my-6 rounded-xl border p-4 font-mono text-sm">
+          <code>
+            {`<!-- KudosWall Social Proof Wall -->
+<div style="width: 100%; min-height: 200px;">
+  <div id="kudoswall-embed-container" data-wall-id="your-wall-slug"></div>
+  <script src="https://kudoswall.org/widget.js" async></script>
+</div>`}
+          </code>
+        </div>
+
+        <UL>
+          <LI>
+            <strong>Step 5: Position & Adjust Spacing:</strong> Drag the Embed element into the
+            desired section (e.g., right above your CTA button). Adjust Carrd's container margins to
+            ensure comfortable whitespace.
+          </LI>
+          <LI>
+            <strong>Step 6: Publish & Test Live:</strong> Click the save/publish icon in Carrd.
+            (Note: Carrd does not execute custom scripts inside the canvas editor; you must preview
+            or publish the live URL to view the interactive widget).
           </LI>
         </UL>
       </section>
 
       <section className="mb-12">
-        <H3>Why KudosWall is Perfect for Carrd</H3>
+        <H2>How to Do This with KudosWall</H2>
         <P>
-          Carrd users value speed and simplicity. KudosWall's widgets are edge-optimized and
-          designed to load instantly without causing layout shifts. Plus, with our generous free
-          tier, you don't have to worry about a monthly subscription for your simple one-page site.
+          KudosWall is built from the ground up to pair effortlessly with modern lightweight website
+          builders like Carrd.
+        </P>
+        <UL>
+          <LI>
+            <strong>1. Collect in One Place:</strong> Send clients your custom collection link or QR
+            code to gather video, text, and 5-star ratings without requiring them to create an
+            account.
+          </LI>
+          <LI>
+            <strong>2. Choose Minimalist Styling:</strong> Match your Carrd site's exact aesthetic
+            by toggling dark/light modes, rounded corner radiuses, and border styles.
+          </LI>
+          <LI>
+            <strong>3. One-Click Embed:</strong> Copy your optimized embed tag and paste it into
+            Carrd's Inline Embed box.
+          </LI>
+        </UL>
+        <P>
+          <strong>Honest Limits:</strong> KudosWall provides the most generous free tier for indie
+          makers, offering 50 testimonials with full video support at zero cost. For high-volume
+          teams requiring unlimited walls or custom domain CNAME mappings, affordable paid tiers are
+          available.
+        </P>
+      </section>
+
+      <section className="mb-12">
+        <H2>Frequently Asked Questions</H2>
+        <H3>Why is my testimonial widget not displaying inside the Carrd editor?</H3>
+        <P>
+          For security and stability reasons, Carrd disables JavaScript execution inside the editing
+          canvas. Once you click <strong>Publish Changes</strong> and open your live Carrd domain,
+          the script will execute and render your social proof.
+        </P>
+        <H3>Should I choose Inline or Hidden style for my Carrd embed?</H3>
+        <P>
+          Always choose <strong>Inline</strong> for visual testimonial walls and review grids. The{" "}
+          <em>Hidden</em> style is intended for background analytics or tracking pixels (like Google
+          Analytics or Meta Pixel).
+        </P>
+        <H3>Will video testimonials play directly on mobile Carrd sites?</H3>
+        <P>
+          Yes. Embedded video reviews stream with native inline video controls, ensuring smooth
+          playback on iOS Safari and Android Chrome without full-screen forced redirects.
         </P>
       </section>
     </>
@@ -1776,64 +2038,154 @@ export const FRAMER_EMBED_GUIDE = {
   content: (
     <>
       <section className="mb-12">
-        <H2>How to Embed Testimonials on Framer in 2026</H2>
+        <H2>How to Embed Testimonials on Framer Without Breaking Your Layout</H2>
         <P>
-          Framer has become the go-to design tool for high-end landing pages and SaaS websites. Its
-          ability to create custom, fluid animations and layouts is unmatched. However, to truly
-          convert visitors into customers, your beautiful Framer site needs verified social proof.
+          Framer has rapidly emerged as the design tool of choice for modern startups, creative
+          agencies, and SaaS companies. Its reactive canvas, spring animations, and native layout
+          engine allow teams to publish visually stunning landing pages in hours.
         </P>
         <P>
-          In this guide, we'll show you how to embed a high-fidelity KudosWall testimonial widget on
-          your Framer site in just a few clicks, without slowing down your site or breaking your
-          design.
-        </P>
-      </section>
-
-      <section className="mb-12">
-        <H3>Step 1: Get Your KudosWall Embed Code</H3>
-        <P>
-          First, log in to your KudosWall dashboard. Navigate to the Widgets section and choose the
-          wall you'd like to display. Customize the design—select from Grid, Masonry, or Carousel
-          layouts and match the colors to your Framer project's palette.
+          However, aesthetic excellence alone rarely converts skeptical traffic. To turn page visits
+          into paying customers, your Framer page needs unshakeable social proof: real client
+          reviews, authentic video testimonials, and verifiable star ratings.
         </P>
         <P>
-          Once it looks perfect, click Embed code and copy the single line of JavaScript provided.
+          The challenge with Framer is avoiding layout breaks or heavy script execution that
+          degrades your smooth scroll animations. This guide walks you through the exact properties,
+          sizing settings, and responsive adjustments needed to embed testimonial widgets smoothly
+          on Framer.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>Step 2: Add an Embed Component in Framer</H3>
-        <P>Open your project in Framer and follow these steps:</P>
+        <H2>Understanding Framer's Native Embed Component</H2>
+        <P>
+          Framer provides a built-in <strong>Embed</strong> utility designed to render custom HTML,
+          third-party scripts, and iframes directly inside your layer hierarchy.
+        </P>
         <UL>
-          <LI>Click the Plus (+) button in the top left to open the Insert menu.</LI>
           <LI>
-            Search for Embed and drag it onto your canvas where you want the testimonials to appear.
+            <strong>HTML Mode vs. URL Mode:</strong> Always select <strong>HTML</strong> when using
+            script-based social proof widgets. URL mode loads external sites inside a standard
+            iframe, which can introduce unwanted scrollbars or layout clipping.
           </LI>
-          <LI>In the properties panel on the right, make sure the "Type" is set to HTML.</LI>
-          <LI>Paste your KudosWall embed code into the HTML box.</LI>
+          <LI>
+            <strong>Responsive Sizing:</strong> Set your Embed component width to{" "}
+            <strong>Fill (100%)</strong> and position it inside a vertical stack (Flex layout) so it
+            expands and contracts cleanly across desktop, tablet, and mobile breakpoints.
+          </LI>
+        </UL>
+        <div className="bg-muted/50 my-6 rounded-xl border p-6">
+          <P className="mb-2 font-semibold">Need lightweight widgets for your Framer site?</P>
+          <P className="text-muted-foreground text-sm">
+            <Link href="/embed-testimonials" className="text-primary font-medium underline">
+              Explore KudosWall's zero-dependency embed widgets
+            </Link>{" "}
+            built with edge-optimized scripts that preserve your Framer site's 60fps animations.
+          </P>
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <H2>Step-by-Step: Adding Testimonials to Your Framer Canvas</H2>
+        <P>Follow these practical steps to integrate your testimonial wall into Framer:</P>
+        <UL>
+          <LI>
+            <strong>Step 1: Insert the Embed Component:</strong> In the top navigation bar of
+            Framer, click <strong>Insert</strong> (or press <code>I</code>), expand the{" "}
+            <strong>Utility</strong> section, and drag <strong>Embed</strong> onto your canvas.
+          </LI>
+          <LI>
+            <strong>Step 2: Configure Embed Properties:</strong> With the Embed layer selected, look
+            at the right-side properties panel:
+            <ul className="list-circle mt-2 space-y-1 pl-6">
+              <li>
+                Set <strong>Type</strong> to <code>HTML</code>.
+              </li>
+              <li>
+                Set <strong>Width</strong> to <code>Fill (100%)</code>.
+              </li>
+              <li>
+                Set <strong>Height</strong> to <code>Fit Content</code> (or a fixed height like{" "}
+                <code>600px</code> if implementing an internal scrollable gallery).
+              </li>
+            </ul>
+          </LI>
+          <LI>
+            <strong>Step 3: Paste Your Embed Script:</strong> Paste your asynchronous script tag
+            into the HTML code box:
+          </LI>
+        </UL>
+
+        <div className="bg-muted my-6 rounded-xl border p-4 font-mono text-sm">
+          <code>
+            {`<!-- KudosWall Social Proof Wall for Framer -->
+<div style="width: 100%; min-height: 350px;">
+  <div id="kudoswall-embed-container" data-wall-id="your-wall-slug"></div>
+  <script src="https://kudoswall.org/widget.js" async></script>
+</div>`}
+          </code>
+        </div>
+
+        <UL>
+          <LI>
+            <strong>Step 4: Check Breakpoint Inheritances:</strong> Switch to Tablet and Mobile
+            views in Framer to ensure your container margins provide at least 16px of horizontal
+            padding on smaller screens.
+          </LI>
+          <LI>
+            <strong>Step 5: Publish Changes:</strong> Click <strong>Publish</strong> in the top
+            right to deploy your updated Framer site.
+          </LI>
         </UL>
       </section>
 
       <section className="mb-12">
-        <H3>Step 3: Styling and Responsive Design</H3>
+        <H2>How to Do This with KudosWall</H2>
         <P>
-          Framer's Embed component is fully responsive. You can resize the embed box directly on the
-          canvas to fit your layout. KudosWall's widgets are designed to be fluid, so they will
-          automatically adjust to the width of the Framer container.
+          KudosWall provides high-converting social proof widgets designed specifically to match the
+          modern aesthetic standard of Framer designers.
         </P>
+        <UL>
+          <LI>
+            <strong>1. Collect Rich Testimonials:</strong> Share a single collection link to gather
+            high-definition video reviews, star ratings, and verified client headshots.
+          </LI>
+          <LI>
+            <strong>2. Curate & Style:</strong> Select your preferred layout—Masonry Wall, Infinite
+            Marquee, or 3D Card Carousel—and customize dark/light accent colors to match your Framer
+            tokens.
+          </LI>
+          <LI>
+            <strong>3. Embed with One Line:</strong> Copy the auto-generated code and paste it into
+            Framer's Embed component.
+          </LI>
+        </UL>
         <P>
-          Pro Tip: Set the Embed component's width to "Fill" and the height to "Auto" (or a fixed
-          height if you want a scrollable masonry grid) to ensure it looks great on all devices.
+          <strong>Honest Limits:</strong> KudosWall offers 50 free testimonials with full video
+          support forever. Premium plans unlock agency workspace segregation, white-label branding
+          removal, and custom domain routing.
         </P>
       </section>
 
       <section className="mb-12">
-        <H3>Why KudosWall + Framer is a Winning Combo</H3>
+        <H2>Frequently Asked Questions</H2>
+        <H3>Will third-party widgets interfere with Framer's built-in scroll animations?</H3>
         <P>
-          Framer users care deeply about performance and aesthetics. KudosWall widgets are
-          edge-optimized, meaning they load near-instantly and won't hurt your Framer site's
-          Lighthouse scores. Plus, our high-fidelity text and video testimonials match the premium
-          feel of a Framer-designed site.
+          No. Because KudosWall widgets utilize an asynchronous script loader and lightweight shadow
+          DOM encapsulation, your browser's compositor thread remains unblocked, preserving smooth
+          Framer spring and scroll physics.
+        </P>
+        <H3>Can I match my Framer site's custom fonts in the testimonial widget?</H3>
+        <P>
+          Yes. KudosWall widgets can inherit your parent site's font-family declaration (such as
+          Inter, Geist, or custom web fonts) or apply custom typography directly from the widget
+          settings.
+        </P>
+        <H3>How do video testimonials perform on mobile devices inside Framer?</H3>
+        <P>
+          Video testimonials are compressed and served via global CDN edges with adaptive bitrate
+          streaming, ensuring instant video playback on mobile devices without buffering delays.
         </P>
       </section>
     </>
@@ -3738,10 +4090,15 @@ export const TESTIMONIAL_SOFTWARE_FREE_PLAN = {
     <>
       <section className="mb-12">
         <P>
-          Finding reliable <strong>testimonial software with a free plan</strong> is one of the most frustrating searches for founders, creators, and marketers in 2026. Almost every tool advertises a "Free Plan," but once you sign up, you hit painful restrictions: 2 video limits, ugly watermarks that redirect to their site, or hard paywalls within 7 days.
+          Finding reliable <strong>testimonial software with a free plan</strong> is one of the most
+          frustrating searches for founders, creators, and marketers in 2026. Almost every tool
+          advertises a "Free Plan," but once you sign up, you hit painful restrictions: 2 video
+          limits, ugly watermarks that redirect to their site, or hard paywalls within 7 days.
         </P>
         <P>
-          In this guide, we break down what the top testimonial software tools actually offer on their free tiers, what hidden restrictions you need to watch out for, and how KudosWall changed the game with 50 free testimonials and native video support.
+          In this guide, we break down what the top testimonial software tools actually offer on
+          their free tiers, what hidden restrictions you need to watch out for, and how KudosWall
+          changed the game with 50 free testimonials and native video support.
         </P>
       </section>
 
@@ -3760,7 +4117,7 @@ export const TESTIMONIAL_SOFTWARE_FREE_PLAN = {
             </thead>
             <tbody className="divide-border divide-y">
               <tr className="bg-primary/5 font-medium">
-                <td className="p-4 font-bold text-primary">KudosWall</td>
+                <td className="text-primary p-4 font-bold">KudosWall</td>
                 <td className="p-4">50 Testimonials</td>
                 <td className="p-4">✅ Yes (Full HD Video)</td>
                 <td className="p-4">✅ Unlimited Widgets</td>
@@ -3803,16 +4160,22 @@ export const TESTIMONIAL_SOFTWARE_FREE_PLAN = {
         <H2>What to Look for in a Free Testimonial Tool</H2>
         <UL>
           <LI>
-            <strong>Native Video Recording:</strong> Text reviews are good, but video testimonials convert at 2x to 3x higher rates. A free plan that blocks video recording is severely handicapped.
+            <strong>Native Video Recording:</strong> Text reviews are good, but video testimonials
+            convert at 2x to 3x higher rates. A free plan that blocks video recording is severely
+            handicapped.
           </LI>
           <LI>
-            <strong>Widget Customization:</strong> Can you customize the fonts, border radius, and dark/light themes to seamlessly blend with your website?
+            <strong>Widget Customization:</strong> Can you customize the fonts, border radius, and
+            dark/light themes to seamlessly blend with your website?
           </LI>
           <LI>
-            <strong>Page Speed Impact:</strong> Many free testimonial widgets inject bloated tracking scripts that drop your Google Lighthouse and Core Web Vitals scores. Look for lightweight, async-loaded widgets.
+            <strong>Page Speed Impact:</strong> Many free testimonial widgets inject bloated
+            tracking scripts that drop your Google Lighthouse and Core Web Vitals scores. Look for
+            lightweight, async-loaded widgets.
           </LI>
           <LI>
-            <strong>Data Ownership & Export:</strong> You must be able to export your testimonials as CSV or JSON anytime without being held hostage behind an upgrade screen.
+            <strong>Data Ownership & Export:</strong> You must be able to export your testimonials
+            as CSV or JSON anytime without being held hostage behind an upgrade screen.
           </LI>
         </UL>
       </section>
@@ -3820,10 +4183,13 @@ export const TESTIMONIAL_SOFTWARE_FREE_PLAN = {
       <section className="mb-12">
         <H2>Why KudosWall Offers the Best Free Plan</H2>
         <P>
-          At KudosWall, we believe early-stage founders, freelancers, and indie builders shouldn't have to pay $29-$79/month just to display their first 20 customer reviews.
+          At KudosWall, we believe early-stage founders, freelancers, and indie builders shouldn't
+          have to pay $29-$79/month just to display their first 20 customer reviews.
         </P>
         <P>
-          Our free tier gives you 50 approved testimonials, native in-browser video capture, unlimited collection links, and embeddable Walls of Love, Carousels, and Badges for zero dollars forever.
+          Our free tier gives you 50 approved testimonials, native in-browser video capture,
+          unlimited collection links, and embeddable Walls of Love, Carousels, and Badges for zero
+          dollars forever.
         </P>
       </section>
     </>
@@ -3835,30 +4201,41 @@ export const UNLIMITED_FREE_TESTIMONIALS = {
     <>
       <section className="mb-12">
         <P>
-          If you've searched online for <strong>"unlimited free testimonials"</strong>, you've probably encountered clickbait articles that either recommend open-source tools requiring complex AWS servers, or SaaS free plans that secretly cap your account after 10 submissions.
+          If you've searched online for <strong>"unlimited free testimonials"</strong>, you've
+          probably encountered clickbait articles that either recommend open-source tools requiring
+          complex AWS servers, or SaaS free plans that secretly cap your account after 10
+          submissions.
         </P>
         <P>
-          Let's unpack the reality of testimonial software hosting, why true "unlimited" free tools rarely exist, and how KudosWall provides the most sustainable, generous free model on the web.
+          Let's unpack the reality of testimonial software hosting, why true "unlimited" free tools
+          rarely exist, and how KudosWall provides the most sustainable, generous free model on the
+          web.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>The Economics of Testimonial Software</H2>
         <P>
-          Hosting text is virtually free. However, hosting high-definition customer video testimonials, transcoding them across mobile viewports, and serving millions of global widget impressions requires real CDN and storage infrastructure.
+          Hosting text is virtually free. However, hosting high-definition customer video
+          testimonials, transcoding them across mobile viewports, and serving millions of global
+          widget impressions requires real CDN and storage infrastructure.
         </P>
         <P>
-          When a tool claims "100% Unlimited Free Forever", they typically monetize through one of three deceptive tactics:
+          When a tool claims "100% Unlimited Free Forever", they typically monetize through one of
+          three deceptive tactics:
         </P>
         <UL>
           <LI>
-            <strong>Intrusive Competitor Ads:</strong> Injecting external affiliate links or third-party banners directly into your website's embedded widget.
+            <strong>Intrusive Competitor Ads:</strong> Injecting external affiliate links or
+            third-party banners directly into your website's embedded widget.
           </LI>
           <LI>
-            <strong>Strict Bandwidth Throttling:</strong> Freezing your widget after 1,000 monthly pageviews, causing broken image icons on your landing page.
+            <strong>Strict Bandwidth Throttling:</strong> Freezing your widget after 1,000 monthly
+            pageviews, causing broken image icons on your landing page.
           </LI>
           <LI>
-            <strong>Data Lock-in:</strong> Preventing you from downloading raw video files or customer email addresses unless you upgrade to an enterprise tier.
+            <strong>Data Lock-in:</strong> Preventing you from downloading raw video files or
+            customer email addresses unless you upgrade to an enterprise tier.
           </LI>
         </UL>
       </section>
@@ -3866,14 +4243,26 @@ export const UNLIMITED_FREE_TESTIMONIALS = {
       <section className="mb-12">
         <H2>How KudosWall Solves This Sustainably</H2>
         <P>
-          Instead of misleading promises, KudosWall offers a transparent, generous free tier: <strong>50 testimonials with full video and text support</strong>. For 95% of creators, freelancers, and early-stage SaaS companies, 50 glowing reviews is more than enough social proof to build massive trust and hit $10k-$50k/month in revenue.
+          Instead of misleading promises, KudosWall offers a transparent, generous free tier:{" "}
+          <strong>50 testimonials with full video and text support</strong>. For 95% of creators,
+          freelancers, and early-stage SaaS companies, 50 glowing reviews is more than enough social
+          proof to build massive trust and hit $10k-$50k/month in revenue.
         </P>
         <div className="bg-card border-border my-8 rounded-2xl border p-6">
           <H3>Pro Tip: How to Maximize 50 Free Testimonials</H3>
           <UL>
-            <LI><strong>Tag & Curate:</strong> Archive outdated or generic 1-sentence reviews and keep only your top 50 high-impact, metrics-driven stories active.</LI>
-            <LI><strong>Embed by Tag:</strong> Filter widgets dynamically (e.g. tag `saas-feature` vs `pricing`) to show the most relevant testimonials per page.</LI>
-            <LI><strong>Highlight Video:</strong> Pin 3-5 authentic customer video clips to the top of your Wall of Love for maximum visual punch.</LI>
+            <LI>
+              <strong>Tag & Curate:</strong> Archive outdated or generic 1-sentence reviews and keep
+              only your top 50 high-impact, metrics-driven stories active.
+            </LI>
+            <LI>
+              <strong>Embed by Tag:</strong> Filter widgets dynamically (e.g. tag `saas-feature` vs
+              `pricing`) to show the most relevant testimonials per page.
+            </LI>
+            <LI>
+              <strong>Highlight Video:</strong> Pin 3-5 authentic customer video clips to the top of
+              your Wall of Love for maximum visual punch.
+            </LI>
           </UL>
         </div>
       </section>
@@ -3886,10 +4275,15 @@ export const SENJA_VS_TESTIMONIAL_TO = {
     <>
       <section className="mb-12">
         <P>
-          When it comes to social proof platforms, <strong>Senja</strong> and <strong>Testimonial.to</strong> are two of the most widely recognized names in the market. Both allow you to collect video and text testimonials, but they take very different approaches to design, pricing, and workflows.
+          When it comes to social proof platforms, <strong>Senja</strong> and{" "}
+          <strong>Testimonial.to</strong> are two of the most widely recognized names in the market.
+          Both allow you to collect video and text testimonials, but they take very different
+          approaches to design, pricing, and workflows.
         </P>
         <P>
-          In this in-depth 2026 comparison, we evaluate their feature sets, user experience, collection forms, embed options, and pricing to help you choose the best platform for your business.
+          In this in-depth 2026 comparison, we evaluate their feature sets, user experience,
+          collection forms, embed options, and pricing to help you choose the best platform for your
+          business.
         </P>
       </section>
 
@@ -3910,13 +4304,13 @@ export const SENJA_VS_TESTIMONIAL_TO = {
                 <td className="p-4 font-semibold">Free Tier</td>
                 <td className="p-4">15 text testimonials (No video)</td>
                 <td className="p-4">2 text + 2 video</td>
-                <td className="p-4 font-bold text-primary">50 testimonials (Video included)</td>
+                <td className="text-primary p-4 font-bold">50 testimonials (Video included)</td>
               </tr>
               <tr>
                 <td className="p-4 font-semibold">Starting Paid Plan</td>
                 <td className="p-4">$19 / month</td>
                 <td className="p-4">$25 / month</td>
-                <td className="p-4 font-bold text-primary">$9 / month</td>
+                <td className="text-primary p-4 font-bold">$9 / month</td>
               </tr>
               <tr>
                 <td className="p-4 font-semibold">Social Media Imports</td>
@@ -3928,13 +4322,13 @@ export const SENJA_VS_TESTIMONIAL_TO = {
                 <td className="p-4 font-semibold">Widget Performance</td>
                 <td className="p-4">Fast (~80kb)</td>
                 <td className="p-4">Moderate (~140kb iframe)</td>
-                <td className="p-4 font-bold text-primary">Blazing Fast (Edge Cached &lt;25kb)</td>
+                <td className="text-primary p-4 font-bold">Blazing Fast (Edge Cached &lt;25kb)</td>
               </tr>
               <tr>
                 <td className="p-4 font-semibold">Multi-Workspace Support</td>
                 <td className="p-4">Add-on per project</td>
                 <td className="p-4">Higher tier required</td>
-                <td className="p-4 font-bold text-primary">Built-in Multi-Tenant</td>
+                <td className="text-primary p-4 font-bold">Built-in Multi-Tenant</td>
               </tr>
             </tbody>
           </table>
@@ -3944,21 +4338,27 @@ export const SENJA_VS_TESTIMONIAL_TO = {
       <section className="mb-12">
         <H2>Where Senja Wins</H2>
         <P>
-          Senja excels in social media testimonial imports and visual asset creation. If you regularly clip tweets, LinkedIn comments, and trust reviews into shareable Instagram or Twitter image graphics, Senja's Studio tools provide excellent image templating.
+          Senja excels in social media testimonial imports and visual asset creation. If you
+          regularly clip tweets, LinkedIn comments, and trust reviews into shareable Instagram or
+          Twitter image graphics, Senja's Studio tools provide excellent image templating.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>Where Testimonial.to Wins</H2>
         <P>
-          Testimonial.to was one of the earliest pioneers in browser-based video collection. It has deep integrations with Zapier and established workflows for older marketing stacks.
+          Testimonial.to was one of the earliest pioneers in browser-based video collection. It has
+          deep integrations with Zapier and established workflows for older marketing stacks.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>Why Modern Founders Are Choosing KudosWall</H2>
         <P>
-          Both Senja and Testimonial.to have become increasingly expensive with restrictive tier gates. KudosWall was built from the ground up for 2026 performance: sub-10ms edge caching, clean modern aesthetics that match Framer/Tailwind sites, and a free tier that gives you 50 testimonials with full video collection.
+          Both Senja and Testimonial.to have become increasingly expensive with restrictive tier
+          gates. KudosWall was built from the ground up for 2026 performance: sub-10ms edge caching,
+          clean modern aesthetics that match Framer/Tailwind sites, and a free tier that gives you
+          50 testimonials with full video collection.
         </P>
       </section>
     </>
@@ -3970,10 +4370,14 @@ export const FAMEWALL_ALTERNATIVE = {
     <>
       <section className="mb-12">
         <P>
-          <strong>Famewall</strong> gained popularity as a straightforward tool for building Walls of Love and collecting text testimonials. However, as creators and businesses scale, they often need native video recording, deeper widget customizability, multi-workspace agency tooling, and more generous free tiers.
+          <strong>Famewall</strong> gained popularity as a straightforward tool for building Walls
+          of Love and collecting text testimonials. However, as creators and businesses scale, they
+          often need native video recording, deeper widget customizability, multi-workspace agency
+          tooling, and more generous free tiers.
         </P>
         <P>
-          Here are the top 5 Famewall alternatives in 2026 evaluated on performance, video capabilities, and pricing value.
+          Here are the top 5 Famewall alternatives in 2026 evaluated on performance, video
+          capabilities, and pricing value.
         </P>
       </section>
 
@@ -3983,31 +4387,37 @@ export const FAMEWALL_ALTERNATIVE = {
           <div className="bg-card border-border rounded-2xl border p-6">
             <H3>1. KudosWall (Best Overall &amp; Most Generous Free Plan)</H3>
             <P>
-              KudosWall combines ultra-fast edge-cached widgets with built-in video capture and an unmatched 50-testimonial free plan. Perfect for SaaS founders, agency owners, and digital creators who want gorgeous, modern widgets without bloated subscription fees.
+              KudosWall combines ultra-fast edge-cached widgets with built-in video capture and an
+              unmatched 50-testimonial free plan. Perfect for SaaS founders, agency owners, and
+              digital creators who want gorgeous, modern widgets without bloated subscription fees.
             </P>
           </div>
           <div className="bg-card border-border rounded-2xl border p-6">
             <H3>2. Senja (Best for Social Media Scraping)</H3>
             <P>
-              Senja is ideal for teams that heavily rely on importing social media shoutouts from X/Twitter, LinkedIn, and ProductHunt into graphic images.
+              Senja is ideal for teams that heavily rely on importing social media shoutouts from
+              X/Twitter, LinkedIn, and ProductHunt into graphic images.
             </P>
           </div>
           <div className="bg-card border-border rounded-2xl border p-6">
             <H3>3. Testimonial.to (Established Video Tool)</H3>
             <P>
-              Testimonial.to is a legacy video-first platform with established agency integrations and Zapier automations.
+              Testimonial.to is a legacy video-first platform with established agency integrations
+              and Zapier automations.
             </P>
           </div>
           <div className="bg-card border-border rounded-2xl border p-6">
             <H3>4. Vocal Video (Enterprise-Grade Video Production)</H3>
             <P>
-              For enterprise marketing departments with larger budgets, Vocal Video offers automatic video editing, lower-third graphics, and branded intros.
+              For enterprise marketing departments with larger budgets, Vocal Video offers automatic
+              video editing, lower-third graphics, and branded intros.
             </P>
           </div>
           <div className="bg-card border-border rounded-2xl border p-6">
             <H3>5. Trustmary (Survey &amp; NPS Hybrid)</H3>
             <P>
-              Trustmary connects testimonial collection directly with NPS surveys and lead generation forms for mid-market eCommerce brands.
+              Trustmary connects testimonial collection directly with NPS surveys and lead
+              generation forms for mid-market eCommerce brands.
             </P>
           </div>
         </div>
@@ -4021,26 +4431,42 @@ export const TRUSTMARY_ALTERNATIVE = {
     <>
       <section className="mb-12">
         <P>
-          <strong>Trustmary</strong> is a well-known customer feedback and testimonial platform, but many small businesses, startups, and agencies find its enterprise pricing model ($79+/month) and complex survey dashboards overwhelming for simple, high-converting social proof.
+          <strong>Trustmary</strong> is a well-known customer feedback and testimonial platform, but
+          many small businesses, startups, and agencies find its enterprise pricing model
+          ($79+/month) and complex survey dashboards overwhelming for simple, high-converting social
+          proof.
         </P>
         <P>
-          If you are looking for a fast, lightweight, and modern <strong>Trustmary alternative</strong>, this guide breaks down the best choices available in 2026.
+          If you are looking for a fast, lightweight, and modern{" "}
+          <strong>Trustmary alternative</strong>, this guide breaks down the best choices available
+          in 2026.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>Why Seek an Alternative to Trustmary?</H2>
         <UL>
-          <LI><strong>High Entry Cost:</strong> Starting plans scale quickly once your website traffic or testimonial volume increases.</LI>
-          <LI><strong>Widget Weight:</strong> Trustmary's legacy embed scripts can introduce noticeable layout shifts (CLS) and extra JavaScript execution time.</LI>
-          <LI><strong>Complex Onboarding:</strong> Setting up multiple survey triggers and review funnels takes hours compared to a 2-minute collection link.</LI>
+          <LI>
+            <strong>High Entry Cost:</strong> Starting plans scale quickly once your website traffic
+            or testimonial volume increases.
+          </LI>
+          <LI>
+            <strong>Widget Weight:</strong> Trustmary's legacy embed scripts can introduce
+            noticeable layout shifts (CLS) and extra JavaScript execution time.
+          </LI>
+          <LI>
+            <strong>Complex Onboarding:</strong> Setting up multiple survey triggers and review
+            funnels takes hours compared to a 2-minute collection link.
+          </LI>
         </UL>
       </section>
 
       <section className="mb-12">
         <H2>Why KudosWall is the Ideal Trustmary Alternative</H2>
         <P>
-          KudosWall strips away the enterprise bloat and delivers what actually converts customers: lightning-fast collection pages, friction-free browser video recording, and stunning widgets that load in under 30 milliseconds.
+          KudosWall strips away the enterprise bloat and delivers what actually converts customers:
+          lightning-fast collection pages, friction-free browser video recording, and stunning
+          widgets that load in under 30 milliseconds.
         </P>
       </section>
     </>
@@ -4052,10 +4478,14 @@ export const WORDPRESS_EMBED_GUIDE = {
     <>
       <section className="mb-12">
         <P>
-          Embedding customer testimonials on your WordPress website shouldn't require installing bulky, outdated WordPress plugins that bloat your MySQL database and slow down your page speed.
+          Embedding customer testimonials on your WordPress website shouldn't require installing
+          bulky, outdated WordPress plugins that bloat your MySQL database and slow down your page
+          speed.
         </P>
         <P>
-          In this tutorial, you'll learn how to embed lightweight, responsive KudosWall testimonial widgets on WordPress in under 3 minutes using Gutenberg, Elementor, or standard theme templates.
+          In this tutorial, you'll learn how to embed lightweight, responsive KudosWall testimonial
+          widgets on WordPress in under 3 minutes using Gutenberg, Elementor, or standard theme
+          templates.
         </P>
       </section>
 
@@ -4063,16 +4493,21 @@ export const WORDPRESS_EMBED_GUIDE = {
         <H2>Method 1: Gutenberg (Block Editor)</H2>
         <ol className="text-muted-foreground mb-6 list-decimal space-y-4 pl-6">
           <LI>
-            <strong>Copy your KudosWall Embed Code:</strong> Navigate to your KudosWall dashboard, select your widget (Wall of Love, Carousel, or Avatar Stack), and click <em>Copy Embed Code</em>.
+            <strong>Copy your KudosWall Embed Code:</strong> Navigate to your KudosWall dashboard,
+            select your widget (Wall of Love, Carousel, or Avatar Stack), and click{" "}
+            <em>Copy Embed Code</em>.
           </LI>
           <LI>
-            <strong>Open the WordPress Editor:</strong> Edit the page or post where you want the testimonials to appear.
+            <strong>Open the WordPress Editor:</strong> Edit the page or post where you want the
+            testimonials to appear.
           </LI>
           <LI>
-            <strong>Add a Custom HTML Block:</strong> Click the <code>+</code> block inserter, search for <strong>Custom HTML</strong>, and add it to your layout.
+            <strong>Add a Custom HTML Block:</strong> Click the <code>+</code> block inserter,
+            search for <strong>Custom HTML</strong>, and add it to your layout.
           </LI>
           <LI>
-            <strong>Paste and Preview:</strong> Paste your KudosWall snippet into the block and click <em>Preview</em> to verify. Publish your page!
+            <strong>Paste and Preview:</strong> Paste your KudosWall snippet into the block and
+            click <em>Preview</em> to verify. Publish your page!
           </LI>
         </ol>
       </section>
@@ -4081,18 +4516,32 @@ export const WORDPRESS_EMBED_GUIDE = {
         <H2>Method 2: Elementor Page Builder</H2>
         <ol className="text-muted-foreground mb-6 list-decimal space-y-4 pl-6">
           <LI>Open your page in Elementor.</LI>
-          <LI>Drag the <strong>HTML</strong> widget from the left sidebar into your target column.</LI>
+          <LI>
+            Drag the <strong>HTML</strong> widget from the left sidebar into your target column.
+          </LI>
           <LI>Paste your KudosWall embed script into the HTML Code input box.</LI>
-          <LI>Click <em>Update</em>. KudosWall automatically scales to match your Elementor column width.</LI>
+          <LI>
+            Click <em>Update</em>. KudosWall automatically scales to match your Elementor column
+            width.
+          </LI>
         </ol>
       </section>
 
       <section className="mb-12">
         <H2>Why Script Embeds Beat Heavy WordPress Plugins</H2>
         <UL>
-          <LI><strong>Zero Plugin Vulnerabilities:</strong> You don't have to worry about plugin security exploits or PHP version deprecations.</LI>
-          <LI><strong>Edge CDN Delivery:</strong> Video and image assets are served from global Cloudflare edge locations, protecting your WordPress server bandwidth.</LI>
-          <LI><strong>Instant Real-Time Updates:</strong> When you approve a new testimonial in KudosWall, it immediately appears on your WordPress site without editing any pages.</LI>
+          <LI>
+            <strong>Zero Plugin Vulnerabilities:</strong> You don't have to worry about plugin
+            security exploits or PHP version deprecations.
+          </LI>
+          <LI>
+            <strong>Edge CDN Delivery:</strong> Video and image assets are served from global
+            Cloudflare edge locations, protecting your WordPress server bandwidth.
+          </LI>
+          <LI>
+            <strong>Instant Real-Time Updates:</strong> When you approve a new testimonial in
+            KudosWall, it immediately appears on your WordPress site without editing any pages.
+          </LI>
         </UL>
       </section>
     </>
@@ -4104,10 +4553,13 @@ export const SHOPIFY_EMBED_GUIDE = {
     <>
       <section className="mb-12">
         <P>
-          In eCommerce, genuine customer social proof is the difference between an abandoned cart and a high-value checkout. Adding authentic customer video reviews and photo testimonials to your Shopify store can lift conversion rates by 20% to 35%.
+          In eCommerce, genuine customer social proof is the difference between an abandoned cart
+          and a high-value checkout. Adding authentic customer video reviews and photo testimonials
+          to your Shopify store can lift conversion rates by 20% to 35%.
         </P>
         <P>
-          Here is how to add KudosWall testimonial widgets to your Shopify store without slowing down your checkout or editing complex theme liquid files.
+          Here is how to add KudosWall testimonial widgets to your Shopify store without slowing
+          down your checkout or editing complex theme liquid files.
         </P>
       </section>
 
@@ -4115,16 +4567,20 @@ export const SHOPIFY_EMBED_GUIDE = {
         <H2>Step-by-Step Shopify Embed Guide</H2>
         <ol className="text-muted-foreground mb-6 list-decimal space-y-4 pl-6">
           <LI>
-            <strong>Navigate to Shopify Admin &gt; Online Store &gt; Themes:</strong> Click <em>Customize</em> on your active theme.
+            <strong>Navigate to Shopify Admin &gt; Online Store &gt; Themes:</strong> Click{" "}
+            <em>Customize</em> on your active theme.
           </LI>
           <LI>
-            <strong>Add a Custom Liquid / HTML Section:</strong> In the sidebar, click <em>Add section</em> and select <strong>Custom Liquid</strong> (or Custom HTML).
+            <strong>Add a Custom Liquid / HTML Section:</strong> In the sidebar, click{" "}
+            <em>Add section</em> and select <strong>Custom Liquid</strong> (or Custom HTML).
           </LI>
           <LI>
-            <strong>Paste Your KudosWall Embed Code:</strong> Insert your responsive KudosWall widget script into the Liquid block.
+            <strong>Paste Your KudosWall Embed Code:</strong> Insert your responsive KudosWall
+            widget script into the Liquid block.
           </LI>
           <LI>
-            <strong>Position the Section:</strong> Drag the section directly below your product hero or right above the footer. Click <em>Save</em>.
+            <strong>Position the Section:</strong> Drag the section directly below your product hero
+            or right above the footer. Click <em>Save</em>.
           </LI>
         </ol>
       </section>
@@ -4132,9 +4588,18 @@ export const SHOPIFY_EMBED_GUIDE = {
       <section className="mb-12">
         <H2>High-Converting Placements for Shopify</H2>
         <UL>
-          <LI><strong>Homepage Hero Bar:</strong> Display a compact 5-star rating badge with customer avatars directly beneath your main call to action.</LI>
-          <LI><strong>Product Detail Page (PDP):</strong> Embed a carousel of video unboxings and customer reviews right above the FAQ accordion.</LI>
-          <LI><strong>Dedicated /reviews Landing Page:</strong> Create a full-page Wall of Love showcasing hundreds of happy buyers to build overwhelming brand authority.</LI>
+          <LI>
+            <strong>Homepage Hero Bar:</strong> Display a compact 5-star rating badge with customer
+            avatars directly beneath your main call to action.
+          </LI>
+          <LI>
+            <strong>Product Detail Page (PDP):</strong> Embed a carousel of video unboxings and
+            customer reviews right above the FAQ accordion.
+          </LI>
+          <LI>
+            <strong>Dedicated /reviews Landing Page:</strong> Create a full-page Wall of Love
+            showcasing hundreds of happy buyers to build overwhelming brand authority.
+          </LI>
         </UL>
       </section>
     </>
@@ -4146,7 +4611,10 @@ export const NOTION_EMBED_GUIDE = {
     <>
       <section className="mb-12">
         <P>
-          Notion is widely used by freelancers, agencies, and course creators for client proposals, project portals, and public resource hubs. With KudosWall, you can embed interactive, live-updating customer testimonials directly into your Notion workspace or Notion-powered websites (like Super.so, Potion, and Fruition).
+          Notion is widely used by freelancers, agencies, and course creators for client proposals,
+          project portals, and public resource hubs. With KudosWall, you can embed interactive,
+          live-updating customer testimonials directly into your Notion workspace or Notion-powered
+          websites (like Super.so, Potion, and Fruition).
         </P>
       </section>
 
@@ -4154,13 +4622,16 @@ export const NOTION_EMBED_GUIDE = {
         <H2>How to Embed on Notion in 3 Steps</H2>
         <ol className="text-muted-foreground mb-6 list-decimal space-y-4 pl-6">
           <LI>
-            <strong>Get Your KudosWall Share URL:</strong> In your KudosWall dashboard, copy your public Wall of Love URL (e.g. <code>https://kudoswall.org/w/your-brand</code>).
+            <strong>Get Your KudosWall Share URL:</strong> In your KudosWall dashboard, copy your
+            public Wall of Love URL (e.g. <code>https://kudoswall.org/w/your-brand</code>).
           </LI>
           <LI>
-            <strong>Type /embed in Notion:</strong> In your Notion doc, create a new line and type <code>/embed</code>, then press Enter.
+            <strong>Type /embed in Notion:</strong> In your Notion doc, create a new line and type{" "}
+            <code>/embed</code>, then press Enter.
           </LI>
           <LI>
-            <strong>Paste the URL and Resize:</strong> Paste your KudosWall URL into the embed field and adjust the block handles to your preferred height.
+            <strong>Paste the URL and Resize:</strong> Paste your KudosWall URL into the embed field
+            and adjust the block handles to your preferred height.
           </LI>
         </ol>
       </section>
@@ -4168,9 +4639,18 @@ export const NOTION_EMBED_GUIDE = {
       <section className="mb-12">
         <H2>Best Use Cases in Notion</H2>
         <UL>
-          <LI><strong>Freelancer Project Proposals:</strong> Close new clients faster by embedding recent reviews right next to your project scope and pricing deliverables.</LI>
-          <LI><strong>Client Onboarding Portals:</strong> Reassure new enterprise clients with case study testimonials during onboarding.</LI>
-          <LI><strong>Public Notion Resumes &amp; Portfolios:</strong> Showcase verifiable references with 1-click video playback.</LI>
+          <LI>
+            <strong>Freelancer Project Proposals:</strong> Close new clients faster by embedding
+            recent reviews right next to your project scope and pricing deliverables.
+          </LI>
+          <LI>
+            <strong>Client Onboarding Portals:</strong> Reassure new enterprise clients with case
+            study testimonials during onboarding.
+          </LI>
+          <LI>
+            <strong>Public Notion Resumes &amp; Portfolios:</strong> Showcase verifiable references
+            with 1-click video playback.
+          </LI>
         </UL>
       </section>
     </>
@@ -4182,25 +4662,38 @@ export const SQUARESPACE_EMBED_GUIDE = {
     <>
       <section className="mb-12">
         <P>
-          Squarespace makes designing sleek websites effortless, but its built-in review blocks are static and lack video support. By embedding a KudosWall widget on Squarespace, you get dynamic social proof, native video playback, and zero layout shift.
+          Squarespace makes designing sleek websites effortless, but its built-in review blocks are
+          static and lack video support. By embedding a KudosWall widget on Squarespace, you get
+          dynamic social proof, native video playback, and zero layout shift.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>Embedding on Squarespace 7.1 (Fluid Engine)</H2>
         <ol className="text-muted-foreground mb-6 list-decimal space-y-4 pl-6">
-          <LI>Open your Squarespace page and click <strong>Edit</strong>.</LI>
-          <LI>Click <strong>Add Block</strong> and choose the <strong>Code</strong> block.</LI>
+          <LI>
+            Open your Squarespace page and click <strong>Edit</strong>.
+          </LI>
+          <LI>
+            Click <strong>Add Block</strong> and choose the <strong>Code</strong> block.
+          </LI>
           <LI>Paste your KudosWall embed snippet into the code editor.</LI>
-          <LI>Turn off <em>Display Source</em> and resize the block on the Fluid Engine grid to fit desktop and mobile viewports.</LI>
-          <LI>Click <strong>Save</strong> and exit preview mode.</LI>
+          <LI>
+            Turn off <em>Display Source</em> and resize the block on the Fluid Engine grid to fit
+            desktop and mobile viewports.
+          </LI>
+          <LI>
+            Click <strong>Save</strong> and exit preview mode.
+          </LI>
         </ol>
       </section>
 
       <section className="mb-12">
         <H2>Why KudosWall Works Seamlessly with Squarespace</H2>
         <P>
-          KudosWall widgets automatically inherit background colors and responsive container widths, ensuring your typography and spacing look pixel-perfect across both desktop and mobile screens.
+          KudosWall widgets automatically inherit background colors and responsive container widths,
+          ensuring your typography and spacing look pixel-perfect across both desktop and mobile
+          screens.
         </P>
       </section>
     </>
@@ -4212,30 +4705,47 @@ export const WHITE_LABEL_TESTIMONIAL_SOFTWARE = {
     <>
       <section className="mb-12">
         <P>
-          Marketing agencies, web design studios, and consultancy firms collect testimonials on behalf of multiple client brands every single week. Using single-tenant testimonial tools leads to chaotic logins, mixed branding, and high recurring costs.
+          Marketing agencies, web design studios, and consultancy firms collect testimonials on
+          behalf of multiple client brands every single week. Using single-tenant testimonial tools
+          leads to chaotic logins, mixed branding, and high recurring costs.
         </P>
         <P>
-          <strong>White-label testimonial software</strong> empowers agencies to manage multiple client workspaces, host collection forms on custom subdomains, and eliminate vendor branding from embedded widgets.
+          <strong>White-label testimonial software</strong> empowers agencies to manage multiple
+          client workspaces, host collection forms on custom subdomains, and eliminate vendor
+          branding from embedded widgets.
         </P>
       </section>
 
       <section className="mb-12">
         <H2>Agency Feature Checklist</H2>
         <UL>
-          <LI><strong>Multi-Tenant Workspaces:</strong> Keep every client's testimonials, tags, and assets strictly segregated with separate team access permissions.</LI>
-          <LI><strong>Custom Domain Portals:</strong> Send review collection requests from <code>kudos.yourclient.com</code> for maximum trust and higher response rates.</LI>
-          <LI><strong>Zero Vendor Watermarks:</strong> Remove all external badges so your agency delivers a completely white-labeled experience.</LI>
-          <LI><strong>Client Review Approval Links:</strong> Allow clients to review and approve submitted customer testimonials before they go live on their website.</LI>
+          <LI>
+            <strong>Multi-Tenant Workspaces:</strong> Keep every client's testimonials, tags, and
+            assets strictly segregated with separate team access permissions.
+          </LI>
+          <LI>
+            <strong>Custom Domain Portals:</strong> Send review collection requests from{" "}
+            <code>kudos.yourclient.com</code> for maximum trust and higher response rates.
+          </LI>
+          <LI>
+            <strong>Zero Vendor Watermarks:</strong> Remove all external badges so your agency
+            delivers a completely white-labeled experience.
+          </LI>
+          <LI>
+            <strong>Client Review Approval Links:</strong> Allow clients to review and approve
+            submitted customer testimonials before they go live on their website.
+          </LI>
         </UL>
       </section>
 
       <section className="mb-12">
         <H2>How Agencies Scale with KudosWall</H2>
         <P>
-          KudosWall's Agency tier includes unlimited workspaces, custom domain routing via Cloudflare SSL, and high-performance widgets designed to maintain your clients' 100/100 Google PageSpeed scores.
+          KudosWall's Agency tier includes unlimited workspaces, custom domain routing via
+          Cloudflare SSL, and high-performance widgets designed to maintain your clients' 100/100
+          Google PageSpeed scores.
         </P>
       </section>
     </>
   ),
 };
-
