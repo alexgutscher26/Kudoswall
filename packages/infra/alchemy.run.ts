@@ -25,6 +25,34 @@ export const web = await Nextjs("web", {
     VIDEOS_BUCKET: videosBucket,
     IMAGES_BUCKET: imagesBucket,
     R2_SIGNING_SECRET: alchemy.secret.env.R2_SIGNING_SECRET || "",
+    // Stripe
+    STRIPE_SECRET_KEY: alchemy.secret.env.STRIPE_SECRET_KEY || "",
+    STRIPE_WEBHOOK_SECRET: alchemy.secret.env.STRIPE_WEBHOOK_SECRET || "",
+    // Stripe Price IDs
+    STRIPE_PLAN_1_PRICE_ID: alchemy.env.STRIPE_PLAN_1_PRICE_ID || "",
+    STRIPE_PLAN_2_PRICE_ID: alchemy.env.STRIPE_PLAN_2_PRICE_ID || "",
+    STRIPE_LTD_PRICE_ID: alchemy.env.STRIPE_LTD_PRICE_ID || "",
+    STRIPE_PLAN_1_YEARLY_PRICE_ID: alchemy.env.STRIPE_PLAN_1_YEARLY_PRICE_ID || "",
+    STRIPE_PLAN_2_YEARLY_PRICE_ID: alchemy.env.STRIPE_PLAN_2_YEARLY_PRICE_ID || "",
+    // Email & Marketing
+    EMAIL_FROM: alchemy.env.EMAIL_FROM || "",
+    LOOPS_API_KEY: alchemy.secret.env.LOOPS_API_KEY || "",
+    LOOPS_TRANSACTIONAL_SUBSCRIBED_ID: alchemy.env.LOOPS_TRANSACTIONAL_SUBSCRIBED_ID || "",
+    // Cron
+    CRON_SECRET: alchemy.secret.env.CRON_SECRET || "",
+    // LinkedIn OAuth
+    LINKEDIN_CLIENT_ID: alchemy.secret.env.LINKEDIN_CLIENT_ID || "",
+    LINKEDIN_CLIENT_SECRET: alchemy.secret.env.LINKEDIN_CLIENT_SECRET || "",
+    // Upstash Redis
+    UPSTASH_REDIS_REST_URL: alchemy.secret.env.UPSTASH_REDIS_REST_URL || "",
+    UPSTASH_REDIS_REST_TOKEN: alchemy.secret.env.UPSTASH_REDIS_REST_TOKEN || "",
+    // UploadThing
+    UPLOADTHING_TOKEN: alchemy.secret.env.UPLOADTHING_TOKEN || "",
+    // Pusher
+    PUSHER_APP_ID: alchemy.secret.env.PUSHER_APP_ID || "",
+    PUSHER_KEY: alchemy.secret.env.PUSHER_KEY || "",
+    PUSHER_SECRET: alchemy.secret.env.PUSHER_SECRET || "",
+    PUSHER_CLUSTER: alchemy.env.PUSHER_CLUSTER || "",
   },
   dev: {
     env: {
