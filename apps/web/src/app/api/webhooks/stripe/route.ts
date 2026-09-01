@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       if (!secret) {
         console.error("❌ STRIPE_WEBHOOK_SECRET is not defined in environment variables");
       }
-      event = stripe.webhooks.constructEvent(body, signature, secret || "") as any;
+      event = (await stripe.webhooks.constructEventAsync(body, signature, secret || "")) as any;
       console.log(`✅ Webhook received: ${event.type} [${event.id}]`);
     } catch (error: any) {
       console.error(`❌ Webhook Signature Error: ${error.message}`);
