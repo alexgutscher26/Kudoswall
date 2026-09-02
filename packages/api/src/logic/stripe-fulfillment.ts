@@ -32,11 +32,9 @@ export async function fulfillStripeCheckoutSession({
   if (providedSession) {
     session = providedSession;
   } else if (sessionId) {
-    session = (
-      await stripe.checkout.sessions.retrieve(sessionId, {
-        expand: ["subscription", "line_items"],
-      })
-    ).data;
+    session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["subscription", "line_items"],
+    });
   } else {
     throw new Error("Either sessionId or session must be provided");
   }
@@ -51,7 +49,7 @@ export async function fulfillStripeCheckoutSession({
   if (session.subscription) {
     let subObj: Stripe.Subscription;
     if (typeof session.subscription === "string") {
-      subObj = (await stripe.subscriptions.retrieve(session.subscription)).data;
+      subObj = await stripe.subscriptions.retrieve(session.subscription);
     } else {
       subObj = session.subscription as Stripe.Subscription;
     }
@@ -136,7 +134,7 @@ export async function fulfillStripeCheckoutSession({
         .set({
           plan,
           stripeCustomerId: customerId,
-          stripeSubscriptionId: subscriptionId || "",
+          stripeSubscriptionId: subscriptionId,
           subscriptionStatus: subscriptionStatus as any,
           trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : null,
         })
@@ -147,7 +145,7 @@ export async function fulfillStripeCheckoutSession({
         .set({
           plan,
           stripeCustomerId: customerId,
-          stripeSubscriptionId: subscriptionId || "",
+          stripeSubscriptionId: subscriptionId,
           subscriptionStatus: subscriptionStatus as any,
           trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : null,
         })
