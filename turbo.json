@@ -37,7 +37,14 @@
         "GITHUB_CLIENT_ID",
         "GITHUB_CLIENT_SECRET",
         "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET"
+        "GOOGLE_CLIENT_SECRET",
+        "R2_SIGNING_SECRET",
+        "VIRUSTOTAL_API_KEY",
+        "PUSHER_APP_ID",
+        "PUSHER_KEY",
+        "PUSHER_SECRET",
+        "PUSHER_CLUSTER",
+        "LOOPS_API_KEY"
       ]
     },
     "lint": {

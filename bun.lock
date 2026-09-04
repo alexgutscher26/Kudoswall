@@ -16,7 +16,7 @@
         "framer-motion": "^12.38.0",
         "goey-toast": "^0.4.0",
         "next": "catalog:",
-        "stripe": "^22.6.0",
+        "stripe": "catalog:",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -118,6 +118,7 @@
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "next": "catalog:",
+        "stripe": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -276,7 +277,7 @@
     "next-themes": "^0.4.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "stripe": "^22.0.1",
+    "stripe": "^22.6.0",
     "tailwindcss": "^4.1.18",
     "zod": "^4.1.13",
   },
