@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Zap, Sparkles, Loader2 } from "lucide-react";
+import { Check, Lightning, CircleNotch, ShieldCheck } from "@phosphor-icons/react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
@@ -91,149 +91,117 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
   return (
     <>
-      <div className="mb-12 flex flex-col items-center gap-4">
-        <div className="flex w-fit items-center rounded-2xl border border-neutral-200 bg-neutral-100 p-1 shadow-inner">
+      {/* Billing Switcher */}
+      <div className="mb-10 flex justify-center">
+        <div className="flex items-center rounded-full border border-neutral-200 bg-neutral-100 p-1">
           <button
+            type="button"
             onClick={() => setBillingCycle("monthly")}
-            className={`rounded-xl px-6 py-2 text-sm font-black transition-all ${
+            className={`rounded-full px-5 py-1.5 text-xs font-semibold transition-all duration-300 ${
               billingCycle === "monthly"
-                ? "bg-white text-neutral-900 shadow-md"
-                : "text-neutral-500 hover:text-neutral-700"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
             Monthly
           </button>
           <button
+            type="button"
             onClick={() => setBillingCycle("yearly")}
-            className={`flex items-center gap-2 rounded-xl px-6 py-2 text-sm font-black transition-all ${
+            className={`flex items-center gap-1.5 rounded-full px-5 py-1.5 text-xs font-semibold transition-all duration-300 ${
               billingCycle === "yearly"
-                ? "bg-white text-neutral-900 shadow-md"
-                : "text-neutral-500 hover:text-neutral-700"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            Yearly
-            <span className="animate-bounce rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-black text-[#e8527a]">
+            <span>Yearly</span>
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
               2 months free
             </span>
           </button>
         </div>
       </div>
 
-      <div className="mb-12 grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className="group relative flex flex-col gap-5 rounded-[2.2rem] border-2 p-5 transition-all duration-500 hover:scale-[1.01] sm:gap-6 sm:p-7"
-            style={{
-              backgroundColor: plan.highlight ? "#171717" : "#fafafa",
-              borderColor: plan.highlight ? "#171717" : "#f1f1f1",
-              boxShadow: plan.highlight
-                ? "0 30px 70px rgba(0,0,0,0.3)"
-                : "0 10px 40px rgba(0,0,0,0.02)",
-            }}
-          >
-            {plan.badge && (
-              <div
-                className="absolute -top-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-black shadow-xl shadow-pink-500/20"
-                style={{ backgroundColor: "#e8527a", color: "#ffffff" }}
-              >
-                <Zap className="size-3.5 fill-white" />
-                {plan.badge}
-              </div>
-            )}
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {plans.map((plan) => {
+          const isDark = plan.highlight;
+          return (
+            <div
+              key={plan.name}
+              className={`relative flex flex-col justify-between rounded-2xl border p-6 sm:p-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                isDark
+                  ? "border-neutral-900 bg-neutral-900 text-white shadow-xl"
+                  : "border-neutral-200 bg-white text-neutral-900 shadow-sm hover:border-neutral-300 hover:shadow-md"
+              }`}
+            >
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-800 px-3 py-1 text-[10px] font-bold tracking-wider text-white uppercase shadow-sm">
+                  {plan.badge}
+                </div>
+              )}
 
-            <div className="space-y-3">
-              <p
-                className="text-xs font-black tracking-[0.2em] uppercase"
-                style={{ color: plan.highlight ? "rgba(255,255,255,0.6)" : "#6b7280" }}
-              >
-                {plan.name}
-              </p>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className="text-4xl font-black tracking-tighter sm:text-5xl"
-                    style={{ color: plan.highlight ? "#ffffff" : "#111827" }}
-                  >
-                    {plan.isComingSoon
-                      ? "Coming Soon"
-                      : billingCycle === "monthly"
-                        ? plan.monthlyPrice
-                        : plan.yearlyPrice}
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-bold tracking-wider uppercase ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+                    {plan.name}
                   </span>
-                  {!plan.isComingSoon && plan.period && (
-                    <span
-                      className="text-sm font-bold tracking-widest uppercase"
-                      style={{ color: plan.highlight ? "rgba(255,255,255,0.5)" : "#9ca3af" }}
-                    >
+                  {isDark && (
+                    <Lightning className="size-4 text-amber-400" weight="fill" />
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className={`text-4xl font-bold tracking-tight sm:text-5xl ${isDark ? "text-white" : "text-neutral-900"}`}>
+                    {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                  </span>
+                  {plan.period && (
+                    <span className={`text-xs font-semibold ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
                       {billingCycle === "monthly" ? "/month" : "/year"}
                     </span>
                   )}
                 </div>
-                {!plan.isComingSoon &&
-                  plan.monthlyPrice !== "Free" &&
-                  billingCycle === "yearly" && (
-                    <span
-                      className="animate-in fade-in slide-in-from-top-1 text-sm font-bold"
-                      style={{ color: plan.highlight ? "#fbcfe8" : "#e8527a" }}
-                    >
-                      Save $
-                      {parseInt(plan.monthlyPrice.replace(/\D/g, "")) * 12 -
-                        parseInt(plan.yearlyPrice.replace(/\D/g, ""))}{" "}
-                      a year
-                    </span>
-                  )}
+
+                <p className={`mt-3 text-xs leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"} [text-wrap:pretty]`}>
+                  {plan.description}
+                </p>
+
+                <div className="my-6 border-t border-neutral-100/20" />
+
+                <ul className="space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-xs font-medium">
+                      <Check
+                        className={`mt-0.5 size-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-emerald-600"}`}
+                        weight="bold"
+                      />
+                      <span className={isDark ? "text-neutral-200" : "text-neutral-700"}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p
-                className="text-[15px] leading-relaxed font-medium"
-                style={{ color: plan.highlight ? "rgba(255,255,255,0.55)" : "#6b7280" }}
-              >
-                {plan.description}
-              </p>
+
+              <div className="mt-8">
+                <Button
+                  onClick={() => handleAction(plan)}
+                  disabled={createCheckout.isPending}
+                  className={`w-full rounded-xl py-2 px-3.5 text-xs font-semibold transition-all duration-300 active:scale-[0.98] ${
+                    isDark
+                      ? "bg-white text-neutral-900 hover:bg-neutral-100 shadow-sm"
+                      : "bg-neutral-900 text-white hover:bg-neutral-800 shadow-sm"
+                  }`}
+                >
+                  {createCheckout.isPending ? (
+                    <CircleNotch className="mr-2 size-4 animate-spin" weight="bold" />
+                  ) : null}
+                  {plan.cta}
+                </Button>
+              </div>
             </div>
-
-            <Button
-              onClick={() => handleAction(plan)}
-              disabled={createCheckout.isPending}
-              className="h-14 w-full rounded-2xl text-sm font-black shadow-lg transition-transform group-hover:shadow-pink-500/10 active:scale-95"
-              style={
-                plan.highlight
-                  ? { backgroundColor: "#e8527a", color: "#ffffff" }
-                  : { backgroundColor: "#171717", color: "#ffffff" }
-              }
-            >
-              {createCheckout.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-              {plan.cta}
-            </Button>
-
-            <ul className="flex flex-col gap-3">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-4 text-sm font-bold">
-                  <div className="mt-0.5 flex shrink-0 items-center justify-center rounded-full bg-neutral-200/20">
-                    <Check
-                      className="size-4"
-                      style={{ color: plan.highlight ? "#e8527a" : "#16a34a" }}
-                    />
-                  </div>
-                  <span style={{ color: plan.highlight ? "rgba(255,255,255,0.75)" : "#374151" }}>
-                    {feature}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col items-center gap-3 pt-6">
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Sparkles key={i} className="size-4 fill-amber-400 text-amber-400" />
-          ))}
-        </div>
-        <p className="text-center text-sm font-black text-neutral-800">
-          100% Satisfaction Guarantee. 7-day full refund policy on all paid plans.
-        </p>
+          );
+        })}
       </div>
     </>
   );

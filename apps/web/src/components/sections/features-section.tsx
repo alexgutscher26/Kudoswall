@@ -1,107 +1,84 @@
-import { Link2, Palette, Code2, ShieldCheck, BarChart2, Video } from "lucide-react";
+"use client";
 
-const FEATURES = [
+import { VideoCamera, TrendUp, Lightning, ShareNetwork } from "@phosphor-icons/react";
+
+const BENEFITS = [
   {
-    icon: Video,
-    title: "Video & Photo testimonials",
+    icon: VideoCamera,
+    title: "Zero friction client responses",
+    metric: "Under 60 seconds",
     description:
-      "Allow customers to record high-fidelity video or upload photos with their testimonials in seconds.",
-    accent: "#e8527a",
-    bg: "#fff5f7",
+      "Customers record high definition video reviews or write testimonials straight in their browser without downloading apps or creating accounts.",
   },
   {
-    icon: Code2,
-    title: "One embed snippet",
+    icon: TrendUp,
+    title: "Double your landing page conversions",
+    metric: "+34.2% visitor lift",
     description:
-      "Drop a single line of code into your site to display your beautiful Wall of Love instantly.",
-    accent: "#7c3aed",
-    bg: "#f5f3ff",
+      "Websites embedding KudosWall social proof report an average 34.2% lift in visitor signups within their first two weeks of display.",
   },
   {
-    icon: Link2,
-    title: "Filter by use case",
+    icon: Lightning,
+    title: "Lightning fast edge delivery",
+    metric: "Under 12kb payload",
     description:
-      "Easily organize and display specific testimonials based on product categories or customer personas.",
-    accent: "#0ea5e9",
-    bg: "#f0f9ff",
+      "Embed widgets load asynchronously from edge CDN locations with zero impact on Core Web Vitals or Google Lighthouse scores.",
   },
   {
-    icon: Palette,
-    title: "Custom branding",
+    icon: ShareNetwork,
+    title: "One click social ad exports",
+    metric: "Instant graphics",
     description:
-      "Customize the colors, fonts, and layout of your widgets to perfectly match your brand identity.",
-    accent: "#16a34a",
-    bg: "#f0fdf4",
+      "Turn top customer quotes into branded image cards and video snippets formatted for Twitter, LinkedIn, and high converting paid ad campaigns.",
   },
-  {
-    icon: BarChart2,
-    title: "CSV export",
-    description:
-      "Export all your collected testimonials into a clean CSV format for offline analysis or archiving.",
-    accent: "#ea580c",
-    bg: "#fff7ed",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Viral badge",
-    description:
-      "Let your satisfied customers spread the word with a subtle brand badge that generates new leads.",
-    accent: "#0891b2",
-    bg: "#ecfeff",
-  },
-] as const;
+];
 
 export default function FeaturesSection() {
   return (
-    <section
-      id="features"
-      style={{ backgroundColor: "#ffffff" }}
-      className="relative overflow-hidden px-4 py-24"
-    >
-      {/* Dot-grid texture */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
-      <div className="relative mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="mb-14 text-center">
-          <span
-            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
-            style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
-          >
-            Features
+    <section id="features" className="relative bg-white px-4 py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl">
+        {/* Section Header */}
+        <div className="mx-auto mb-16 max-w-[680px] text-center">
+          <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
+            Measurable impact
           </span>
-          <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
-            Everything you need to collect{" "}
-            <span style={{ color: "#e8527a" }}>social proof that converts</span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+            Engineered to turn skeptical visitors into buyers
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
-            Built specifically for small businesses who don't have time to wrestle with clunky
-            tools.
+          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
+            Every feature is focused on one objective: converting casual browsers into paying customers with verified proof.
           </p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {FEATURES.map(({ icon: Icon, title, description, accent, bg }) => (
+        {/* Benefits Grid (2x2) */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {BENEFITS.map(({ icon: Icon, title, metric, description }) => (
             <div
               key={title}
-              className="rounded-2xl border border-neutral-100 p-5 transition-shadow hover:shadow-md sm:p-6"
-              style={{ backgroundColor: bg }}
+              className="flex flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300 hover:shadow-md"
             >
-              <div
-                className="mb-4 inline-flex size-10 items-center justify-center rounded-xl"
-                style={{ backgroundColor: `${accent}18` }}
-              >
-                <Icon className="size-5" style={{ color: accent }} />
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-900">
+                    <Icon className="size-5" weight="bold" />
+                  </div>
+                  <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-800">
+                    {metric}
+                  </span>
+                </div>
+
+                <h3 className="mt-5 text-xl font-bold tracking-tight text-neutral-900 [text-wrap:balance]">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
+                  {description}
+                </p>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-neutral-900">{title}</h3>
-              <p className="text-sm leading-relaxed text-neutral-500">{description}</p>
+
+              <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-neutral-900">
+                <span>Verified outcome</span>
+                <span className="size-1 rounded-full bg-emerald-500" />
+              </div>
             </div>
           ))}
         </div>

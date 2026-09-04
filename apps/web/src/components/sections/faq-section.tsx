@@ -7,29 +7,44 @@ interface FAQItem {
 
 const FAQS: FAQItem[] = [
   {
-    question: "How does KudosWall work?",
+    question: "Do my customers need to create an account or download an app to record a video?",
     answer:
-      "KudosWall provides you with a unique, shareable link that you can send to your customers. They click the link, share a photo, record a video, or type a written testimonial, and submit it. You then review and approve the testimonials from your dashboard and embed them on your site with a simple script tag.",
+      "No. Your customers simply open your link in any desktop or mobile browser and can record video or write text in two clicks with zero registration.",
   },
   {
-    question: "Do my customers need to create an account to leave a review?",
+    question: "Will embedding KudosWall slow down my website load time?",
     answer:
-      "No. We believe in zero friction. Your customers can leave high-quality text or video testimonials directly from their browser without ever signing up or downloading an app.",
+      "No. KudosWall embeds are ultra lightweight (under 12kb), delivered via global edge CDN caches, and load asynchronously without blocking your page paint or hurting Core Web Vitals.",
   },
   {
-    question: "Can I customize the look of the testimonial widget?",
+    question: "Can I customize the widgets to match my brand colors and dark mode?",
     answer:
-      "Yes! You can customize the colors, fonts, layout, and even the rounding of the corners to perfectly match your brand identity. All changes can be previewed live in your dashboard.",
+      "Yes. You have complete control over corner radii, typography, dark or light themes, card borders, and layout styles such as walls, carousels, marquees, and floating badges.",
   },
   {
-    question: "Which platforms does the embed widget support?",
+    question: "How do I prevent spam or negative reviews from appearing on my site?",
     answer:
-      "KudosWall works on any platform that allows you to add HTML/JavaScript. This includes WordPress, Wix, Squarespace, Webflow, Shopify, Framer, and custom-built websites.",
+      "Every incoming submission arrives in your private dashboard. Testimonials only appear on your live website after you review and click approve.",
   },
   {
-    question: "Is there a limit on how many testimonials I can collect?",
+    question: "Can I import existing reviews from Twitter, Product Hunt, and G2?",
     answer:
-      "All new users get a 14-day free Pro trial with unlimited collection (no credit card required). Our Free plan allows you to collect up to 10 text and video testimonials. Our Pro and Agency plans offer unlimited collection, HD video downloads, and custom branding.",
+      "Yes. You can import verified reviews from X (Twitter), Product Hunt, G2, Trustpilot, and the App Store with a single link paste.",
+  },
+  {
+    question: "What platforms are supported for embedding?",
+    answer:
+      "KudosWall works anywhere HTML or JavaScript is allowed, including Next.js, Webflow, Framer, WordPress, Shopify, Squarespace, Ghost, and custom static sites.",
+  },
+  {
+    question: "What happens when my 14 day free trial ends?",
+    answer:
+      "You can choose a plan that fits your volume or stay on our free tier. We will never display third party advertisements on your widgets or hold your data hostage.",
+  },
+  {
+    question: "Do I need a credit card to get started?",
+    answer:
+      "No. You get immediate access to all Pro features for 14 days without entering credit card or payment details.",
   },
 ];
 
@@ -48,38 +63,24 @@ export default function FaqSection() {
   };
 
   return (
-    <section
-      id="faq"
-      className="relative overflow-hidden px-4 py-24"
-      style={{ backgroundColor: "#ffffff" }}
-    >
+    <section id="faq" className="relative bg-white px-4 py-20 sm:py-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {/* Dot-grid texture */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-3xl">
+      <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <span
-            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
-            style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
-          >
-            FAQ
+        <div className="mx-auto mb-14 max-w-[680px] text-center">
+          <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
+            Frequently answered
           </span>
-          <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
-            Frequently Asked <span style={{ color: "#e8527a" }}>Questions</span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+            Got questions? We have answers.
           </h2>
+          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
+            Everything you need to know about collecting, managing, and displaying authentic customer praise.
+          </p>
         </div>
 
         {/* FAQ Accordion */}

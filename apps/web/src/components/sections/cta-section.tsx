@@ -1,58 +1,42 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowRight, ShieldCheck } from "@phosphor-icons/react";
 import { Button } from "@my-better-t-app/ui/components/button";
-import { ArrowRight } from "lucide-react";
 
 export default function CtaSection() {
   return (
-    <section className="relative overflow-hidden px-4 py-24" style={{ backgroundColor: "#ffffff" }}>
-      {/* Dot grid */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
-      {/* White glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
-        <div
-          className="h-[400px] w-[600px] rounded-full blur-3xl"
-          style={{ backgroundColor: "rgba(255,255,255,0.8)" }}
-        />
-      </div>
-
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-        <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
-          Start collecting testimonials <span style={{ color: "#e8527a" }}>today</span>
-        </h2>
-        <p className="max-w-lg text-lg text-neutral-500">
-          Join business owners using KudosWall to turn happy customers into their best marketing
-          asset.
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a href="/login">
-            <Button
-              className="flex h-11 items-center gap-2 rounded-full px-7 text-base text-white"
-              style={{ backgroundColor: "#171717" }}
-            >
-              Start 14-day Pro trial
-              <ArrowRight className="size-4" />
-            </Button>
-          </a>
-          <a href="#how-it-works">
-            <Button
-              variant="outline"
-              className="h-11 rounded-full border-neutral-300 px-7 text-base text-neutral-700 hover:bg-neutral-100"
-            >
-              See how it works
-            </Button>
-          </a>
+    <section className="relative bg-white px-4 py-24 sm:py-32">
+      <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
+          <ShieldCheck className="size-4 text-emerald-600" weight="fill" />
+          <span>14 day unrestricted trial</span>
         </div>
-        <p className="text-sm text-neutral-400">
-          No credit card required · 14-day Pro trial · Free plan available
+
+        {/* Headline */}
+        <h2 className="mt-6 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl [text-wrap:balance]">
+          Start collecting testimonials today
+        </h2>
+
+        {/* Subheadline */}
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg [text-wrap:pretty]">
+          Join over 480 ambitious founders using KudosWall to turn happy customer praise into their highest converting sales asset.
+        </p>
+
+        {/* Primary Action Button */}
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+          <Link href="/login">
+            <Button className="group flex h-12 items-center gap-2 rounded-full bg-neutral-900 px-8 text-base font-semibold text-white shadow-xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
+              <span>Start free trial</span>
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" weight="bold" />
+            </Button>
+          </Link>
+        </div>
+
+        {/* Risk Reversal Footer */}
+        <p className="mt-4 text-xs font-medium text-neutral-500">
+          No credit card required · Cancel anytime · Full access to Pro features
         </p>
       </div>
     </section>

@@ -1,102 +1,78 @@
-import { Link2, Sparkles, Globe } from "lucide-react";
+"use client";
+
+import { LinkSimple, VideoCamera, Code } from "@phosphor-icons/react";
 
 const STEPS = [
   {
     number: "01",
-    icon: Link2,
-    title: "Create your collection",
+    icon: LinkSimple,
+    title: "Share your collection link",
     description:
-      "Create a collection wall in seconds and get a unique link. Share it via email, SMS, or social — anywhere you reach customers.",
-    color: "#e8527a",
-    bg: "#fff5f7",
+      "Generate a branded collection page with custom prompt questions and your logo in sixty seconds. Send via email, SMS, or post purchase redirects.",
   },
   {
     number: "02",
-    icon: Sparkles,
-    title: "Customers leave a review",
+    icon: VideoCamera,
+    title: "Gather authentic video and text",
     description:
-      "They click the link and share their experience with a photo, video, or written review — no account needed, takes under 60 seconds.",
-    color: "#7c3aed",
-    bg: "#f5f3ff",
+      "Customers record quick video reviews or type feedback with automatic transcription, permissions, and zero app download requirements.",
   },
   {
     number: "03",
-    icon: Globe,
-    title: "Publish a beautiful widget",
+    icon: Code,
+    title: "Embed with a single script tag",
     description:
-      "Approve the testimonials you love, customize the widget to match your brand, then embed it with a single line of code.",
-    color: "#16a34a",
-    bg: "#f0fdf4",
+      "Paste one lightweight embed code into Webflow, Framer, Next.js, WordPress, or Shopify to show live customer proof that updates automatically.",
   },
-] as const;
+];
 
 export default function HowItWorksSection() {
   return (
-    <section
-      id="how-it-works"
-      className="relative overflow-hidden px-4 py-24"
-      style={{ backgroundColor: "#ffffff" }}
-    >
-      {/* Dot grid bg */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="mb-16 text-center">
-          <span
-            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
-            style={{ color: "#7c3aed", backgroundColor: "#f5f3ff" }}
-          >
-            How it works
+    <section id="how-it-works" className="relative bg-white px-4 py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl">
+        {/* Section Header */}
+        <div className="mx-auto mb-16 max-w-[680px] text-center">
+          <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
+            Three simple steps
           </span>
-          <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
-            Up and running in <span style={{ color: "#e8527a" }}>under 5 minutes</span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+            From zero reviews to live social proof in minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
-            No technical setup. No complex integrations. Just share, collect, and embed.
+          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
+            No complex backend configuration. Share your link and watch high converting reviews roll into your dashboard.
           </p>
         </div>
 
-        {/* Steps */}
+        {/* 3 Step Cards Grid */}
         <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
-          {/* Connector line (desktop) */}
-          <div
-            aria-hidden="true"
-            className="absolute top-12 right-[calc(33.33%+12px)] left-[calc(33.33%+12px)] hidden h-px md:block"
-            style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
-          />
-
-          {STEPS.map(({ number, icon: Icon, title, description, color, bg }) => (
+          {STEPS.map(({ number, icon: Icon, title, description }) => (
             <div
               key={number}
-              className="relative flex flex-col items-center rounded-2xl border border-white/70 p-6 text-center shadow-sm sm:p-8"
-              style={{ backgroundColor: "#ffffff" }}
+              className="relative flex flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300 hover:shadow-md"
             >
-              {/* Step number badge */}
-              <div
-                className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold"
-                style={{ backgroundColor: color, color: "#ffffff" }}
-              >
-                {number}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-900">
+                    <Icon className="size-5" weight="bold" />
+                  </div>
+                  <span className="text-xs font-bold tracking-wider text-neutral-400">
+                    {number}
+                  </span>
+                </div>
+
+                <h3 className="mt-6 text-lg font-bold text-neutral-900 [text-wrap:balance]">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
+                  {description}
+                </p>
               </div>
 
-              {/* Icon */}
-              <div
-                className="mt-2 mb-5 flex size-14 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: bg }}
-              >
-                <Icon className="size-6" style={{ color }} />
+              <div className="mt-6 border-t border-neutral-100 pt-4">
+                <span className="text-xs font-semibold text-neutral-500">
+                  Step {number}
+                </span>
               </div>
-
-              <h3 className="mb-3 text-xl font-semibold text-neutral-900">{title}</h3>
-              <p className="text-sm leading-relaxed text-neutral-500">{description}</p>
             </div>
           ))}
         </div>

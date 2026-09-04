@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Timer, Crown, Users, Sparkles, Zap, Loader2 } from "lucide-react";
+import { Crown, Users, Sparkle, Lightning, CircleNotch, Timer } from "@phosphor-icons/react";
 import { Button } from "@my-better-t-app/ui/components/button";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
@@ -13,6 +13,15 @@ interface LTDCardProps {
   ltdPriceId?: string;
 }
 
+const LTD_FEATURES = [
+  "Everything in Agency tier",
+  "Unlimited text testimonials",
+  "Lifetime software updates",
+  "Full white label branding",
+  "Direct founder support",
+  "Zero ongoing subscription fees",
+];
+
 export default function LTDCard({ ltdPriceId }: LTDCardProps) {
   const { data: session, isPending: isSessionLoading } = authClient.useSession();
   const router = useRouter();
@@ -21,22 +30,19 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
   // Fetch real count of LTD workspaces
   const { data: ltdCountData, isLoading } = useQuery({
     ...trpc.billing.getLTDCount.queryOptions(),
-    refetchInterval: 30000, // Refresh every 30s
+    refetchInterval: 30000,
   });
 
-  // Start with 500 if loading, then calculate based on real data
   const realSeatsRemaining = ltdCountData ? Math.max(5, 500 - ltdCountData.count) : 500;
   const [displaySeats, setDisplaySeats] = useState(500);
   const [showCard, setShowCard] = useState(false);
 
   useEffect(() => {
-    // Check if they've visited before
     const hasVisited = localStorage.getItem("hasVisitedPricing");
     if (hasVisited) {
       setShowCard(true);
     } else {
       localStorage.setItem("hasVisitedPricing", "true");
-      // Show after 30 seconds
       const timer = setTimeout(() => {
         setShowCard(true);
       }, 30000);
@@ -49,24 +55,6 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
       setDisplaySeats(realSeatsRemaining);
     }
   }, [ltdCountData?.count, realSeatsRemaining]);
-
-  // FOMO decrement logic (only runs if we have some baseline count, for effect)
-  useEffect(() => {
-    if (isLoading) return;
-
-    const interval = setInterval(() => {
-      setDisplaySeats((prev) => {
-        // Slow down or stop decrement if we're near the real count or at 500
-        if (ltdCountData?.count === 0 && prev <= 498) return prev;
-        if (prev <= 5) return prev;
-
-        // Randomly decrement to show "activity" if we're below 500
-        if (Math.random() > 0.95) return prev - 1;
-        return prev;
-      });
-    }, 45000); // Slower interval (45s instead of 15s)
-    return () => clearInterval(interval);
-  }, [isLoading, ltdCountData?.count]);
 
   // Get user's first workspace to start checkout
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({
@@ -101,7 +89,6 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
 
     const workspace = dashboardData?.workspace;
     if (!workspace || !("id" in workspace)) {
-      // If data is still loading, wait
       if (isDashboardLoading) {
         toast("Preparing checkout...", { duration: 2000 });
         return;
@@ -116,7 +103,6 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
     });
   };
 
-  // Auto-trigger if returning from login with intent
   useEffect(() => {
     if (
       session &&
@@ -126,7 +112,6 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
       !createCheckout.isSuccess
     ) {
       handleClaim();
-      // Clean up the URL
       const newUrl = window.location.pathname + window.location.hash;
       window.history.replaceState({}, "", newUrl);
     }
@@ -135,92 +120,69 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
   if (!showCard) return null;
 
   return (
-    <div className="group relative mx-auto mb-14 w-full max-w-5xl">
-      <div className="absolute -inset-1.5 rounded-[2.5rem] bg-linear-to-r from-[#e8527a] via-[#bf3fbe] to-[#e8527a] opacity-20 blur transition duration-1000 group-hover:opacity-40" />
-
-      <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-[2.2rem] border border-white/10 bg-neutral-900 p-6 shadow-2xl sm:gap-8 md:p-10 lg:flex-row">
-        <div className="absolute top-0 right-0 p-8 opacity-10">
-          <Sparkles className="size-32 text-pink-500 blur-lg" />
-        </div>
-
-        <div className="z-10 flex-1 space-y-6">
+    <div className="relative mx-auto mb-14 w-full">
+      <div className="flex flex-col items-center justify-between gap-8 rounded-2xl border border-neutral-800 bg-[#181818] p-6 text-white shadow-xl sm:p-8 lg:flex-row">
+        {/* Left column details */}
+        <div className="flex-1 space-y-5">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-[#e8527a]/40 bg-white/5 px-3 py-1 shadow-inner">
-              <Crown className="size-3.5 text-[#e8527a]" />
-              <span className="text-[10px] font-black tracking-[0.2em] text-[#e8527a] uppercase">
-                Founder's Special: Access for Life
-              </span>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-neutral-700 bg-neutral-800 px-3 py-1 text-xs font-semibold text-neutral-200">
+              <Crown className="size-3.5 text-amber-400" weight="fill" />
+              <span>Founder special: Lifetime access</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider text-white/50 uppercase">
-              <Users className="size-3" />
-              <span>Only {displaySeats} seats remaining</span>
+            <div className="inline-flex items-center gap-1 text-xs font-medium text-neutral-400">
+              <Users className="size-3.5" />
+              <span>{displaySeats} seats remaining</span>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-3xl leading-[1.05] font-black tracking-tight text-white sm:text-4xl md:text-5xl">
-              Stop paying monthly. <br />
-              <span className="animate-gradient-x bg-linear-to-r from-[#e8527a] via-[#ff94b4] to-[#e8527a] bg-clip-text text-transparent">
-                Own your brand asset.
-              </span>
-            </h3>
-            <p className="max-w-lg text-base leading-relaxed text-neutral-400">
-              Unlock everything forever. Get all future updates, priority support, and
-              white-labeling for a fraction of the long-term cost. No monthly fees, ever.
-            </p>
-          </div>
+          <h3 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl [text-wrap:balance]">
+            Stop paying recurring monthly fees
+          </h3>
 
-          <div className="grid grid-cols-1 gap-x-8 gap-y-4 pt-2 sm:grid-cols-2">
-            {[
-              "Everything in Agency",
-              "Unlimited testimonials", // Video reviews coming soon
-              "Lifetime software updates",
-              "100% White-labeling",
-              "Founders Direct support",
-              "Zero-fee API for life",
-            ].map((f) => (
-              <div
-                key={f}
-                className="group/item flex items-center gap-3 text-sm font-semibold text-neutral-200"
-              >
-                <div className="rounded-full bg-[#e8527a]/10 p-1 transition-transform group-hover/item:scale-110">
-                  <Sparkles className="size-4 text-[#e8527a]" />
-                </div>
-                {f}
+          <p className="max-w-lg text-sm leading-relaxed text-neutral-300 [text-wrap:pretty]">
+            Get all future updates, priority support, and white label capabilities for a single payment. No subscriptions or hidden fees.
+          </p>
+
+          <div className="grid grid-cols-1 gap-2.5 pt-2 sm:grid-cols-2">
+            {LTD_FEATURES.map((f) => (
+              <div key={f} className="flex items-center gap-2 text-xs font-medium text-neutral-200">
+                <Sparkle className="size-3.5 shrink-0 text-amber-400" weight="fill" />
+                <span>{f}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-20 flex w-full flex-col items-center gap-5 rounded-[2rem] bg-white p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] sm:gap-6 sm:p-8 lg:w-[340px]">
-          <div className="space-y-2">
-            <div className="mb-1 flex items-center justify-center gap-2">
-              <span className="rounded-full bg-pink-50 px-3 py-1 text-[10px] font-black tracking-widest text-[#e8527a] uppercase">
-                Founder Discount
-              </span>
-            </div>
-            <div className="flex items-baseline justify-center gap-3">
-              <span className="text-5xl font-black tracking-tighter text-neutral-900 sm:text-6xl">
-                $199
-              </span>
-              <span className="text-xl font-bold text-neutral-400 line-through">$499</span>
-            </div>
-            <p className="text-[11px] font-black tracking-[0.2em] text-neutral-400 uppercase">
-              One Payment · Lifetime Access
-            </p>
+        {/* Right column checkout card */}
+        <div className="w-full rounded-xl border border-neutral-200 bg-white p-6 text-center text-neutral-900 shadow-md sm:w-80 shrink-0">
+          <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-700 uppercase">
+            One time payment
+          </span>
+
+          <div className="mt-4 flex items-baseline justify-center gap-2">
+            <span className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
+              $199
+            </span>
+            <span className="text-sm font-semibold text-neutral-400 line-through">
+              $499
+            </span>
           </div>
 
-          <div className="w-full space-y-3">
-            <div className="flex justify-between text-[11px] font-black tracking-widest text-[#e8527a] uppercase">
-              <span className="flex animate-pulse items-center gap-1.5">
-                <Timer className="size-3.5" />
-                Urgent: {displaySeats} Left
+          <p className="mt-1 text-xs font-medium text-neutral-500">
+            Lifetime updates included
+          </p>
+
+          <div className="mt-5 space-y-2">
+            <div className="flex justify-between text-[10px] font-semibold text-neutral-500 uppercase">
+              <span className="flex items-center gap-1">
+                <Timer className="size-3 text-neutral-700" />
+                <span>{displaySeats} left</span>
               </span>
-              <span>Nearly Full</span>
+              <span>Limited batch</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 shadow-inner">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
               <div
-                className="h-full bg-linear-to-r from-[#e8527a] to-[#bf3fbe] shadow-[0_0_10px_rgba(232,82,122,0.3)] transition-all duration-1000"
+                className="h-full bg-neutral-900 transition-all duration-700"
                 style={{ width: `${(displaySeats / 500) * 100}%` }}
               />
             </div>
@@ -229,13 +191,18 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
           <Button
             onClick={handleClaim}
             disabled={createCheckout.isPending}
-            className="h-16 w-full rounded-[1.25rem] bg-[#171717] text-lg font-black text-white shadow-xl shadow-neutral-200 transition-all hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]"
+            className="mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-4 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-[0.98]"
           >
-            {createCheckout.isPending ? <Loader2 className="mr-2 size-5 animate-spin" /> : null}
-            Claim Lifetime Access
-            <Zap className="ml-2 size-5 fill-white transition-transform group-hover:scale-125" />
+            {createCheckout.isPending ? (
+              <CircleNotch className="size-4 animate-spin" weight="bold" />
+            ) : null}
+            <span>Claim lifetime access</span>
+            <Lightning className="size-3.5 text-amber-400" weight="fill" />
           </Button>
-          <p className="text-[11px] font-medium text-neutral-400">Secure Checkout via Stripe</p>
+
+          <p className="mt-3 text-[10px] font-medium text-neutral-400">
+            Secure checkout powered by Stripe
+          </p>
         </div>
       </div>
     </div>

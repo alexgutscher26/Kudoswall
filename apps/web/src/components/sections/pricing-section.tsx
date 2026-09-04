@@ -28,8 +28,7 @@ const UI_PLANS: Plan[] = [
     monthlyPrice: "Free",
     yearlyPrice: "Free",
     period: "",
-    description:
-      "Start collecting social proof today. Up to 10 reviews with text and video support.",
+    description: "Start collecting customer proof today with up to 10 video and text reviews.",
     cta: "Get started free",
     ctaHref: "/login",
     highlight: false,
@@ -39,7 +38,7 @@ const UI_PLANS: Plan[] = [
       "1 Project workspace",
       "Text and video testimonials",
       "Grid layout widget",
-      "KudosWall branding",
+      "Standard KudosWall badge",
     ],
   },
   {
@@ -48,22 +47,22 @@ const UI_PLANS: Plan[] = [
     monthlyPrice: "$19",
     yearlyPrice: "$190",
     period: "per month",
-    description: "For growing businesses that want unlimited social proof and zero branding.",
+    description: "For growing SaaS and creators who want unlimited social proof with zero branding.",
     cta: "Start 14-day free trial",
     ctaHref: "/login",
     highlight: true,
-    badge: "14-Day Free Trial",
+    badge: "Most popular",
     features: [
       "Unlimited testimonials",
       "Unlimited embed widgets",
       "1 Project workspace",
-      "HD video downloads",
-      "All 4 widget layouts",
+      "High definition video downloads",
+      "All 4 widget layout styles",
       "Filter testimonials by tag",
-      "Custom branding & colors",
-      "Remove 'Powered by' badge",
-      "Custom domain for collection",
-      "CSV export & analytics",
+      "Custom branding and colors",
+      "Remove powered by badge",
+      "Custom collection domain",
+      "CSV export and analytics",
       "Priority email support",
     ],
   },
@@ -73,17 +72,17 @@ const UI_PLANS: Plan[] = [
     monthlyPrice: "$59",
     yearlyPrice: "$590",
     period: "per month",
-    description: "Manage 5 client brands. White-label everything. Look like a pro.",
-    cta: "Get started now",
+    description: "Manage multiple client workspaces with complete white label flexibility.",
+    cta: "Start agency trial",
     ctaHref: "/login",
     highlight: false,
     features: [
-      "Everything in Pro",
-      "Manage 5 client brands",
+      "Everything in Pro tier",
+      "Manage 5 client workspaces",
       "Unlimited embed widgets",
-      "Up to 3 team members",
-      "White-label everything",
-      "Priority VIP support",
+      "Up to 3 team seats",
+      "Full white label branding",
+      "Priority direct support",
     ],
   },
 ];
@@ -100,55 +99,36 @@ const PLANS = UI_PLANS.map((plan) => {
 
 export default function PricingSection() {
   return (
-    <section
-      id="pricing"
-      style={{ backgroundColor: "#ffffff" }}
-      className="relative overflow-hidden px-4 py-20"
-    >
-      {/* Dot-grid texture */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <span
-            className="mb-2 inline-block rounded-full px-3 py-1 text-[10px] font-semibold tracking-widest uppercase"
-            style={{ color: "#e8527a", backgroundColor: "#fff5f7" }}
-          >
-            Simple Pricing
+    <section id="pricing" className="relative bg-white px-4 py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl">
+        {/* Section Header */}
+        <div className="mx-auto mb-16 max-w-[680px] text-center">
+          <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
+            Simple transparent pricing
           </span>
-          <h2 className="text-3xl leading-tight font-black tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
-            Plans that scale with you.
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+            Plans that scale with your growth
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base font-medium text-neutral-500">
-            Join businesses turning testimonials into revenue. Start free, upgrade when you're
-            ready.
+          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
+            Start free with zero commitment. Upgrade when you need unlimited video reviews and custom branding.
           </p>
         </div>
 
-        {/* Lifetime Deal Section */}
+        {/* Lifetime Deal Special Card */}
         <Suspense
           fallback={
-            <div className="mb-14 h-[400px] w-full animate-pulse rounded-[2.2rem] bg-neutral-100" />
+            <div className="mb-14 h-96 w-full animate-pulse rounded-2xl bg-neutral-100" />
           }
         >
           <LTDCard ltdPriceId={CONFIG_PLANS.ltd.stripePriceIdLifetime} />
         </Suspense>
 
-        {/* Pricing Grid (includes Billing Switcher) */}
+        {/* Pricing Grid */}
         <PricingGrid plans={PLANS} />
 
-        {/* Footer note */}
-        <p className="mt-8 text-center text-xs font-medium text-neutral-400">
-          Secure, encrypted payments with bank-level security. Switch plans anytime from your
-          dashboard.
+        {/* Guarantee and Risk Reversal Footer */}
+        <p className="mt-10 text-center text-xs font-medium text-neutral-500">
+          All paid plans include a 14 day free trial · No credit card required to start · Cancel anytime with one click
         </p>
       </div>
     </section>

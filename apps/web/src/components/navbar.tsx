@@ -6,10 +6,10 @@ import { Logo } from "@my-better-t-app/ui/components/logo";
 import MobileMenu from "./mobile-menu";
 
 const NAV_LINKS = [
-  { href: "/free", label: "Free Tier" },
-  { href: "/vs", label: "Comparisons" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/blog", label: "Blog" },
+  { href: "#features", label: "Benefits" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#faq", label: "FAQ" },
 ] as const;
 
 export default async function Navbar() {
@@ -18,67 +18,59 @@ export default async function Navbar() {
   });
 
   return (
-    <header className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2">
+    <header className="fixed top-6 left-1/2 z-50 w-max max-w-[calc(100%-2rem)] -translate-x-1/2">
       <nav
-        className="flex items-center justify-between rounded-full px-4 py-2 shadow-sm backdrop-blur-md"
-        style={{
-          backgroundColor: "rgba(255,255,255,0.92)",
-          border: "1px solid rgba(0,0,0,0.09)",
-        }}
+        className="flex items-center gap-6 rounded-full border border-neutral-200/80 bg-white/90 px-4 py-2 shadow-sm backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300"
       >
-        {/* Left: Nav links */}
+        {/* Brand Logo */}
+        <Link href="/" className="flex items-center gap-2 select-none">
+          <Logo showText size={26} />
+        </Link>
+
+        {/* Center: Nav links */}
         <div className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <a
               key={href}
               href={href}
-              className="rounded-full px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors duration-200 hover:bg-neutral-100 hover:text-neutral-900"
             >
               {label}
             </a>
           ))}
         </div>
 
-        {/* Center: Logo */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none">
-          <Logo showText size={28} />
-        </Link>
-
-        {/* Right: Auth actions */}
-        <div className="ml-auto hidden items-center gap-2 md:flex">
+        {/* Right: Actions */}
+        <div className="hidden items-center gap-2 md:flex">
           {session ? (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard"
-                className="text-sm font-bold text-neutral-700 transition-colors hover:text-neutral-900"
-                style={{ fontFamily: "inherit" }}
-              >
-                Dashboard
-              </Link>
-            </div>
+            <Link
+              href="/dashboard"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-neutral-900 transition-colors hover:bg-neutral-100"
+            >
+              Dashboard
+            </Link>
           ) : (
             <>
               <Link href="/login">
                 <Button
-                  variant="outline"
-                  className="h-8 rounded-full border-neutral-300 px-4 text-sm text-neutral-700 hover:bg-neutral-100"
+                  variant="ghost"
+                  className="h-8 rounded-full px-3 text-xs font-semibold text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                 >
                   Log in
                 </Button>
               </Link>
               <Link href="/login">
                 <Button
-                  className="h-8 rounded-full px-4 text-sm text-white transition-all hover:bg-neutral-700 active:scale-95"
-                  style={{ backgroundColor: "#171717" }}
+                  className="h-8 rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-95"
                 >
-                  Get started →
+                  Start free trial
                 </Button>
               </Link>
             </>
           )}
         </div>
 
-        {/* Mobile: Hamburger & Menu */}
+        {/* Mobile Hamburger Morph */}
         <MobileMenu session={session} navLinks={NAV_LINKS} />
       </nav>
     </header>
