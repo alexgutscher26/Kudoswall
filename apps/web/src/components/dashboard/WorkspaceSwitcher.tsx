@@ -3,13 +3,8 @@
 import {
   useState,
   useEffect,
-  type JSXElementConstructor,
-  type Key,
-  type ReactElement,
-  type ReactNode,
-  type ReactPortal,
 } from "react";
-import { ChevronDown, Building2, Check, Loader2, Plus, X, ChevronRight } from "lucide-react";
+import { CaretDown, Buildings, Check, CircleNotch, Plus, X, CaretRight } from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,14 +17,13 @@ import {
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { trpc, queryClient } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 interface WorkspaceSwitcherProps {
   currentWorkspaceId: string;
   onWorkspaceChange: (workspaceId: string) => void;
   collapsed?: boolean;
 }
-
-import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 export function WorkspaceSwitcher({
   currentWorkspaceId,
@@ -81,34 +75,34 @@ export function WorkspaceSwitcher({
       <DropdownMenu>
         <DropdownMenuTrigger
           title={collapsed ? "Switch workspace" : undefined}
-          className={`group flex w-full items-center rounded-xl border border-neutral-100 bg-white text-left transition-all outline-none hover:bg-neutral-50 active:scale-[0.98] ${
+          className={`group flex w-full items-center rounded-xl border border-neutral-200 bg-white text-left transition-all outline-none hover:bg-neutral-50 active:scale-[0.98] ${
             collapsed ? "justify-center p-1" : "gap-3 p-2"
           }`}
         >
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-pink-500">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-800">
             {isLoading ? (
-              <Loader2 className="size-4 animate-spin" />
+              <CircleNotch className="size-4 animate-spin" weight="bold" />
             ) : (
-              <Building2 className="size-5" />
+              <Buildings className="size-4" weight="bold" />
             )}
           </div>
           {!collapsed && (
             <>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-neutral-900">
+                <p className="truncate text-xs font-bold text-neutral-900">
                   {activeWorkspace?.name || "Loading..."}
                 </p>
-                <p className="truncate text-[11px] font-medium text-neutral-400">
-                  Personal Workspace
+                <p className="truncate text-[10px] font-medium text-neutral-500">
+                  Workspace
                 </p>
               </div>
-              <ChevronDown className="mr-1 size-4 text-neutral-300 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              <CaretDown className="mr-1 size-3.5 text-neutral-400 transition-transform duration-200 group-data-[state=open]:rotate-180" weight="bold" />
             </>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 rounded-xl p-1" align="start">
+        <DropdownMenuContent className="w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg" align="start">
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+            <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
               Workspaces
             </DropdownMenuLabel>
             <div className="space-y-0.5">
@@ -116,21 +110,21 @@ export function WorkspaceSwitcher({
                 <DropdownMenuItem
                   key={ws.id}
                   onClick={() => onWorkspaceChange(ws.id as string)}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 transition-colors ${
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors ${
                     ws.id === currentWorkspaceId
-                      ? "bg-pink-50 font-semibold text-pink-600"
-                      : "text-neutral-600 hover:bg-neutral-50"
+                      ? "bg-neutral-900 font-semibold text-white"
+                      : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                   }`}
                 >
                   <div
-                    className={`flex size-6 shrink-0 items-center justify-center rounded-md ${
-                      ws.id === currentWorkspaceId ? "bg-white shadow-sm" : "bg-neutral-100"
+                    className={`flex size-5 shrink-0 items-center justify-center rounded ${
+                      ws.id === currentWorkspaceId ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700"
                     }`}
                   >
-                    <Building2 className="size-3" />
+                    <Buildings className="size-3" weight="bold" />
                   </div>
                   <span className="flex-1 truncate">{ws.name}</span>
-                  {ws.id === currentWorkspaceId && <Check className="size-3" />}
+                  {ws.id === currentWorkspaceId && <Check className="size-3" weight="bold" />}
                 </DropdownMenuItem>
               ))}
             </div>
@@ -138,15 +132,15 @@ export function WorkspaceSwitcher({
 
           {canCreateMoreWorkspaces && (
             <>
-              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuSeparator className="my-1 border-neutral-100" />
               <DropdownMenuItem
                 onClick={() => setIsModalOpen(true)}
-                className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-neutral-600 hover:bg-neutral-50"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
               >
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-neutral-100">
-                  <Plus className="size-3" />
+                <div className="flex size-5 shrink-0 items-center justify-center rounded bg-neutral-100">
+                  <Plus className="size-3 text-neutral-700" weight="bold" />
                 </div>
-                <span>Create Workspace</span>
+                <span>Create workspace</span>
               </DropdownMenuItem>
             </>
           )}
@@ -161,21 +155,18 @@ export function WorkspaceSwitcher({
             onClick={() => setIsModalOpen(false)}
           />
           <div
-            className="animate-in zoom-in-95 relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl duration-300"
-            style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+            className="animate-in zoom-in-95 relative w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300"
           >
             <div className="mb-6 flex items-center justify-between">
-              <h3
-                className="text-lg font-bold tracking-tight text-neutral-900"
-                style={{ fontFamily: "'Georgia', serif" }}
-              >
-                New Workspace
+              <h3 className="text-base font-bold text-neutral-900">
+                New workspace
               </h3>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
+                className="flex size-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
               >
-                <X className="size-4 text-neutral-400" />
+                <X className="size-4" weight="bold" />
               </button>
             </div>
 
@@ -186,11 +177,11 @@ export function WorkspaceSwitcher({
                   createWorkspace.mutate({ name: newWorkspaceName });
                 }
               }}
-              className="space-y-6"
+              className="space-y-5"
             >
-              <div className="space-y-2">
-                <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Workspace Name
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-700">
+                  Workspace name
                 </label>
                 <input
                   autoFocus
@@ -198,7 +189,7 @@ export function WorkspaceSwitcher({
                   placeholder="e.g. Acme Corp"
                   value={newWorkspaceName}
                   onChange={(e) => setNewWorkspaceName(e.target.value)}
-                  className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-sm font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                  className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium transition-all outline-none placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 />
               </div>
 
@@ -206,21 +197,21 @@ export function WorkspaceSwitcher({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-full px-4 py-2.5 text-sm font-bold text-neutral-500 transition-all hover:bg-neutral-50"
+                  className="flex-1 rounded-xl border border-neutral-200 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createWorkspace.isPending || !newWorkspaceName.trim()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
                 >
                   {createWorkspace.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
+                    <CircleNotch className="size-4 animate-spin" weight="bold" />
                   ) : (
                     <>
-                      Create
-                      <ChevronRight className="size-4" />
+                      <span>Create</span>
+                      <CaretRight className="size-3.5" weight="bold" />
                     </>
                   )}
                 </button>

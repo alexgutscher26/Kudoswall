@@ -1,7 +1,7 @@
 "use client";
 
 import { trpc } from "@/utils/trpc";
-import { Gift, Copy, Check, Users, Zap, ArrowRight, ShieldCheck, Star } from "lucide-react";
+import { Copy, Check, Users, Lightning, ArrowRight, ShieldCheck, Star, Sparkle } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
@@ -32,178 +32,162 @@ export default function RewardsPage() {
       pageTitle="Rewards & Growth"
       pageSubtitle="Give 30 days of badge-free embedding, get 30 days back."
     >
-      <div className="mx-auto max-w-5xl space-y-8">
+      <div className="mx-auto max-w-5xl space-y-6 pb-12">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-pink-100 bg-gradient-to-br from-white to-pink-50/30 p-8 sm:p-12">
-          {/* Decorative elements */}
-          <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-pink-500/5 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-pink-500/5 blur-3xl" />
-
-          <div className="relative flex flex-col items-center text-center lg:flex-row lg:items-start lg:justify-between lg:text-left">
-            <div className="max-w-xl space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-[11px] font-black tracking-widest text-pink-500 uppercase shadow-sm">
-                <Star className="size-3 fill-pink-500" />
-                Growth Engine
+        <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 sm:p-10 shadow-sm">
+          <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:justify-between lg:text-left gap-8">
+            <div className="max-w-xl space-y-4">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-800">
+                <Star className="size-3.5 text-amber-500" weight="fill" />
+                <span>Growth rewards</span>
               </div>
 
-              <h1 className="text-4xl font-black tracking-tight text-neutral-900 sm:text-5xl">
-                Refer a friend, <br />
-                <span className="text-pink-500">Remove the badge.</span>
+              <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+                Refer a founder, remove the badge
               </h1>
 
-              <p className="text-lg leading-relaxed font-medium text-neutral-500">
-                Help another founder build social proof. When they embed their first wall,
-                <span className="font-bold text-neutral-900"> both of you </span>
-                get 30 days of badge-free embedding (a Pro feature).
+              <p className="text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
+                Help another founder build authentic social proof. When they embed their first wall, both of you get 30 days of badge-free embedding.
               </p>
             </div>
 
-            <div className="mt-12 w-full max-w-sm lg:mt-0">
-              <Card className="overflow-hidden rounded-3xl border-2 border-neutral-100 bg-white p-6 shadow-xl shadow-pink-500/5">
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-                      Your Unique Invite Link
-                    </label>
-                    <div className="flex items-center gap-2 rounded-2xl border-2 border-neutral-50 bg-neutral-50 p-1.5 transition-all focus-within:border-pink-500/20 focus-within:bg-white">
-                      <div className="flex-1 truncate px-3 py-1 font-mono text-xs font-bold text-neutral-500">
-                        {isLoading ? "Generating..." : stats?.referralLink}
-                      </div>
-                      <Button
-                        onClick={handleCopy}
-                        disabled={isLoading}
-                        className="h-10 rounded-xl bg-neutral-900 px-4 text-[11px] font-black tracking-widest text-white uppercase transition-all hover:bg-neutral-800 active:scale-95"
-                      >
-                        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                        <span className="ml-2">{copied ? "Copied" : "Copy"}</span>
-                      </Button>
-                    </div>
+            <div className="w-full max-w-sm shrink-0">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-5 shadow-sm space-y-3">
+                <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                  Your unique invite link
+                </label>
+                <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-sm">
+                  <div className="flex-1 truncate px-2.5 font-mono text-xs text-neutral-600">
+                    {isLoading ? "Generating..." : stats?.referralLink}
                   </div>
-
-                  <p className="text-center text-[10px] leading-tight font-medium text-neutral-400">
-                    Share this link with founders on Twitter, Slack, or via Email.
-                  </p>
+                  <Button
+                    onClick={handleCopy}
+                    disabled={isLoading}
+                    className="h-8 rounded-lg bg-neutral-900 px-3 text-xs font-semibold text-white transition-all hover:bg-neutral-800 active:scale-95"
+                  >
+                    {copied ? <Check className="size-3.5" weight="bold" /> : <Copy className="size-3.5" weight="bold" />}
+                    <span className="ml-1.5">{copied ? "Copied" : "Copy"}</span>
+                  </Button>
                 </div>
-              </Card>
+                <p className="text-[11px] text-neutral-500 text-center">
+                  Share via Twitter, Slack, or direct email.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-6 sm:grid-cols-3">
-          <Card className="flex flex-col items-center justify-center gap-2 rounded-[2rem] border-2 border-neutral-100 bg-white p-8 text-center transition-all hover:border-pink-200">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-400">
-              <Users className="size-6" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-800">
+              <Users className="size-5" weight="bold" />
             </div>
             <div>
-              <p className="text-3xl font-black text-neutral-900">{stats?.totalReferred || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                Founders Referred
+              <p className="text-3xl font-bold tracking-tight text-neutral-900">{stats?.totalReferred || 0}</p>
+              <p className="text-xs font-semibold text-neutral-500">
+                Founders referred
               </p>
             </div>
-          </Card>
+          </div>
 
-          <Card className="flex flex-col items-center justify-center gap-2 rounded-[2rem] border-2 border-neutral-100 bg-white p-8 text-center transition-all hover:border-pink-200">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500">
-              <Zap className="size-6 fill-emerald-500" />
+          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-800">
+              <Lightning className="size-5 text-amber-500" weight="fill" />
             </div>
             <div>
-              <p className="text-3xl font-black text-neutral-900">{stats?.totalActivated || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                Activations
+              <p className="text-3xl font-bold tracking-tight text-neutral-900">{stats?.totalActivated || 0}</p>
+              <p className="text-xs font-semibold text-neutral-500">
+                Active widgets
               </p>
             </div>
-          </Card>
+          </div>
 
-          <Card className="flex flex-col items-center justify-center gap-2 rounded-[2rem] border-2 border-neutral-100 bg-pink-500 p-8 text-center text-white shadow-lg shadow-pink-500/20 transition-all hover:scale-[1.02]">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-white/20">
-              <ShieldCheck className="size-6 text-white" />
+          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-neutral-900 bg-neutral-900 p-6 text-center text-white shadow-md">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-white/10 text-white">
+              <ShieldCheck className="size-5" weight="fill" />
             </div>
             <div>
-              <p className="text-3xl font-black">{stats?.daysRemaining || 0}</p>
-              <p className="text-[10px] font-bold tracking-widest text-white/70 uppercase">
-                Days of Badge-Free remaining
+              <p className="text-3xl font-bold tracking-tight text-white">{stats?.daysRemaining || 0}</p>
+              <p className="text-xs font-semibold text-neutral-300">
+                Badge-free days left
               </p>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* How it works & Referral List */}
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-black tracking-tight text-neutral-900">How it works</h2>
+        {/* How it works & Referrals */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
+            <h2 className="text-base font-bold text-neutral-900">How rewards work</h2>
 
             <div className="space-y-4">
               {[
                 {
                   step: 1,
-                  title: "Invite a Founder",
-                  desc: "Send your link to someone who needs to showcase testimonials.",
+                  title: "Invite a founder",
+                  desc: "Send your invite link to someone building a product or service.",
                 },
                 {
                   step: 2,
-                  title: "They setup their wall",
-                  desc: "They get 50 testimonials free and their first 30 days are badge-free immediately.",
+                  title: "They create their wall",
+                  desc: "They collect testimonials and get 30 days badge-free immediately.",
                 },
                 {
                   step: 3,
-                  title: "They embed it",
-                  desc: "Once they embed their first widget and it gets 1 view, your reward activates.",
+                  title: "They embed on their site",
+                  desc: "Once their embedded widget gets its first live view, your reward activates.",
                 },
                 {
                   step: 4,
-                  title: "Rewards Stack",
-                  desc: "Refer 10 people? That's 300 days of Pro-tier branding for free.",
+                  title: "Rewards stack indefinitely",
+                  desc: "Refer 10 founders? That unlocks 300 continuous days of badge-free display.",
                 },
               ].map((item) => (
-                <div key={item.step} className="flex gap-4">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-black text-white">
+                <div key={item.step} className="flex gap-3.5 items-start">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
                     {item.step}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-900">{item.title}</h3>
-                    <p className="text-xs font-medium text-neutral-400">{item.desc}</p>
+                    <h3 className="text-xs font-bold text-neutral-900">{item.title}</h3>
+                    <p className="mt-0.5 text-xs text-neutral-500 [text-wrap:pretty]">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h2 className="text-2xl font-black tracking-tight text-neutral-900">Your Referrals</h2>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-neutral-900">Your referrals</h2>
             <ReferralList />
           </div>
         </div>
 
-        {/* Skip the wait CTA */}
-        <Card className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border-2 border-neutral-900 bg-neutral-900 p-8 text-white">
-          <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-pink-500 px-3 py-1 text-[9px] font-black tracking-widest text-white uppercase">
-              Pro Feature Preview
+        {/* Pro CTA banner */}
+        <div className="relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-900 p-6 sm:p-8 text-white shadow-xl">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-neutral-200">
+              <Sparkle className="size-3.5 text-amber-400" weight="fill" />
+              <span>Instant upgrade</span>
             </div>
-            <h3 className="text-2xl leading-tight font-black">
-              Get a taste of <br />
-              the Pro Life.
+            <h3 className="text-2xl font-bold tracking-tight text-white [text-wrap:balance]">
+              Skip the wait and upgrade directly
             </h3>
-            <p className="text-sm leading-relaxed font-medium text-neutral-400">
-              Removing the "Powered by KudosWall" badge is usually reserved for our Pro customers.
-              We're letting you earn it so you can see how much cleaner your site looks.
+            <p className="text-xs leading-relaxed text-neutral-300 max-w-xl [text-wrap:pretty]">
+              Removing the KudosWall branding badge is standard on all Pro plans, alongside HD video downloads and unlimited collection.
             </p>
           </div>
 
-          <div className="relative z-10 pt-8">
+          <div className="pt-6">
             <Button
               onClick={() => (window.location.href = "/dashboard/settings?tab=billing")}
-              className="group flex h-12 items-center justify-center gap-2 rounded-2xl bg-white px-8 text-[12px] font-black tracking-widest text-neutral-900 uppercase transition-all hover:bg-neutral-100 active:scale-[0.98]"
+              className="group flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-6 text-xs font-bold text-neutral-900 shadow-sm transition-all hover:bg-neutral-100 active:scale-[0.98]"
             >
-              Skip the wait, Go Pro
-              <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+              <span>Unlock Pro features</span>
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" weight="bold" />
             </Button>
           </div>
-
-          {/* Background Glow */}
-          <div className="pointer-events-none absolute -right-20 -bottom-20 size-64 rounded-full bg-pink-500/20 blur-3xl" />
-        </Card>
+        </div>
       </div>
     </DashboardShell>
   );
@@ -214,9 +198,9 @@ function ReferralList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-neutral-100" />
+          <div key={i} className="h-14 w-full animate-pulse rounded-xl bg-neutral-100" />
         ))}
       </div>
     );
@@ -224,50 +208,50 @@ function ReferralList() {
 
   if (!list || list.length === 0) {
     return (
-      <Card className="flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-neutral-100 bg-neutral-50/50 p-12 text-center">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-white text-neutral-300 shadow-sm">
-          <Users className="size-6" />
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 p-8 text-center">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-400">
+          <Users className="size-5" weight="bold" />
         </div>
-        <p className="text-sm font-bold text-neutral-400">No referrals yet.</p>
-        <p className="mt-1 text-[11px] font-medium text-neutral-300">
-          Share your link to get started!
+        <p className="text-xs font-bold text-neutral-700">No referrals yet</p>
+        <p className="mt-0.5 text-[11px] text-neutral-500">
+          Share your invite link above to get started.
         </p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {list.map((u) => (
-        <Card
+        <div
           key={u.id}
-          className="flex items-center justify-between rounded-2xl border-2 border-neutral-50 bg-white p-4 transition-all hover:border-pink-100"
+          className="flex items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50/50 p-3.5 transition-colors hover:bg-neutral-50"
         >
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-neutral-50 text-[10px] font-black text-neutral-400">
+            <div className="flex size-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">
               {u.name?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-[13px] font-bold text-neutral-900">{u.name}</p>
-              <p className="text-[10px] font-medium text-neutral-400">{u.email}</p>
+              <p className="text-xs font-bold text-neutral-900">{u.name}</p>
+              <p className="text-[11px] text-neutral-500">{u.email}</p>
             </div>
           </div>
           <div className="text-right">
-            <div
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black tracking-widest uppercase ${
+            <span
+              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
                 u.status === "Activated"
-                  ? "bg-emerald-50 text-emerald-500"
-                  : "bg-neutral-50 text-neutral-400"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-neutral-100 text-neutral-600"
               }`}
             >
-              {u.status === "Activated" && <Check className="size-2.5" />}
+              {u.status === "Activated" && <Check className="size-2.5" weight="bold" />}
               {u.status}
-            </div>
-            <p className="mt-1 text-[9px] font-bold tracking-widest text-neutral-300 uppercase">
-              Joined {new Date(u.createdAt).toLocaleDateString()}
+            </span>
+            <p className="mt-0.5 text-[10px] text-neutral-400">
+              {new Date(u.createdAt).toLocaleDateString()}
             </p>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );

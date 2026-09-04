@@ -19,7 +19,7 @@ const FAQS: FAQItem[] = [
   {
     question: "Can I customize the widgets to match my brand colors and dark mode?",
     answer:
-      "Yes. You have complete control over corner radii, typography, dark or light themes, card borders, and layout styles such as walls, carousels, marquees, and floating badges.",
+      "Yes. You have complete control over corner radii, typography, dark or light themes, card borders, and layout styles including Grid, Masonry, Carousel, and Bento.",
   },
   {
     question: "How do I prevent spam or negative reviews from appearing on my site?",

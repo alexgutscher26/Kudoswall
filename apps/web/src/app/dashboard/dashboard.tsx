@@ -6,22 +6,21 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard,
-  MessageSquareQuote,
-  BarChart2,
-  Code2,
-  Settings,
-  LogOut,
+  House,
+  Quotes,
+  ChartBar,
+  Code,
+  Gear,
+  SignOut,
   Plus,
   Globe,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Menu,
+  CaretRight,
+  CaretLeft,
+  List,
   X,
   Lock,
   Gift,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
 import { WorkspaceSwitcher } from "@/components/dashboard/WorkspaceSwitcher";
 import { gooeyToast as toast } from "goey-toast";
@@ -40,31 +39,14 @@ type RecentTestimonial = DashboardData["recentTestimonials"][number];
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
-  { href: "/dashboard/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
+  { href: "/dashboard", icon: House, label: "Overview" },
+  { href: "/dashboard/testimonials", icon: Quotes, label: "Testimonials" },
   { href: "/dashboard/collection", icon: Globe, label: "Collection Page" },
-  { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics", feature: "analytics" },
-  { href: "/dashboard/embed", icon: Code2, label: "Embed Widget" },
+  { href: "/dashboard/analytics", icon: ChartBar, label: "Analytics", feature: "analytics" },
+  { href: "/dashboard/embed", icon: Code, label: "Embed Widget" },
   { href: "/dashboard/rewards", icon: Gift, label: "Rewards" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+  { href: "/dashboard/settings", icon: Gear, label: "Settings" },
 ] as const;
-
-// ─── Dot-grid background ──────────────────────────────────────────────────────
-
-// ─── Dot-grid background ──────────────────────────────────────────────────────
-
-function DotGrid({ opacity = 0.08 }: { opacity?: number }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-      style={{
-        backgroundImage: `radial-gradient(circle, rgba(0,0,0,${opacity}) 1.5px, transparent 1.5px)`,
-        backgroundSize: "20px 20px",
-      }}
-    />
-  );
-}
 
 function setCookie(name: string, value: string, days = 7) {
   if (typeof document === "undefined") return;
@@ -112,12 +94,12 @@ function NavContent({
     if (feature === "analytics" && (!plan || plan === "free")) return true;
     return false;
   };
+
   return (
     <>
       {/* Workspace Switcher */}
       <div
-        className={`pt-5 pb-4 ${collapsed ? "px-1" : "px-3"}`}
-        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+        className={`pt-5 pb-4 border-b border-neutral-100 ${collapsed ? "px-1" : "px-3"}`}
       >
         <WorkspaceSwitcher
           currentWorkspaceId={currentWorkspaceId}
@@ -127,7 +109,7 @@ function NavContent({
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {NAV_ITEMS.map((item) => {
           const { href, icon: Icon, label } = item;
           const isActive = pathname === href;
@@ -149,14 +131,14 @@ function NavContent({
                     description: `Upgrade to KudosWall Pro to unlock ${label}, unlimited testimonials, video downloads, and custom domains.`,
                   });
                 }}
-                className={`flex w-full cursor-pointer items-center rounded-xl py-2.5 text-[13px] font-medium text-neutral-400 transition-colors hover:bg-pink-50/60 hover:text-pink-600 ${
+                className={`flex w-full cursor-pointer items-center rounded-xl py-2 text-xs font-semibold text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-800 ${
                   collapsed ? "justify-center px-0" : "gap-3 px-3"
                 }`}
                 title={`${label} is a Pro feature — Click to unlock`}
               >
-                <Icon className="size-4 shrink-0" />
-                {!collapsed && label}
-                {!collapsed && <Lock className="ml-auto size-3 text-neutral-400" />}
+                <Icon className="size-4 shrink-0" weight="bold" />
+                {!collapsed && <span>{label}</span>}
+                {!collapsed && <Lock className="ml-auto size-3.5 text-neutral-400" weight="bold" />}
               </button>
             );
           }
@@ -167,24 +149,19 @@ function NavContent({
               href={linkHref}
               onClick={onNavClick}
               title={collapsed ? label : undefined}
-              className={`flex items-center rounded-xl py-2.5 text-[13px] font-medium transition-all duration-150 ${
+              className={`flex items-center rounded-xl py-2 text-xs font-semibold transition-all duration-200 ${
                 collapsed ? "justify-center px-0" : "gap-3 px-3"
               } ${
                 isActive
-                  ? "bg-pink-500/10 font-semibold text-pink-600 shadow-xs"
-                  : "text-neutral-600 hover:bg-neutral-100/80 hover:text-neutral-900"
+                  ? "bg-neutral-900 text-white shadow-sm"
+                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
               }`}
             >
               <Icon
-                className={`size-4 shrink-0 ${isActive ? "text-pink-600" : "text-neutral-400"}`}
+                className={`size-4 shrink-0 ${isActive ? "text-white" : "text-neutral-500"}`}
+                weight={isActive ? "bold" : "regular"}
               />
-              {!collapsed && label}
-              {isActive && !collapsed && (
-                <div
-                  className="ml-auto size-1.5 rounded-full"
-                  style={{ backgroundColor: "#e8527a" }}
-                />
-              )}
+              {!collapsed && <span>{label}</span>}
             </Link>
           );
         })}
@@ -199,24 +176,21 @@ function NavContent({
             onNewCollection();
           }}
           title={collapsed ? "New Collection Link" : undefined}
-          className={`group flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-[13px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] ${
+          className={`group flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-[0.98] ${
             collapsed ? "px-0" : "px-4"
           }`}
-          style={{ backgroundColor: "#171717" }}
         >
-          <Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" />
-          {!collapsed && "New Collection Link"}
+          <Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" weight="bold" />
+          {!collapsed && "New collection link"}
         </button>
       </div>
 
       {/* User */}
       <div
-        className={`flex shrink-0 items-center py-4 ${collapsed ? "justify-center px-2" : "gap-3 px-4"}`}
-        style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+        className={`flex shrink-0 items-center border-t border-neutral-100 py-4 ${collapsed ? "justify-center px-2" : "gap-3 px-4"}`}
       >
         <div
-          className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-          style={{ backgroundColor: "#e8527a" }}
+          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white"
           title={collapsed ? userName : undefined}
         >
           {userName.charAt(0).toUpperCase()}
@@ -224,21 +198,21 @@ function NavContent({
         {!collapsed && (
           <>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] leading-tight font-semibold text-neutral-900">
+              <p className="truncate text-xs font-bold text-neutral-900">
                 {userName}
               </p>
-              <p className="mt-0.5 truncate text-[11px] leading-tight text-neutral-400">
+              <p className="mt-0.5 truncate text-[11px] text-neutral-500">
                 {userEmail}
               </p>
             </div>
             <button
               type="button"
               onClick={onSignOut}
-              className="p-1 text-neutral-300 transition-colors hover:text-neutral-600"
+              className="p-1 text-neutral-400 transition-colors hover:text-neutral-900"
               title="Sign out"
               aria-label="Sign out"
             >
-              <LogOut className="size-3.5" />
+              <SignOut className="size-4" weight="bold" />
             </button>
           </>
         )}
@@ -247,7 +221,8 @@ function NavContent({
   );
 }
 
-// ─── Desktop sidebar (hidden on mobile) ──────────────────────────────────────
+// ─── Desktop sidebar ─────────────────────────────────────────────────────────
+
 function DesktopSidebar({
   userName,
   userEmail,
@@ -270,13 +245,9 @@ function DesktopSidebar({
   const pathname = usePathname();
   return (
     <aside
-      className={`dashboard-sidebar fixed top-0 left-0 z-40 hidden h-screen flex-col transition-[width] duration-300 lg:flex ${
+      className={`dashboard-sidebar fixed top-0 left-0 z-40 hidden h-screen flex-col border-r border-neutral-200 bg-white transition-[width] duration-300 lg:flex ${
         collapsed ? "w-16" : "w-60"
       }`}
-      style={{
-        backgroundColor: "#ffffff",
-        borderRight: "1px solid rgba(0,0,0,0.07)",
-      }}
     >
       <NavContent
         pathname={pathname}
@@ -294,6 +265,7 @@ function DesktopSidebar({
 }
 
 // ─── Mobile drawer ────────────────────────────────────────────────────────────
+
 function MobileDrawer({
   open,
   onClose,
@@ -323,17 +295,13 @@ function MobileDrawer({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm lg:hidden"
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
       {/* Drawer */}
       <div
-        className="animate-in slide-in-from-left fixed top-0 left-0 z-50 flex h-screen w-72 flex-col duration-200 lg:hidden"
-        style={{
-          backgroundColor: "#ffffff",
-          borderRight: "1px solid rgba(0,0,0,0.07)",
-        }}
+        className="animate-in slide-in-from-left fixed top-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-neutral-200 bg-white duration-200 lg:hidden"
       >
         {/* Close button */}
         <button
@@ -342,7 +310,7 @@ function MobileDrawer({
           aria-label="Close menu"
           className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
         >
-          <X className="size-4 text-neutral-500" />
+          <X className="size-4 text-neutral-500" weight="bold" />
         </button>
         <NavContent
           pathname={pathname}
@@ -381,45 +349,37 @@ function TopBar({
 }) {
   return (
     <header
-      className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8"
-      style={{
-        backgroundColor: "rgba(255,255,255,0.9)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(0,0,0,0.07)",
-      }}
+      className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8"
     >
       <div className="flex items-center gap-3">
-        {/* Collapse toggle — only on desktop */}
+        {/* Collapse toggle — desktop only */}
         <button
           type="button"
           onClick={onToggleCollapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="hidden size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50 lg:flex"
-          style={{ borderColor: "rgba(0,0,0,0.1)" }}
+          className="hidden size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-100 lg:flex"
         >
           {collapsed ? (
-            <ChevronsRight className="size-4 text-neutral-600" />
+            <CaretRight className="size-3.5" weight="bold" />
           ) : (
-            <ChevronsLeft className="size-4 text-neutral-600" />
+            <CaretLeft className="size-3.5" weight="bold" />
           )}
         </button>
 
-        {/* Hamburger — only on mobile */}
+        {/* Hamburger — mobile only */}
         <button
           type="button"
           onClick={onMenuOpen}
           aria-label="Open navigation"
-          className="flex size-8 items-center justify-center rounded-full border transition-colors hover:bg-neutral-50 lg:hidden"
-          style={{ borderColor: "rgba(0,0,0,0.1)" }}
+          className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-100 lg:hidden"
         >
-          <Menu className="size-4 text-neutral-600" />
+          <List className="size-4" weight="bold" />
         </button>
 
         <div className="flex items-center gap-3">
           <div>
-            <p className="flex items-center gap-2 text-[15px] leading-none font-bold text-neutral-900">
+            <p className="flex items-center gap-2 text-sm font-bold text-neutral-900">
               {pageTitle}
               {isLive && (
                 <span className="relative flex h-2 w-2">
@@ -428,8 +388,8 @@ function TopBar({
                 </span>
               )}
             </p>
-            <p className="mt-0.5 hidden text-[12px] text-neutral-400 sm:block">
-              {pageSubtitle ?? `Welcome back, ${userName} 👋`}
+            <p className="hidden text-[11px] text-neutral-500 sm:block">
+              {pageSubtitle ?? `Welcome back, ${userName}`}
             </p>
           </div>
         </div>
@@ -437,8 +397,6 @@ function TopBar({
     </header>
   );
 }
-
-// ─── Modal ──────────────────────────────────────────────────────────────────
 
 // ─── Modal ──────────────────────────────────────────────────────────────────
 
@@ -515,131 +473,118 @@ function NewCollectionModal({
 
       {/* Content */}
       <div
-        className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl duration-300"
-        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+        className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300 sm:p-8"
       >
-        <DotGrid opacity={0.04} />
-
-        <div className="relative p-6 sm:p-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h3
-              className="text-xl font-bold tracking-tight text-neutral-900"
-              style={{ fontFamily: "'Georgia', serif" }}
-            >
-              New Collection Link
-            </h3>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-neutral-50"
-            >
-              <X className="size-4 text-neutral-400" />
-            </button>
-          </div>
-
-          <p className="mb-8 text-[13px] leading-relaxed text-neutral-500">
-            Create a dedicated page where your customers can record or write their testimonials.
-          </p>
-
-          {permissions && !permissions.canAddProject ? (
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-center">
-                <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                  <Lock className="size-6" />
-                </div>
-                <h4 className="text-base font-bold text-neutral-900">Project Limit Reached</h4>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-600">
-                  Your current {permissions.name} plan includes {permissions.limits.maxProjects}{" "}
-                  project link. Upgrade to the Agency plan to manage up to 5 projects and client
-                  brands.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
-                >
-                  Cancel
-                </button>
-                <Link
-                  href={`/dashboard/settings?tab=billing&workspaceId=${workspaceId}` as any}
-                  onClick={onClose}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.98]"
-                >
-                  Upgrade to Agency
-                  <ChevronRight className="size-4" />
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Project / Campaign Name
-                </label>
-                <input
-                  autoFocus
-                  name="name"
-                  type="text"
-                  required
-                  placeholder="e.g. April 2024 Product Launch"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-[14px] font-medium transition-all outline-none placeholder:text-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-                />
-              </div>
-
-              <div className="space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
-                <p className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                  Preview URL
-                </p>
-                <code className="flex flex-col gap-1 font-mono text-[12px] font-bold text-neutral-400">
-                  <div className="flex items-center gap-1.5">
-                    <Globe className="size-3" />
-                    kudoswall.org/{workspaceSlug}/
-                    <span className={name ? "text-pink-500" : "text-neutral-300"}>
-                      {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
-                    </span>
-                  </div>
-                </code>
-              </div>
-
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 rounded-full px-4 py-2.5 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50 active:scale-[0.98]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[14px] font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-                  style={{ backgroundColor: "#171717" }}
-                >
-                  {loading ? (
-                    <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  ) : (
-                    <>
-                      Create Link
-                      <ChevronRight className="size-3.5" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
+        <div className="mb-6 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-neutral-900">
+            New collection link
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex size-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+          >
+            <X className="size-4" weight="bold" />
+          </button>
         </div>
+
+        <p className="mb-6 text-xs text-neutral-500 [text-wrap:pretty]">
+          Create a dedicated page where your customers can record video or write testimonials.
+        </p>
+
+        {permissions && !permissions.canAddProject ? (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-5 text-center">
+              <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+                <Lock className="size-5" weight="bold" />
+              </div>
+              <h4 className="text-sm font-bold text-neutral-900">Project limit reached</h4>
+              <p className="mt-1 text-xs text-neutral-600 [text-wrap:pretty]">
+                Your current {permissions.name} plan includes {permissions.limits.maxProjects}{" "}
+                project link. Upgrade to the Agency plan to manage up to 5 project workspaces.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-xl border border-neutral-200 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
+              >
+                Cancel
+              </button>
+              <Link
+                href={`/dashboard/settings?tab=billing&workspaceId=${workspaceId}` as any}
+                onClick={onClose}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98]"
+              >
+                <span>Upgrade to Agency</span>
+                <CaretRight className="size-3.5" weight="bold" />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-700">
+                Project / Campaign name
+              </label>
+              <input
+                autoFocus
+                name="name"
+                type="text"
+                required
+                placeholder="e.g. Product Launch Reviews"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium transition-all outline-none placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+              />
+            </div>
+
+            <div className="space-y-1.5 rounded-xl border border-neutral-200 bg-neutral-50 p-3.5">
+              <p className="text-[11px] font-semibold text-neutral-600">
+                Preview URL
+              </p>
+              <code className="flex items-center gap-1.5 font-mono text-[11px] text-neutral-600">
+                <Globe className="size-3 text-neutral-400" />
+                <span>kudoswall.org/{workspaceSlug}/</span>
+                <span className="font-bold text-neutral-900">
+                  {name ? name.toLowerCase().replace(/\s+/g, "-") : "link-slug"}
+                </span>
+              </code>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-xl border border-neutral-200 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : (
+                  <>
+                    <span>Create link</span>
+                    <CaretRight className="size-3.5" weight="bold" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
 }
 
 // ─── Dashboard shell ──────────────────────────────────────────────────────────
-// When `children` is provided it renders instead of the default overview content.
 
 export default function DashboardShell({
   userName,
@@ -667,7 +612,7 @@ export default function DashboardShell({
 
   const SIDEBAR_COLLAPSED_KEY = "kudoswall:sidebar-collapsed";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false; // SSR guard
+    if (typeof window === "undefined") return false;
     try {
       return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
     } catch {
@@ -675,20 +620,16 @@ export default function DashboardShell({
     }
   });
 
-  // Persist sidebar collapse state (client-only)
   useEffect(() => {
     try {
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? "true" : "false");
     } catch {}
   }, [sidebarCollapsed]);
 
-  const [testimonialFilter, setTestimonialFilter] = useState<"All" | "Text">("All");
-
   // Auto-open modal if `new=project` is in URL
   useEffect(() => {
     if (searchParams.get("new") === "project") {
       setNewCollectionOpen(true);
-      // Clean up URL to avoid re-opening on refresh
       const params = new URLSearchParams(searchParams.toString());
       params.delete("new");
       const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
@@ -701,7 +642,6 @@ export default function DashboardShell({
     initialWorkspaceId || urlWorkspaceId || initialData?.workspace.id || "",
   );
 
-  // Sync state with URL search params
   useEffect(() => {
     if (urlWorkspaceId && urlWorkspaceId !== activeWorkspaceId) {
       setActiveWorkspaceId(urlWorkspaceId);
@@ -718,7 +658,6 @@ export default function DashboardShell({
     setIsMounted(true);
   }, []);
 
-  // Claim referral if code exists in cookies
   useEffect(() => {
     if (isMounted) {
       const refCode = getCookie("kudoswall-ref");
@@ -727,7 +666,6 @@ export default function DashboardShell({
           { code: refCode },
           {
             onSuccess: () => {
-              // Clear cookie
               document.cookie = "kudoswall-ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
               toast.success("Referral linked! Embed a wall to unlock your 30-day reward.");
             },
@@ -737,11 +675,8 @@ export default function DashboardShell({
     }
   }, [isMounted]);
 
-  // Synchronize state with initialData from server
   useEffect(() => {
     if (initialData?.workspace.id && initialData.workspace.id !== activeWorkspaceId) {
-      // Only override local state if there's no workspaceId in the URL,
-      // or if the URL matches the initialData (meaning navigation finished)
       if (!urlWorkspaceId || urlWorkspaceId === initialData.workspace.id) {
         setActiveWorkspaceId(initialData.workspace.id);
         setCookie("workspace-id", initialData.workspace.id);
@@ -749,21 +684,14 @@ export default function DashboardShell({
     }
   }, [initialData?.workspace.id, urlWorkspaceId, activeWorkspaceId]);
 
-  // Derived data state (polled content)
   const [polledData, setPolledData] = useState<DashboardData | null>(null);
 
-  // Sync initialData vs polledData with protection against stale data
   const activeData = (() => {
-    // If polledData is for the wrong workspace, ignore it
     const isPolledDataStale = polledData && polledData.workspace.id !== activeWorkspaceId;
-
     if (isPolledDataStale) {
-      // If initialData matches current workspace, use it as fallback
       if (initialData?.workspace.id === activeWorkspaceId) return initialData;
       return null;
     }
-
-    // Normal selection logic
     return activeWorkspaceId === initialData?.workspace.id ? polledData || initialData : polledData;
   })();
 
@@ -772,7 +700,6 @@ export default function DashboardShell({
       ...trpc.dashboard.completeOnboardingStep.mutationOptions(),
       onSuccess: () => {
         toast.success("Progress updated!");
-        // Correctly invalidate the specific workspace query to trigger a refresh
         queryClient.invalidateQueries(
           trpc.dashboard.getData.queryOptions({ workspaceId: activeWorkspaceId }),
         );
@@ -820,7 +747,7 @@ export default function DashboardShell({
       data={activeData}
     >
       <UpgradeModalProvider>
-        {/* Live Data Poller (Client Only) */}
+        {/* Live Data Poller */}
         {isMounted && (
           <DashboardPoller
             workspaceId={activeWorkspaceId}
@@ -829,9 +756,8 @@ export default function DashboardShell({
           />
         )}
 
-        <div className="flex min-h-screen" style={{ backgroundColor: "#ffffff" }}>
+        <div className="flex min-h-screen bg-white">
           {/* Desktop sidebar */}
-
           <DesktopSidebar
             userName={userName}
             userEmail={userEmail}
@@ -844,10 +770,7 @@ export default function DashboardShell({
               setActiveWorkspaceId(id);
               const params = new URLSearchParams(searchParams.toString());
               params.set("workspaceId", id);
-              // Clear project-specific params that won't exist in the new workspace
               params.delete("project");
-
-              // Stay on current page if it's a dashboard page, otherwise go to overview
               const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
               router.push(`${targetPath}?${params.toString()}` as any);
             }}
@@ -868,13 +791,12 @@ export default function DashboardShell({
               const params = new URLSearchParams(searchParams.toString());
               params.set("workspaceId", id);
               params.delete("project");
-
               const targetPath = pathname.startsWith("/dashboard") ? pathname : "/dashboard";
               router.push(`${targetPath}?${params.toString()}` as any);
             }}
           />
 
-          {/* Modal */}
+          {/* New Collection Modal */}
           <NewCollectionModal
             open={newCollectionOpen}
             onClose={() => setNewCollectionOpen(false)}
@@ -883,40 +805,24 @@ export default function DashboardShell({
             permissions={activeData?.permissions}
           />
 
-          {/* Main content — offset only on lg+ */}
+          {/* Main content */}
           <div
             className={`dashboard-content relative flex min-h-screen flex-1 flex-col overflow-x-hidden transition-[margin] duration-300 ${
               sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"
             }`}
           >
-            <DotGrid opacity={0.08} />
-
-            {/* Soft central glow */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-start justify-center"
-              style={{ zIndex: 0 }}
-            >
-              <div
-                className="h-[500px] w-[600px] rounded-full blur-3xl lg:w-[900px]"
-                style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
-              />
-            </div>
-
             {/* Top bar */}
-            <div className="relative z-10">
-              <TopBar
-                userName={userName}
-                onMenuOpen={() => setMobileMenuOpen(true)}
-                pageTitle={pageTitle}
-                pageSubtitle={pageSubtitle}
-                isLive
-                collapsed={sidebarCollapsed}
-                onToggleCollapsed={() => setSidebarCollapsed((c) => !c)}
-              />
-            </div>
+            <TopBar
+              userName={userName}
+              onMenuOpen={() => setMobileMenuOpen(true)}
+              pageTitle={pageTitle}
+              pageSubtitle={pageSubtitle}
+              isLive
+              collapsed={sidebarCollapsed}
+              onToggleCollapsed={() => setSidebarCollapsed((c) => !c)}
+            />
 
-            {/* Main content */}
+            {/* Main view container */}
             <main className="relative flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
               <TrialBanner permissions={activeData?.permissions} workspaceId={activeWorkspaceId} />
               <ErrorBoundary name={pageTitle || "Dashboard Content"}>{children}</ErrorBoundary>
@@ -928,10 +834,6 @@ export default function DashboardShell({
   );
 }
 
-/**
- * Client-only component to handle live data polling and mutations.
- * This avoids SSR issues with useQuery/useMutation in the main DashboardShell.
- */
 function DashboardPoller({
   workspaceId,
   onData,

@@ -3,17 +3,17 @@
 import { useState, useEffect } from "react";
 import {
   Plus,
-  Code2,
-  Trash2,
-  Search,
-  Layers,
-  LayoutGrid,
+  Code,
+  Trash,
+  MagnifyingGlass,
+  SquaresFour,
   Columns,
-  GalleryHorizontal,
-  ChevronRight,
-  Loader2,
+  Rows,
+  CaretRight,
+  CircleNotch,
   X,
-} from "lucide-react";
+  Lock,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,6 @@ import { gooeyToast as toast } from "goey-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
-import { Lock } from "lucide-react";
 import { useUpgradeModal } from "@/components/modals/UpgradeModal";
 import type { WidgetSettings } from "./[id]/customizer";
 
@@ -108,87 +107,89 @@ export default function WidgetList() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-pink-500" />
+      <div className="flex min-h-[300px] items-center justify-center">
+        <CircleNotch className="size-6 animate-spin text-neutral-800" weight="bold" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-12">
       {/* Search & Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
-          <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-neutral-400" />
+          <MagnifyingGlass className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-neutral-400" weight="bold" />
           <input
             type="text"
             placeholder="Search widgets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-2xl border border-neutral-100 bg-white py-2.5 pr-4 pl-11 text-[13px] transition-all outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/5"
+            className="w-full rounded-xl border border-neutral-200 bg-white py-2 pr-4 pl-10 text-xs font-medium transition-all outline-none placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
           />
         </div>
         <button
           onClick={handleCreateButtonClick}
-          className="flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-6 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98]"
         >
-          <Plus className="size-4" />
-          Create New Widget
+          <Plus className="size-3.5" weight="bold" />
+          <span>Create widget</span>
         </button>
       </div>
 
       {/* Widget Grid */}
       {filteredWidgets && filteredWidgets.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredWidgets.map((w) => {
             const settings = JSON.parse(w.settingsJson) as WidgetSettings;
             return (
               <div
                 key={w.id}
-                className="group relative flex flex-col overflow-hidden rounded-[32px] border border-neutral-100 bg-white p-6 shadow-sm transition-all hover:border-pink-200 hover:shadow-md"
+                className="group relative flex flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-neutral-300 hover:shadow-md"
               >
-                <div className="mb-4 flex items-start justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-400 transition-colors group-hover:bg-pink-50 group-hover:text-pink-500">
-                    <Code2 className="size-5" />
+                <div>
+                  <div className="mb-4 flex items-start justify-between">
+                    <div className="flex size-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-800">
+                      <Code className="size-4" weight="bold" />
+                    </div>
+                    <div className="relative z-20 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          toast("Delete widget?", {
+                            description: "This action cannot be undone.",
+                            action: {
+                              label: "Delete",
+                              onClick: () => deleteWidget.mutate({ id: w.id }),
+                            },
+                          });
+                        }}
+                        className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        title="Delete widget"
+                        aria-label="Delete widget"
+                      >
+                        <Trash className="size-3.5" weight="bold" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="relative z-20 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        toast("Delete widget?", {
-                          description: "This action cannot be undone.",
-                          action: {
-                            label: "Delete",
-                            onClick: () => deleteWidget.mutate({ id: w.id }),
-                          },
-                        });
-                      }}
-                      className="p-2 text-neutral-400 transition-colors hover:text-red-500"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                </div>
 
-                <div className="mb-6 flex-1">
-                  <h3 className="text-[15px] font-bold text-neutral-900">{w.name}</h3>
-                  <p className="mt-1.5 text-[12px] text-neutral-500">
+                  <h3 className="text-sm font-bold text-neutral-900 [text-wrap:balance]">{w.name}</h3>
+                  <p className="mt-1 text-[11px] text-neutral-500">
                     Created {formatDistanceToNow(new Date(w.createdAt))} ago
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 border-t border-neutral-50 pt-4">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                    {settings.layout === "grid" && <LayoutGrid className="size-3" />}
-                    {settings.layout === "masonry" && <Columns className="size-3" />}
-                    {settings.layout === "carousel" && <GalleryHorizontal className="size-3" />}
-                    {settings.layout}
+                <div className="mt-6 flex items-center justify-between border-t border-neutral-100 pt-3">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-neutral-600 uppercase tracking-wider">
+                    {settings.layout === "grid" && <SquaresFour className="size-3.5" weight="bold" />}
+                    {settings.layout === "masonry" && <Columns className="size-3.5" weight="bold" />}
+                    {settings.layout === "carousel" && <Rows className="size-3.5" weight="bold" />}
+                    <span>{settings.layout} · {settings.theme}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
-                    <Layers className="size-3" />
-                    {settings.theme}
-                  </div>
+                  <span className="flex items-center gap-1 text-xs font-semibold text-neutral-900">
+                    <span>Configure</span>
+                    <CaretRight className="size-3 text-neutral-500" weight="bold" />
+                  </span>
                 </div>
 
                 <Link
@@ -200,28 +201,28 @@ export default function WidgetList() {
           })}
         </div>
       ) : searchQuery ? (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-[32px] border border-dashed border-neutral-200 bg-neutral-50/50 p-12 text-center">
-          <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400">
-            <Search className="size-6" />
+        <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/50 p-8 text-center">
+          <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500">
+            <MagnifyingGlass className="size-5" weight="bold" />
           </div>
-          <h3 className="text-sm font-bold text-neutral-900">No widgets found</h3>
-          <p className="mt-1 text-[13px] text-neutral-500">No widgets matching "{searchQuery}"</p>
+          <h3 className="text-xs font-bold text-neutral-900">No widgets found</h3>
+          <p className="mt-1 text-xs text-neutral-500">No widgets matching "{searchQuery}"</p>
         </div>
       ) : (
-        <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[48px] border border-dashed border-neutral-200 bg-neutral-50/30 p-12 text-center">
-          <div className="mb-6 flex size-20 items-center justify-center rounded-[32px] bg-pink-50 text-pink-500 shadow-inner">
-            <Code2 className="size-10" />
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/30 p-8 text-center">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-800">
+            <Code className="size-6" weight="bold" />
           </div>
-          <h2 className="text-xl font-bold text-neutral-900">Start Embedding Social Proof</h2>
-          <p className="mx-auto mt-2 max-w-[320px] text-[13px] leading-relaxed text-neutral-500">
-            Create your first embed config to start showing testimonials on your own website.
+          <h2 className="text-base font-bold text-neutral-900">Start embedding social proof</h2>
+          <p className="mx-auto mt-1.5 max-w-[320px] text-xs leading-relaxed text-neutral-500 [text-wrap:pretty]">
+            Create your first embed widget configuration to display live reviews on your website.
           </p>
           <button
             onClick={openModal}
-            className="mt-8 flex items-center gap-2 rounded-full bg-neutral-900 px-8 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.95]"
+            className="mt-6 flex items-center gap-2 rounded-xl bg-neutral-900 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98]"
           >
-            <Plus className="size-4" />
-            Create Your First Widget
+            <Plus className="size-3.5" weight="bold" />
+            <span>Create widget</span>
           </button>
         </div>
       )}
@@ -230,38 +231,37 @@ export default function WidgetList() {
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
+            className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
             onClick={closeModal}
           />
-          <div className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-[32px] bg-white p-8 shadow-2xl duration-300">
+          <div className="animate-in zoom-in-95 relative w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300 sm:p-8">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-neutral-900">New Embed Config</h3>
+              <h3 className="text-base font-bold text-neutral-900">New embed widget</h3>
               <button
                 onClick={closeModal}
-                className="rounded-full p-2 text-neutral-400 transition-all hover:bg-neutral-100 hover:text-neutral-600 active:scale-[0.85]"
+                className="flex size-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
               >
-                <X className="size-5" />
+                <X className="size-4" weight="bold" />
               </button>
             </div>
             {permissions && !permissions.canAddWidget && (widgets?.length ?? 0) >= 1 ? (
               <div className="space-y-6">
-                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-center">
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                    <Lock className="size-6" />
+                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-5 text-center">
+                  <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+                    <Lock className="size-5" weight="bold" />
                   </div>
-                  <h4 className="text-base font-bold text-neutral-900">Widget Limit Reached</h4>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-600">
+                  <h4 className="text-sm font-bold text-neutral-900">Widget limit reached</h4>
+                  <p className="mt-1 text-xs text-neutral-600 [text-wrap:pretty]">
                     Your {permissions.name} plan allows {permissions.limits.maxWidgets} embed
-                    widget. Upgrade to Pro to create unlimited embed widgets, custom themes, and
-                    unlock all premium layout styles.
+                    widget. Upgrade to Pro to create unlimited embed widgets and unlock all 4 layout styles.
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
+                    className="flex-1 rounded-xl border border-neutral-200 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
                   >
                     Cancel
                   </button>
@@ -272,48 +272,48 @@ export default function WidgetList() {
                         : ("/dashboard/settings?tab=billing" as any)
                     }
                     onClick={closeModal}
-                    className="flex flex-2 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98]"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98]"
                   >
-                    Upgrade to Pro
-                    <ChevronRight className="size-4" />
+                    <span>Upgrade to Pro</span>
+                    <CaretRight className="size-3.5" weight="bold" />
                   </Link>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleCreate} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="px-1 text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-                    Widget Name
+              <form onSubmit={handleCreate} className="space-y-5">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-700">
+                    Widget name
                   </label>
                   <input
                     autoFocus
                     type="text"
                     required
-                    placeholder="e.g. Homepage Hero Section"
+                    placeholder="e.g. Homepage Wall of Love"
                     value={newWidgetName}
                     onChange={(e) => setNewWidgetName(e.target.value)}
-                    className="w-full rounded-2xl border border-neutral-100 bg-neutral-50 px-5 py-4 text-sm font-medium transition-all outline-none focus:border-pink-500 focus:bg-white focus:ring-4 focus:ring-pink-500/5"
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium transition-all outline-none placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                   />
                 </div>
-                <div className="flex gap-3 pt-2">
+                <div className="flex items-center gap-3 pt-2">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 rounded-full py-3 text-[14px] font-bold text-neutral-500 transition-all hover:bg-neutral-50"
+                    className="flex-1 rounded-xl border border-neutral-200 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={createWidget.isPending}
-                    className="flex flex-2 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-[14px] font-bold text-white transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-[0.98] disabled:opacity-50"
                   >
                     {createWidget.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
+                      <CircleNotch className="size-4 animate-spin" weight="bold" />
                     ) : (
                       <>
-                        Create Widget
-                        <ChevronRight className="size-4" />
+                        <span>Create widget</span>
+                        <CaretRight className="size-3.5" weight="bold" />
                       </>
                     )}
                   </button>
