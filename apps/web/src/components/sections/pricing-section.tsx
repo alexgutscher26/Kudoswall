@@ -47,7 +47,8 @@ const UI_PLANS: Plan[] = [
     monthlyPrice: "$19",
     yearlyPrice: "$190",
     period: "per month",
-    description: "For growing SaaS and creators who want unlimited social proof with zero branding.",
+    description:
+      "For growing SaaS and creators who want unlimited social proof with zero branding.",
     cta: "Start 14-day free trial",
     ctaHref: "/login",
     highlight: true,
@@ -106,19 +107,18 @@ export default function PricingSection() {
           <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
             Simple transparent pricing
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
             Plans that scale with your growth
           </h2>
-          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
-            Start free with zero commitment. Upgrade when you need unlimited video reviews and custom branding.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            Start free with zero commitment. Upgrade when you need unlimited video reviews and
+            custom branding.
           </p>
         </div>
 
         {/* Lifetime Deal Special Card */}
         <Suspense
-          fallback={
-            <div className="mb-14 h-96 w-full animate-pulse rounded-2xl bg-neutral-100" />
-          }
+          fallback={<div className="mb-14 h-96 w-full animate-pulse rounded-2xl bg-neutral-100" />}
         >
           <LTDCard ltdPriceId={CONFIG_PLANS.ltd.stripePriceIdLifetime} />
         </Suspense>
@@ -128,7 +128,8 @@ export default function PricingSection() {
 
         {/* Guarantee and Risk Reversal Footer */}
         <p className="mt-10 text-center text-xs font-medium text-neutral-500">
-          All paid plans include a 14 day free trial · No credit card required to start · Cancel anytime with one click
+          All paid plans include a 14 day free trial · No credit card required to start · Cancel
+          anytime with one click
         </p>
       </div>
     </section>

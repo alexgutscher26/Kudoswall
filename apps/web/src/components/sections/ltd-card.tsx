@@ -135,12 +135,13 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
             </div>
           </div>
 
-          <h3 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl [text-wrap:balance]">
+          <h3 className="text-2xl font-bold tracking-tight [text-wrap:balance] sm:text-3xl md:text-4xl">
             Stop paying recurring monthly fees
           </h3>
 
-          <p className="max-w-lg text-sm leading-relaxed text-neutral-300 [text-wrap:pretty]">
-            Get all future updates, priority support, and white label capabilities for a single payment. No subscriptions or hidden fees.
+          <p className="max-w-lg text-sm leading-relaxed [text-wrap:pretty] text-neutral-300">
+            Get all future updates, priority support, and white label capabilities for a single
+            payment. No subscriptions or hidden fees.
           </p>
 
           <div className="grid grid-cols-1 gap-2.5 pt-2 sm:grid-cols-2">
@@ -154,7 +155,7 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
         </div>
 
         {/* Right column checkout card */}
-        <div className="w-full rounded-xl border border-neutral-200 bg-white p-6 text-center text-neutral-900 shadow-md sm:w-80 shrink-0">
+        <div className="w-full shrink-0 rounded-xl border border-neutral-200 bg-white p-6 text-center text-neutral-900 shadow-md sm:w-80">
           <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-700 uppercase">
             One time payment
           </span>
@@ -163,14 +164,10 @@ export default function LTDCard({ ltdPriceId }: LTDCardProps) {
             <span className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
               $199
             </span>
-            <span className="text-sm font-semibold text-neutral-400 line-through">
-              $499
-            </span>
+            <span className="text-sm font-semibold text-neutral-400 line-through">$499</span>
           </div>
 
-          <p className="mt-1 text-xs font-medium text-neutral-500">
-            Lifetime updates included
-          </p>
+          <p className="mt-1 text-xs font-medium text-neutral-500">Lifetime updates included</p>
 
           <div className="mt-5 space-y-2">
             <div className="flex justify-between text-[10px] font-semibold text-neutral-500 uppercase">

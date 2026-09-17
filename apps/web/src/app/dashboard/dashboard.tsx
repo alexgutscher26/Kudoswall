@@ -98,9 +98,7 @@ function NavContent({
   return (
     <>
       {/* Workspace Switcher */}
-      <div
-        className={`pt-5 pb-4 border-b border-neutral-100 ${collapsed ? "px-1" : "px-3"}`}
-      >
+      <div className={`border-b border-neutral-100 pt-5 pb-4 ${collapsed ? "px-1" : "px-3"}`}>
         <WorkspaceSwitcher
           currentWorkspaceId={currentWorkspaceId}
           onWorkspaceChange={onWorkspaceChange}
@@ -180,7 +178,10 @@ function NavContent({
             collapsed ? "px-0" : "px-4"
           }`}
         >
-          <Plus className="size-3.5 transition-transform duration-300 group-hover:rotate-90" weight="bold" />
+          <Plus
+            className="size-3.5 transition-transform duration-300 group-hover:rotate-90"
+            weight="bold"
+          />
           {!collapsed && "New collection link"}
         </button>
       </div>
@@ -198,12 +199,8 @@ function NavContent({
         {!collapsed && (
           <>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-neutral-900">
-                {userName}
-              </p>
-              <p className="mt-0.5 truncate text-[11px] text-neutral-500">
-                {userEmail}
-              </p>
+              <p className="truncate text-xs font-bold text-neutral-900">{userName}</p>
+              <p className="mt-0.5 truncate text-[11px] text-neutral-500">{userEmail}</p>
             </div>
             <button
               type="button"
@@ -300,9 +297,7 @@ function MobileDrawer({
         aria-hidden="true"
       />
       {/* Drawer */}
-      <div
-        className="animate-in slide-in-from-left fixed top-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-neutral-200 bg-white duration-200 lg:hidden"
-      >
+      <div className="animate-in slide-in-from-left fixed top-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-neutral-200 bg-white duration-200 lg:hidden">
         {/* Close button */}
         <button
           type="button"
@@ -348,9 +343,7 @@ function TopBar({
   onToggleCollapsed: () => void;
 }) {
   return (
-    <header
-      className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8"
-    >
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       <div className="flex items-center gap-3">
         {/* Collapse toggle — desktop only */}
         <button
@@ -472,13 +465,9 @@ function NewCollectionModal({
       />
 
       {/* Content */}
-      <div
-        className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300 sm:p-8"
-      >
+      <div className="animate-in zoom-in-95 relative w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300 sm:p-8">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-neutral-900">
-            New collection link
-          </h3>
+          <h3 className="text-lg font-bold text-neutral-900">New collection link</h3>
           <button
             type="button"
             onClick={onClose}
@@ -488,7 +477,7 @@ function NewCollectionModal({
           </button>
         </div>
 
-        <p className="mb-6 text-xs text-neutral-500 [text-wrap:pretty]">
+        <p className="mb-6 text-xs [text-wrap:pretty] text-neutral-500">
           Create a dedicated page where your customers can record video or write testimonials.
         </p>
 
@@ -499,7 +488,7 @@ function NewCollectionModal({
                 <Lock className="size-5" weight="bold" />
               </div>
               <h4 className="text-sm font-bold text-neutral-900">Project limit reached</h4>
-              <p className="mt-1 text-xs text-neutral-600 [text-wrap:pretty]">
+              <p className="mt-1 text-xs [text-wrap:pretty] text-neutral-600">
                 Your current {permissions.name} plan includes {permissions.limits.maxProjects}{" "}
                 project link. Upgrade to the Agency plan to manage up to 5 project workspaces.
               </p>
@@ -542,9 +531,7 @@ function NewCollectionModal({
             </div>
 
             <div className="space-y-1.5 rounded-xl border border-neutral-200 bg-neutral-50 p-3.5">
-              <p className="text-[11px] font-semibold text-neutral-600">
-                Preview URL
-              </p>
+              <p className="text-[11px] font-semibold text-neutral-600">Preview URL</p>
               <code className="flex items-center gap-1.5 font-mono text-[11px] text-neutral-600">
                 <Globe className="size-3 text-neutral-400" />
                 <span>kudoswall.org/{workspaceSlug}/</span>

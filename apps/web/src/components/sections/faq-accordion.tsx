@@ -30,7 +30,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
               onClick={() => setOpenIndex(isOpen ? null : index)}
               aria-expanded={isOpen}
             >
-              <span className="text-base font-semibold text-neutral-900 [text-wrap:balance]">
+              <span className="text-base font-semibold [text-wrap:balance] text-neutral-900">
                 {faq.question}
               </span>
               <CaretDown
@@ -42,7 +42,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
             </button>
             {isOpen && (
               <div className="border-t border-neutral-100 px-6 py-4">
-                <p className="text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
+                <p className="text-sm leading-relaxed [text-wrap:pretty] text-neutral-600">
                   {faq.answer}
                 </p>
               </div>

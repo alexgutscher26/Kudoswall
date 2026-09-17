@@ -5,7 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import { project, workspace } from "@my-better-t-app/db/schema";
 import { eq } from "drizzle-orm";
 import DashboardShell from "../../dashboard";
-import { CollectionCustomizer } from "../collection-customizer";
+import { CollectionDetailClient } from "./collection-detail-client";
 import { getDashboardData } from "../../actions";
 
 import { Suspense } from "react";
@@ -76,11 +76,11 @@ async function CollectionDetailContentWrapper({
       userEmail={userEmail}
       initialData={data}
       pageTitle={`Edit: ${p.name}`}
-      pageSubtitle="Customize your collection page experience"
+      pageSubtitle="Customize your collection page experience and review funnel analytics"
       initialWorkspaceId={p.workspaceId}
     >
       <div className="mx-auto max-w-7xl">
-        <CollectionCustomizer
+        <CollectionDetailClient
           project={p}
           workspace={p.workspace}
           isPro={(p.workspace.organization?.plan || p.workspace.plan) !== "free"}

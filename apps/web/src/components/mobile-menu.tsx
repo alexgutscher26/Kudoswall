@@ -18,7 +18,7 @@ export default function MobileMenu({ session, navLinks }: MobileMenuProps) {
       {/* Morphing Hamburger Button */}
       <button
         type="button"
-        className="relative flex size-8 flex-col items-center justify-center rounded-full p-1 md:hidden focus:outline-none"
+        className="relative flex size-8 flex-col items-center justify-center rounded-full p-1 focus:outline-none md:hidden"
         onClick={() => setMenuOpen((prev) => !prev)}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
         aria-expanded={menuOpen}

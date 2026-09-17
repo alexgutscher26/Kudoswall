@@ -75,11 +75,12 @@ export default function FaqSection() {
           <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
             Frequently answered
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
             Got questions? We have answers.
           </h2>
-          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
-            Everything you need to know about collecting, managing, and displaying authentic customer praise.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            Everything you need to know about collecting, managing, and displaying authentic
+            customer praise.
           </p>
         </div>
 

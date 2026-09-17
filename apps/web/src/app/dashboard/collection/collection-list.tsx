@@ -64,7 +64,10 @@ export default function CollectionList({ projects }: CollectionListProps) {
       {/* Header & Search */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
-          <MagnifyingGlass className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-neutral-400" weight="bold" />
+          <MagnifyingGlass
+            className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-neutral-400"
+            weight="bold"
+          />
           <input
             type="text"
             placeholder="Search collections..."
@@ -140,7 +143,7 @@ export default function CollectionList({ projects }: CollectionListProps) {
                   </div>
                 </div>
 
-                <h3 className="text-sm font-bold text-neutral-900 transition-colors group-hover:text-neutral-700 [text-wrap:balance]">
+                <h3 className="text-sm font-bold [text-wrap:balance] text-neutral-900 transition-colors group-hover:text-neutral-700">
                   {p.name}
                 </h3>
                 <div className="mt-1 flex items-center gap-1.5 text-[11px] text-neutral-500">
@@ -191,8 +194,9 @@ export default function CollectionList({ projects }: CollectionListProps) {
             <Globe className="size-6" weight="bold" />
           </div>
           <h2 className="text-base font-bold text-neutral-900">Start collecting social proof</h2>
-          <p className="mx-auto mt-1.5 max-w-[320px] text-xs leading-relaxed text-neutral-500 [text-wrap:pretty]">
-            Create your first collection link to start gathering video and text testimonials from your customers.
+          <p className="mx-auto mt-1.5 max-w-[320px] text-xs leading-relaxed [text-wrap:pretty] text-neutral-500">
+            Create your first collection link to start gathering video and text testimonials from
+            your customers.
           </p>
           <button
             onClick={onCreateClick}

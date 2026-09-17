@@ -76,11 +76,12 @@ export default function Overview({ data, workspaceId }: OverviewProps) {
               <Sparkle className="size-5" weight="fill" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white [text-wrap:balance]">
+              <h3 className="text-sm font-bold [text-wrap:balance] text-white">
                 You are currently on the Free tier (10 testimonials limit)
               </h3>
-              <p className="mt-0.5 text-xs text-neutral-300 [text-wrap:pretty]">
-                Upgrade to Pro to unlock unlimited testimonials, high definition video downloads, and custom branding.
+              <p className="mt-0.5 text-xs [text-wrap:pretty] text-neutral-300">
+                Upgrade to Pro to unlock unlimited testimonials, high definition video downloads,
+                and custom branding.
               </p>
             </div>
           </div>

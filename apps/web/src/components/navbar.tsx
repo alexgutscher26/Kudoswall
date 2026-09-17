@@ -19,9 +19,7 @@ export default async function Navbar() {
 
   return (
     <header className="fixed top-6 left-1/2 z-50 w-max max-w-[calc(100%-2rem)] -translate-x-1/2">
-      <nav
-        className="flex items-center gap-6 rounded-full border border-neutral-200/80 bg-white/90 px-4 py-2 shadow-sm backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300"
-      >
+      <nav className="flex items-center gap-6 rounded-full border border-neutral-200/80 bg-white/90 px-4 py-2 shadow-sm backdrop-blur-xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2 select-none">
           <Logo showText size={26} />
@@ -60,9 +58,7 @@ export default async function Navbar() {
                 </Button>
               </Link>
               <Link href="/login">
-                <Button
-                  className="h-8 rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-95"
-                >
+                <Button className="h-8 rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-95">
                   Start free trial
                 </Button>
               </Link>

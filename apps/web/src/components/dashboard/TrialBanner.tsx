@@ -47,8 +47,9 @@ export function TrialBanner({ permissions, workspaceId }: TrialBannerProps) {
                 {days === 1 ? "Last day of trial" : `${days} days remaining`}
               </span>
             </div>
-            <p className="text-xs text-neutral-500 [text-wrap:pretty]">
-              You have full access to unlimited testimonials, high definition video downloads, and custom widgets.
+            <p className="text-xs [text-wrap:pretty] text-neutral-500">
+              You have full access to unlimited testimonials, high definition video downloads, and
+              custom widgets.
             </p>
           </div>
         </div>
@@ -58,7 +59,10 @@ export function TrialBanner({ permissions, workspaceId }: TrialBannerProps) {
           className="group inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-[0.98]"
         >
           <span>Upgrade to Pro</span>
-          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" weight="bold" />
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover:translate-x-0.5"
+            weight="bold"
+          />
         </Link>
       </div>
     );
@@ -80,8 +84,9 @@ export function TrialBanner({ permissions, workspaceId }: TrialBannerProps) {
                 Your workspace is on the Free plan (10 testimonials limit)
               </span>
             </div>
-            <p className="text-xs text-neutral-500 [text-wrap:pretty]">
-              Upgrade to Pro to reactivate unlimited testimonials, video downloads, and custom domains.
+            <p className="text-xs [text-wrap:pretty] text-neutral-500">
+              Upgrade to Pro to reactivate unlimited testimonials, video downloads, and custom
+              domains.
             </p>
           </div>
         </div>
@@ -91,7 +96,10 @@ export function TrialBanner({ permissions, workspaceId }: TrialBannerProps) {
           className="group inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-neutral-800 active:scale-[0.98]"
         >
           <span>Upgrade to Pro</span>
-          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" weight="bold" />
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover:translate-x-0.5"
+            weight="bold"
+          />
         </Link>
       </div>
     );

@@ -54,9 +54,7 @@ const STEPS = [
   },
 ] as const;
 
-export function OnboardingChecklist({
-  status: initialStatus,
-}: OnboardingChecklistProps) {
+export function OnboardingChecklist({ status: initialStatus }: OnboardingChecklistProps) {
   const { onShareLink, activeWorkspaceId, data } = useWorkspace();
   const router = useRouter();
 
@@ -82,9 +80,7 @@ export function OnboardingChecklist({
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all hover:shadow-md">
       <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
         <div>
-          <h3 className="text-sm font-bold text-neutral-900">
-            Setup checklist
-          </h3>
+          <h3 className="text-sm font-bold text-neutral-900">Setup checklist</h3>
           <p className="mt-0.5 text-xs text-neutral-500">
             {doneCount} of {totalCount} steps completed ({percentage}%)
           </p>
@@ -113,12 +109,10 @@ export function OnboardingChecklist({
               onClick={() => handleStepClick(step)}
               disabled={isDone}
               className={`flex w-full items-center justify-between rounded-xl p-3 text-left transition-colors ${
-                isDone
-                  ? "opacity-60 cursor-default"
-                  : "hover:bg-neutral-50 cursor-pointer"
+                isDone ? "cursor-default opacity-60" : "cursor-pointer hover:bg-neutral-50"
               }`}
             >
-              <div className="flex items-start gap-3 min-w-0">
+              <div className="flex min-w-0 items-start gap-3">
                 <CheckCircle
                   className={`mt-0.5 size-4.5 shrink-0 ${
                     isDone ? "text-emerald-600" : "text-neutral-300"
@@ -126,12 +120,12 @@ export function OnboardingChecklist({
                   weight={isDone ? "fill" : "bold"}
                 />
                 <div className="min-w-0">
-                  <p className={`text-xs font-bold ${isDone ? "text-neutral-500 line-through" : "text-neutral-900"}`}>
+                  <p
+                    className={`text-xs font-bold ${isDone ? "text-neutral-500 line-through" : "text-neutral-900"}`}
+                  >
                     {step.label}
                   </p>
-                  <p className="mt-0.5 truncate text-[11px] text-neutral-500">
-                    {step.desc}
-                  </p>
+                  <p className="mt-0.5 truncate text-[11px] text-neutral-500">{step.desc}</p>
                 </div>
               </div>
               {!isDone && (

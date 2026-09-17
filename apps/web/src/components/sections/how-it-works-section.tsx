@@ -35,11 +35,12 @@ export default function HowItWorksSection() {
           <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
             Three simple steps
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
             From zero reviews to live social proof in minutes
           </h2>
-          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
-            No complex backend configuration. Share your link and watch high converting reviews roll into your dashboard.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            No complex backend configuration. Share your link and watch high converting reviews roll
+            into your dashboard.
           </p>
         </div>
 
@@ -48,7 +49,7 @@ export default function HowItWorksSection() {
           {STEPS.map(({ number, icon: Icon, title, description }) => (
             <div
               key={number}
-              className="relative flex flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300 hover:shadow-md"
+              className="relative flex flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300 hover:shadow-md sm:p-8"
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -60,18 +61,16 @@ export default function HowItWorksSection() {
                   </span>
                 </div>
 
-                <h3 className="mt-6 text-lg font-bold text-neutral-900 [text-wrap:balance]">
+                <h3 className="mt-6 text-lg font-bold [text-wrap:balance] text-neutral-900">
                   {title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
+                <p className="mt-2 text-sm leading-relaxed [text-wrap:pretty] text-neutral-600">
                   {description}
                 </p>
               </div>
 
               <div className="mt-6 border-t border-neutral-100 pt-4">
-                <span className="text-xs font-semibold text-neutral-500">
-                  Step {number}
-                </span>
+                <span className="text-xs font-semibold text-neutral-500">Step {number}</span>
               </div>
             </div>
           ))}

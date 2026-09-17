@@ -64,7 +64,7 @@ export function StatCard({
           </p>
           <p className="mt-1 text-xs font-semibold text-neutral-700">{label}</p>
         </div>
-        <p className="mt-2 text-[11px] text-neutral-500 [text-wrap:pretty]">
+        <p className="mt-2 text-[11px] [text-wrap:pretty] text-neutral-500">
           {locked ? "Pro feature" : sub}
         </p>
       </div>
@@ -119,12 +119,12 @@ export function RecentTestimonialsList({
                   ))}
                 </div>
               </div>
-              <p className="mt-0.5 line-clamp-1 text-xs text-neutral-600 [text-wrap:pretty]">
+              <p className="mt-0.5 line-clamp-1 text-xs [text-wrap:pretty] text-neutral-600">
                 "{t.content || (t.type === "video" ? "Video testimonial" : "No content")}"
               </p>
               <div className="mt-1 flex items-center gap-2">
                 {t.verifiedVia && (
-                  <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center gap-1 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
                     <CheckCircle className="size-3" weight="fill" />
                     Verified
                   </span>
@@ -143,7 +143,7 @@ export function RecentTestimonialsList({
           <div className="ml-3 flex items-center gap-2">
             <Link
               href={`/dashboard/testimonials?id=${t.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
-              className="flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 transition-colors hover:border-neutral-300 hover:text-neutral-900 shadow-sm"
+              className="flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm transition-colors hover:border-neutral-300 hover:text-neutral-900"
               aria-label="View testimonial details"
             >
               <CaretRight className="size-3.5" weight="bold" />
@@ -178,12 +178,12 @@ export function ProjectsList({
               <LinkSimple className="size-5" weight="bold" />
             </div>
             <div className="min-w-0">
-              <h4 className="truncate text-xs font-bold text-neutral-900">
-                {p.name}
-              </h4>
+              <h4 className="truncate text-xs font-bold text-neutral-900">{p.name}</h4>
               <p className="mt-0.5 flex items-center gap-1 text-[11px] text-neutral-500">
                 <Globe className="size-3 text-neutral-400" />
-                <span>/{workspaceSlug}/{p.slug}</span>
+                <span>
+                  /{workspaceSlug}/{p.slug}
+                </span>
               </p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export function ProjectsList({
             <CopyButton slug={p.slug} workspaceSlug={workspaceSlug} />
             <Link
               href={`/dashboard/testimonials?project=${p.id}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`}
-              className="flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 transition-colors hover:border-neutral-300 hover:text-neutral-900 shadow-sm"
+              className="flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm transition-colors hover:border-neutral-300 hover:text-neutral-900"
               aria-label="View project details"
             >
               <CaretRight className="size-3.5" weight="bold" />
@@ -210,8 +210,9 @@ export function EmptyTestimonials() {
         <Quotes className="size-6" weight="bold" />
       </div>
       <h3 className="text-sm font-bold text-neutral-900">No testimonials yet</h3>
-      <p className="mt-1 max-w-xs text-xs text-neutral-500 [text-wrap:pretty]">
-        Share your collection link with customers and your incoming reviews will appear here ready for approval.
+      <p className="mt-1 max-w-xs text-xs [text-wrap:pretty] text-neutral-500">
+        Share your collection link with customers and your incoming reviews will appear here ready
+        for approval.
       </p>
     </div>
   );

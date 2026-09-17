@@ -23,6 +23,7 @@ import {
   Terminal,
   Image as LucideImage,
   Layers,
+  Split,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { gooeyToast as toast } from "goey-toast";
@@ -121,6 +122,15 @@ export type CollectionSettings = {
     imageBlur?: number;
     isAnimated?: boolean;
   };
+  abTesting?: {
+    enabled: boolean;
+    variants: Array<{
+      id: string; // "A" | "B"
+      headline: string;
+      subheading: string;
+      ctaText: string;
+    }>;
+  };
 };
 
 const DEFAULT_SETTINGS: CollectionSettings = {
@@ -173,6 +183,23 @@ const DEFAULT_SETTINGS: CollectionSettings = {
     imageOpacity: 1,
     imageBlur: 0,
     isAnimated: false,
+  },
+  abTesting: {
+    enabled: false,
+    variants: [
+      {
+        id: "A",
+        headline: "Share your experience",
+        subheading: "We value your feedback and want to know how we did.",
+        ctaText: "Submit Testimonial",
+      },
+      {
+        id: "B",
+        headline: "Tell us what you loved most",
+        subheading: "Your honest review helps others make the right decision.",
+        ctaText: "Send My Review",
+      },
+    ],
   },
 };
 
@@ -231,6 +258,11 @@ export function CollectionCustomizer({
             ...(parsed.compliance?.cookieConsent || {}),
           },
         },
+        abTesting: {
+          ...DEFAULT_SETTINGS.abTesting!,
+          ...(parsed.abTesting || {}),
+          variants: parsed.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants,
+        },
       };
     } catch (e) {
       return DEFAULT_SETTINGS;
@@ -240,6 +272,7 @@ export function CollectionCustomizer({
   const [mockStep, setMockStep] = useState<"rating" | "text" | "video" | "details" | "success">(
     "rating",
   );
+  const [previewVariant, setPreviewVariant] = useState<"A" | "B">("A");
 
   const [projectName, setProjectName] = useState(project.name);
   const [collectionSlug, setCollectionSlug] = useState(project.collectionSlug || project.slug);
@@ -247,7 +280,7 @@ export function CollectionCustomizer({
   const [emailFromName, setEmailFromName] = useState(project.emailFromName || "");
 
   const [activeTab, setActiveTab] = useState<
-    "branding" | "fields" | "content" | "video" | "share" | "advanced" | "domain"
+    "branding" | "fields" | "content" | "video" | "ab" | "share" | "advanced" | "domain"
   >("branding");
 
   const [domain, setDomain] = useState(project.customDomain || "");
@@ -407,6 +440,12 @@ export function CollectionCustomizer({
               Video
             </button>
           )}
+          <button
+            onClick={() => setActiveTab("ab")}
+            className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "ab" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
+          >
+            A/B Test
+          </button>
           <button
             onClick={() => setActiveTab("advanced")}
             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === "advanced" ? "bg-pink-50 text-pink-500" : "text-neutral-400 hover:bg-neutral-50"}`}
@@ -1249,6 +1288,287 @@ export function CollectionCustomizer({
             </div>
           )}
 
+          {activeTab === "ab" && (
+            <div className="space-y-6">
+              <SectionHeader icon={Split} pro title="A/B Testing Copy" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4">
+                  <div>
+                    <span className="text-xs font-bold text-neutral-900">Enable A/B Testing</span>
+                    <p className="text-[10px] text-neutral-400">
+                      Splits visitor traffic 50/50 between Variant A & Variant B
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.abTesting?.enabled ?? false}
+                    disabled={!isPro}
+                    onChange={(e) => {
+                      if (!isPro) {
+                        toast.error("Pro Feature", {
+                          description: "Upgrade to Pro to run A/B testing on collection copy.",
+                        });
+                        return;
+                      }
+                      setSettings((prev) => ({
+                        ...prev,
+                        abTesting: {
+                          enabled: e.target.checked,
+                          variants:
+                            prev.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants,
+                        },
+                      }));
+                    }}
+                    className="size-4 accent-pink-500"
+                  />
+                </div>
+
+                {/* Variant A (Control) */}
+                <div className="space-y-3 rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+                    <span className="flex items-center gap-1.5 text-xs font-black text-neutral-900">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-neutral-100 text-[10px] font-bold">
+                        A
+                      </span>
+                      Variant A (Control)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewVariant("A")}
+                      className={`rounded-lg px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                        previewVariant === "A"
+                          ? "bg-neutral-900 text-white"
+                          : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                      }`}
+                    >
+                      Preview A
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      Headline
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "A")?.headline ??
+                        settings.pageContent?.headline ??
+                        ""
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "A");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], headline: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. Share your experience"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      Subheading
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "A")?.subheading ??
+                        settings.pageContent?.subheading ??
+                        ""
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "A");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], subheading: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. We value your feedback"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      CTA Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "A")?.ctaText ??
+                        "Submit Testimonial"
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "A");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], ctaText: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-neutral-50 px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. Submit Testimonial"
+                    />
+                  </div>
+                </div>
+
+                {/* Variant B (Challenger) */}
+                <div className="space-y-3 rounded-2xl border border-pink-100 bg-pink-50/20 p-4 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-pink-100 pb-2">
+                    <span className="flex items-center gap-1.5 text-xs font-black text-pink-900">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-pink-100 text-[10px] font-bold text-pink-700">
+                        B
+                      </span>
+                      Variant B (Challenger)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewVariant("B")}
+                      className={`rounded-lg px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                        previewVariant === "B"
+                          ? "bg-pink-600 text-white"
+                          : "bg-white text-pink-600 ring-1 ring-pink-200 hover:bg-pink-100"
+                      }`}
+                    >
+                      Preview B
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      Headline
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "B")?.headline ??
+                        "Tell us what you loved most"
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "B");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], headline: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. Tell us what you loved most"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      Subheading
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "B")?.subheading ??
+                        "Your honest review helps others make the right decision."
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "B");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], subheading: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. Your honest review helps others"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                      CTA Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        settings.abTesting?.variants?.find((v) => v.id === "B")?.ctaText ??
+                        "Send My Review"
+                      }
+                      onChange={(e) => {
+                        const newVariants = [
+                          ...(settings.abTesting?.variants || DEFAULT_SETTINGS.abTesting!.variants),
+                        ];
+                        const idx = newVariants.findIndex((v) => v.id === "B");
+                        if (idx >= 0) {
+                          newVariants[idx] = { ...newVariants[idx], ctaText: e.target.value };
+                        }
+                        setSettings((prev) => ({
+                          ...prev,
+                          abTesting: {
+                            enabled: prev.abTesting?.enabled ?? false,
+                            variants: newVariants,
+                          },
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-neutral-100 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-pink-500"
+                      placeholder="e.g. Send My Review"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-neutral-100 bg-neutral-50/50 p-3">
+                  <p className="text-[10px] leading-relaxed text-neutral-500">
+                    💡 <strong>Pro Tip:</strong> Visitors are randomly and deterministically
+                    assigned to either Variant A or B upon first arriving. View live conversion
+                    rates, uplift, and statistical significance under the{" "}
+                    <strong>Funnel & A/B Analytics</strong> tab.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === "advanced" && (
             <div className="space-y-6">
               <SectionHeader icon={Terminal} pro title="Custom CSS" />
@@ -1621,6 +1941,33 @@ export function CollectionCustomizer({
             </span>
           </div>
 
+          {settings.abTesting?.enabled && (
+            <div className="flex items-center rounded-lg bg-neutral-100 p-0.5">
+              <button
+                type="button"
+                onClick={() => setPreviewVariant("A")}
+                className={`rounded-md px-2 py-0.5 text-[9px] font-bold transition-all ${
+                  previewVariant === "A"
+                    ? "bg-white text-neutral-900 shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-900"
+                }`}
+              >
+                Variant A
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewVariant("B")}
+                className={`rounded-md px-2 py-0.5 text-[9px] font-bold transition-all ${
+                  previewVariant === "B"
+                    ? "bg-white text-pink-600 shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-900"
+                }`}
+              >
+                Variant B
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             {[
               { id: "rating", label: "Rating" },
@@ -1660,11 +2007,29 @@ export function CollectionCustomizer({
                 </div>
               )}
               <div className="space-y-1">
+                {settings.abTesting?.enabled && (
+                  <div className="mb-1">
+                    <span className="inline-block rounded-full bg-pink-100 px-2.5 py-0.5 text-[9px] font-bold text-pink-700">
+                      Previewing Variant {previewVariant} (
+                      {previewVariant === "A" ? "Control" : "Challenger"})
+                    </span>
+                  </div>
+                )}
                 <h1 className="text-3xl leading-tight font-black tracking-tighter text-neutral-900 sm:text-5xl">
-                  {settings.pageContent.headline || "Share your story"}
+                  {settings.abTesting?.enabled
+                    ? settings.abTesting.variants?.find((v) => v.id === previewVariant)?.headline ||
+                      settings.pageContent.headline ||
+                      "Share your story"
+                    : settings.pageContent.headline || "Share your story"}
                 </h1>
                 <p className="text-md mx-auto max-w-xl font-medium text-neutral-500">
-                  {settings.pageContent.subheading || `You're leaving a review for ${project.name}`}
+                  {settings.abTesting?.enabled
+                    ? settings.abTesting.variants?.find((v) => v.id === previewVariant)
+                        ?.subheading ||
+                      settings.pageContent.subheading ||
+                      `You're leaving a review for ${project.name}`
+                    : settings.pageContent.subheading ||
+                      `You're leaving a review for ${project.name}`}
                 </p>
               </div>
             </div>

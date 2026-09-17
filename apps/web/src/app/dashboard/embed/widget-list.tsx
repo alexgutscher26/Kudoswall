@@ -118,7 +118,10 @@ export default function WidgetList() {
       {/* Search & Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
-          <MagnifyingGlass className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-neutral-400" weight="bold" />
+          <MagnifyingGlass
+            className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-neutral-400"
+            weight="bold"
+          />
           <input
             type="text"
             placeholder="Search widgets..."
@@ -173,18 +176,26 @@ export default function WidgetList() {
                     </div>
                   </div>
 
-                  <h3 className="text-sm font-bold text-neutral-900 [text-wrap:balance]">{w.name}</h3>
+                  <h3 className="text-sm font-bold [text-wrap:balance] text-neutral-900">
+                    {w.name}
+                  </h3>
                   <p className="mt-1 text-[11px] text-neutral-500">
                     Created {formatDistanceToNow(new Date(w.createdAt))} ago
                   </p>
                 </div>
 
                 <div className="mt-6 flex items-center justify-between border-t border-neutral-100 pt-3">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold text-neutral-600 uppercase tracking-wider">
-                    {settings.layout === "grid" && <SquaresFour className="size-3.5" weight="bold" />}
-                    {settings.layout === "masonry" && <Columns className="size-3.5" weight="bold" />}
+                  <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-neutral-600 uppercase">
+                    {settings.layout === "grid" && (
+                      <SquaresFour className="size-3.5" weight="bold" />
+                    )}
+                    {settings.layout === "masonry" && (
+                      <Columns className="size-3.5" weight="bold" />
+                    )}
                     {settings.layout === "carousel" && <Rows className="size-3.5" weight="bold" />}
-                    <span>{settings.layout} · {settings.theme}</span>
+                    <span>
+                      {settings.layout} · {settings.theme}
+                    </span>
                   </div>
                   <span className="flex items-center gap-1 text-xs font-semibold text-neutral-900">
                     <span>Configure</span>
@@ -214,7 +225,7 @@ export default function WidgetList() {
             <Code className="size-6" weight="bold" />
           </div>
           <h2 className="text-base font-bold text-neutral-900">Start embedding social proof</h2>
-          <p className="mx-auto mt-1.5 max-w-[320px] text-xs leading-relaxed text-neutral-500 [text-wrap:pretty]">
+          <p className="mx-auto mt-1.5 max-w-[320px] text-xs leading-relaxed [text-wrap:pretty] text-neutral-500">
             Create your first embed widget configuration to display live reviews on your website.
           </p>
           <button
@@ -251,9 +262,10 @@ export default function WidgetList() {
                     <Lock className="size-5" weight="bold" />
                   </div>
                   <h4 className="text-sm font-bold text-neutral-900">Widget limit reached</h4>
-                  <p className="mt-1 text-xs text-neutral-600 [text-wrap:pretty]">
+                  <p className="mt-1 text-xs [text-wrap:pretty] text-neutral-600">
                     Your {permissions.name} plan allows {permissions.limits.maxWidgets} embed
-                    widget. Upgrade to Pro to create unlimited embed widgets and unlock all 4 layout styles.
+                    widget. Upgrade to Pro to create unlimited embed widgets and unlock all 4 layout
+                    styles.
                   </p>
                 </div>
 
@@ -282,9 +294,7 @@ export default function WidgetList() {
             ) : (
               <form onSubmit={handleCreate} className="space-y-5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-700">
-                    Widget name
-                  </label>
+                  <label className="text-xs font-semibold text-neutral-700">Widget name</label>
                   <input
                     autoFocus
                     type="text"

@@ -115,7 +115,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
             }`}
           >
             <span>Yearly</span>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
               2 months free
             </span>
           </button>
@@ -129,7 +129,7 @@ export default function PricingGrid({ plans }: PricingGridProps) {
           return (
             <div
               key={plan.name}
-              className={`relative flex flex-col justify-between rounded-2xl border p-6 sm:p-8 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+              className={`relative flex flex-col justify-between rounded-2xl border p-6 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] sm:p-8 ${
                 isDark
                   ? "border-neutral-900 bg-neutral-900 text-white shadow-xl"
                   : "border-neutral-200 bg-white text-neutral-900 shadow-sm hover:border-neutral-300 hover:shadow-md"
@@ -143,26 +143,32 @@ export default function PricingGrid({ plans }: PricingGridProps) {
 
               <div>
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold tracking-wider uppercase ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+                  <span
+                    className={`text-xs font-bold tracking-wider uppercase ${isDark ? "text-neutral-400" : "text-neutral-500"}`}
+                  >
                     {plan.name}
                   </span>
-                  {isDark && (
-                    <Lightning className="size-4 text-amber-400" weight="fill" />
-                  )}
+                  {isDark && <Lightning className="size-4 text-amber-400" weight="fill" />}
                 </div>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className={`text-4xl font-bold tracking-tight sm:text-5xl ${isDark ? "text-white" : "text-neutral-900"}`}>
+                  <span
+                    className={`text-4xl font-bold tracking-tight sm:text-5xl ${isDark ? "text-white" : "text-neutral-900"}`}
+                  >
                     {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
                   </span>
                   {plan.period && (
-                    <span className={`text-xs font-semibold ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+                    <span
+                      className={`text-xs font-semibold ${isDark ? "text-neutral-400" : "text-neutral-500"}`}
+                    >
                       {billingCycle === "monthly" ? "/month" : "/year"}
                     </span>
                   )}
                 </div>
 
-                <p className={`mt-3 text-xs leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"} [text-wrap:pretty]`}>
+                <p
+                  className={`mt-3 text-xs leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"} [text-wrap:pretty]`}
+                >
                   {plan.description}
                 </p>
 
@@ -187,10 +193,10 @@ export default function PricingGrid({ plans }: PricingGridProps) {
                 <Button
                   onClick={() => handleAction(plan)}
                   disabled={createCheckout.isPending}
-                  className={`w-full rounded-xl py-2 px-3.5 text-xs font-semibold transition-all duration-300 active:scale-[0.98] ${
+                  className={`w-full rounded-xl px-3.5 py-2 text-xs font-semibold transition-all duration-300 active:scale-[0.98] ${
                     isDark
-                      ? "bg-white text-neutral-900 hover:bg-neutral-100 shadow-sm"
-                      : "bg-neutral-900 text-white hover:bg-neutral-800 shadow-sm"
+                      ? "bg-white text-neutral-900 shadow-sm hover:bg-neutral-100"
+                      : "bg-neutral-900 text-white shadow-sm hover:bg-neutral-800"
                   }`}
                 >
                   {createCheckout.isPending ? (

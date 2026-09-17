@@ -1,14 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { Star, VideoCamera, ShieldCheck, Lightning, Users, ArrowRight, Play, Quotes } from "@phosphor-icons/react";
+import {
+  Star,
+  VideoCamera,
+  ShieldCheck,
+  Lightning,
+  Users,
+  ArrowRight,
+  Play,
+  Quotes,
+} from "@phosphor-icons/react";
 import { Button } from "@my-better-t-app/ui/components/button";
 
 const PROOF_CARDS = [
   {
     name: "Marcus Vance",
     role: "Founder, ShipFast Labs",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
     text: "Embedding the KudosWall widget increased our checkout conversion rate by 34.2% in our very first week.",
     metric: "+34.2% checkout rate",
     type: "text",
@@ -16,7 +26,8 @@ const PROOF_CARDS = [
   {
     name: "Elena Rostova",
     role: "Head of Growth, BentoUI",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
     text: "Our users recorded genuine 30 second video reviews directly from their phone. Zero friction.",
     metric: "42 video reviews in 48h",
     type: "video",
@@ -24,7 +35,8 @@ const PROOF_CARDS = [
   {
     name: "Devon Chen",
     role: "Creator, Notion Mastery",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
     text: "Setup took 3 minutes. I replaced messy static images with a live social proof feed that updates automatically.",
     metric: "Saved 4h weekly",
     type: "text",
@@ -45,7 +57,6 @@ export default function Hero() {
     <section className="relative flex min-h-[92vh] flex-col items-center justify-center overflow-hidden bg-white px-4 pt-28 pb-16 sm:px-6 lg:pt-36 lg:pb-24">
       {/* Container */}
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
-        
         {/* Rating and Social Proof Tag */}
         <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 shadow-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-neutral-300">
           <div className="flex items-center gap-0.5 text-amber-400">
@@ -59,15 +70,16 @@ export default function Hero() {
         </div>
 
         {/* Outcome Headline with left-to-right gradient */}
-        <h1 className="mt-6 max-w-[680px] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08] [text-wrap:balance]">
+        <h1 className="mt-6 max-w-[680px] text-4xl leading-[1.08] font-bold tracking-tight [text-wrap:balance] sm:text-5xl md:text-6xl lg:text-7xl">
           <span className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-500 bg-clip-text text-transparent">
             Collect video and text testimonials without chasing clients
           </span>
         </h1>
 
         {/* Subheadline */}
-        <p className="mt-6 max-w-[680px] text-base leading-relaxed text-neutral-600 sm:text-lg md:text-xl [text-wrap:pretty]">
-          Send one simple link. Let your customers record video or write reviews in seconds, then embed high converting proof widgets on any site with zero code.
+        <p className="mt-6 max-w-[680px] text-base leading-relaxed [text-wrap:pretty] text-neutral-600 sm:text-lg md:text-xl">
+          Send one simple link. Let your customers record video or write reviews in seconds, then
+          embed high converting proof widgets on any site with zero code.
         </p>
 
         {/* Primary CTA Button (Single clear action) */}
@@ -75,7 +87,10 @@ export default function Hero() {
           <Link href="/login">
             <Button className="group flex h-12 items-center gap-2 rounded-full bg-neutral-900 px-8 text-base font-semibold text-white shadow-xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.02] hover:bg-neutral-800 active:scale-[0.98]">
               <span>Start free trial</span>
-              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" weight="bold" />
+              <ArrowRight
+                className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                weight="bold"
+              />
             </Button>
           </Link>
         </div>
@@ -93,9 +108,11 @@ export default function Hero() {
               <div className="size-2.5 rounded-full bg-neutral-300" />
               <div className="size-2.5 rounded-full bg-neutral-300" />
               <div className="size-2.5 rounded-full bg-neutral-300" />
-              <span className="ml-2 text-xs font-medium text-neutral-400">live-widget.kudoswall.org/embed</span>
+              <span className="ml-2 text-xs font-medium text-neutral-400">
+                live-widget.kudoswall.org/embed
+              </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+            <div className="flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
               <ShieldCheck className="size-3.5" weight="fill" />
               <span>Verified Testimonials</span>
             </div>
@@ -111,9 +128,9 @@ export default function Hero() {
                 {card.type === "video" && (
                   <div className="relative mb-3 flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-900">
                     <div className="flex size-9 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow-md">
-                      <Play className="size-4 ml-0.5" weight="fill" />
+                      <Play className="ml-0.5 size-4" weight="fill" />
                     </div>
-                    <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    <span className="absolute right-2 bottom-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                       0:28
                     </span>
                   </div>
@@ -123,7 +140,11 @@ export default function Hero() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-0.5 text-amber-400">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={`card-star-${i}`} className="size-3 fill-amber-400" weight="fill" />
+                        <Star
+                          key={`card-star-${i}`}
+                          className="size-3 fill-amber-400"
+                          weight="fill"
+                        />
                       ))}
                     </div>
                     {card.type === "text" && (
@@ -131,7 +152,7 @@ export default function Hero() {
                     )}
                   </div>
 
-                  <p className="mt-2.5 text-xs font-normal leading-relaxed text-neutral-700 [text-wrap:pretty]">
+                  <p className="mt-2.5 text-xs leading-relaxed font-normal [text-wrap:pretty] text-neutral-700">
                     "{card.text}"
                   </p>
                 </div>
@@ -164,13 +185,15 @@ export default function Hero() {
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-opacity hover:opacity-90">
             {LOGO_CLIENTS.map((logo) => (
-              <span key={logo.name} className="text-sm font-semibold tracking-tight text-neutral-700">
+              <span
+                key={logo.name}
+                className="text-sm font-semibold tracking-tight text-neutral-700"
+              >
                 {logo.label}
               </span>
             ))}
           </div>
         </div>
-
       </div>
     </section>
   );

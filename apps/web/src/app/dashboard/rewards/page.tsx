@@ -1,7 +1,16 @@
 "use client";
 
 import { trpc } from "@/utils/trpc";
-import { Copy, Check, Users, Lightning, ArrowRight, ShieldCheck, Star, Sparkle } from "@phosphor-icons/react";
+import {
+  Copy,
+  Check,
+  Users,
+  Lightning,
+  ArrowRight,
+  ShieldCheck,
+  Star,
+  Sparkle,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
@@ -34,26 +43,27 @@ export default function RewardsPage() {
     >
       <div className="mx-auto max-w-5xl space-y-6 pb-12">
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 sm:p-10 shadow-sm">
-          <div className="flex flex-col items-center text-center lg:flex-row lg:items-start lg:justify-between lg:text-left gap-8">
+        <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-10">
+          <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:items-start lg:justify-between lg:text-left">
             <div className="max-w-xl space-y-4">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-800">
                 <Star className="size-3.5 text-amber-500" weight="fill" />
                 <span>Growth rewards</span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+              <h1 className="text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
                 Refer a founder, remove the badge
               </h1>
 
-              <p className="text-sm leading-relaxed text-neutral-600 [text-wrap:pretty]">
-                Help another founder build authentic social proof. When they embed their first wall, both of you get 30 days of badge-free embedding.
+              <p className="text-sm leading-relaxed [text-wrap:pretty] text-neutral-600">
+                Help another founder build authentic social proof. When they embed their first wall,
+                both of you get 30 days of badge-free embedding.
               </p>
             </div>
 
             <div className="w-full max-w-sm shrink-0">
-              <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-5 shadow-sm space-y-3">
-                <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+              <div className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50 p-5 shadow-sm">
+                <label className="text-[11px] font-semibold tracking-wider text-neutral-500 uppercase">
                   Your unique invite link
                 </label>
                 <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-sm">
@@ -65,11 +75,15 @@ export default function RewardsPage() {
                     disabled={isLoading}
                     className="h-8 rounded-lg bg-neutral-900 px-3 text-xs font-semibold text-white transition-all hover:bg-neutral-800 active:scale-95"
                   >
-                    {copied ? <Check className="size-3.5" weight="bold" /> : <Copy className="size-3.5" weight="bold" />}
+                    {copied ? (
+                      <Check className="size-3.5" weight="bold" />
+                    ) : (
+                      <Copy className="size-3.5" weight="bold" />
+                    )}
                     <span className="ml-1.5">{copied ? "Copied" : "Copy"}</span>
                   </Button>
                 </div>
-                <p className="text-[11px] text-neutral-500 text-center">
+                <p className="text-center text-[11px] text-neutral-500">
                   Share via Twitter, Slack, or direct email.
                 </p>
               </div>
@@ -84,10 +98,10 @@ export default function RewardsPage() {
               <Users className="size-5" weight="bold" />
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-neutral-900">{stats?.totalReferred || 0}</p>
-              <p className="text-xs font-semibold text-neutral-500">
-                Founders referred
+              <p className="text-3xl font-bold tracking-tight text-neutral-900">
+                {stats?.totalReferred || 0}
               </p>
+              <p className="text-xs font-semibold text-neutral-500">Founders referred</p>
             </div>
           </div>
 
@@ -96,10 +110,10 @@ export default function RewardsPage() {
               <Lightning className="size-5 text-amber-500" weight="fill" />
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-neutral-900">{stats?.totalActivated || 0}</p>
-              <p className="text-xs font-semibold text-neutral-500">
-                Active widgets
+              <p className="text-3xl font-bold tracking-tight text-neutral-900">
+                {stats?.totalActivated || 0}
               </p>
+              <p className="text-xs font-semibold text-neutral-500">Active widgets</p>
             </div>
           </div>
 
@@ -108,17 +122,17 @@ export default function RewardsPage() {
               <ShieldCheck className="size-5" weight="fill" />
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-white">{stats?.daysRemaining || 0}</p>
-              <p className="text-xs font-semibold text-neutral-300">
-                Badge-free days left
+              <p className="text-3xl font-bold tracking-tight text-white">
+                {stats?.daysRemaining || 0}
               </p>
+              <p className="text-xs font-semibold text-neutral-300">Badge-free days left</p>
             </div>
           </div>
         </div>
 
         {/* How it works & Referrals */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
+          <div className="space-y-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
             <h2 className="text-base font-bold text-neutral-900">How rewards work</h2>
 
             <div className="space-y-4">
@@ -144,37 +158,40 @@ export default function RewardsPage() {
                   desc: "Refer 10 founders? That unlocks 300 continuous days of badge-free display.",
                 },
               ].map((item) => (
-                <div key={item.step} className="flex gap-3.5 items-start">
+                <div key={item.step} className="flex items-start gap-3.5">
                   <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
                     {item.step}
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-neutral-900">{item.title}</h3>
-                    <p className="mt-0.5 text-xs text-neutral-500 [text-wrap:pretty]">{item.desc}</p>
+                    <p className="mt-0.5 text-xs [text-wrap:pretty] text-neutral-500">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-4">
+          <div className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
             <h2 className="text-base font-bold text-neutral-900">Your referrals</h2>
             <ReferralList />
           </div>
         </div>
 
         {/* Pro CTA banner */}
-        <div className="relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-900 p-6 sm:p-8 text-white shadow-xl">
+        <div className="relative flex flex-col justify-between rounded-2xl border border-neutral-900 bg-neutral-900 p-6 text-white shadow-xl sm:p-8">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-neutral-200">
               <Sparkle className="size-3.5 text-amber-400" weight="fill" />
               <span>Instant upgrade</span>
             </div>
-            <h3 className="text-2xl font-bold tracking-tight text-white [text-wrap:balance]">
+            <h3 className="text-2xl font-bold tracking-tight [text-wrap:balance] text-white">
               Skip the wait and upgrade directly
             </h3>
-            <p className="text-xs leading-relaxed text-neutral-300 max-w-xl [text-wrap:pretty]">
-              Removing the KudosWall branding badge is standard on all Pro plans, alongside HD video downloads and unlimited collection.
+            <p className="max-w-xl text-xs leading-relaxed [text-wrap:pretty] text-neutral-300">
+              Removing the KudosWall branding badge is standard on all Pro plans, alongside HD video
+              downloads and unlimited collection.
             </p>
           </div>
 
@@ -184,7 +201,10 @@ export default function RewardsPage() {
               className="group flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-6 text-xs font-bold text-neutral-900 shadow-sm transition-all hover:bg-neutral-100 active:scale-[0.98]"
             >
               <span>Unlock Pro features</span>
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" weight="bold" />
+              <ArrowRight
+                className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                weight="bold"
+              />
             </Button>
           </div>
         </div>
@@ -240,7 +260,7 @@ function ReferralList() {
             <span
               className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
                 u.status === "Activated"
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                   : "bg-neutral-100 text-neutral-600"
               }`}
             >

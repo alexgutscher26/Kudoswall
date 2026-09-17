@@ -7,7 +7,8 @@ const DEMO_TESTIMONIALS = [
   {
     name: "Siddharth Nair",
     role: "Founder, SupaDocs",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80",
     rating: 5,
     text: "We replaced manual screenshot reviews with KudosWall and saw our checkout completion jump by 28.4% within 10 days.",
     verified: true,
@@ -15,7 +16,8 @@ const DEMO_TESTIMONIALS = [
   {
     name: "Clara Dubois",
     role: "Product Lead, FlowCraft",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
     rating: 5,
     text: "Our users love how easy it is to leave video feedback directly in their mobile browser without installing anything.",
     verified: true,
@@ -23,7 +25,8 @@ const DEMO_TESTIMONIALS = [
   {
     name: "Mateo Rodriguez",
     role: "Course Creator, DesignStack",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
     rating: 5,
     text: "The embed script weighs next to nothing. It loads instantly and matches our dark mode theme seamlessly.",
     verified: true,
@@ -31,7 +34,8 @@ const DEMO_TESTIMONIALS = [
   {
     name: "Hanna Lindqvist",
     role: "Growth, HyperScale",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
     rating: 5,
     text: "Zero setup friction. We collected 24 authentic video reviews in 48 hours for our product launch.",
     verified: true,
@@ -50,11 +54,12 @@ export default function WidgetPreviewSection() {
           <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
             Live preview
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
             Four widget layouts to match any page design
           </h2>
-          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
-            Switch between Grid, Masonry, Carousel, and Bento layouts with a single click in your dashboard.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            Switch between Grid, Masonry, Carousel, and Bento layouts with a single click in your
+            dashboard.
           </p>
 
           {/* Widget Layout Type Selector */}
@@ -107,14 +112,16 @@ export default function WidgetPreviewSection() {
         </div>
 
         {/* Browser Mockup */}
-        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8 shadow-xl">
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 shadow-xl sm:p-8">
           {/* Top Bar */}
           <div className="mb-6 flex items-center justify-between border-b border-neutral-200 pb-3">
             <div className="flex items-center gap-2">
               <div className="size-2.5 rounded-full bg-neutral-300" />
               <div className="size-2.5 rounded-full bg-neutral-300" />
               <div className="size-2.5 rounded-full bg-neutral-300" />
-              <span className="ml-2 text-xs font-medium text-neutral-400">yourbrand.com/testimonials</span>
+              <span className="ml-2 text-xs font-medium text-neutral-400">
+                yourbrand.com/testimonials
+              </span>
             </div>
             <span className="text-xs font-semibold text-neutral-700 capitalize">
               {activeTab} layout
@@ -133,12 +140,16 @@ export default function WidgetPreviewSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-0.5 text-amber-400">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={`grid-star-${i}`} className="size-3 fill-amber-400" weight="fill" />
+                          <Star
+                            key={`grid-star-${i}`}
+                            className="size-3 fill-amber-400"
+                            weight="fill"
+                          />
                         ))}
                       </div>
                       <Quotes className="size-4 text-neutral-300" weight="fill" />
                     </div>
-                    <p className="mt-3 text-xs leading-relaxed text-neutral-700 [text-wrap:pretty]">
+                    <p className="mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700">
                       "{t.text}"
                     </p>
                   </div>
@@ -156,7 +167,7 @@ export default function WidgetPreviewSection() {
 
           {/* Layout 2: Masonry */}
           {activeTab === "masonry" && (
-            <div className="columns-1 gap-4 md:columns-2 lg:columns-3 space-y-4">
+            <div className="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
               {DEMO_TESTIMONIALS.map((t, idx) => (
                 <div
                   key={t.name}
@@ -165,12 +176,18 @@ export default function WidgetPreviewSection() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-0.5 text-amber-400">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={`masonry-star-${i}`} className="size-3 fill-amber-400" weight="fill" />
+                        <Star
+                          key={`masonry-star-${i}`}
+                          className="size-3 fill-amber-400"
+                          weight="fill"
+                        />
                       ))}
                     </div>
                     <Quotes className="size-4 text-neutral-300" weight="fill" />
                   </div>
-                  <p className={`mt-3 text-xs leading-relaxed text-neutral-700 [text-wrap:pretty] ${idx === 1 ? "line-clamp-none font-medium" : ""}`}>
+                  <p
+                    className={`mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700 ${idx === 1 ? "line-clamp-none font-medium" : ""}`}
+                  >
                     "{t.text}"
                   </p>
                   <div className="mt-4 flex items-center gap-2.5 border-t border-neutral-100 pt-3">
@@ -195,17 +212,25 @@ export default function WidgetPreviewSection() {
                 >
                   {DEMO_TESTIMONIALS.map((t) => (
                     <div key={t.name} className="w-full shrink-0 px-2">
-                      <div className="mx-auto max-w-lg rounded-xl border border-neutral-200 bg-white p-6 shadow-sm text-center">
-                        <div className="flex justify-center items-center gap-0.5 text-amber-400">
+                      <div className="mx-auto max-w-lg rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm">
+                        <div className="flex items-center justify-center gap-0.5 text-amber-400">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={`car-star-${i}`} className="size-4 fill-amber-400" weight="fill" />
+                            <Star
+                              key={`car-star-${i}`}
+                              className="size-4 fill-amber-400"
+                              weight="fill"
+                            />
                           ))}
                         </div>
-                        <p className="mt-4 text-sm font-medium leading-relaxed text-neutral-800 [text-wrap:pretty]">
+                        <p className="mt-4 text-sm leading-relaxed font-medium [text-wrap:pretty] text-neutral-800">
                           "{t.text}"
                         </p>
                         <div className="mt-5 flex items-center justify-center gap-2.5">
-                          <img src={t.avatar} alt={t.name} className="size-8 rounded-full object-cover" />
+                          <img
+                            src={t.avatar}
+                            alt={t.name}
+                            className="size-8 rounded-full object-cover"
+                          />
                           <div className="text-left">
                             <p className="text-xs font-bold text-neutral-900">{t.name}</p>
                             <p className="text-[10px] text-neutral-500">{t.role}</p>
@@ -220,16 +245,20 @@ export default function WidgetPreviewSection() {
               {/* Prev / Next controls */}
               <button
                 type="button"
-                onClick={() => setCarouselIndex((prev) => (prev === 0 ? DEMO_TESTIMONIALS.length - 1 : prev - 1))}
-                className="absolute left-0 top-1/2 -translate-y-1/2 flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
+                onClick={() =>
+                  setCarouselIndex((prev) => (prev === 0 ? DEMO_TESTIMONIALS.length - 1 : prev - 1))
+                }
+                className="absolute top-1/2 left-0 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
                 aria-label="Previous slide"
               >
                 <CaretLeft className="size-4 text-neutral-700" weight="bold" />
               </button>
               <button
                 type="button"
-                onClick={() => setCarouselIndex((prev) => (prev === DEMO_TESTIMONIALS.length - 1 ? 0 : prev + 1))}
-                className="absolute right-0 top-1/2 -translate-y-1/2 flex size-8 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
+                onClick={() =>
+                  setCarouselIndex((prev) => (prev === DEMO_TESTIMONIALS.length - 1 ? 0 : prev + 1))
+                }
+                className="absolute top-1/2 right-0 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
                 aria-label="Next slide"
               >
                 <CaretRight className="size-4 text-neutral-700" weight="bold" />
@@ -256,24 +285,32 @@ export default function WidgetPreviewSection() {
           {activeTab === "bento" && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Featured Large Bento Card */}
-              <div className="flex flex-col justify-between rounded-xl border border-neutral-900 bg-neutral-900 p-6 text-white md:col-span-2 shadow-md">
+              <div className="flex flex-col justify-between rounded-xl border border-neutral-900 bg-neutral-900 p-6 text-white shadow-md md:col-span-2">
                 <div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-0.5 text-amber-400">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={`bento-star-lg-${i}`} className="size-4 fill-amber-400" weight="fill" />
+                        <Star
+                          key={`bento-star-lg-${i}`}
+                          className="size-4 fill-amber-400"
+                          weight="fill"
+                        />
                       ))}
                     </div>
                     <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-neutral-200">
                       Featured story
                     </span>
                   </div>
-                  <p className="mt-4 text-base font-semibold leading-relaxed text-white [text-wrap:pretty]">
+                  <p className="mt-4 text-base leading-relaxed font-semibold [text-wrap:pretty] text-white">
                     "{DEMO_TESTIMONIALS[0].text}"
                   </p>
                 </div>
                 <div className="mt-6 flex items-center gap-3 border-t border-white/10 pt-4">
-                  <img src={DEMO_TESTIMONIALS[0].avatar} alt={DEMO_TESTIMONIALS[0].name} className="size-9 rounded-full object-cover" />
+                  <img
+                    src={DEMO_TESTIMONIALS[0].avatar}
+                    alt={DEMO_TESTIMONIALS[0].name}
+                    className="size-9 rounded-full object-cover"
+                  />
                   <div>
                     <p className="text-sm font-bold text-white">{DEMO_TESTIMONIALS[0].name}</p>
                     <p className="text-xs text-neutral-400">{DEMO_TESTIMONIALS[0].role}</p>
@@ -286,17 +323,27 @@ export default function WidgetPreviewSection() {
                 <div>
                   <div className="flex items-center gap-0.5 text-amber-400">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={`bento-star-sm-${i}`} className="size-3 fill-amber-400" weight="fill" />
+                      <Star
+                        key={`bento-star-sm-${i}`}
+                        className="size-3 fill-amber-400"
+                        weight="fill"
+                      />
                     ))}
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-neutral-700 [text-wrap:pretty]">
+                  <p className="mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700">
                     "{DEMO_TESTIMONIALS[1].text}"
                   </p>
                 </div>
                 <div className="mt-4 flex items-center gap-2.5 border-t border-neutral-100 pt-3">
-                  <img src={DEMO_TESTIMONIALS[1].avatar} alt={DEMO_TESTIMONIALS[1].name} className="size-7 rounded-full object-cover" />
+                  <img
+                    src={DEMO_TESTIMONIALS[1].avatar}
+                    alt={DEMO_TESTIMONIALS[1].name}
+                    className="size-7 rounded-full object-cover"
+                  />
                   <div>
-                    <p className="text-xs font-semibold text-neutral-900">{DEMO_TESTIMONIALS[1].name}</p>
+                    <p className="text-xs font-semibold text-neutral-900">
+                      {DEMO_TESTIMONIALS[1].name}
+                    </p>
                     <p className="text-[10px] text-neutral-500">{DEMO_TESTIMONIALS[1].role}</p>
                   </div>
                 </div>

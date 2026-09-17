@@ -1624,9 +1624,7 @@ const mcpAgent = new McpAgent({
 ```typescript
 // Client advertised elicitation capability during handshake,
 // but after hibernation, capability info was lost
-await server.elicitInput({
-  /* form */
-}); // ❌ Error: capabilities lost
+await server.elicitInput({/* form */}); // ❌ Error: capabilities lost
 ```
 
 **Solution** (fixed in 0.3.5):

@@ -1,10 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
-  useState,
-  useEffect,
-} from "react";
-import { CaretDown, Buildings, Check, CircleNotch, Plus, X, CaretRight } from "@phosphor-icons/react";
+  CaretDown,
+  Buildings,
+  Check,
+  CircleNotch,
+  Plus,
+  X,
+  CaretRight,
+} from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,15 +97,19 @@ export function WorkspaceSwitcher({
                 <p className="truncate text-xs font-bold text-neutral-900">
                   {activeWorkspace?.name || "Loading..."}
                 </p>
-                <p className="truncate text-[10px] font-medium text-neutral-500">
-                  Workspace
-                </p>
+                <p className="truncate text-[10px] font-medium text-neutral-500">Workspace</p>
               </div>
-              <CaretDown className="mr-1 size-3.5 text-neutral-400 transition-transform duration-200 group-data-[state=open]:rotate-180" weight="bold" />
+              <CaretDown
+                className="mr-1 size-3.5 text-neutral-400 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                weight="bold"
+              />
             </>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg" align="start">
+        <DropdownMenuContent
+          className="w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg"
+          align="start"
+        >
           <DropdownMenuGroup>
             <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
               Workspaces
@@ -118,7 +127,9 @@ export function WorkspaceSwitcher({
                 >
                   <div
                     className={`flex size-5 shrink-0 items-center justify-center rounded ${
-                      ws.id === currentWorkspaceId ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700"
+                      ws.id === currentWorkspaceId
+                        ? "bg-white/10 text-white"
+                        : "bg-neutral-100 text-neutral-700"
                     }`}
                   >
                     <Buildings className="size-3" weight="bold" />
@@ -154,13 +165,9 @@ export function WorkspaceSwitcher({
             className="animate-in fade-in absolute inset-0 bg-black/40 backdrop-blur-sm duration-300"
             onClick={() => setIsModalOpen(false)}
           />
-          <div
-            className="animate-in zoom-in-95 relative w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300"
-          >
+          <div className="animate-in zoom-in-95 relative w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-300">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-base font-bold text-neutral-900">
-                New workspace
-              </h3>
+              <h3 className="text-base font-bold text-neutral-900">New workspace</h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -180,9 +187,7 @@ export function WorkspaceSwitcher({
               className="space-y-5"
             >
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-700">
-                  Workspace name
-                </label>
+                <label className="text-xs font-semibold text-neutral-700">Workspace name</label>
                 <input
                   autoFocus
                   type="text"

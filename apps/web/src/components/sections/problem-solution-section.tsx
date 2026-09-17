@@ -26,11 +26,12 @@ export default function ProblemSolutionSection() {
             <Sparkle className="size-3.5 text-neutral-900" weight="bold" />
             <span>Why founders switch</span>
           </div>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl [text-wrap:balance]">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
             Stop losing sales to skepticism
           </h2>
-          <p className="mt-3 text-base text-neutral-500 sm:text-lg [text-wrap:pretty]">
-            Most visitors leave because they cannot verify your claims. Turn your real results into your strongest asset.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            Most visitors leave because they cannot verify your claims. Turn your real results into
+            your strongest asset.
           </p>
         </div>
 
@@ -42,11 +43,9 @@ export default function ProblemSolutionSection() {
               <div className="flex size-8 items-center justify-center rounded-lg bg-neutral-200/70 text-neutral-700">
                 <WarningCircle className="size-5" weight="bold" />
               </div>
-              <h3 className="text-lg font-bold text-neutral-900">
-                The manual struggle
-              </h3>
+              <h3 className="text-lg font-bold text-neutral-900">The manual struggle</h3>
             </div>
-            <p className="mt-3 text-sm text-neutral-500 [text-wrap:pretty]">
+            <p className="mt-3 text-sm [text-wrap:pretty] text-neutral-500">
               How testimonial collection usually fails and wastes hours of founder time every week.
             </p>
 
@@ -54,7 +53,9 @@ export default function ProblemSolutionSection() {
               {PAIN_POINTS.map((pain) => (
                 <li key={pain} className="flex items-start gap-3">
                   <XCircle className="mt-0.5 size-5 shrink-0 text-neutral-400" weight="fill" />
-                  <span className="text-sm font-medium text-neutral-600 [text-wrap:pretty]">{pain}</span>
+                  <span className="text-sm font-medium [text-wrap:pretty] text-neutral-600">
+                    {pain}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -66,11 +67,9 @@ export default function ProblemSolutionSection() {
               <div className="flex size-8 items-center justify-center rounded-lg bg-white/10 text-white">
                 <CheckCircle className="size-5" weight="fill" />
               </div>
-              <h3 className="text-lg font-bold text-white">
-                The KudosWall system
-              </h3>
+              <h3 className="text-lg font-bold text-white">The KudosWall system</h3>
             </div>
-            <p className="mt-3 text-sm text-neutral-400 [text-wrap:pretty]">
+            <p className="mt-3 text-sm [text-wrap:pretty] text-neutral-400">
               Automated proof gathering and instant edge embedding designed for high conversion.
             </p>
 
@@ -78,7 +77,9 @@ export default function ProblemSolutionSection() {
               {OUTCOMES.map((outcome) => (
                 <li key={outcome} className="flex items-start gap-3">
                   <CheckCircle className="mt-0.5 size-5 shrink-0 text-white" weight="fill" />
-                  <span className="text-sm font-medium text-neutral-200 [text-wrap:pretty]">{outcome}</span>
+                  <span className="text-sm font-medium [text-wrap:pretty] text-neutral-200">
+                    {outcome}
+                  </span>
                 </li>
               ))}
             </ul>
