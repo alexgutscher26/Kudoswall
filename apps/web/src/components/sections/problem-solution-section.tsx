@@ -30,8 +30,8 @@ export default function ProblemSolutionSection() {
             Stop losing sales to skepticism
           </h2>
           <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
-            Most visitors leave because they cannot verify your claims. Turn your real results into
-            your strongest asset.
+            Visitors hesitate when they cannot verify customer results. Show genuine video and text
+            proof right at the point of decision.
           </p>
         </div>
 

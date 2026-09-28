@@ -76,7 +76,7 @@ export default function TaglineRevealSection() {
           })}
         </h2>
         <p className="mt-6 text-sm font-medium [text-wrap:pretty] text-neutral-500 sm:text-base">
-          No manual code tweaks. No waiting on developer sprints. Just automated trust.
+          Approved reviews sync directly to your live website without updating code or waiting on deployments.
         </p>
       </div>
     </section>

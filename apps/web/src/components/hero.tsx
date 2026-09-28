@@ -78,8 +78,8 @@ export default function Hero() {
 
         {/* Subheadline */}
         <p className="mt-6 max-w-[680px] text-base leading-relaxed [text-wrap:pretty] text-neutral-600 sm:text-lg md:text-xl">
-          Send one simple link. Let your customers record video or write reviews in seconds, then
-          embed high converting proof widgets on any site with zero code.
+          Send customers a link to record video or write reviews in their browser, then embed a live
+          proof wall on your site with one script tag.
         </p>
 
         {/* Primary CTA Button (Single clear action) */}

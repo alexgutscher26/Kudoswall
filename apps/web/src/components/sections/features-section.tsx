@@ -46,8 +46,8 @@ export default function FeaturesSection() {
             Engineered to turn skeptical visitors into buyers
           </h2>
           <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
-            Every feature is focused on one objective: converting casual browsers into paying
-            customers with verified proof.
+            Collect real customer stories, showcase them across your funnel, and convert more visitors
+            with verified proof.
           </p>
         </div>
 

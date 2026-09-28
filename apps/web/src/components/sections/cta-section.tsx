@@ -21,8 +21,8 @@ export default function CtaSection() {
 
         {/* Subheadline */}
         <p className="mt-4 max-w-xl text-base leading-relaxed [text-wrap:pretty] text-neutral-600 sm:text-lg">
-          Join over 480 ambitious founders using KudosWall to turn happy customer praise into their
-          highest converting sales asset.
+          Join 480+ founders collecting video and text reviews that convert visitors on pricing and
+          landing pages.
         </p>
 
         {/* Primary Action Button */}

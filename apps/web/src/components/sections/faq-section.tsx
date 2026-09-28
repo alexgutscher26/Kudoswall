@@ -73,10 +73,10 @@ export default function FaqSection() {
         {/* Header */}
         <div className="mx-auto mb-14 max-w-[680px] text-center">
           <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
-            Frequently answered
+            FAQ
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
-            Got questions? We have answers.
+            Frequently asked questions
           </h2>
           <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
             Everything you need to know about collecting, managing, and displaying authentic
