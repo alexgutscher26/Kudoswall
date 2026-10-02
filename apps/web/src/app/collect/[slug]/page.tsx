@@ -8,6 +8,7 @@ import CollectionWizard from "../../[workspaceSlug]/[projectSlug]/collection-wiz
 import { JsonLd } from "@/components/seo/json-ld";
 import { CookieConsentBanner } from "@/components/collection/cookie-consent-banner";
 import { CollectionFooter } from "@/components/collection/collection-footer";
+import { CollectionHeader } from "@/components/collection/collection-header";
 
 interface CollectPageProps {
   params: Promise<{
@@ -394,32 +395,16 @@ export default async function CollectPage({ params, searchParams }: CollectPageP
         ) : null}
 
         <div className="z-10 mx-auto w-full max-w-4xl origin-center scale-95 lg:scale-100">
-          <div className="mb-6 space-y-4 text-center">
-            {logoUrl && (
-              <div className="group relative inline-block">
-                <div
-                  className="absolute -inset-2 rounded-[24px] opacity-20 blur-xl transition-opacity group-hover:opacity-40"
-                  style={{ backgroundColor: accentColor }}
-                />
-                <Image
-                  src={logoUrl as string}
-                  alt={projectData.workspace.name}
-                  width={56}
-                  height={56}
-                  priority
-                  className="relative mx-auto size-14 rounded-[18px] border border-neutral-100 bg-white object-cover p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
-                />
-              </div>
-            )}
-            <div className="space-y-1">
-              <h1 className="collect-heading text-3xl leading-tight font-black tracking-tighter text-neutral-900 transition-colors duration-300 sm:text-5xl">
-                {headline}
-              </h1>
-              <p className="collect-subheading mx-auto max-w-xl text-lg font-medium text-neutral-500 transition-colors duration-300">
-                {subheading}
-              </p>
-            </div>
-          </div>
+          <CollectionHeader
+            projectId={projectData.id}
+            projectName={projectData.name}
+            workspaceName={projectData.workspace.name}
+            logoUrl={logoUrl as string | null}
+            accentColor={accentColor}
+            defaultHeadline={headline}
+            defaultSubheading={subheading}
+            abTesting={settings?.abTesting}
+          />
 
           <CollectionWizard
             project={projectData as any}

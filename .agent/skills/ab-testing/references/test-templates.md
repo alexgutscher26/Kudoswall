@@ -162,16 +162,18 @@ We'll know this is true when [metrics].
 ### Segment Analysis
 
 **Mobile vs. Desktop**
+
 | Segment | Control | Variant | Lift |
-|---------|---------|---------|------|
-| Mobile | X% | Y% | +Z% |
-| Desktop | X% | Y% | +Z% |
+| ------- | ------- | ------- | ---- |
+| Mobile  | X%      | Y%      | +Z%  |
+| Desktop | X%      | Y%      | +Z%  |
 
 **New vs. Returning**
-| Segment | Control | Variant | Lift |
-|---------|---------|---------|------|
-| New | X% | Y% | +Z% |
-| Returning | X% | Y% | +Z% |
+
+| Segment   | Control | Variant | Lift |
+| --------- | ------- | ------- | ---- |
+| New       | X%      | Y%      | +Z%  |
+| Returning | X%      | Y%      | +Z%  |
 
 ## Interpretation
 

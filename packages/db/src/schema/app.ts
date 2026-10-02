@@ -23,6 +23,10 @@ export const analyticsEventTypeEnum = pgEnum("analytics_event_type", [
   "click",
   "video_play",
   "video_progress",
+  "collection_view",
+  "collection_step_view",
+  "collection_step_complete",
+  "collection_submit",
 ]);
 export const auditActionEnum = pgEnum("audit_action", ["create", "update", "delete"]);
 export const workspaceRoleEnum = pgEnum("workspace_role", ["owner", "admin", "member"]);

@@ -746,9 +746,7 @@ import { AI_NoObjectGeneratedError } from "ai";
 try {
   const result = await generateObject({
     model: openai("gpt-4-turbo"),
-    schema: z.object({
-      /* complex schema */
-    }),
+    schema: z.object({/* complex schema */}),
     prompt: "Generate data",
   });
 } catch (error) {
@@ -1092,9 +1090,7 @@ async function generateWithBackoff(prompt: string, retries = 3) {
 
 // Define inside functions or use type assertions:
 function generateData() {
-  const schema = z.object({
-    /* complex schema */
-  });
+  const schema = z.object({/* complex schema */});
   return generateObject({ model: openai("gpt-4-turbo"), schema, prompt: "..." });
 }
 

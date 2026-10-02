@@ -1,167 +1,355 @@
-import { Star, Quote, Play, MoreHorizontal } from "lucide-react";
+"use client";
 
-const WIDGET_TESTIMONIALS = [
+import { useState } from "react";
+import { Star, Quotes, CheckCircle, CaretLeft, CaretRight } from "@phosphor-icons/react";
+
+const DEMO_TESTIMONIALS = [
   {
-    name: "Jordan K.",
-    role: "Customer",
-    avatar: "JK",
-    avatarColor: "#e8527a",
+    name: "Siddharth Nair",
+    role: "Founder, SupaDocs",
+    avatar:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80",
     rating: 5,
-    text: "Absolutely love this product. The quality is outstanding and shipping was super fast!",
-    type: "text",
+    text: "We replaced manual screenshot reviews with KudosWall and saw our checkout completion jump by 28.4% within 10 days.",
+    verified: true,
   },
   {
-    name: "Aisha M.",
-    role: "Verified buyer",
-    avatar: "AM",
-    avatarColor: "#7c3aed",
+    name: "Clara Dubois",
+    role: "Product Lead, FlowCraft",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
     rating: 5,
-    text: "Changed my business completely. I recommend it to everyone.",
-    type: "text",
+    text: "Our users love how easy it is to leave video feedback directly in their mobile browser without installing anything.",
+    verified: true,
   },
   {
-    name: "Tom B.",
-    role: "Customer",
-    avatar: "TB",
-    avatarColor: "#0ea5e9",
+    name: "Mateo Rodriguez",
+    role: "Course Creator, DesignStack",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
     rating: 5,
-    text: "Best purchase this year. The support team is also incredibly responsive.",
-    type: "text",
+    text: "The embed script weighs next to nothing. It loads instantly and matches our dark mode theme seamlessly.",
+    verified: true,
+  },
+  {
+    name: "Hanna Lindqvist",
+    role: "Growth, HyperScale",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
+    rating: 5,
+    text: "Zero setup friction. We collected 24 authentic video reviews in 48 hours for our product launch.",
+    verified: true,
   },
 ];
 
-function StarRow({ count }: { count: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: count }).map((_, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: static rating stars
-        <Star key={i} className="size-3 fill-amber-400 text-amber-400" />
-      ))}
-    </div>
-  );
-}
-
 export default function WidgetPreviewSection() {
-  return (
-    <section className="relative overflow-hidden px-4 py-24" style={{ backgroundColor: "#ffffff" }}>
-      {/* Dot grid */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      />
+  const [activeTab, setActiveTab] = useState<"grid" | "masonry" | "carousel" | "bento">("grid");
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
-      <div className="relative mx-auto max-w-5xl">
+  return (
+    <section className="relative bg-white px-4 py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl">
         {/* Header */}
-        <div className="mb-14 text-center">
-          <span
-            className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-widest uppercase"
-            style={{ color: "#0ea5e9", backgroundColor: "#f0f9ff" }}
-          >
+        <div className="mx-auto mb-12 max-w-[680px] text-center">
+          <span className="inline-block rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-700">
             Live preview
           </span>
-          <h2 className="text-3xl leading-tight font-bold text-neutral-900 sm:text-4xl md:text-5xl">
-            A widget your visitors will <span style={{ color: "#e8527a" }}>actually trust</span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight [text-wrap:balance] text-neutral-900 sm:text-4xl">
+            Four widget layouts to match any page design
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-500">
-            Here's what the embeddable widget looks like on your site — fully customizable to match
-            your brand.
+          <p className="mt-3 text-base [text-wrap:pretty] text-neutral-500 sm:text-lg">
+            Switch between Grid, Masonry, Carousel, and Bento layouts with a single click in your
+            dashboard.
           </p>
+
+          {/* Widget Layout Type Selector */}
+          <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-100 p-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab("grid")}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeTab === "grid"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              Grid
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("masonry")}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeTab === "masonry"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              Masonry
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("carousel")}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeTab === "carousel"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              Carousel
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("bento")}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeTab === "bento"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              Bento
+            </button>
+          </div>
         </div>
 
-        {/* Browser chrome mock */}
-        <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-neutral-200 shadow-2xl">
-          {/* Browser bar */}
-          <div
-            className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3"
-            style={{ backgroundColor: "#f0efeb" }}
-          >
-            <div className="flex gap-1.5">
-              <span className="size-3 rounded-full bg-red-400" />
-              <span className="size-3 rounded-full bg-amber-400" />
-              <span className="size-3 rounded-full bg-green-400" />
-            </div>
-            <div
-              className="mx-4 flex-1 rounded-full px-3 py-1 text-xs text-neutral-400"
-              style={{ backgroundColor: "#e8e7e3" }}
-            >
-              yourwebsite.com
-            </div>
-            <MoreHorizontal className="size-4 text-neutral-400" />
-          </div>
-
-          {/* Widget content */}
-          <div className="p-4 sm:p-6" style={{ backgroundColor: "#ffffff" }}>
-            {/* Widget header */}
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h3 className="text-lg font-bold text-neutral-900">What our customers say</h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: static stars
-                      <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="text-xs text-neutral-500">4.9 · 128 reviews</span>
-                </div>
-              </div>
-              <span
-                className="hidden shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold sm:inline"
-                style={{ backgroundColor: "#fff5f7", color: "#e8527a" }}
-              >
-                Powered by KudosWall
+        {/* Browser Mockup */}
+        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 shadow-xl sm:p-8">
+          {/* Top Bar */}
+          <div className="mb-6 flex items-center justify-between border-b border-neutral-200 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="size-2.5 rounded-full bg-neutral-300" />
+              <div className="size-2.5 rounded-full bg-neutral-300" />
+              <div className="size-2.5 rounded-full bg-neutral-300" />
+              <span className="ml-2 text-xs font-medium text-neutral-400">
+                yourbrand.com/testimonials
               </span>
             </div>
+            <span className="text-xs font-semibold text-neutral-700 capitalize">
+              {activeTab} layout
+            </span>
+          </div>
 
-            {/* Cards */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-              {WIDGET_TESTIMONIALS.map(
-                ({ name, role, avatar, avatarColor, rating, text, type }) => (
-                  <div
-                    key={name}
-                    className="relative rounded-xl border border-neutral-100 p-4"
-                    style={{ backgroundColor: "#fafafa" }}
-                  >
-                    {type === "video" && (
-                      <div
-                        className="relative mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg"
-                        style={{ backgroundColor: "#e8527a22" }}
-                      >
-                        <div
-                          className="flex size-8 items-center justify-center rounded-full"
-                          style={{ backgroundColor: "#e8527a" }}
-                        >
-                          <Play className="size-3.5 fill-white text-white" />
-                        </div>
-                        <span className="absolute right-2 bottom-2 rounded bg-white px-1 text-[10px] text-neutral-500">
-                          0:32
-                        </span>
+          {/* Layout 1: Grid */}
+          {activeTab === "grid" && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {DEMO_TESTIMONIALS.slice(0, 3).map((t) => (
+                <div
+                  key={t.name}
+                  className="flex flex-col justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={`grid-star-${i}`}
+                            className="size-3 fill-amber-400"
+                            weight="fill"
+                          />
+                        ))}
                       </div>
-                    )}
-                    {type === "text" && <Quote className="mb-2 size-5 text-neutral-200" />}
-                    <StarRow count={rating} />
-                    <p className="mt-2 mb-3 text-xs leading-relaxed text-neutral-600">"{text}"</p>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="flex size-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                        style={{ backgroundColor: avatarColor }}
-                      >
-                        {avatar}
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-neutral-800">{name}</p>
-                        <p className="text-[10px] text-neutral-400">{role}</p>
-                      </div>
+                      <Quotes className="size-4 text-neutral-300" weight="fill" />
+                    </div>
+                    <p className="mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700">
+                      "{t.text}"
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2.5 border-t border-neutral-100 pt-3">
+                    <img src={t.avatar} alt={t.name} className="size-7 rounded-full object-cover" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-900">{t.name}</p>
+                      <p className="text-[10px] text-neutral-500">{t.role}</p>
                     </div>
                   </div>
-                ),
-              )}
+                </div>
+              ))}
             </div>
-          </div>
+          )}
+
+          {/* Layout 2: Masonry */}
+          {activeTab === "masonry" && (
+            <div className="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
+              {DEMO_TESTIMONIALS.map((t, idx) => (
+                <div
+                  key={t.name}
+                  className="break-inside-avoid rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-0.5 text-amber-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={`masonry-star-${i}`}
+                          className="size-3 fill-amber-400"
+                          weight="fill"
+                        />
+                      ))}
+                    </div>
+                    <Quotes className="size-4 text-neutral-300" weight="fill" />
+                  </div>
+                  <p
+                    className={`mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700 ${idx === 1 ? "line-clamp-none font-medium" : ""}`}
+                  >
+                    "{t.text}"
+                  </p>
+                  <div className="mt-4 flex items-center gap-2.5 border-t border-neutral-100 pt-3">
+                    <img src={t.avatar} alt={t.name} className="size-7 rounded-full object-cover" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-900">{t.name}</p>
+                      <p className="text-[10px] text-neutral-500">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Layout 3: Carousel */}
+          {activeTab === "carousel" && (
+            <div className="relative px-8 py-2">
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
+                >
+                  {DEMO_TESTIMONIALS.map((t) => (
+                    <div key={t.name} className="w-full shrink-0 px-2">
+                      <div className="mx-auto max-w-lg rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm">
+                        <div className="flex items-center justify-center gap-0.5 text-amber-400">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={`car-star-${i}`}
+                              className="size-4 fill-amber-400"
+                              weight="fill"
+                            />
+                          ))}
+                        </div>
+                        <p className="mt-4 text-sm leading-relaxed font-medium [text-wrap:pretty] text-neutral-800">
+                          "{t.text}"
+                        </p>
+                        <div className="mt-5 flex items-center justify-center gap-2.5">
+                          <img
+                            src={t.avatar}
+                            alt={t.name}
+                            className="size-8 rounded-full object-cover"
+                          />
+                          <div className="text-left">
+                            <p className="text-xs font-bold text-neutral-900">{t.name}</p>
+                            <p className="text-[10px] text-neutral-500">{t.role}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prev / Next controls */}
+              <button
+                type="button"
+                onClick={() =>
+                  setCarouselIndex((prev) => (prev === 0 ? DEMO_TESTIMONIALS.length - 1 : prev - 1))
+                }
+                className="absolute top-1/2 left-0 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
+                aria-label="Previous slide"
+              >
+                <CaretLeft className="size-4 text-neutral-700" weight="bold" />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setCarouselIndex((prev) => (prev === DEMO_TESTIMONIALS.length - 1 ? 0 : prev + 1))
+                }
+                className="absolute top-1/2 right-0 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm hover:bg-neutral-100"
+                aria-label="Next slide"
+              >
+                <CaretRight className="size-4 text-neutral-700" weight="bold" />
+              </button>
+
+              {/* Dots */}
+              <div className="mt-6 flex justify-center gap-1.5">
+                {DEMO_TESTIMONIALS.map((_, i) => (
+                  <button
+                    key={`dot-${i}`}
+                    type="button"
+                    onClick={() => setCarouselIndex(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      carouselIndex === i ? "w-6 bg-neutral-900" : "w-1.5 bg-neutral-300"
+                    }`}
+                    aria-label={`Slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Layout 4: Bento */}
+          {activeTab === "bento" && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Featured Large Bento Card */}
+              <div className="flex flex-col justify-between rounded-xl border border-neutral-900 bg-neutral-900 p-6 text-white shadow-md md:col-span-2">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-0.5 text-amber-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={`bento-star-lg-${i}`}
+                          className="size-4 fill-amber-400"
+                          weight="fill"
+                        />
+                      ))}
+                    </div>
+                    <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-neutral-200">
+                      Featured story
+                    </span>
+                  </div>
+                  <p className="mt-4 text-base leading-relaxed font-semibold [text-wrap:pretty] text-white">
+                    "{DEMO_TESTIMONIALS[0].text}"
+                  </p>
+                </div>
+                <div className="mt-6 flex items-center gap-3 border-t border-white/10 pt-4">
+                  <img
+                    src={DEMO_TESTIMONIALS[0].avatar}
+                    alt={DEMO_TESTIMONIALS[0].name}
+                    className="size-9 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-sm font-bold text-white">{DEMO_TESTIMONIALS[0].name}</p>
+                    <p className="text-xs text-neutral-400">{DEMO_TESTIMONIALS[0].role}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Standard Bento Card */}
+              <div className="flex flex-col justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+                <div>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={`bento-star-sm-${i}`}
+                        className="size-3 fill-amber-400"
+                        weight="fill"
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed [text-wrap:pretty] text-neutral-700">
+                    "{DEMO_TESTIMONIALS[1].text}"
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-2.5 border-t border-neutral-100 pt-3">
+                  <img
+                    src={DEMO_TESTIMONIALS[1].avatar}
+                    alt={DEMO_TESTIMONIALS[1].name}
+                    className="size-7 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-neutral-900">
+                      {DEMO_TESTIMONIALS[1].name}
+                    </p>
+                    <p className="text-[10px] text-neutral-500">{DEMO_TESTIMONIALS[1].role}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
