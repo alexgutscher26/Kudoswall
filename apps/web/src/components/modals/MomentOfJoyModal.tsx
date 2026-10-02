@@ -7,10 +7,7 @@ import { Sparkles, Video, Trophy, ArrowRight, X, Flame } from "lucide-react";
 import type { WorkspacePermissions } from "@my-better-t-app/api/logic/billing";
 
 export type JoyMilestoneType =
-  | "FIRST_TESTIMONIAL"
-  | "FIRST_VIDEO"
-  | "LIMIT_APPROACHING"
-  | "LIMIT_REACHED";
+  "FIRST_TESTIMONIAL" | "FIRST_VIDEO" | "LIMIT_APPROACHING" | "LIMIT_REACHED";
 
 interface MomentOfJoyModalProps {
   workspaceId: string;

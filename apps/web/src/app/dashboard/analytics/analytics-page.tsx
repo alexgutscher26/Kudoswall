@@ -22,6 +22,7 @@ import { trpc, trpcClient, type RouterOutputs } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { gooeyToast as toast } from "goey-toast";
 import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
+import { CollectionFunnelAnalytics } from "../collection/collection-funnel-analytics";
 
 type ExportRow = RouterOutputs["analytics"]["getExportData"][number];
 
@@ -200,6 +201,7 @@ export default function AnalyticsPage() {
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [isExporting, setIsExporting] = useState(false);
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
   const TIMEFRAME_LABELS = {
     "7d": "Last 7 Days",
@@ -610,6 +612,37 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Collection Funnel & A/B Testing Section */}
+      {dashData?.projects && dashData.projects.length > 0 && (
+        <div className="pt-4">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-neutral-900">Collection Funnel & Experiments</h2>
+            {dashData.projects.length > 1 && (
+              <select
+                value={selectedProjectId || dashData.projects[0].id}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="rounded-xl border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-700 shadow-xs outline-none focus:border-pink-500"
+              >
+                {dashData.projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <CollectionFunnelAnalytics
+            workspaceId={activeWorkspaceId}
+            projectId={selectedProjectId || dashData.projects[0].id}
+            projectName={
+              dashData.projects.find((p) => p.id === (selectedProjectId || dashData.projects[0].id))
+                ?.name || "Collection"
+            }
+          />
+        </div>
+      )}
     </div>
   );
 }

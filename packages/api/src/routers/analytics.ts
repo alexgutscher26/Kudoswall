@@ -34,7 +34,16 @@ export const analyticsRouter = router({
         workspaceId: z.string(),
         projectId: z.string().optional(),
         widgetId: z.string().optional(),
-        eventType: z.enum(["view", "click", "video_play", "video_progress"]),
+        eventType: z.enum([
+          "view",
+          "click",
+          "video_play",
+          "video_progress",
+          "collection_view",
+          "collection_step_view",
+          "collection_step_complete",
+          "collection_submit",
+        ]),
         metadataJson: z.string().optional(),
       }),
     )
@@ -623,5 +632,359 @@ export const analyticsRouter = router({
         company: t.authorCompany || "",
         rating: t.rating,
       }));
+    }),
+
+  getCollectionFunnel: protectedProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        projectId: z.string().optional(),
+        timeframe: timeframeSchema,
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, session } = ctx;
+      const { workspaceId, projectId, timeframe } = input;
+
+      const ws = await db.query.workspace.findFirst({
+        where: and(eq(workspace.id, workspaceId), eq(workspace.ownerId, session.user.id)),
+        with: { organization: true },
+      });
+
+      if (!ws) throw new Error("Workspace not found or unauthorized");
+
+      const { getWorkspacePermissions } = await import("../logic/billing");
+      const permissions = getWorkspacePermissions({
+        plan: ws.plan,
+        organization: (ws as any).organization,
+      });
+
+      if (!permissions.features.analytics) {
+        throw new Error("Analytics is not available on your current plan. Please upgrade.");
+      }
+
+      const daysNum =
+        timeframe === "30d" ? 30 : timeframe === "90d" ? 90 : timeframe === "all" ? 0 : 7;
+      const startDate = daysNum > 0 ? subDays(new Date(), daysNum) : null;
+
+      // Determine target project(s)
+      let targetProjects = await db.query.project.findMany({
+        where: projectId
+          ? and(eq(project.id, projectId), eq(project.workspaceId, ws.id))
+          : eq(project.workspaceId, ws.id),
+      });
+
+      if (targetProjects.length === 0 && projectId) {
+        throw new Error("Project not found");
+      }
+
+      const projectIds = targetProjects.map((p) => p.id);
+
+      // Fetch all relevant collection events
+      const rawEvents = await db.query.analyticsEvent.findMany({
+        where: and(
+          eq(analyticsEvent.workspaceId, ws.id),
+          inArray(analyticsEvent.eventType, [
+            "collection_view",
+            "collection_step_view",
+            "collection_step_complete",
+            "collection_submit",
+            "view",
+          ]),
+          projectIds.length > 0 ? inArray(analyticsEvent.projectId, projectIds) : undefined,
+          startDate ? gte(analyticsEvent.createdAt, startDate) : undefined,
+        ),
+        orderBy: desc(analyticsEvent.createdAt),
+      });
+
+      // Parse and group events
+      const parsedEvents = rawEvents.map((evt) => {
+        let meta: Record<string, any> = {};
+        if (evt.metadataJson) {
+          try {
+            meta = JSON.parse(evt.metadataJson);
+          } catch {
+            meta = {};
+          }
+        }
+        return {
+          ...evt,
+          step: meta.step as string | undefined,
+          variantId: (meta.variantId || meta.variant || "A") as string,
+          timeSpentMs: typeof meta.timeSpentMs === "number" ? meta.timeSpentMs : 0,
+        };
+      });
+
+      // Define standard funnel steps
+      const FUNNEL_STEPS = [
+        { id: "rating", name: "1. Star Rating", order: 1 },
+        { id: "choice", name: "2. Text or Video Choice", order: 2 },
+        { id: "content", name: "3. Content & Experience", order: 3 },
+        { id: "details", name: "4. Author Details", order: 4 },
+        { id: "review", name: "5. Review & Consent", order: 5 },
+        { id: "success", name: "6. Completed Submission", order: 6 },
+      ];
+
+      // Unique visitors per step and submissions
+      const stepViewsMap = new Map<string, Set<string>>();
+      const stepCompletionsMap = new Map<string, Set<string>>();
+      const stepTimeSpentMap = new Map<string, number[]>();
+
+      FUNNEL_STEPS.forEach((s) => {
+        stepViewsMap.set(s.id, new Set<string>());
+        stepCompletionsMap.set(s.id, new Set<string>());
+        stepTimeSpentMap.set(s.id, []);
+      });
+
+      // Variant tracking
+      const variantImpressions = new Map<string, Set<string>>();
+      const variantSubmissions = new Map<string, Set<string>>();
+      variantImpressions.set("A", new Set<string>());
+      variantImpressions.set("B", new Set<string>());
+      variantSubmissions.set("A", new Set<string>());
+      variantSubmissions.set("B", new Set<string>());
+
+      const uniquePageVisitors = new Set<string>();
+      const uniqueSubmissions = new Set<string>();
+
+      parsedEvents.forEach((e) => {
+        const vId = e.visitorId || e.id;
+        const variant = (e.variantId === "B" ? "B" : "A") as "A" | "B";
+
+        if (e.eventType === "collection_view" || (e.eventType === "view" && e.projectId)) {
+          uniquePageVisitors.add(vId);
+          variantImpressions.get(variant)?.add(vId);
+          // Landing step is also step 1 (rating or initial)
+          stepViewsMap.get("rating")?.add(vId);
+        }
+
+        if (e.eventType === "collection_step_view") {
+          uniquePageVisitors.add(vId);
+          variantImpressions.get(variant)?.add(vId);
+          const mappedStep =
+            e.step === "text" || e.step === "video" ? "content" : e.step || "rating";
+          if (stepViewsMap.has(mappedStep)) {
+            stepViewsMap.get(mappedStep)?.add(vId);
+          }
+        }
+
+        if (e.eventType === "collection_step_complete") {
+          const mappedStep =
+            e.step === "text" || e.step === "video" ? "content" : e.step || "rating";
+          if (stepCompletionsMap.has(mappedStep)) {
+            stepCompletionsMap.get(mappedStep)?.add(vId);
+          }
+          if (e.timeSpentMs > 0 && stepTimeSpentMap.has(mappedStep)) {
+            stepTimeSpentMap.get(mappedStep)?.push(e.timeSpentMs);
+          }
+        }
+
+        if (e.eventType === "collection_submit") {
+          uniqueSubmissions.add(vId);
+          stepCompletionsMap.get("review")?.add(vId);
+          stepViewsMap.get("success")?.add(vId);
+          stepCompletionsMap.get("success")?.add(vId);
+          variantSubmissions.get(variant)?.add(vId);
+        }
+      });
+
+      // Total counts
+      const totalViews = Math.max(uniquePageVisitors.size, stepViewsMap.get("rating")?.size || 0);
+      const totalSubmissions = Math.max(
+        uniqueSubmissions.size,
+        stepCompletionsMap.get("success")?.size || 0,
+      );
+      const submissionRate = totalViews > 0 ? (totalSubmissions / totalViews) * 100 : 0;
+
+      // Step analytics aggregation
+      const stepsAnalytics = FUNNEL_STEPS.map((s, index) => {
+        const rawViews = stepViewsMap.get(s.id)?.size || 0;
+        const views = index === 0 ? Math.max(rawViews, totalViews) : rawViews;
+        const nextStepId =
+          index < FUNNEL_STEPS.length - 1 ? FUNNEL_STEPS[index + 1]?.id : undefined;
+        const completions =
+          s.id === "success"
+            ? totalSubmissions
+            : Math.max(
+                stepCompletionsMap.get(s.id)?.size || 0,
+                // If they reached next step, they must have completed this step
+                nextStepId ? stepViewsMap.get(nextStepId)?.size || 0 : 0,
+              );
+
+        const dropOffCount = Math.max(0, views - completions);
+        const dropOffRate = views > 0 ? (dropOffCount / views) * 100 : 0;
+        const completionRate = views > 0 ? (completions / views) * 100 : 0;
+
+        const timeSpents = stepTimeSpentMap.get(s.id) || [];
+        const avgTimeSpentMs =
+          timeSpents.length > 0
+            ? Math.round(timeSpents.reduce((a, b) => a + b, 0) / timeSpents.length)
+            : 0;
+
+        return {
+          id: s.id,
+          name: s.name,
+          order: s.order,
+          views,
+          completions,
+          dropOffCount,
+          dropOffRate: Number(dropOffRate.toFixed(1)),
+          completionRate: Number(completionRate.toFixed(1)),
+          avgTimeSpentSec: Number((avgTimeSpentMs / 1000).toFixed(1)),
+        };
+      });
+
+      // Drop-off Heatmap generation (Friction index & abandonment profile per step)
+      const dropOffHeatmap = stepsAnalytics.map((step) => {
+        // Friction score 0-100 based on drop-off rate and relative bounce severity
+        let frictionLevel: "low" | "moderate" | "high" | "critical" = "low";
+        if (step.dropOffRate >= 45) frictionLevel = "critical";
+        else if (step.dropOffRate >= 25) frictionLevel = "high";
+        else if (step.dropOffRate >= 10) frictionLevel = "moderate";
+
+        return {
+          stepId: step.id,
+          stepName: step.name,
+          views: step.views,
+          dropOffCount: step.dropOffCount,
+          dropOffRate: step.dropOffRate,
+          frictionLevel,
+          avgTimeSpentSec: step.avgTimeSpentSec,
+        };
+      });
+
+      // A/B Test Configuration from Project Settings
+      const primaryProject = targetProjects[0];
+      let abConfig: {
+        enabled: boolean;
+        variantA: { headline: string; ctaText: string; subheading?: string };
+        variantB: { headline: string; ctaText: string; subheading?: string };
+      } = {
+        enabled: false,
+        variantA: {
+          headline: "Share your experience",
+          ctaText: "Submit Testimonial",
+          subheading: "We value your feedback",
+        },
+        variantB: {
+          headline: "Tell us what you loved",
+          ctaText: "Send My Review",
+          subheading: "Help others discover our service",
+        },
+      };
+
+      if (primaryProject?.collectionSettingsJson) {
+        try {
+          const parsedSettings = JSON.parse(primaryProject.collectionSettingsJson);
+          if (parsedSettings.abTesting) {
+            abConfig = {
+              enabled: Boolean(parsedSettings.abTesting.enabled),
+              variantA: parsedSettings.abTesting.variants?.find((v: any) => v.id === "A") || {
+                headline: parsedSettings.pageContent?.headline || "Share your experience",
+                ctaText: "Submit Testimonial",
+                subheading: parsedSettings.pageContent?.subheading || "We value your feedback",
+              },
+              variantB: parsedSettings.abTesting.variants?.find((v: any) => v.id === "B") || {
+                headline: "Tell us what you loved",
+                ctaText: "Send My Review",
+                subheading: "Help others discover our service",
+              },
+            };
+          } else {
+            // Default variant A to project's current page content
+            if (parsedSettings.pageContent?.headline) {
+              abConfig.variantA.headline = parsedSettings.pageContent.headline;
+            }
+            if (parsedSettings.pageContent?.subheading) {
+              abConfig.variantA.subheading = parsedSettings.pageContent.subheading;
+            }
+          }
+        } catch {}
+      }
+
+      // A/B Test calculations
+      const viewsA = variantImpressions.get("A")?.size || 0;
+      const viewsB = variantImpressions.get("B")?.size || 0;
+      const convA = variantSubmissions.get("A")?.size || 0;
+      const convB = variantSubmissions.get("B")?.size || 0;
+
+      const rateA = viewsA > 0 ? (convA / viewsA) * 100 : 0;
+      const rateB = viewsB > 0 ? (convB / viewsB) * 100 : 0;
+      const uplift = rateA > 0 ? ((rateB - rateA) / rateA) * 100 : rateB > 0 ? 100 : 0;
+
+      // Two-proportion Z-score calculation
+      let zScore = 0;
+      let confidenceScore = 0;
+      let winner: "A" | "B" | "tie" | "insufficient_data" = "insufficient_data";
+
+      if (viewsA >= 10 && viewsB >= 10) {
+        const pA = convA / viewsA;
+        const pB = convB / viewsB;
+        const pPool = (convA + convB) / (viewsA + viewsB);
+        const se = Math.sqrt(pPool * (1 - pPool) * (1 / viewsA + 1 / viewsB));
+        if (se > 0) {
+          zScore = (pB - pA) / se;
+          // Approximate error function for normal CDF
+          const t = 1.0 / (1.0 + 0.2316419 * Math.abs(zScore));
+          const d = 0.3989423 * Math.exp((-zScore * zScore) / 2);
+          const prob =
+            1.0 -
+            d *
+              t *
+              (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+          confidenceScore = Number((prob * 100).toFixed(1));
+
+          if (confidenceScore >= 95) {
+            winner = rateB > rateA ? "B" : "A";
+          } else if (confidenceScore >= 80) {
+            winner = rateB > rateA ? "B" : "A";
+          } else {
+            winner = "tie";
+          }
+        }
+      }
+
+      const abTestResults = {
+        enabled: abConfig.enabled,
+        variants: [
+          {
+            id: "A",
+            name: "Variant A (Control)",
+            headline: abConfig.variantA.headline,
+            subheading: abConfig.variantA.subheading,
+            ctaText: abConfig.variantA.ctaText,
+            impressions: viewsA,
+            submissions: convA,
+            conversionRate: Number(rateA.toFixed(1)),
+          },
+          {
+            id: "B",
+            name: "Variant B (Challenger)",
+            headline: abConfig.variantB.headline,
+            subheading: abConfig.variantB.subheading,
+            ctaText: abConfig.variantB.ctaText,
+            impressions: viewsB,
+            submissions: convB,
+            conversionRate: Number(rateB.toFixed(1)),
+          },
+        ],
+        uplift: Number(uplift.toFixed(1)),
+        confidenceScore,
+        winner,
+      };
+
+      return {
+        overall: {
+          totalViews,
+          totalSubmissions,
+          submissionRate: Number(submissionRate.toFixed(1)),
+          averageCompletionTimeSec: Number(
+            (stepsAnalytics.reduce((acc, curr) => acc + curr.avgTimeSpentSec, 0) || 45).toFixed(1),
+          ),
+        },
+        steps: stepsAnalytics,
+        dropOffHeatmap,
+        abTest: abTestResults,
+      };
     }),
 });

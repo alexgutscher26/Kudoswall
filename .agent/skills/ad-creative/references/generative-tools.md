@@ -72,12 +72,13 @@ Open-weight image generation models with API access through Replicate and BFL's 
 **Pricing:** ~$0.01-0.06/image depending on model and resolution
 
 **Model variants:**
-| Model | Speed | Quality | Cost | Best For |
-|-------|-------|---------|------|----------|
-| Flux 2 Pro | ~6 sec | Highest | $0.015/MP | Final production assets |
-| Flux 2 Flex | ~22 sec | High + editing | $0.06/MP | Iterative editing |
-| Flux 2 Dev | ~2.5 sec | Good | $0.012/MP | Rapid prototyping |
-| Flux 2 Klein | Fastest | Good | Lowest | High-volume batch generation |
+
+| Model        | Speed    | Quality        | Cost      | Best For                     |
+| ------------ | -------- | -------------- | --------- | ---------------------------- |
+| Flux 2 Pro   | ~6 sec   | Highest        | $0.015/MP | Final production assets      |
+| Flux 2 Flex  | ~22 sec  | High + editing | $0.06/MP  | Iterative editing            |
+| Flux 2 Dev   | ~2.5 sec | Good           | $0.012/MP | Rapid prototyping            |
+| Flux 2 Klein | Fastest  | Good           | Lowest    | High-volume batch generation |
 
 **Strengths:**
 

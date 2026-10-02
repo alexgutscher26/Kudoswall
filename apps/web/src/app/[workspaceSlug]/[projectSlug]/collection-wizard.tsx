@@ -18,7 +18,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import { useLocale } from "@/lib/collection-i18n";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { uploadFiles } from "@/utils/uploadthing";
 import { gooeyToast as toast } from "goey-toast";
 import { ImageCropper } from "@/components/collection/image-cropper";
@@ -91,6 +91,15 @@ interface CollectionSettings {
     showFooterPrivacy: boolean;
     footerPrivacyText: string;
     privacyPolicyContent?: string;
+  };
+  abTesting?: {
+    enabled?: boolean;
+    variants?: Array<{
+      id: string;
+      headline?: string;
+      subheading?: string;
+      ctaText?: string;
+    }>;
   };
 }
 
@@ -255,6 +264,33 @@ export default function CollectionWizard({
   const { data: session } = authClient.useSession();
   const trackEvent = useMutation(trpc.analytics.trackEvent.mutationOptions());
 
+  // A/B Test Variant Resolution
+  const [variantId, setVariantId] = useState<string>("A");
+  const stepStartTimeRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ab = settings?.abTesting;
+    if (ab?.enabled && ab.variants && ab.variants.length > 0) {
+      const storageKey = `kw_ab_variant_${project.id}`;
+      let saved = localStorage.getItem(storageKey);
+      if (!saved || !ab.variants.some((v) => v.id === saved)) {
+        saved = Math.random() < 0.5 ? "A" : "B";
+        const validChosen = ab.variants.some((v) => v.id === saved)
+          ? saved
+          : ab.variants[0]?.id || "A";
+        localStorage.setItem(storageKey, validChosen);
+        saved = validChosen;
+      }
+      setVariantId(saved);
+    }
+  }, [settings?.abTesting, project.id]);
+
+  const activeVariant = useMemo(() => {
+    if (!settings?.abTesting?.enabled) return null;
+    return settings?.abTesting?.variants?.find((v) => v.id === variantId) || null;
+  }, [settings?.abTesting, variantId]);
+
   const DRAFT_KEY = `t-wall-draft-${project.id}`;
 
   // Restore draft from localStorage on mount
@@ -334,14 +370,32 @@ export default function CollectionWizard({
     }
   }, [session, name, email, photo]);
 
-  // Track page view
+  // Track initial page view and initial step view
   useEffect(() => {
     trackEvent.mutate(
-      { workspaceId: project.workspaceId, projectId: project.id, eventType: "view" },
-      { onError: (err) => console.error("[KudosWall Analytics] trackEvent failed:", err.message) },
+      {
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "collection_view",
+        metadataJson: JSON.stringify({ variantId }),
+      },
+      {
+        onError: (err) =>
+          console.error("[KudosWall Analytics] collection_view failed:", err.message),
+      },
     );
+    trackEvent.mutate(
+      {
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "collection_step_view",
+        metadataJson: JSON.stringify({ step, variantId }),
+      },
+      { onError: (err) => console.error("[KudosWall Analytics] step_view failed:", err.message) },
+    );
+    stepStartTimeRef.current = Date.now();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [variantId]);
 
   const stepsData = useMemo(() => {
     const mapping: Record<Step, { percent: number; text: string; title: string }> = {
@@ -356,6 +410,33 @@ export default function CollectionWizard({
     return mapping[step];
   }, [step, t]);
 
+  const recordStepTransition = (fromStep: Step, toStep: Step) => {
+    const timeSpentMs = Date.now() - stepStartTimeRef.current;
+    stepStartTimeRef.current = Date.now();
+
+    trackEvent.mutate({
+      workspaceId: project.workspaceId,
+      projectId: project.id,
+      eventType: "collection_step_complete",
+      metadataJson: JSON.stringify({
+        step: fromStep,
+        nextStep: toStep,
+        variantId,
+        timeSpentMs,
+      }),
+    });
+
+    trackEvent.mutate({
+      workspaceId: project.workspaceId,
+      projectId: project.id,
+      eventType: "collection_step_view",
+      metadataJson: JSON.stringify({
+        step: toStep,
+        variantId,
+      }),
+    });
+  };
+
   const nextStep = () => {
     setDirection(1);
     const nextStepName = (() => {
@@ -366,6 +447,9 @@ export default function CollectionWizard({
         setMode("text");
         return "text";
       }
+      if (step === "choice") {
+        return mode === "video" ? "video" : "text";
+      }
       if (step === "text") return "details";
       if (step === "video") return "details";
       if (step === "details") return "review";
@@ -374,30 +458,29 @@ export default function CollectionWizard({
     })();
 
     if (nextStepName) {
-      trackEvent.mutate({
-        workspaceId: project.workspaceId,
-        projectId: project.id,
-        eventType: "click",
-        metadataJson: JSON.stringify({ action: "next_step", from: step, to: nextStepName }),
-      });
+      recordStepTransition(step, nextStepName as Step);
       setStep(nextStepName as Step);
     }
   };
 
   const prevStep = () => {
     setDirection(-1);
-    if (step === "choice") return setStep("rating");
-    if (step === "text") {
-      if (project.permissions?.features?.video) return setStep("choice");
-      return setStep("rating");
+    let targetStep: Step | null = null;
+    if (step === "choice") targetStep = "rating";
+    else if (step === "text") {
+      targetStep = project.permissions?.features?.video ? "choice" : "rating";
+    } else if (step === "video") {
+      targetStep = "choice";
+    } else if (step === "details") {
+      targetStep = mode === "video" ? "video" : "text";
+    } else if (step === "review") {
+      targetStep = "details";
     }
-    if (step === "video") {
-      return setStep("choice");
+
+    if (targetStep) {
+      recordStepTransition(step, targetStep);
+      setStep(targetStep);
     }
-    if (step === "details") {
-      return setStep(mode === "video" ? "video" : "text");
-    }
-    if (step === "review") return setStep("details");
   };
 
   const fireConfetti = () => {
@@ -505,6 +588,20 @@ export default function CollectionWizard({
       localStorage.removeItem(DRAFT_KEY);
       fireConfetti();
       setStep("success");
+
+      // Track final funnel submission
+      const totalTimeSpentMs = Date.now() - stepStartTimeRef.current;
+      trackEvent.mutate({
+        workspaceId: project.workspaceId,
+        projectId: project.id,
+        eventType: "collection_submit",
+        metadataJson: JSON.stringify({
+          variantId,
+          timeSpentMs: totalTimeSpentMs,
+          rating,
+          mode,
+        }),
+      });
 
       // Handle custom redirect if configured
       const redirectUrl = settings?.redirectUrl;
@@ -1399,7 +1496,7 @@ export default function CollectionWizard({
                         color: "var(--cw-fg-inv)",
                       }}
                     >
-                      {loading ? t.submittingButton : t.submitButton}
+                      {loading ? t.submittingButton : activeVariant?.ctaText || t.submitButton}
                     </button>
                     <button
                       onClick={prevStep}

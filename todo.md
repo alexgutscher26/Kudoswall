@@ -200,8 +200,8 @@
 - [x] Create and manage multiple collection forms
 - [x] Per-collection branding settings (logo, color, font)
 - [x] Collection page live preview
-- [ ] Collection analytics: Submission rate, completion rate per step, drop-off heatmap
-- [ ] A/B testing for collection form copy (Headline, CTA button text)
+- [x] Collection analytics: Submission rate, completion rate per step, drop-off heatmap
+- [x] A/B testing for collection form copy (Headline, CTA button text)
 - [x] Collection form duplication (Clone an existing form)
 - [ ] Archive / delete old collections
 - [ ] QR code generator per collection for offline use (print on receipts, flyers)
